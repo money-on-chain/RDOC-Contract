@@ -16,7 +16,7 @@
     "gas": 99999999,
     "startStoppable": true
   },
-  "qaTestnet": {
+  "mocTestnet": {
     "commissionSplitter": "",
     "mocCommissionProportion": "500000000000000000",
     "initialPrice": 7569,
@@ -27,21 +27,6 @@
     "governor": "0xD63C0441b9A6c019917e9773992F7B5428542cbb",
     "stopper": "0x7936cA4f95a662ABe0b1d9B41Ce89eE0Bc704824",
     "proxyAdmin": "0x93176E10a2962061D92617a06abE3F5850E18CD6",
-    "reserveToken": "0x19F64674D8A5B4E652319F5e239eFd3bc969A1fE",
-    "gas": 6800000,
-    "startStoppable": false
-  },
-  "uatTestnet": {
-    "commissionSplitter": "",
-    "mocCommissionProportion": "500000000000000000",
-    "initialPrice": "0.16435",
-    "initialEma": "0.1016175",
-    "dayBlockSpan": 1440,
-    "settlementDays": 90,
-    "oracle": "0xF027e67fDDc8f589dc4419f0aF20747A1d670E1E",
-    "governor": "0xa3A8d2AE0021b5AbF90c4C9133b5bAcd75025c93",
-    "stopper": "0xb0f004ffAA04f4F1642d355f0D7Dc598edE5CBa3",
-    "proxyAdmin": "0xE80815114a53742cd9B50E66d22bc09194aBf8d1",
     "reserveToken": "0x19F64674D8A5B4E652319F5e239eFd3bc969A1fE",
     "gas": 6800000,
     "startStoppable": false

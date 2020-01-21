@@ -1,9 +1,9 @@
 {
-  "name": "secondary-RRC-20-contract",
+  "name": "RDOC-Contract",
   "version": "0.1.3",
   "private": true,
-  "homepage": "https://gitlab.com/atixlabs/money-on-chain",
-  "description": "RRC-20 collateralized stablecoin using decentralized three-token system",
+  "homepage": "https://github.com/money-on-chain/RDOC-Contract",
+  "description": "RDOC collateralized stablecoin using decentralized three-token system",
   "main": "truffle-config.js",
   "directories": {
     "test": "test"
@@ -28,7 +28,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://gitlab.com/atixlabs/moc/rrc20-collateralized.git"
+    "url": "git+https://github.com/money-on-chain/RDOC-Contract.git"
   },
   "keywords": [
     "rrc-20",
@@ -37,7 +37,7 @@
   "author": "Money On Chain",
   "license": "ISC",
   "dependencies": {
-    "moc-governance": "git+ssh://git@gitlab.com/atixlabs/moc---gobernanza.git#v0.3.1",
+    "moc-governance": "git+https://github.com/money-on-chain/Areopagus-Governance.git#v0.3.1",
     "moment": "2.24.0",
     "openzeppelin-eth": "2.1.3",
     "openzeppelin-solidity": "2.3.0",
