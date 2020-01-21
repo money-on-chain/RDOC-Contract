@@ -369,7 +369,8 @@ const makeUtils = async (artifacts, networkName, config, owner, deployer) => {
       config.dayBlockSpan, // _dayBlockSpan
       toContract(config.initialEma * 10 ** 18), // _ema
       toContract(0.01653 * 10 ** 18), // _smoothFactor
-      config.dayBlockSpan // _emaBlockSpan
+      config.dayBlockSpan, // _emaBlockSpan
+      toContract(config.maxMintRiskPro * 10 ** 18)
     );
     console.log('State Initialized');
   };

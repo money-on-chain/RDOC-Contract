@@ -4,7 +4,8 @@
     "initialEma": 10000,
     "dayBlockSpan": 20,
     "settlementDays": 100,
-    "gas": 99999999
+    "gas": 99999999,
+    "maxMintRiskPro": 10000
   },
   "development": {
     "commissionSplitter": "",
@@ -14,7 +15,8 @@
     "dayBlockSpan": 20,
     "settlementDays": 90,
     "gas": 99999999,
-    "startStoppable": true
+    "startStoppable": true,
+    "maxMintRiskPro": 10000
   },
   "mocTestnet": {
     "commissionSplitter": "",
@@ -29,6 +31,7 @@
     "proxyAdmin": "0x93176E10a2962061D92617a06abE3F5850E18CD6",
     "reserveToken": "0x19F64674D8A5B4E652319F5e239eFd3bc969A1fE",
     "gas": 6800000,
-    "startStoppable": false
+    "startStoppable": false,
+    "maxMintRiskPro": 10
   }
 }
