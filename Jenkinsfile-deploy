@@ -1,0 +1,37 @@
+pipeline {
+	agent {
+		dockerfile {
+			filename 'Dockerfile'
+			args '-u 0:0'
+		}
+	}
+  environment {
+    MNEMONIC = credentials('mnemonic_testnet')
+  }
+
+	post {
+		cleanup {
+			sh 'rm -rf node_modules'
+			cleanWs()
+		}
+	}
+	stages {
+		stage("checkout") {
+			steps {
+				checkout scm
+			}
+		}
+		stage("install and deploy") {
+			steps {
+				dir('sc') {
+					sshagent(credentials: ['ssh_jenkins_global', 'gitlab_acces', 'gitlab_acces'], ignoreMissing: false) {
+						sh 'ssh -oStrictHostKeyChecking=no git@gitlab.com' // Add as known host
+						sh 'npm install'
+						sh 'npm run deploy-reset-testnet'
+
+					}
+				}
+			}
+		}
+	}
+}
