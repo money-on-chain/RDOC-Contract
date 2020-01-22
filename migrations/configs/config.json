@@ -8,7 +8,21 @@
     "maxMintRiskPro": 10000,
     "stableTmin": 0.000133681,
     "stablePower": 4,
-    "stableTmax": 0.004
+    "stableTmax": 0.004,
+    "riskProxTmin": 0.000133681,
+    "riskProxPower": 4,
+    "riskProxTmax": 0.004,
+    "riskProHolderRate": 0.000047945,
+    "daysRiskProHolderExecutePayment": 7,
+    "targetAddressRiskProInterest": "",
+    "targetAddressCommissionPayment": "",
+    "commissionRate": 0.002,
+    "c0Cobj": 4,
+    "x2Cobj": 2,
+    "liq": 1.04,
+    "utpdu": 2,
+    "maxDiscRate": 0.5,
+    "smoothFactor": 0.01653
   },
   "development": {
     "commissionSplitter": "",
@@ -22,7 +36,21 @@
     "maxMintRiskPro": 10000,
     "stableTmin": 0.000133681,
     "stablePower": 4,
-    "stableTmax": 0.004
+    "stableTmax": 0.004,
+    "riskProxTmin": 0.000133681,
+    "riskProxPower": 4,
+    "riskProxTmax": 0.004,
+    "riskProHolderRate": 0.000047945,
+    "daysRiskProHolderExecutePayment": 7,
+    "targetAddressRiskProInterest": "",
+    "targetAddressCommissionPayment": "",
+    "commissionRate": 0.002,
+    "c0Cobj": 4,
+    "x2Cobj": 2,
+    "liq": 1.04,
+    "utpdu": 2,
+    "maxDiscRate": 0.5,
+    "smoothFactor": 0.01653
   },
   "mocTestnet": {
     "commissionSplitter": "",
@@ -41,6 +69,20 @@
     "maxMintRiskPro": 10,
     "stableTmin": 0.000133681,
     "stablePower": 4,
-    "stableTmax": 0.004
+    "stableTmax": 0.004,
+    "riskProxTmin": 0.000133681,
+    "riskProxPower": 4,
+    "riskProxTmax": 0.004,
+    "riskProHolderRate": 0.000047945,
+    "daysRiskProHolderExecutePayment": 7,
+    "targetAddressRiskProInterest": "",
+    "targetAddressCommissionPayment": "",
+    "commissionRate": 0.002,
+    "c0Cobj": 4,
+    "x2Cobj": 2,
+    "liq": 1.04,
+    "utpdu": 2,
+    "maxDiscRate": 0.5,
+    "smoothFactor": 0.01653
   }
 }

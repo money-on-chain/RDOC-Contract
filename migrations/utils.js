@@ -326,17 +326,27 @@ const makeUtils = async (artifacts, networkName, config, owner, deployer) => {
 
     const commissionSplitter = await getCommissionSplitter();
 
+    var targetAddressRiskPro = owner;
+    if (config.targetAddressRiskProInterest != "") {
+        targetAddressRiskPro = config.targetAddressRiskProInterest;
+    }
+
+    var targetAddressCommission = owner;
+    if (config.targetAddressCommissionPayment != "") {
+        targetAddressCommission = config.targetAddressCommissionPayment;
+    }
+
     await mocInrate.initialize(
       mocConnector.address,
       governorAddress,
-      0, // riskProxTmin [using mocPrecision]
-      toContract(1), // riskProxPower [no precision]
-      toContract(0.0002611578760678 * 10 ** 18), // riskProxTmax [using mocPrecision]
-      toContract(0.000047945 * 10 ** 18), // RiskPro Holder rate .25% (annual 0.0025 / 365 * 7) with [mocPrecision]
-      config.dayBlockSpan * 7, // Blockspan to execute payment once a week
-      owner, // Target address of RiskPro interest
+      toContract(config.riskProxTmin * 10 ** 18), // riskProxTmin [using mocPrecision]
+      toContract(config.riskProxPower), // riskProxPower [no precision]
+      toContract(config.riskProxTmax * 10 ** 18), // riskProxTmax [using mocPrecision]
+      toContract(config.riskProHolderRate * 10 ** 18), // RiskPro Holder rate .25% (annual 0.0025 / 365 * 7) with [mocPrecision]
+      config.dayBlockSpan * config.daysRiskProHolderExecutePayment, // Blockspan to execute payment once a week
+      targetAddressRiskPro, // Target address of RiskPro interest
       commissionSplitter.address, // Target address of commission payment
-      toContract(0.002 * 10 ** 18), // commissionRate [mocPrecision]
+      toContract(config.commissionRate * 10 ** 18), // commissionRate [mocPrecision]
       toContract(config.stableTmin * 10 ** 18), // stableTmin [using mocPrecision]
       toContract(config.stablePower), // stablePower [no precision]
       toContract(config.stableTmax * 10 ** 18) // stableTmax [using mocPrecision]
@@ -347,8 +357,8 @@ const makeUtils = async (artifacts, networkName, config, owner, deployer) => {
     await riskProx.initialize(
       mocConnector.address,
       governorAddress,
-      toContract(4 * 10 ** 18),
-      toContract(2 * 10 ** 18)
+      toContract(config.c0Cobj * 10 ** 18),
+      toContract(config.x2Cobj * 10 ** 18)
     ); // mocPrecision
     console.log('RiskProxManager Initialized');
 
@@ -366,12 +376,12 @@ const makeUtils = async (artifacts, networkName, config, owner, deployer) => {
       mocConnector.address,
       governorAddress,
       oracleAddress,
-      toContract(1.04 * 10 ** 18), // _liq
-      toContract(2 * 10 ** 18), // _utpdu
-      toContract(0.5 * 10 ** 18), // _maxDiscRate
+      toContract(config.liq * 10 ** 18), // _liq
+      toContract(config.utpdu * 10 ** 18), // _utpdu
+      toContract(config.maxDiscRate * 10 ** 18), // _maxDiscRate
       config.dayBlockSpan, // _dayBlockSpan
       toContract(config.initialEma * 10 ** 18), // _ema
-      toContract(0.01653 * 10 ** 18), // _smoothFactor
+      toContract(config.smoothFactor * 10 ** 18), // _smoothFactor
       config.dayBlockSpan, // _emaBlockSpan
       toContract(config.maxMintRiskPro * 10 ** 18)
     );
