@@ -91,6 +91,22 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection  {
       finalRiskProAmount = finalRiskProAmount.add(regularRiskProAmount);
     }
 
+    // START RiskPro Limit
+    // Only enter with no discount state
+    if (mocState.state() != MoCState.States.RiskProDiscount)
+    {
+      uint256 availableRiskPro = Math.min(finalRiskProAmount, mocState.maxMintRiskProAvalaible());
+      if (availableRiskPro != finalRiskProAmount) {
+        reserveTokenAmount = mocConverter.riskProToResToken(availableRiskPro);
+        finalRiskProAmount = availableRiskPro;
+
+        if (reserveTokenAmount <= 0) {
+          return (0, 0);
+        }
+      }
+    }
+    // END RiskPro Limit
+
     uint256 commissionPaid = mocInrate.calcCommissionValue(reserveTokenAmount);
 
     mintRiskPro(account, commissionPaid, finalRiskProAmount, reserveTokenAmount);
