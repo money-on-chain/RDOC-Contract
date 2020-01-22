@@ -5,7 +5,10 @@
     "dayBlockSpan": 20,
     "settlementDays": 100,
     "gas": 99999999,
-    "maxMintRiskPro": 10000
+    "maxMintRiskPro": 10000,
+    "stableTmin": 0.000133681,
+    "stablePower": 4,
+    "stableTmax": 0.004
   },
   "development": {
     "commissionSplitter": "",
@@ -16,7 +19,10 @@
     "settlementDays": 90,
     "gas": 99999999,
     "startStoppable": true,
-    "maxMintRiskPro": 10000
+    "maxMintRiskPro": 10000,
+    "stableTmin": 0.000133681,
+    "stablePower": 4,
+    "stableTmax": 0.004
   },
   "mocTestnet": {
     "commissionSplitter": "",
@@ -32,6 +38,9 @@
     "reserveToken": "0x19F64674D8A5B4E652319F5e239eFd3bc969A1fE",
     "gas": 6800000,
     "startStoppable": false,
-    "maxMintRiskPro": 10
+    "maxMintRiskPro": 10,
+    "stableTmin": 0.000133681,
+    "stablePower": 4,
+    "stableTmax": 0.004
   }
 }

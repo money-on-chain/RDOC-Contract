@@ -45,6 +45,11 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
   // commissionRate [using mocPrecision]
   uint256 public commissionRate;
 
+  // Upgrade to support redeem stable inrate parameter
+  uint256 public stableTmin;
+  uint256 public stablePower;
+  uint256 public stableTmax;
+
   /**CONTRACTS**/
   MoCState internal mocState;
   MoCConverter internal mocConverter;
@@ -60,7 +65,10 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
     uint256 blockSpanRiskPro,
     address payable riskProInterestTargetAddress,
     address payable commissionsAddressTarget,
-    uint256 commissionRateParam
+    uint256 commissionRateParam,
+    uint256 _stableTmin,
+    uint256 _stablePower,
+    uint256 _stableTmax
   ) public initializer {
     initializePrecisions();
     initializeBase(connectorAddress);
@@ -74,9 +82,37 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
       commissionsAddressTarget,
       commissionRateParam,
       blockSpanRiskPro,
-      riskProInterestTargetAddress
+      riskProInterestTargetAddress,
+      _stableTmin,
+      _stablePower,
+      _stableTmax
     );
   }
+
+  function setStableTmin(uint256 _stableTmin) public onlyAuthorizedChanger() {
+    stableTmin = _stableTmin;
+  }
+
+  function setStableTmax(uint256 _stableTmax) public onlyAuthorizedChanger() {
+    stableTmax = _stableTmax;
+  }
+
+  function setStablePower(uint256 _stablePower) public onlyAuthorizedChanger(){
+    stablePower = _stablePower;
+  }
+
+  function getStableTmin() public view returns(uint256) {
+    return stableTmin;
+  }
+
+  function getStableTmax() public view returns(uint256) {
+    return stableTmax;
+  }
+
+  function getStablePower() public view returns(uint256) {
+    return stablePower;
+  }
+
 
   /**
    * @dev gets tMin param of RiskProx tokens
@@ -229,7 +265,7 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
     uint256 preAbRatio = mocState.currentAbundanceRatio();
     uint256 posAbRatio = mocState.abundanceRatio(riskProxManager.getBucketNStableToken(BUCKET_C0).sub(stableTokenRedeem));
 
-    return mocLibConfig.inrateAvg(riskProxParams.tMax, riskProxParams.power, riskProxParams.tMin, preAbRatio, posAbRatio);
+    return mocLibConfig.inrateAvg(stableTmax, stablePower, stableTmin, preAbRatio, posAbRatio);
   }
 
   /**
@@ -500,7 +536,10 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
     address payable commissionsAddressTarget,
     uint256 commissionRateParam,
     uint256 blockSpanRiskPro,
-    address payable riskProInterestsTarget
+    address payable riskProInterestsTarget,
+    uint256 _stableTmin,
+    uint256 _stablePower,
+    uint256 _stableTmax
   ) internal {
     governor = IGovernor(_governor);
     riskProxParams.tMin = riskProxMin;
@@ -511,6 +550,9 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
     riskProInterestBlockSpan = blockSpanRiskPro;
     commissionRate = commissionRateParam;
     commissionsAddress = commissionsAddressTarget;
+    stableTmin = _stableTmin;
+    stablePower = _stablePower;
+    stableTmax = _stableTmax;
   }
 
   // Leave a gap betweeen inherited contracts variables in order to be

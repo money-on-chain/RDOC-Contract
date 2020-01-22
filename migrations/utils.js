@@ -336,7 +336,10 @@ const makeUtils = async (artifacts, networkName, config, owner, deployer) => {
       config.dayBlockSpan * 7, // Blockspan to execute payment once a week
       owner, // Target address of RiskPro interest
       commissionSplitter.address, // Target address of commission payment
-      toContract(0.002 * 10 ** 18) // commissionRate [mocPrecision]
+      toContract(0.002 * 10 ** 18), // commissionRate [mocPrecision]
+      toContract(config.stableTmin * 10 ** 18), // stableTmin [using mocPrecision]
+      toContract(config.stablePower), // stablePower [no precision]
+      toContract(config.stableTmax * 10 ** 18) // stableTmax [using mocPrecision]
     );
     console.log('Inrate Initialized');
 
