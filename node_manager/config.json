@@ -12,15 +12,16 @@
         }
       ],
       "addresses": {
-        "moc":"0x2F9bA84912347b40CCE644DF101F92B7DC99E535",
-        "oracle":"0x67Db4c498969FE12Af3e55198586fE5B0dbFad20",
-        "moCRiskProxManager":"0x826C53b22f18976Ce00E65E96c53fC07263459e6",
-        "mocState":"0x2de9686f2d6b1531156862f2080B27F48Eb34B75",
-        "mocInrate":"0x70f7626675e80C0daD2E7F55CFFe97B855CD2dEA",
-        "governor":"0xA04De7A2AF10b4f27f675DB676deF72910656e1e",
-        "stopper":"0xba6F8B9bf6dfA1e0949eABD44d1DD1702fd18f76",
-        "proxyAdmin":"0xC81F32292fe23dE91bBb93Bd27f71132612990B3",
-        "upgradeDelegator":"0xc301191D09FB7f6130d5bD444B4CCb396bE1A056"
+        "moc":"0x35A8dAA4e5094d1B1eF575A514c8AECc528e4a12",
+        "oracle":"0x6D85E75b4dF65EF26B1984257E77e23F0D2b20eb",
+        "moCRiskProxManager":"0x8206e662A1C586757ecDeD2D830424C991d98dfC",
+        "mocState":"0x3B66181529d4Aa8F31533133bd446eD351F2D197",
+        "mocInrate":"0xce3486510c6dDdda757EF761FcdF4663D116F7cf",
+        "governor":"0xC8370a042Db6E973b23e267c0Ef3b46e095f1EB1",
+        "stopper":"0x18C997B52fa48a1761a7AB96Ed65b6489decaC72",
+        "proxyAdmin":"0xF96D4A580e239960f4D967FAF706a2A1aDC85907",
+        "upgradeDelegator":"0x02D270c4e4D752dEA28F3b01Fd684a85125Ad051",
+        "reserveToken": "0x8FF9e37eC16f8ACEeA4257425c315cfdFC3E7501"
       }
 
     }

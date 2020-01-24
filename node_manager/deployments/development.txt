@@ -11,13 +11,13 @@ Deploying ReserveToken
 
    Deploying 'ReserveToken'
    ------------------------
-   > transaction hash:    0x28c24823959ec3c8fc968315d29670ddea8a1a6407ac782613661377b6640298
+   > transaction hash:    0xa6c2f815c911872b9c4b2fff31fadb7d5ace9c10bbfaefc1f173f4db70d9ba0d
    > Blocks: 0            Seconds: 0
-   > contract address:    0xF1157745173752745a0a20356C7F790661B88e5A
-   > block number:        627
-   > block timestamp:     1579784462
+   > contract address:    0x8FF9e37eC16f8ACEeA4257425c315cfdFC3E7501
+   > block number:        758
+   > block timestamp:     1579786990
    > account:             0xDf08F82De32B8d460adbE8D72043E3a7e25A3B39
-   > balance:             9999991.42458408
+   > balance:             9999989.7623761
    > gas used:            1019424
    > gas price:           20 gwei
    > value sent:          0 ETH
@@ -33,13 +33,13 @@ Deploying ReserveToken
 
    Deploying 'Migrations'
    ----------------------
-   > transaction hash:    0x2fc8181076003e7119ca866aa5ed2e57edab986dde2f5f8cdac4a6ea633dd305
+   > transaction hash:    0x286db56bacddc25db303afbcf4fbb91a63288723273be747446a1ca769721c04
    > Blocks: 0            Seconds: 0
-   > contract address:    0x437eEAB02d0741E7681e478c41eb0c84A5d204AC
-   > block number:        628
-   > block timestamp:     1579784463
+   > contract address:    0xDAA79C4f892f72E0C59ab8DBee15D8a6f7E1c3b8
+   > block number:        759
+   > block timestamp:     1579786990
    > account:             0xDf08F82De32B8d460adbE8D72043E3a7e25A3B39
-   > balance:             9999991.4207781
+   > balance:             9999989.75857012
    > gas used:            190299
    > gas price:           20 gwei
    > value sent:          0 ETH
@@ -58,13 +58,13 @@ Deploying MoCLib
 
    Deploying 'MoCHelperLib'
    ------------------------
-   > transaction hash:    0xeffdc0f85de203de7ecd3db4500d6d67d41d62762cbd86f2b86e2095a2feba1b
+   > transaction hash:    0x155ae2295d376a1035e1995b990d30bd16e3f03959df06d81bc3aa460a7bdf60
    > Blocks: 0            Seconds: 0
-   > contract address:    0xF8373282bEbAe9F128B9B3e16816a76a5865c039
-   > block number:        630
-   > block timestamp:     1579784463
+   > contract address:    0xc52fDB6B24e82434cE9134F43b3D3AD8D89E0baB
+   > block number:        761
+   > block timestamp:     1579786990
    > account:             0xDf08F82De32B8d460adbE8D72043E3a7e25A3B39
-   > balance:             9999991.39050728
+   > balance:             9999989.7282993
    > gas used:            1471480
    > gas price:           20 gwei
    > value sent:          0 ETH
@@ -83,7 +83,7 @@ Deploying Dev only 1
 
    Linking
    -------
-   * Contract: MoCHelperLibMock <--> Library: MoCHelperLib (at address: 0xF8373282bEbAe9F128B9B3e16816a76a5865c039)
+   * Contract: MoCHelperLibMock <--> Library: MoCHelperLib (at address: 0xc52fDB6B24e82434cE9134F43b3D3AD8D89E0baB)
 
    Deploying 'MoCHelperLibMock'
    ----------------------------
@@ -93,148 +93,148 @@ Deploying Dev only 1
 
    Deploying 'Governor'
    --------------------
-   > transaction hash:    0xb53b7ada4757eeba960cb1c74685c0e46f5030519fc302bd6aaf6aa5e1ac79ba
-   ⠋ Blocks: 0            Seconds: 0   > transaction hash:    0x563874377e2621c043ae48ba1790262fa737c78b658882e0a00cf0b779f56b96
-   ⠋ Blocks: 0            Seconds: 0   > transaction hash:    0xfd64e23f74145bd54520e0f5602068b471565e483ea79dd99b76de1589dd106f
+   > transaction hash:    0xe80a00b42d07bf67557157f8d1371850257295df855e83942c9abc758e58c4cd
+   ⠋ Blocks: 0            Seconds: 0   > transaction hash:    0x3085ff04171e4d1c3f891e723518177f3b57def25bdaeef49daafcd75708b9cc
+   ⠋ Blocks: 0            Seconds: 0   > transaction hash:    0xd928c5fd417f6181ea8ee6abd100b6ae011a219a5f642d7d313a805f41521464
    > Blocks: 0            Seconds: 0
-   > contract address:    0x66c77B71e9EB3373F3D0f08b2E06FB7106f8613E
-   > block number:        632
-   > block timestamp:     1579784467
+   > contract address:    0x3D63B32d62Dc34BCdbdeC8fDCa75d25b6a86EDB7
+   > block number:        763
+   > block timestamp:     1579786994
    > account:             0xDf08F82De32B8d460adbE8D72043E3a7e25A3B39
-   > balance:             9999991.36128238
+   > balance:             9999989.6990744
    > gas used:            841976
    > gas price:           20 gwei
    > value sent:          0 ETH
    > total cost:          0.01683952 ETH
 
-   > Blocks: 0            Seconds: 0
-   > contract address:    0x67Db4c498969FE12Af3e55198586fE5B0dbFad20
-   > block number:        633
-   > block timestamp:     1579784467
+   ⠙ Blocks: 0            Seconds: 0   > Blocks: 0            Seconds: 0
+   > contract address:    0x6D85E75b4dF65EF26B1984257E77e23F0D2b20eb
+   > block number:        764
+   > block timestamp:     1579786994
    > account:             0xDf08F82De32B8d460adbE8D72043E3a7e25A3B39
-   > balance:             9999991.36128238
+   > balance:             9999989.6990744
    > gas used:            178200
    > gas price:           20 gwei
    > value sent:          0 ETH
    > total cost:          0.003564 ETH
 
    > Blocks: 0            Seconds: 0
-   > contract address:    0xA04De7A2AF10b4f27f675DB676deF72910656e1e
-   > block number:        634
-   > block timestamp:     1579784467
+   > contract address:    0xC8370a042Db6E973b23e267c0Ef3b46e095f1EB1
+   > block number:        765
+   > block timestamp:     1579786994
    > account:             0xDf08F82De32B8d460adbE8D72043E3a7e25A3B39
-   > balance:             9999991.36128238
+   > balance:             9999989.6990744
    > gas used:            414008
    > gas price:           20 gwei
    > value sent:          0 ETH
    > total cost:          0.00828016 ETH
 
-   ⠙ Blocks: 0            Seconds: 0
+
    Replacing 'ReserveToken'
    ------------------------
-   ⠹ Blocks: 0            Seconds: 0   > transaction hash:    0xfea56820aae271865ff15d5f37a82e3f42d529d11af0eaae517b6c367a26db97
+   ⠙ Blocks: 0            Seconds: 0   > transaction hash:    0xe955e17d7657c0805fc488baea540b4cee104468a38b6a692568a3d73a4a123c
    > Blocks: 0            Seconds: 0
-   > contract address:    0x6C15Ef913d00E606F7aCDB264E8D62316b3E0b54
-   > block number:        636
-   > block timestamp:     1579784467
+   > contract address:    0xE4aEcfeDA940739C1D4E60A245e88d9BB054E5A5
+   > block number:        767
+   > block timestamp:     1579786994
    > account:             0xDf08F82De32B8d460adbE8D72043E3a7e25A3B39
-   > balance:             9999991.33945408
+   > balance:             9999989.6772461
    > gas used:            1019424
    > gas price:           20 gwei
    > value sent:          0 ETH
    > total cost:          0.02038848 ETH
 
 Deploying Dev only Proxy Admin
-   ⠸ Blocks: 0            Seconds: 0
+   ⠹ Blocks: 0            Seconds: 0
    Deploying 'ProxyAdmin'
    ----------------------
-   ⠸ Blocks: 0            Seconds: 0   > transaction hash:    0x59ffc850920cc97cfcff747c0c5a371f90fbba08b052ed4765f07f253a901d30
+   > transaction hash:    0x883d5cf5652462cbe63b3bf45f2acf483a8da1e6ede56e2923e9d4744c11de4e
    > Blocks: 0            Seconds: 0
-   > contract address:    0xC81F32292fe23dE91bBb93Bd27f71132612990B3
-   > block number:        637
-   > block timestamp:     1579784467
+   > contract address:    0xF96D4A580e239960f4D967FAF706a2A1aDC85907
+   > block number:        768
+   > block timestamp:     1579786994
    > account:             0xDf08F82De32B8d460adbE8D72043E3a7e25A3B39
-   > balance:             9999991.32862814
+   > balance:             9999989.66642016
    > gas used:            541297
    > gas price:           20 gwei
    > value sent:          0 ETH
    > total cost:          0.01082594 ETH
 
 Deploying Dev only Stopper and delegator
-0xA04De7A2AF10b4f27f675DB676deF72910656e1e
-   ⠼ Blocks: 0            Seconds: 0
+0xC8370a042Db6E973b23e267c0Ef3b46e095f1EB1
+   ⠸ Blocks: 0            Seconds: 0
    Deploying 'Stopper'
    -------------------
 
    Deploying 'UpgradeDelegator'
    ----------------------------
-   ⠴ Blocks: 0            Seconds: 0   > transaction hash:    0xea9b526e3437f6712b90907589aad4566772bf8a02c5fcd7e5a29bb72abfd1b8
-   ⠴ Blocks: 0            Seconds: 0   > transaction hash:    0x054bd54384efd40e52c1f6f8a9b38968ef40d5b3a1c37b845fa48607ed1e2890
+   ⠼ Blocks: 0            Seconds: 0   > transaction hash:    0xbb2fe4bbfb90114451c6b29435dc93f4e4ef40420cdf030aeabc3f78716d128c
+   ⠋ Blocks: 0            Seconds: 0   > transaction hash:    0x9ab0e5732b9dee9612a6fd9bf5fd6ab990b5b21f2e5b322c720ad03e359633f6
    > Blocks: 0            Seconds: 0
-   > contract address:    0xba6F8B9bf6dfA1e0949eABD44d1DD1702fd18f76
-   > block number:        638
-   > block timestamp:     1579784467
+   > contract address:    0x18C997B52fa48a1761a7AB96Ed65b6489decaC72
+   > block number:        769
+   > block timestamp:     1579786994
    > account:             0xDf08F82De32B8d460adbE8D72043E3a7e25A3B39
-   > balance:             9999991.30444996
+   > balance:             9999989.64224198
    > gas used:            349143
    > gas price:           20 gwei
    > value sent:          0 ETH
    > total cost:          0.00698286 ETH
 
-   ⠦ Blocks: 0            Seconds: 0   > Blocks: 0            Seconds: 0
-   > contract address:    0xc301191D09FB7f6130d5bD444B4CCb396bE1A056
-   > block number:        639
-   > block timestamp:     1579784467
+   > Blocks: 0            Seconds: 0
+   > contract address:    0x02D270c4e4D752dEA28F3b01Fd684a85125Ad051
+   > block number:        770
+   > block timestamp:     1579786994
    > account:             0xDf08F82De32B8d460adbE8D72043E3a7e25A3B39
-   > balance:             9999991.30444996
+   > balance:             9999989.64224198
    > gas used:            859766
    > gas price:           20 gwei
    > value sent:          0 ETH
    > total cost:          0.01719532 ETH
 
-   ⠹ Blocks: 0            Seconds: 0Deploying Dev only MoCStateMock
+   ⠦ Blocks: 0            Seconds: 0Deploying Dev only MoCStateMock
 
    Linking
    -------
-   * Contract: MoCConverter <--> Library: MoCHelperLib (at address: 0xF8373282bEbAe9F128B9B3e16816a76a5865c039)
+   * Contract: MoCConverter <--> Library: MoCHelperLib (at address: 0xc52fDB6B24e82434cE9134F43b3D3AD8D89E0baB)
 
    Linking
    -------
-   * Contract: MoCStateMock <--> Library: MoCHelperLib (at address: 0xF8373282bEbAe9F128B9B3e16816a76a5865c039)
+   * Contract: MoCStateMock <--> Library: MoCHelperLib (at address: 0xc52fDB6B24e82434cE9134F43b3D3AD8D89E0baB)
 
    Linking
    -------
-   * Contract: MoCExchange <--> Library: MoCHelperLib (at address: 0xF8373282bEbAe9F128B9B3e16816a76a5865c039)
+   * Contract: MoCExchange <--> Library: MoCHelperLib (at address: 0xc52fDB6B24e82434cE9134F43b3D3AD8D89E0baB)
 
    Linking
    -------
-   * Contract: MoCInrate <--> Library: MoCHelperLib (at address: 0xF8373282bEbAe9F128B9B3e16816a76a5865c039)
+   * Contract: MoCInrate <--> Library: MoCHelperLib (at address: 0xc52fDB6B24e82434cE9134F43b3D3AD8D89E0baB)
 Deploying Dev only Tokens
-   ⠇ Blocks: 0            Seconds: 0
+   ⠸ Blocks: 0            Seconds: 0
    Deploying 'StableToken'
    -----------------------
-   ⠸ Blocks: 0            Seconds: 0
+   ⠧ Blocks: 0            Seconds: 0
    Deploying 'RiskProToken'
    ------------------------
-   ⠇ Blocks: 0            Seconds: 0   > transaction hash:    0x0598737e55f9f742a2792f0c28c8912d6050709348db4d665cce753f4f6b8784
-   ⠏ Blocks: 0            Seconds: 0   > transaction hash:    0x04833ef89242c5f093e3347e6d381d285371cf04ca1a7dc9b59a22a4049d5ddc
+   > transaction hash:    0xccc3fbcfee4b687d5368ef0b988d76ebd1649b8a518144529185aed858ce8e7f
+   ⠼ Blocks: 0            Seconds: 0   > transaction hash:    0x58f02e378ee0d44fe231b45c97522372f28a8fcd599e4e218d5b62a31061378a
    > Blocks: 0            Seconds: 0
-   > contract address:    0x8A4F4860eB9778007Ac0c253D6dFC5243C063242
-   > block number:        642
-   > block timestamp:     1579784467
+   > contract address:    0x6eDE0D79B359282457F9895d6e2B2401130EeA7E
+   > block number:        773
+   > block timestamp:     1579786994
    > account:             0xDf08F82De32B8d460adbE8D72043E3a7e25A3B39
-   > balance:             9999991.23491066
+   > balance:             9999989.57270268
    > gas used:            1475399
    > gas price:           20 gwei
    > value sent:          0 ETH
    > total cost:          0.02950798 ETH
 
    > Blocks: 0            Seconds: 0
-   > contract address:    0xE00795D9D84c66DdFc0dA5caE4ACe885D236FdD0
-   > block number:        643
-   > block timestamp:     1579784467
+   > contract address:    0x0D2184E6fa0245c50B116B32e2d677B356F43302
+   > block number:        774
+   > block timestamp:     1579786994
    > account:             0xDf08F82De32B8d460adbE8D72043E3a7e25A3B39
-   > balance:             9999991.23491066
+   > balance:             9999989.57270268
    > gas used:            1878032
    > gas price:           20 gwei
    > value sent:          0 ETH
@@ -243,55 +243,55 @@ Deploying Dev only Tokens
 Deploying Dev only MoCLib
 Deploying Dev only deployUpgradable
 deploying Upgradable 0: MoC
-   ⠋ Blocks: 0            Seconds: 0
+   ⠏ Blocks: 0            Seconds: 0
    Replacing 'MoCHelperLib'
    ------------------------
-   ⠙ Blocks: 0            Seconds: 0   > transaction hash:    0x2b6bca0de98fae135381a823e7821874098b56404fccd5e3cd57379b056c63bc
+   > transaction hash:    0xc6c13bf044ac27da4b72af2bcac75124620b252267c93566a3549d180cfec85b
    > Blocks: 0            Seconds: 0
-   > contract address:    0xfF6fDfA9ec1144e35A5C412eDB0436b86e22D3fD
-   > block number:        645
-   > block timestamp:     1579784468
+   > contract address:    0xA354B1f97179f1D8Fc999a7BdC812E21CD00391B
+   > block number:        776
+   > block timestamp:     1579786995
    > account:             0xDf08F82De32B8d460adbE8D72043E3a7e25A3B39
-   > balance:             9999990.67524988
+   > balance:             9999989.0130419
    > gas used:            1471480
    > gas price:           20 gwei
    > value sent:          0 ETH
    > total cost:          0.0294296 ETH
 
-pushed 0: MoC
-   ⠇ Blocks: 0            Seconds: 00xafB395dC80FD7506c158E2c29143e78D798aD217
+   ⠼ Blocks: 0            Seconds: 0pushed 0: MoC
+   ⠦ Blocks: 0            Seconds: 00x50dfAE3aA83F12787BBEC8923dFc0Ff3671A1EE5
 Created 0: MoC
 deploying Upgradable 1: MoCConnector
 pushed 1: MoCConnector
-   ⠏ Blocks: 0            Seconds: 00xCbf6872B256Ff97466ddF9D14D5CA21c50A8Caa1
+   ⠧ Blocks: 0            Seconds: 00xF2e6BAFF57e55506e1b0D09654173f6BfEF0515a
 Created 1: MoCConnector
 deploying Upgradable 2: MoCRiskProxManager
 pushed 2: MoCRiskProxManager
-   ⠋ Blocks: 0            Seconds: 00xe87cc37fde3b66CB1A840a253558cce9d9b10912
+   ⠏ Blocks: 0            Seconds: 00x1393bD7e0A7F048f3144d5a30F44AA208f8AC8fD
 Created 2: MoCRiskProxManager
 deploying Upgradable 3: MoCBurnout
 pushed 3: MoCBurnout
-   ⠙ Blocks: 0            Seconds: 00x1FfE4A1354D1030F939e17ADf6D0a7De41a78739
+   ⠋ Blocks: 0            Seconds: 00x7CA000300Ef74026EF25bA85B20a6f2EDC944786
 Created 3: MoCBurnout
 deploying Upgradable 4: MoCSettlementMock
-   ⠹ Blocks: 0            Seconds: 0pushed 4: MoCSettlementMock
-   ⠸ Blocks: 0            Seconds: 00x76dd2dEAD52D6fC4A89dd86D534bB61386Cb9591
+   ⠙ Blocks: 0            Seconds: 0pushed 4: MoCSettlementMock
+   ⠹ Blocks: 0            Seconds: 00x42EF443263Ba02328997B9d21b288ab1e49380A3
 Created 4: MoCSettlementMock
 deploying Upgradable 5: MoCConverter
 pushed 5: MoCConverter
-   ⠼ Blocks: 0            Seconds: 00x7DaFb4c8bB034A6472446f044A65092e300E3f10
+   ⠸ Blocks: 0            Seconds: 00xe34554f295097413D182ca04e9449e7DD6D7eA5C
 Created 5: MoCConverter
 deploying Upgradable 6: MoCStateMock
-   ⠴ Blocks: 0            Seconds: 0pushed 6: MoCStateMock
-   ⠦ Blocks: 0            Seconds: 00xD9121B64b944dADA2990c62396f171430693b0D6
+   ⠼ Blocks: 0            Seconds: 0pushed 6: MoCStateMock
+   ⠴ Blocks: 0            Seconds: 00x464B49249aa09f3EB650Af968D4bEe33e1f88930
 Created 6: MoCStateMock
 deploying Upgradable 7: MoCExchange
 pushed 7: MoCExchange
-   ⠧ Blocks: 0            Seconds: 00xCacEeb8b7A5f83C0493956F4ef013b5F1829ec03
+   ⠦ Blocks: 0            Seconds: 00x4C86d2592dE3BF250FD023e8768F137B43b51b43
 Created 7: MoCExchange
 deploying Upgradable 8: MoCInrate
 pushed 8: MoCInrate
-   ⠇ Blocks: 0            Seconds: 00x520a4ba8f03B57cE9b14557AcFc57215ad175000
+   ⠧ Blocks: 0            Seconds: 00xA346BB87209D73B485D1A3a90eDD60833c25E278
 Created 8: MoCInrate
 
    > Saving migration to chain.
@@ -299,57 +299,57 @@ Created 8: MoCInrate
    -------------------------------------
    > Total cost:           0.1805745 ETH
 
-   ⠋ Blocks: 0            Seconds: 0
+   ⠏ Blocks: 0            Seconds: 0
 4_initialize_develop_only.js
 ============================
-   ⠙ Blocks: 0            Seconds: 0Init Dev only createInstances
+   ⠋ Blocks: 0            Seconds: 0Init Dev only createInstances
 Init Dev only transferStableTokenRoles
-Changing STABLE ownership
-   ⠹ Blocks: 0            Seconds: 0STABLE Ownership completely changed
+   ⠙ Blocks: 0            Seconds: 0Changing STABLE ownership
+STABLE Ownership completely changed
 Changing STABLE minter
-STABLE minter successfully changed
+   ⠹ Blocks: 0            Seconds: 0STABLE minter successfully changed
 Init Dev only transferRiskProRoles
-   ⠸ Blocks: 0            Seconds: 0Changing RPRO ownership
+Changing RPRO ownership
 RPRO Ownership completely changed
 Changing RPRO minter
-   ⠼ Blocks: 0            Seconds: 0RPRO minter successfully changed
+   ⠸ Blocks: 0            Seconds: 0RPRO minter successfully changed
 Init Dev only transferRiskProPausingRole
 Changing RPRO pauser
-   ⠴ Blocks: 0            Seconds: 0RPRO pauser successfully changed
+RPRO pauser successfully changed
 Deploying CommissionSplitter
 Deploying CommissionSplitter
-
+   ⠼ Blocks: 0            Seconds: 0
    Deploying 'CommissionSplitter'
    ------------------------------
-   > transaction hash:    0xa48f83b8518963825737d7257ed472d65363171b766feb822a5dc8f74af1c5bb
+   > transaction hash:    0xe3ad426a2250e11cb0e328186a40f9ae6370ab8d267f85d9a69e08b385badaa0
    > Blocks: 0            Seconds: 0
-   > contract address:    0x0a09AfE537F8607633Ac1e2eb0b62cb05AC1c89C
-   > block number:        676
-   > block timestamp:     1579784475
+   > contract address:    0xE8FE7D90357729fa6cA0821B1E533a05D37F4B30
+   > block number:        807
+   > block timestamp:     1579787002
    > account:             0xDf08F82De32B8d460adbE8D72043E3a7e25A3B39
-   > balance:             9999990.3577194
-   > gas used:            894658
+   > balance:             9999988.69552166
+   > gas used:            894722
    > gas price:           20 gwei
    > value sent:          0 ETH
-   > total cost:          0.01789316 ETH
+   > total cost:          0.01789444 ETH
 
 Init Dev only initializeContracts
 Initializing contracts
-Initializing MoC
+   ⠴ Blocks: 0            Seconds: 0Initializing MoC
 MoCConnector Initialized
    ⠧ Blocks: 0            Seconds: 0MoC Initialized
-   ⠇ Blocks: 0            Seconds: 0Exchange Initialized
-Converter Initialized
-   ⠏ Blocks: 0            Seconds: 0Inrate Initialized
-RiskProxManager Initialized
-   ⠋ Blocks: 0            Seconds: 0Burnout Initialized
-   ⠙ Blocks: 0            Seconds: 0Settlement Initialized
-State Initialized
+Exchange Initialized
+   ⠇ Blocks: 0            Seconds: 0Converter Initialized
+Inrate Initialized
+   ⠏ Blocks: 0            Seconds: 0RiskProxManager Initialized
+Burnout Initialized
+   ⠋ Blocks: 0            Seconds: 0Settlement Initialized
+   ⠙ Blocks: 0            Seconds: 0State Initialized
 
    > Saving migration to chain.
    > Saving artifacts
    -------------------------------------
-   > Total cost:          0.01789316 ETH
+   > Total cost:          0.01789444 ETH
 
    ⠸ Blocks: 0            Seconds: 0
 5_link_MocLib.js
@@ -357,19 +357,19 @@ State Initialized
    ⠼ Blocks: 0            Seconds: 0
    Linking
    -------
-   * Contract: MoCConverter <--> Library: MoCHelperLib (at address: 0xfF6fDfA9ec1144e35A5C412eDB0436b86e22D3fD)
+   * Contract: MoCConverter <--> Library: MoCHelperLib (at address: 0xA354B1f97179f1D8Fc999a7BdC812E21CD00391B)
 
    Linking
    -------
-   * Contract: MoCState <--> Library: MoCHelperLib (at address: 0xfF6fDfA9ec1144e35A5C412eDB0436b86e22D3fD)
+   * Contract: MoCState <--> Library: MoCHelperLib (at address: 0xA354B1f97179f1D8Fc999a7BdC812E21CD00391B)
 
    Linking
    -------
-   * Contract: MoCExchange <--> Library: MoCHelperLib (at address: 0xfF6fDfA9ec1144e35A5C412eDB0436b86e22D3fD)
+   * Contract: MoCExchange <--> Library: MoCHelperLib (at address: 0xA354B1f97179f1D8Fc999a7BdC812E21CD00391B)
 
    Linking
    -------
-   * Contract: MoCInrate <--> Library: MoCHelperLib (at address: 0xfF6fDfA9ec1144e35A5C412eDB0436b86e22D3fD)
+   * Contract: MoCInrate <--> Library: MoCHelperLib (at address: 0xA354B1f97179f1D8Fc999a7BdC812E21CD00391B)
 
    > Saving migration to chain.
    -------------------------------------
@@ -378,16 +378,16 @@ State Initialized
    ⠦ Blocks: 0            Seconds: 0
 6_deploy_DoC.js
 ===============
-   ⠇ Blocks: 0            Seconds: 0
+   ⠧ Blocks: 0            Seconds: 0
    Replacing 'StableToken'
    -----------------------
-   > transaction hash:    0x83a7fe1cf4a4cc285a6dfde033b0191fe2da27c66452cfbd09e437c724cd47fc
+   > transaction hash:    0xfd90da43c4d50aab53ffe258fc9763ef1991126d164c12bf0c072d4fe2d346f5
    > Blocks: 0            Seconds: 0
-   > contract address:    0xb4E744c5008e955ec36DEaA30a52553eB1af2913
-   > block number:        688
-   > block timestamp:     1579784479
+   > contract address:    0x3d3ad391351D8E2642c5884aC73270927c9cA5B2
+   > block number:        819
+   > block timestamp:     1579787006
    > account:             0xDf08F82De32B8d460adbE8D72043E3a7e25A3B39
-   > balance:             9999990.2617761
+   > balance:             9999988.5995758
    > gas used:            1475399
    > gas price:           20 gwei
    > value sent:          0 ETH
@@ -402,16 +402,16 @@ State Initialized
 
 7_deploy_RiskPro.js
 ===================
-   ⠋ Blocks: 0            Seconds: 0
+   ⠏ Blocks: 0            Seconds: 0
    Replacing 'RiskProToken'
    ------------------------
-   ⠙ Blocks: 0            Seconds: 0   > transaction hash:    0xb34e53145a5b24f7658fb4f4f33d13f663773fdbe6c7da79fa5c2bedb0e7d2d5
+   > transaction hash:    0xb96ceaedcd10d88b0bc5b7bc991d62698d72abb41d69a5cdb210dbc041031f52
    > Blocks: 0            Seconds: 0
-   > contract address:    0xd0411dCEe0F52E7EC9144E77f96B3CD82e6d07b4
-   > block number:        690
-   > block timestamp:     1579784480
+   > contract address:    0x355ca01f8E1A5D7814c669876dC2328c86a70c60
+   > block number:        821
+   > block timestamp:     1579787007
    > account:             0xDf08F82De32B8d460adbE8D72043E3a7e25A3B39
-   > balance:             9999990.22367424
+   > balance:             9999988.56147394
    > gas used:            1878032
    > gas price:           20 gwei
    > value sent:          0 ETH
@@ -426,16 +426,16 @@ State Initialized
 
 8_deploy_MocLib.js
 ==================
-   ⠸ Blocks: 0            Seconds: 0
+   ⠹ Blocks: 0            Seconds: 0
    Replacing 'MoCHelperLib'
    ------------------------
-   > transaction hash:    0xedb8d136d1c9f26323158b5ddafc6a196ce47b93c22cad8675d7750b265f7756
+   > transaction hash:    0xb17b234a0b5bcd7468049b5429870929898251da473127e71ce7e01642d634ad
    > Blocks: 0            Seconds: 0
-   > contract address:    0x0DaB5Bf85A6158ED3c2ccbbb870239cd21108bD7
-   > block number:        692
-   > block timestamp:     1579784480
+   > contract address:    0x8Be74B506F41FE92Cd21c02bDC9907BF79BcEf72
+   > block number:        823
+   > block timestamp:     1579787007
    > account:             0xDf08F82De32B8d460adbE8D72043E3a7e25A3B39
-   > balance:             9999990.19370342
+   > balance:             9999988.53150312
    > gas used:            1471480
    > gas price:           20 gwei
    > value sent:          0 ETH
@@ -450,9 +450,9 @@ State Initialized
 
 9_deploy_upgradables.js
 =======================
-   ⠴ Blocks: 0            Seconds: 0deploying Upgradable 0: MoC
+   ⠼ Blocks: 0            Seconds: 0deploying Upgradable 0: MoC
 pushed 0: MoC
-   ⠦ Blocks: 0            Seconds: 00x2F9bA84912347b40CCE644DF101F92B7DC99E535
+   ⠴ Blocks: 0            Seconds: 00x35A8dAA4e5094d1B1eF575A514c8AECc528e4a12
 Created 0: MoC
 
    > Saving migration to chain.
@@ -464,7 +464,7 @@ Created 0: MoC
 ========================
    ⠏ Blocks: 0            Seconds: 0deploying Upgradable 1: MoCConnector
 pushed 1: MoCConnector
-   ⠋ Blocks: 0            Seconds: 00xbfF34ffe02E8beC250B507467848F8e3C7f69BcE
+   ⠙ Blocks: 0            Seconds: 00x7E2F431D3A7E452CdDea2AdE46fdFaD3cC626a47
 Created 1: MoCConnector
 
    > Saving migration to chain.
@@ -476,7 +476,7 @@ Created 1: MoCConnector
 ========================
    ⠼ Blocks: 0            Seconds: 0deploying Upgradable 2: MoCRiskProxManager
 pushed 2: MoCRiskProxManager
-   ⠴ Blocks: 0            Seconds: 00x826C53b22f18976Ce00E65E96c53fC07263459e6
+   ⠴ Blocks: 0            Seconds: 00x8206e662A1C586757ecDeD2D830424C991d98dfC
 Created 2: MoCRiskProxManager
 
    > Saving migration to chain.
@@ -488,19 +488,19 @@ Created 2: MoCRiskProxManager
 ========================
    ⠇ Blocks: 0            Seconds: 0deploying Upgradable 3: MoCBurnout
 pushed 3: MoCBurnout
-   ⠏ Blocks: 0            Seconds: 00x6837CE2164B5c40f7ca75176150F816702Ab7eFC
+   ⠏ Blocks: 0            Seconds: 00xdF51066da2Ef5530429557FfCe18B83436681830
 Created 3: MoCBurnout
 
    > Saving migration to chain.
    -------------------------------------
    > Total cost:                   0 ETH
 
-   ⠹ Blocks: 0            Seconds: 0
+   ⠙ Blocks: 0            Seconds: 0
 13_deploy_upgradables.js
 ========================
-   ⠸ Blocks: 0            Seconds: 0deploying Upgradable 4: MoCSettlement
-   ⠼ Blocks: 0            Seconds: 0pushed 4: MoCSettlement
-   ⠴ Blocks: 0            Seconds: 00xdFb25AC85f411e369462670Dfc38C0b347c3E79c
+   ⠹ Blocks: 0            Seconds: 0deploying Upgradable 4: MoCSettlement
+   ⠸ Blocks: 0            Seconds: 0pushed 4: MoCSettlement
+   ⠴ Blocks: 0            Seconds: 00x6367F683c79e63E0809748e8b85AF8FD4109f82a
 Created 4: MoCSettlement
 
    > Saving migration to chain.
@@ -512,19 +512,19 @@ Created 4: MoCSettlement
 ========================
    ⠇ Blocks: 0            Seconds: 0deploying Upgradable 5: MoCConverter
 pushed 5: MoCConverter
-   ⠋ Blocks: 0            Seconds: 00xFF5cAC23780B718B74b6ca332f7C03BEf52B816D
+   ⠏ Blocks: 0            Seconds: 00x17B25221ac831c6D7BF0D5C9782EBD36378E47CA
 Created 5: MoCConverter
 
    > Saving migration to chain.
    -------------------------------------
    > Total cost:                   0 ETH
 
-   ⠹ Blocks: 0            Seconds: 0
+   ⠙ Blocks: 0            Seconds: 0
 15_deploy_upgradables.js
 ========================
-   ⠸ Blocks: 0            Seconds: 0deploying Upgradable 6: MoCState
-   ⠼ Blocks: 0            Seconds: 0pushed 6: MoCState
-   ⠴ Blocks: 0            Seconds: 00x2de9686f2d6b1531156862f2080B27F48Eb34B75
+   ⠹ Blocks: 0            Seconds: 0deploying Upgradable 6: MoCState
+   ⠸ Blocks: 0            Seconds: 0pushed 6: MoCState
+   ⠴ Blocks: 0            Seconds: 00x3B66181529d4Aa8F31533133bd446eD351F2D197
 Created 6: MoCState
 
    > Saving migration to chain.
@@ -536,7 +536,7 @@ Created 6: MoCState
 ========================
    ⠇ Blocks: 0            Seconds: 0deploying Upgradable 7: MoCExchange
 pushed 7: MoCExchange
-   ⠏ Blocks: 0            Seconds: 00xb70966Ec57b05e58537339DF92b4727dE8813310
+   ⠏ Blocks: 0            Seconds: 00x9f065b5EE4e05Ee268152EeC48A6820bA6eD04d4
 Created 7: MoCExchange
 
    > Saving migration to chain.
@@ -548,18 +548,18 @@ Created 7: MoCExchange
 ========================
    ⠹ Blocks: 0            Seconds: 0deploying Upgradable 8: MoCInrate
 pushed 8: MoCInrate
-   ⠼ Blocks: 0            Seconds: 00x70f7626675e80C0daD2E7F55CFFe97B855CD2dEA
+   ⠸ Blocks: 0            Seconds: 00xce3486510c6dDdda757EF761FcdF4663D116F7cf
 Created 8: MoCInrate
 
    > Saving migration to chain.
    -------------------------------------
    > Total cost:                   0 ETH
 
-   ⠦ Blocks: 0            Seconds: 0
+   ⠴ Blocks: 0            Seconds: 0
 18_transfer_doc_roles.js
 ========================
-   ⠧ Blocks: 0            Seconds: 0Changing STABLE ownership
-   ⠇ Blocks: 0            Seconds: 0STABLE Ownership completely changed
+   ⠇ Blocks: 0            Seconds: 0Changing STABLE ownership
+STABLE Ownership completely changed
 Changing STABLE minter
    ⠏ Blocks: 0            Seconds: 0STABLE minter successfully changed
 
@@ -567,97 +567,97 @@ Changing STABLE minter
    -------------------------------------
    > Total cost:                   0 ETH
 
-   ⠹ Blocks: 0            Seconds: 0
+   ⠙ Blocks: 0            Seconds: 0
 19_transfer_riskPro_roles.js
 ============================
-   ⠴ Blocks: 0            Seconds: 0Changing RPRO ownership
+   ⠸ Blocks: 0            Seconds: 0Changing RPRO ownership
 RPRO Ownership completely changed
 Changing RPRO minter
-   ⠦ Blocks: 0            Seconds: 0RPRO minter successfully changed
+   ⠼ Blocks: 0            Seconds: 0RPRO minter successfully changed
 
    > Saving migration to chain.
    -------------------------------------
    > Total cost:                   0 ETH
 
-   ⠇ Blocks: 0            Seconds: 0
+   ⠧ Blocks: 0            Seconds: 0
 20_transfer_pause_roles.js
 ==========================
-   ⠋ Blocks: 0            Seconds: 0Changing RPRO pauser
-RPRO pauser successfully changed
+   ⠇ Blocks: 0            Seconds: 0Changing RPRO pauser
+   ⠏ Blocks: 0            Seconds: 0RPRO pauser successfully changed
 
    > Saving migration to chain.
    -------------------------------------
    > Total cost:                   0 ETH
 
-   ⠹ Blocks: 0            Seconds: 0
+   ⠙ Blocks: 0            Seconds: 0
 21_deploy_CommissionSplitter.js
 ===============================
    ⠸ Blocks: 0            Seconds: 0Deploying CommissionSplitter
    ⠼ Blocks: 0            Seconds: 0
    Replacing 'CommissionSplitter'
    ------------------------------
-   ⠴ Blocks: 0            Seconds: 0   > transaction hash:    0x8d7cc0b3af240068b4c74bcf684f5ab88a3583080bbed1e61e03a88688776e41
+   > transaction hash:    0x9891b28438c1f9e630c28eac2a7046e506e84ba652a8dc5fdd5cafe606342eaa
    > Blocks: 0            Seconds: 0
-   > contract address:    0x63208A1e6cf700ddE626f85Bbdc3a4E4aCd83686
-   > block number:        725
-   > block timestamp:     1579784527
+   > contract address:    0x391B5Fdcc189166Fd5A331896497052a03b7e054
+   > block number:        856
+   > block timestamp:     1579787053
    > account:             0xDf08F82De32B8d460adbE8D72043E3a7e25A3B39
-   > balance:             9999989.88752218
-   > gas used:            894658
+   > balance:             9999988.22533084
+   > gas used:            894722
    > gas price:           20 gwei
    > value sent:          0 ETH
-   > total cost:          0.01789316 ETH
+   > total cost:          0.01789444 ETH
 
 
    > Saving migration to chain.
    > Saving artifacts
    -------------------------------------
-   > Total cost:          0.01789316 ETH
+   > Total cost:          0.01789444 ETH
 
-   ⠧ Blocks: 0            Seconds: 0
+   ⠦ Blocks: 0            Seconds: 0
 22_initialize_contracts.js
 ==========================
-   ⠇ Blocks: 0            Seconds: 0Initialize contracts - network: development
+   ⠧ Blocks: 0            Seconds: 0Initialize contracts - network: development
 Initializing contracts
 Initializing MoC
    ⠏ Blocks: 0            Seconds: 0MoCConnector Initialized
    ⠋ Blocks: 0            Seconds: 0MoC Initialized
-   ⠙ Blocks: 0            Seconds: 0Exchange Initialized
-Converter Initialized
-   ⠹ Blocks: 0            Seconds: 0Inrate Initialized
-RiskProxManager Initialized
-   ⠸ Blocks: 0            Seconds: 0Burnout Initialized
-   ⠼ Blocks: 0            Seconds: 0Settlement Initialized
-   ⠴ Blocks: 0            Seconds: 0State Initialized
+Exchange Initialized
+   ⠙ Blocks: 0            Seconds: 0Converter Initialized
+Inrate Initialized
+   ⠹ Blocks: 0            Seconds: 0RiskProxManager Initialized
+Burnout Initialized
+   ⠸ Blocks: 0            Seconds: 0Settlement Initialized
+   ⠼ Blocks: 0            Seconds: 0State Initialized
 
    > Saving migration to chain.
    -------------------------------------
    > Total cost:                   0 ETH
 
-   ⠧ Blocks: 0            Seconds: 0
+   ⠦ Blocks: 0            Seconds: 0
 23_set_governance.js
 ====================
-   ⠇ Blocks: 0            Seconds: 0Setting Governance - network: development
-   ⠙ Blocks: 0            Seconds: 00xafB395dC80FD7506c158E2c29143e78D798aD217
-0x2F9bA84912347b40CCE644DF101F92B7DC99E535
-   ⠹ Blocks: 0            Seconds: 00xCbf6872B256Ff97466ddF9D14D5CA21c50A8Caa1
-0xbfF34ffe02E8beC250B507467848F8e3C7f69BcE
-   ⠸ Blocks: 0            Seconds: 00xe87cc37fde3b66CB1A840a253558cce9d9b10912
-0x826C53b22f18976Ce00E65E96c53fC07263459e6
-   ⠼ Blocks: 0            Seconds: 00x1FfE4A1354D1030F939e17ADf6D0a7De41a78739
-0x6837CE2164B5c40f7ca75176150F816702Ab7eFC
-   ⠦ Blocks: 0            Seconds: 00x76dd2dEAD52D6fC4A89dd86D534bB61386Cb9591
-0xdFb25AC85f411e369462670Dfc38C0b347c3E79c
-   ⠧ Blocks: 0            Seconds: 00x7DaFb4c8bB034A6472446f044A65092e300E3f10
-0xFF5cAC23780B718B74b6ca332f7C03BEf52B816D
-   ⠇ Blocks: 0            Seconds: 00xD9121B64b944dADA2990c62396f171430693b0D6
-0x2de9686f2d6b1531156862f2080B27F48Eb34B75
-   ⠏ Blocks: 0            Seconds: 00xCacEeb8b7A5f83C0493956F4ef013b5F1829ec03
-0xb70966Ec57b05e58537339DF92b4727dE8813310
-   ⠋ Blocks: 0            Seconds: 00x520a4ba8f03B57cE9b14557AcFc57215ad175000
-0x70f7626675e80C0daD2E7F55CFFe97B855CD2dEA
+   ⠧ Blocks: 0            Seconds: 0Setting Governance - network: development
+   ⠇ Blocks: 0            Seconds: 00x50dfAE3aA83F12787BBEC8923dFc0Ff3671A1EE5
+0x35A8dAA4e5094d1B1eF575A514c8AECc528e4a12
+   ⠏ Blocks: 0            Seconds: 00xF2e6BAFF57e55506e1b0D09654173f6BfEF0515a
+0x7E2F431D3A7E452CdDea2AdE46fdFaD3cC626a47
+   ⠙ Blocks: 0            Seconds: 00x1393bD7e0A7F048f3144d5a30F44AA208f8AC8fD
+0x8206e662A1C586757ecDeD2D830424C991d98dfC
+   ⠹ Blocks: 0            Seconds: 00x7CA000300Ef74026EF25bA85B20a6f2EDC944786
+0xdF51066da2Ef5530429557FfCe18B83436681830
+   ⠸ Blocks: 0            Seconds: 00x42EF443263Ba02328997B9d21b288ab1e49380A3
+0x6367F683c79e63E0809748e8b85AF8FD4109f82a
+   ⠼ Blocks: 0            Seconds: 00xe34554f295097413D182ca04e9449e7DD6D7eA5C
+0x17B25221ac831c6D7BF0D5C9782EBD36378E47CA
+   ⠴ Blocks: 0            Seconds: 00x464B49249aa09f3EB650Af968D4bEe33e1f88930
+0x3B66181529d4Aa8F31533133bd446eD351F2D197
+   ⠦ Blocks: 0            Seconds: 00x4C86d2592dE3BF250FD023e8768F137B43b51b43
+0x9f065b5EE4e05Ee268152EeC48A6820bA6eD04d4
+   ⠧ Blocks: 0            Seconds: 00xA346BB87209D73B485D1A3a90eDD60833c25E278
+0xce3486510c6dDdda757EF761FcdF4663D116F7cf
 ------------CONTRACTS DEPLOYED-----------------
-{"moc":"0x2F9bA84912347b40CCE644DF101F92B7DC99E535","oracle":"0x67Db4c498969FE12Af3e55198586fE5B0dbFad20","moCRiskProxManager":"0x826C53b22f18976Ce00E65E96c53fC07263459e6","mocState":"0x2de9686f2d6b1531156862f2080B27F48Eb34B75","mocInrate":"0x70f7626675e80C0daD2E7F55CFFe97B855CD2dEA","governor":"0xA04De7A2AF10b4f27f675DB676deF72910656e1e","stopper":"0xba6F8B9bf6dfA1e0949eABD44d1DD1702fd18f76","proxyAdmin":"0xC81F32292fe23dE91bBb93Bd27f71132612990B3","upgradeDelegator":"0xc301191D09FB7f6130d5bD444B4CCb396bE1A056"}
+   ⠇ Blocks: 0            Seconds: 0{"moc":"0x35A8dAA4e5094d1B1eF575A514c8AECc528e4a12","oracle":"0x6D85E75b4dF65EF26B1984257E77e23F0D2b20eb","moCRiskProxManager":"0x8206e662A1C586757ecDeD2D830424C991d98dfC","mocState":"0x3B66181529d4Aa8F31533133bd446eD351F2D197","mocInrate":"0xce3486510c6dDdda757EF761FcdF4663D116F7cf","governor":"0xC8370a042Db6E973b23e267c0Ef3b46e095f1EB1","stopper":"0x18C997B52fa48a1761a7AB96Ed65b6489decaC72","proxyAdmin":"0xF96D4A580e239960f4D967FAF706a2A1aDC85907","upgradeDelegator":"0x02D270c4e4D752dEA28F3b01Fd684a85125Ad051"}
 
    > Saving migration to chain.
    -------------------------------------
@@ -667,15 +667,17 @@ RiskProxManager Initialized
 Summary
 =======
 > Total deployments:   18
-> Final cost:          0.3664831 ETH
+> Final cost:          0.36648566 ETH
 
 
-"moc":"0x2F9bA84912347b40CCE644DF101F92B7DC99E535",
-"oracle":"0x67Db4c498969FE12Af3e55198586fE5B0dbFad20",
-"moCRiskProxManager":"0x826C53b22f18976Ce00E65E96c53fC07263459e6",
-"mocState":"0x2de9686f2d6b1531156862f2080B27F48Eb34B75",
-"mocInrate":"0x70f7626675e80C0daD2E7F55CFFe97B855CD2dEA",
-"governor":"0xA04De7A2AF10b4f27f675DB676deF72910656e1e",
-"stopper":"0xba6F8B9bf6dfA1e0949eABD44d1DD1702fd18f76",
-"proxyAdmin":"0xC81F32292fe23dE91bBb93Bd27f71132612990B3",
-"upgradeDelegator":"0xc301191D09FB7f6130d5bD444B4CCb396bE1A056"
+
+
+{"moc":"0x35A8dAA4e5094d1B1eF575A514c8AECc528e4a12",
+"oracle":"0x6D85E75b4dF65EF26B1984257E77e23F0D2b20eb",
+"moCRiskProxManager":"0x8206e662A1C586757ecDeD2D830424C991d98dfC",
+"mocState":"0x3B66181529d4Aa8F31533133bd446eD351F2D197",
+"mocInrate":"0xce3486510c6dDdda757EF761FcdF4663D116F7cf",
+"governor":"0xC8370a042Db6E973b23e267c0Ef3b46e095f1EB1",
+"stopper":"0x18C997B52fa48a1761a7AB96Ed65b6489decaC72",
+"proxyAdmin":"0xF96D4A580e239960f4D967FAF706a2A1aDC85907",
+"upgradeDelegator":"0x02D270c4e4D752dEA28F3b01Fd684a85125Ad051"}
