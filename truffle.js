@@ -20,10 +20,9 @@ module.exports = {
   },
   networks: {
     development: {
-      host: 'http://192.168.56.2:8545',
-      provider: new HDWalletProvider('0x9e790b185e5b7f11f2924c7b809936866c38ed3ab3f33e0fbd3cfe791c2cdbd6', 'http://192.168.56.2:8545'),
-      network_id: '123456',
-      gasPrice: 0x00
+      host: '127.0.0.1',
+      port: 8545,
+      network_id: '*'
     },
     coverage: {
       host: 'localhost',
