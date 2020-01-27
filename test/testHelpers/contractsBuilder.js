@@ -78,7 +78,7 @@ const baseParams = {
   commissionRate: toContract(0 * 10 ** 18), // mocPrecision
   peg: toContract(1),
   startStoppable: true,
-  maxMintRiskPro: toContract(100000 * 10 ** 18),
+  maxMintRiskPro: toContract(10000000 * 10 ** 18),
   stableTmin: toContract(0 * 10 ** 18),
   stablePower: toContract(1),
   stableTmax: toContract(0.0002611578760678 * 10 ** 18),
