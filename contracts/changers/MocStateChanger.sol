@@ -17,6 +17,7 @@ contract MocStateChanger is ChangeContract, Ownable{
   uint256 public liq;
   uint256 public smoothingFactor;
   uint256 public emaCalculationBlockSpan;
+  uint256 public maxMintRiskPro;
 
   constructor(
     MoCState _mocState,
@@ -27,7 +28,8 @@ contract MocStateChanger is ChangeContract, Ownable{
     uint256 _dayBlockSpan,
     uint256 _liq,
     uint256 _smoothingFactor,
-    uint256 _emaCalculationBlockSpan
+    uint256 _emaCalculationBlockSpan,
+    uint256 _maxMintRiskPro
   ) public {
     mocState = _mocState;
     newPeg = _newPeg;
@@ -38,6 +40,7 @@ contract MocStateChanger is ChangeContract, Ownable{
     smoothingFactor = _smoothingFactor;
     emaCalculationBlockSpan = _emaCalculationBlockSpan;
     priceProvider = _priceProvider;
+    maxMintRiskPro = _maxMintRiskPro;
   }
 
   function execute() external {
@@ -49,6 +52,11 @@ contract MocStateChanger is ChangeContract, Ownable{
     mocState.setEmaCalculationBlockSpan(emaCalculationBlockSpan);
     mocState.setSmoothingFactor(smoothingFactor);
     mocState.setPriceProvider(priceProvider);
+    mocState.setMaxMintRiskPro(maxMintRiskPro);
+  }
+
+  function setMaxMintRiskPro(uint256 _maxMintRiskPro) public onlyOwner() {
+    maxMintRiskPro = _maxMintRiskPro;
   }
 
   function setPriceProvider(address _priceProvider) public onlyOwner() {

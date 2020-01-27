@@ -47,6 +47,8 @@ contract MoCState is MoCLibConnection, MoCBase, MoCEMACalculator {
   // Price to use at stableToken redemption at
   // liquidation event
   uint256 public liquidationPrice;
+  // Max value posible to mint of RiskPro
+  uint256 public maxMintRiskPro;
 
   function initialize(
     address connectorAddress,
@@ -58,12 +60,13 @@ contract MoCState is MoCLibConnection, MoCBase, MoCEMACalculator {
     uint256 _dayBlockSpan,
     uint256 _ema,
     uint256 _smoothFactor,
-    uint256 _emaBlockSpan
+    uint256 _emaBlockSpan,
+    uint256 _maxMintRiskPro
   ) public initializer {
     initializePrecisions();
     initializeBase(connectorAddress);
     initializeContracts();
-    initializeValues(_governor, _priceProvider,_liq, _utpdu, _maxDiscRate, _dayBlockSpan);
+    initializeValues(_governor, _priceProvider,_liq, _utpdu, _maxDiscRate, _dayBlockSpan, _maxMintRiskPro);
     initializeMovingAverage(_ema, _smoothFactor, _emaBlockSpan);
   }
 
@@ -634,7 +637,8 @@ contract MoCState is MoCLibConnection, MoCBase, MoCEMACalculator {
     uint256 _liq,
     uint256 _utpdu,
     uint256 _maxDiscRate,
-    uint256 _dayBlockSpan) internal {
+    uint256 _dayBlockSpan,
+    uint256 _maxMintRiskPro) internal {
     liq = _liq;
     utpdu = _utpdu;
     riskProMaxDiscountRate = _maxDiscRate;
@@ -644,6 +648,7 @@ contract MoCState is MoCLibConnection, MoCBase, MoCEMACalculator {
     // Default values
     state = States.AboveCobj;
     peg = 1;
+    maxMintRiskPro = _maxMintRiskPro;
   }
 
   function initializeContracts() internal  {
@@ -652,6 +657,39 @@ contract MoCState is MoCLibConnection, MoCBase, MoCEMACalculator {
     riskProToken = RiskProToken(connector.riskProToken());
     riskProxManager = MoCRiskProxManager(connector.riskProxManager());
     mocConverter = MoCConverter(connector.mocConverter());
+  }
+
+  /**
+  * @param _maxMintRiskPro [using mocPrecision]
+  **/
+  function setMaxMintRiskPro(uint256 _maxMintRiskPro) public onlyAuthorizedChanger() {
+    maxMintRiskPro = _maxMintRiskPro;
+  }
+
+   /**
+   * @dev return Max value posible to mint of RiskPro
+   * @return maxMintRiskPro
+   */
+  function getMaxMintRiskPro() public view returns(uint256) {
+    return maxMintRiskPro;
+  }
+
+  /**
+  * @dev return the RiskPro available to mint
+  * @return maxMintRiskProAvalaible  [using mocPrecision]
+  */
+  function maxMintRiskProAvalaible() public view returns(uint256) {
+
+    uint256 totalRiskPro = riskProTotalSupply();
+    uint256 maxiMintRiskPro = getMaxMintRiskPro();
+
+    if (totalRiskPro >= maxiMintRiskPro) {
+      return 0;
+    }
+
+    uint256 availableMintRiskPro = maxiMintRiskPro.sub(totalRiskPro);
+
+    return availableMintRiskPro;
   }
 
   // Leave a gap betweeen inherited contracts variables in order to be

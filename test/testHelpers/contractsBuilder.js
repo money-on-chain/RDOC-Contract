@@ -77,7 +77,11 @@ const baseParams = {
   emaBlockSpan: toContract(40),
   commissionRate: toContract(0 * 10 ** 18), // mocPrecision
   peg: toContract(1),
-  startStoppable: true
+  startStoppable: true,
+  maxMintRiskPro: toContract(10000000 * 10 ** 18),
+  stableTmin: toContract(0 * 10 ** 18),
+  stablePower: toContract(1),
+  stableTmax: toContract(0.0002611578760678 * 10 ** 18),
 };
 
 const createContracts = params => async ({ owner, useMock }) => {
@@ -101,7 +105,11 @@ const createContracts = params => async ({ owner, useMock }) => {
     riskProRate,
     commissionRate,
     peg,
-    startStoppable
+    startStoppable,
+    maxMintRiskPro,
+    stableTmin,
+    stablePower,
+    stableTmax
   } = params;
   const settlementContract = useMock ? MoCSettlementMock : MoCSettlement;
   const stateContract = useMock ? MoCStateMock : MoCState;
@@ -153,6 +161,7 @@ const createContracts = params => async ({ owner, useMock }) => {
     liq,
     smoothingFactor,
     emaBlockSpan,
+    maxMintRiskPro,
     { from: owner }
   );
   const mockMocInrateChanger = await MocInrateChanger.new(
@@ -163,6 +172,9 @@ const createContracts = params => async ({ owner, useMock }) => {
     riskProxPower,
     riskProRate,
     commissionRate,
+    stableTmin,
+    stableTmax,
+    stablePower,
     { from: owner }
   );
 
@@ -218,7 +230,8 @@ const createContracts = params => async ({ owner, useMock }) => {
     dayBlockSpan, // no Precision
     reservePrice,
     smoothingFactor,
-    emaBlockSpan
+    emaBlockSpan,
+    maxMintRiskPro
   );
 
   const commissionSplitter = await CommissionSplitter.new(
@@ -242,7 +255,10 @@ const createContracts = params => async ({ owner, useMock }) => {
     dayBlockSpan * 7,
     owner,
     commissionSplitter.address,
-    commissionRate
+    commissionRate,
+    stableTmin,
+    stablePower,
+    stableTmax
   );
   await riskProx.initialize(mocConnector.address, governor.address, c0Cobj, x2Cobj);
   await mocSettlement.initialize(mocConnector.address, governor.address, settlementBlockSpan);

@@ -1,0 +1,31 @@
+{
+  "timeout": 60,
+  "timeout_web3": 300,
+  "networks": {
+    "development": {
+      "uri": "http://127.0.0.1:8545",
+      "network_id": null,
+      "accounts": [
+        {
+          "address": "0xdf08f82de32b8d460adbe8d72043e3a7e25a3b39",
+          "private_key":  "0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501200"
+        }
+      ],
+      "addresses": {
+        "moc":"0x35A8dAA4e5094d1B1eF575A514c8AECc528e4a12",
+        "oracle":"0x6D85E75b4dF65EF26B1984257E77e23F0D2b20eb",
+        "moCRiskProxManager":"0x8206e662A1C586757ecDeD2D830424C991d98dfC",
+        "mocState":"0x3B66181529d4Aa8F31533133bd446eD351F2D197",
+        "mocInrate":"0xce3486510c6dDdda757EF761FcdF4663D116F7cf",
+        "governor":"0xC8370a042Db6E973b23e267c0Ef3b46e095f1EB1",
+        "stopper":"0x18C997B52fa48a1761a7AB96Ed65b6489decaC72",
+        "proxyAdmin":"0xF96D4A580e239960f4D967FAF706a2A1aDC85907",
+        "upgradeDelegator":"0x02D270c4e4D752dEA28F3b01Fd684a85125Ad051",
+        "reserveToken": "0x8FF9e37eC16f8ACEeA4257425c315cfdFC3E7501"
+      }
+
+    }
+
+  }
+
+}
