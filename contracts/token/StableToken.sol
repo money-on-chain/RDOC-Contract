@@ -5,8 +5,8 @@ import "./OwnerBurnableToken.sol";
 
 contract StableToken is ERC20Detailed, OwnerBurnableToken {
 
-  string private _name = "Stable Token";
-  string private _symbol = "STABLE";
+  string private _name = "rDOC";
+  string private _symbol = "rDOC";
   uint8 private _decimals = 18;
 
   constructor() Ownable() ERC20Detailed(_name, _symbol, _decimals) public {
