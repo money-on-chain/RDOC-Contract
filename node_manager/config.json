@@ -24,6 +24,29 @@
         "reserveToken": "0x8FF9e37eC16f8ACEeA4257425c315cfdFC3E7501"
       }
 
+    },
+    "mocTestnet": {
+      "uri": "http://localhost:4444",
+      "network_id": 31,
+      "accounts": [
+        {
+          "address": "0xC67D9eE30d2119A384E02de568BE80FE785074Ba",
+          "private_key":  ""
+        }
+      ],
+      "addresses": {
+        "moc":"0x7e2F245F7dc8e78576ECB13AEFc0a101E9BE1AD3",
+        "oracle":"0x9d4b2c05818A0086e641437fcb64ab6098c7BbEc",
+        "moCRiskProxManager":"0xDd67D17eDABF2b320A18C00753C4D1c1008Abd73",
+        "mocState":"0x496eD67F77D044C8d9471fe86085Ccb5DC4d2f63",
+        "mocInrate":"0x4C54053845F4f219AddB43ef3A7d4478E89a2A47",
+        "governor":"0x4eAC4518e81B3A5198aADAb998D2610B46aAA609",
+        "stopper":"0x5bCdf8A2E61BD238AEe43b99962Ee8BfBda1Beca",
+        "proxyAdmin":"0xffb65F6E24806B7e1A988EeD1Ad07BB2654fF695",
+        "upgradeDelegator":"0xCDAbFbF334A5F6BCe900D2f73470D1e6722365d8",
+        "reserveToken": "0x19F64674D8A5B4E652319F5e239eFd3bc969A1fE"
+      }
+
     }
 
   }
