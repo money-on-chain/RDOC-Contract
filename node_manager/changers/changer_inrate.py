@@ -21,17 +21,17 @@ moc_inrate = node_manager.load_json_contract(os.path.join(path_build, "MoCInrate
 oracle_address = Web3.toChecksumAddress(node_manager.options['networks'][network]['addresses']['oracle'])
 governor_address = Web3.toChecksumAddress(node_manager.options['networks'][network]['addresses']['governor'])
 
-dayBlockSpan = 2551
+dayBlockSpan = 2824
 init_settings = dict()
 init_settings['bitProInterestBlockSpan'] = int(dayBlockSpan * 1)
 init_settings['btxcTmin'] = int(0.0 * 10 ** 18)
 init_settings['btxcTmax'] = int(0.000611539 * 10 ** 18)
-init_settings['btxcPower'] = int(1)
+init_settings['btxcPower'] = int(0)
 init_settings['newBitProRate'] = int(0.0000478537 * 10 ** 18)
 init_settings['newCommissionRate'] = int(0.001 * 10 ** 18)
 init_settings['stableTmin'] = int(0.0 * 10 ** 18)
-init_settings['stableTmax'] = int(0.000611539 * 10 ** 18)
-init_settings['stablePower'] = int(1)
+init_settings['stableTmax'] = int(0.0000000000000001 * 10 ** 18)
+init_settings['stablePower'] = int(0)
 
 
 print("Going to change to this settings:")
