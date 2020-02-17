@@ -1,6 +1,7 @@
 {
   "timeout": 60,
   "timeout_web3": 300,
+  "gas_price": 60000000,
   "networks": {
     "development": {
       "uri": "http://127.0.0.1:8545",
@@ -45,6 +46,30 @@
         "proxyAdmin":"0xffb65F6E24806B7e1A988EeD1Ad07BB2654fF695",
         "upgradeDelegator":"0xCDAbFbF334A5F6BCe900D2f73470D1e6722365d8",
         "reserveToken": "0x19F64674D8A5B4E652319F5e239eFd3bc969A1fE"
+      }
+
+    },
+    "mocMainnet": {
+      "uri": "https://public-node.rsk.co",
+      "network_id": 30,
+      "accounts": [
+        {
+          "address": "0x27A3074Db95EC5F6A0e73dC41a4859f48990E841",
+          "private_key":  ""
+        }
+      ],
+      "addresses": {
+        "moc":"0x8fCc64727e041e9f7Dc7137e06b7D7bE6748d134",
+        "oracle":"0x504EfCadFB020d6bBaeC8a5c5BB21453719d0E00",
+        "moCRiskProxManager":"0xFcc7ab14E3Ca0F13a8363764Dce49B42cB8beb97",
+        "mocState":"0x38c8367F947AE21BA1d47BEE8339c32208aE488e",
+        "mocInrate":"0x4B4c24C632eE85e75AECB9c9A6e65668C3dF160D",
+        "governor":"0xC61F0392d5170214b5D93C0BC4c4354163aBC1f7",
+        "stopper":"0x40662eD57284B4B541A42D347BE2447ABd1b119d",
+        "proxyAdmin":"0x009C51E1f6feDcDB8014Ea9AE1E39B6dbF2AC0EC",
+        "upgradeDelegator":"0x5cE577f6Ec969CE9a282838D350206C52A6F338C",
+        "reserveToken": "0x2acc95758f8b5f583470ba265eb685a8f45fc9d5",
+        "FeedFactory": "0x54878866F5324B56AEE9B6619a1e1A213B2fCC30"
       }
 
     }

@@ -1,10 +1,8 @@
 from web3 import Web3
-from web3.contract import ContractEvent
-
 import json
-from optparse import OptionParser
 import pprint
 import datetime
+import os
 
 import logging
 import logging.config
@@ -78,13 +76,8 @@ class NodeManager(object):
     def connect_node(self):
         """Connect to the node"""
         network = self.network
-        #self.web3 = Web3(Web3.HTTPProvider("http://{}:{}".format(self.options['networks'][network]['host'],
-        #                                                         self.options['networks'][network]['port'])))
         self.web3 = Web3(Web3.HTTPProvider(self.options['networks'][network]['uri'],
                                            request_kwargs={'timeout': self.options['timeout_web3']}))
-
-        #self.web3 = Web3(Web3.WebsocketProvider('ws://13.52.161.255:4444',
-        #                                        websocket_kwargs={'timeout': self.options['timeout_web3']}))
 
     def set_default_account(self, index):
         """ Default index account from config.json accounts """
@@ -94,18 +87,25 @@ class NodeManager(object):
     @property
     def is_connected(self):
         """ Is connected to the node """
+        if not self.web3:
+            return False
+
         return self.web3.isConnected()
 
     @property
     def gas_price(self):
         """ Gas Price """
         return self.web3.eth.gasPrice
-        #return self.web3.eth.getBlock('latest').minimumGasPrice
 
     @property
     def minimum_gas_price(self):
         """ Gas Price """
         return Web3.toInt(hexstr=self.web3.eth.getBlock('latest').minimumGasPrice)
+
+    @property
+    def minimum_gas_price_fixed(self):
+        """ Gas Price """
+        return self.options['gas_price']
 
     @property
     def block_number(self):
@@ -134,15 +134,25 @@ class NodeManager(object):
         """ Transfer value to... """
         network = self.network
         default_account = self.default_account
-        pk = self.options['networks'][network]['accounts'][default_account]['private_key']
+
+        # pk from enviroment or from json
+        if 'ACCOUNT_PK_SECRET' in os.environ:
+            pk = os.environ['ACCOUNT_PK_SECRET']
+        else:
+            pk = self.options['networks'][network]['accounts'][default_account]['private_key']
+
         return self.transfer(pk, to_address, value, unit=unit)
 
     def transfer(self, private_key, to_address, value, unit='wei'):
-        """ Tranferencia """
+        """ transfer """
         network = self.network
         default_account = self.default_account
 
-        from_address = self.options['networks'][network]['accounts'][default_account]['address']
+        # account from enviroment or from json
+        if 'ACCOUNT_ADDRESS' in os.environ:
+            from_address = os.environ['ACCOUNT_ADDRESS']
+        else:
+            from_address = self.options['networks'][network]['accounts'][default_account]['address']
 
         from_address = Web3.toChecksumAddress(from_address)
         to_address = Web3.toChecksumAddress(to_address)
@@ -151,9 +161,13 @@ class NodeManager(object):
 
         nonce = self.web3.eth.getTransactionCount(from_address)
 
+        gas_price = self.options['gas_price']
+        if gas_price <= 0:
+            gas_price = self.minimum_gas_price
+
         transaction = dict(chainId=self.options['networks'][network]['network_id'],
                            nonce=nonce,
-                           gasPrice=self.gas_price,
+                           gasPrice=gas_price,
                            gas=100000,
                            to=to_address,
                            value=value)
@@ -164,7 +178,7 @@ class NodeManager(object):
         return self.web3.eth.sendRawTransaction(
             signed_transaction.rawTransaction)
 
-    def transaction(self, fnc, private_key, value=0, gas_limit=0):
+    def transaction(self, fnc, private_key, value=0, gas_limit=2000000):
 
         network = self.network
         default_account = self.default_account
@@ -172,14 +186,21 @@ class NodeManager(object):
         if not gas_limit:
             gas_limit = fnc.estimateGas()
 
-        from_address = self.options['networks'][network]['accounts'][default_account]['address']
-        from_address = Web3.toChecksumAddress(from_address)
+        # account from enviroment or from json
+        if 'ACCOUNT_ADDRESS' in os.environ:
+            from_address = Web3.toChecksumAddress(os.environ['ACCOUNT_ADDRESS'])
+        else:
+            from_address = Web3.toChecksumAddress(self.options['networks'][network]['accounts'][default_account]['address'])
 
         nonce = self.web3.eth.getTransactionCount(from_address)
 
+        gas_price = self.options['gas_price']
+        if gas_price <= 0:
+            gas_price = self.minimum_gas_price
+
         transaction_dict = dict(chainId=self.options['networks'][network]['network_id'],
                                 nonce=nonce,
-                                gasPrice=self.gas_price,
+                                gasPrice=gas_price,
                                 gas=gas_limit,
                                 value=value)
 
@@ -193,7 +214,7 @@ class NodeManager(object):
 
         return transaction_hash.hex()
 
-    def fnx_transaction(self, sc, function_, *tx_args, tx_params=None, gas_limit=2100000):
+    def fnx_transaction(self, sc, function_, *tx_args, tx_params=None, gas_limit=3500000):
         """Contract agnostic transaction function with extras"""
 
         network = self.network
@@ -214,8 +235,17 @@ class NodeManager(object):
 
         log.debug("Sending transaction to {} with {} as arguments.\n".format(function_, tx_args))
 
-        from_address = Web3.toChecksumAddress(self.options['networks'][network]['accounts'][default_account]['address'])
-        pk = self.options['networks'][network]['accounts'][default_account]['private_key']
+        # account from enviroment or from json
+        if 'ACCOUNT_ADDRESS' in os.environ:
+            from_address = Web3.toChecksumAddress(os.environ['ACCOUNT_ADDRESS'])
+        else:
+            from_address = Web3.toChecksumAddress(self.options['networks'][network]['accounts'][default_account]['address'])
+
+        # pk from enviroment or from json
+        if 'ACCOUNT_PK_SECRET' in os.environ:
+            pk = os.environ['ACCOUNT_PK_SECRET']
+        else:
+            pk = self.options['networks'][network]['accounts'][default_account]['private_key']
 
         nonce = self.web3.eth.getTransactionCount(from_address)
 
@@ -224,9 +254,13 @@ class NodeManager(object):
             if 'value' in tx_params:
                 tx_value = tx_params['value']
 
+        gas_price = self.options['gas_price']
+        if gas_price <= 0:
+            gas_price = self.minimum_gas_price
+
         transaction_dict = {'chainId': self.options['networks'][network]['network_id'],
                             'nonce': nonce,
-                            'gasPrice': self.gas_price,
+                            'gasPrice': gas_price,
                             'gas': gas_limit,
                             'value': tx_value}
 
@@ -240,7 +274,7 @@ class NodeManager(object):
 
         return transaction_hash
 
-    def fnx_constructor(self, sc, *tx_args, tx_params=None, gas_limit=6000000):
+    def fnx_constructor(self, sc, *tx_args, tx_params=None, gas_limit=3500000):
         """Contract agnostic transaction function with extras"""
 
         network = self.network
@@ -260,8 +294,18 @@ class NodeManager(object):
 
         log.debug("Sending transaction to {} with {} as arguments.\n".format('Constructor', tx_args))
 
-        from_address = Web3.toChecksumAddress(self.options['networks'][network]['accounts'][default_account]['address'])
-        pk = self.options['networks'][network]['accounts'][default_account]['private_key']
+        # account from enviroment or from json
+        if 'ACCOUNT_ADDRESS' in os.environ:
+            from_address = Web3.toChecksumAddress(os.environ['ACCOUNT_ADDRESS'])
+        else:
+            from_address = Web3.toChecksumAddress(
+                self.options['networks'][network]['accounts'][default_account]['address'])
+
+        # pk from enviroment or from json
+        if 'ACCOUNT_PK_SECRET' in os.environ:
+            pk = os.environ['ACCOUNT_PK_SECRET']
+        else:
+            pk = self.options['networks'][network]['accounts'][default_account]['private_key']
 
         nonce = self.web3.eth.getTransactionCount(from_address)
 
@@ -270,9 +314,13 @@ class NodeManager(object):
             if 'value' in tx_params:
                 tx_value = tx_params['value']
 
+        gas_price = self.options['gas_price']
+        if gas_price <= 0:
+            gas_price = self.minimum_gas_price
+
         transaction_dict = {'chainId': self.options['networks'][network]['network_id'],
                             'nonce': nonce,
-                            'gasPrice': self.gas_price,
+                            'gasPrice': gas_price,
                             'gas': gas_limit,
                             'value': tx_value}
 
