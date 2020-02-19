@@ -3,7 +3,7 @@ from web3 import Web3
 from node_manager.utils import NodeManager
 
 
-network = 'mocTestnet'
+network = 'mocMainnet'
 config_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'config.json')
 node_manager = NodeManager(path_to_config=config_path, network=network)
 node_manager.connect_node()
