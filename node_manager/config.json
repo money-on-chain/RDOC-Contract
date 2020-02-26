@@ -50,7 +50,7 @@
 
     },
     "mocMainnet": {
-      "uri": "http://localhost:4444",
+      "uri": "https://public-node.rsk.co",
       "network_id": 30,
       "accounts": [
         {
