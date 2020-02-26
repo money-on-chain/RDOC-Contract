@@ -37,7 +37,21 @@ module.exports = {
       host: 'localhost',
       port: 4444,
       network_id: '*'
-    }
+    },
+    mocTestnet: {
+      // 0xC67D9eE30d2119A384E02de568BE80FE785074Ba
+      host: 'https://public-node.testnet.rsk.co',
+      provider: new HDWalletProvider(mnemonic, 'https://public-node.testnet.rsk.co'),
+      network_id: '*',
+      gasPrice: 60000000
+    },
+    mocMainnet: {
+      // 0x27A3074Db95EC5F6A0e73dC41a4859f48990E841
+      host: 'https://public-node.rsk.co',
+      provider: new HDWalletProvider(mnemonic, 'https://public-node.rsk.co'),
+      network_id: '*',
+      gasPrice: 68000000
+    },
   },
   mocha: {
     useColors: true,
