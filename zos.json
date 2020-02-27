@@ -3,6 +3,14 @@
   "name": "money-on-chain",
   "version": "0.1.3",
   "contracts": {
-    "MoC": "MoC"
+    "MoC": "MoC",
+    "MoCConnector": "MoCConnector",
+    "MoCRiskProxManager": "MoCRiskProxManager",
+    "MoCBurnout": "MoCBurnout",
+    "MoCSettlement": "MoCSettlement",
+    "MoCConverter": "MoCConverter",
+    "MoCState": "MoCState",
+    "MoCExchange": "MoCExchange",
+    "MoCInrate": "MoCInrate"
   }
 }
