@@ -27,7 +27,7 @@
 
     },
     "mocTestnet": {
-      "uri": "https://public-node.testnet.rsk.co",
+      "uri": "http://localhost:4444",
       "network_id": 31,
       "accounts": [
         {
@@ -41,6 +41,7 @@
         "moCRiskProxManager":"0xDd67D17eDABF2b320A18C00753C4D1c1008Abd73",
         "mocState":"0x496eD67F77D044C8d9471fe86085Ccb5DC4d2f63",
         "mocInrate":"0x4C54053845F4f219AddB43ef3A7d4478E89a2A47",
+        "MoCExchange":"0x7d5804E33B015b43159e61188526C93cfdA746f6",
         "governor":"0x4eAC4518e81B3A5198aADAb998D2610B46aAA609",
         "stopper":"0x5bCdf8A2E61BD238AEe43b99962Ee8BfBda1Beca",
         "proxyAdmin":"0xffb65F6E24806B7e1A988EeD1Ad07BB2654fF695",
@@ -59,11 +60,11 @@
         }
       ],
       "addresses": {
-        "moc":"0x8fCc64727e041e9f7Dc7137e06b7D7bE6748d134",
+        "moc":"0xCfF3fcaeC2352C672C38d77cb1a064B7D50ce7e1",
         "oracle":"0x504EfCadFB020d6bBaeC8a5c5BB21453719d0E00",
-        "moCRiskProxManager":"0xFcc7ab14E3Ca0F13a8363764Dce49B42cB8beb97",
-        "mocState":"0x38c8367F947AE21BA1d47BEE8339c32208aE488e",
-        "mocInrate":"0x4B4c24C632eE85e75AECB9c9A6e65668C3dF160D",
+        "moCRiskProxManager":"0x07Cd11fC4c4eC0BdBdC2Ec495f66A69bba32e7e7",
+        "mocState":"0x541F68a796Fe5ae3A381d2Aa5a50b975632e40A6",
+        "mocInrate":"0x1DaB07c4FD07d6eE1359a5198ACa2DEe64F371f3",
         "governor":"0xC61F0392d5170214b5D93C0BC4c4354163aBC1f7",
         "stopper":"0x40662eD57284B4B541A42D347BE2447ABd1b119d",
         "proxyAdmin":"0x009C51E1f6feDcDB8014Ea9AE1E39B6dbF2AC0EC",

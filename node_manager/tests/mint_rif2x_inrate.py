@@ -29,48 +29,32 @@ moc_state_address = Web3.toChecksumAddress(node_manager.options['networks'][netw
 moc_state = node_manager.load_json_contract(os.path.join(path_build, "MoCState.json"),
                                             deploy_address=moc_state_address)
 
-print("Reserve token balance:")
-from_address = Web3.toChecksumAddress("0xea14C08764c9E5F212C916E11a5C47eaF92571E4")
-
-balance = reserve_token.functions.balanceOf(from_address).call()
-print("Account: {0} Reserve Balance: {1}".format(from_address, Web3.fromWei(balance, 'ether')))
-
-balance = moc_moc.functions.getAllowance(from_address).call()
-print("Account: {0} Spendable Balance: {1}".format(from_address, Web3.fromWei(balance, 'ether')))
-
-reserve_t = moc_moc.functions.reserveToken().call()
-print("Reserve: {0}".format(reserve_t))
-
-result = moc_state.functions.currentAbundanceRatio().call()
-print("Abundance 0: {0}".format(result))
-
-result = moc_inrate.functions.spotInrate().call()
-print("spotInrate: {0}".format(result))
-
 result = moc_inrate.functions.getRiskProxTmax().call()
-print("getRiskProxTmax: {0} inrateTPl: (BtcxTmax, BtcxPower, BtcxTmin )".format(result))
+print("max: {0}".format(Web3.fromWei(result, 'ether')))
 
 result = moc_inrate.functions.getRiskProxPower().call()
-print("getRiskProxPower: {0} inrateTPl: (BtcxTmax, BtcxPower, BtcxTmin )".format(result))
+print("power: {0}".format(result))
 
 result = moc_inrate.functions.getRiskProxTmin().call()
-print("getRiskProxTmin: {0} inrateTPl: (BtcxTmax, BtcxPower, BtcxTmin )".format(result))
+print("min: {0}".format(result))
+print("Settlement: 30")
 
-result = moc_inrate.functions.getStableTmax().call()
-print("getStableTmax: {0} inrateTPl: (BtcxTmax, BtcxPower, BtcxTmin )".format(result))
+#interest_v = moc_inrate.functions.calcMintInterestValues(str.encode('X2'), 1 * 10 ** 18).call()
+#print("Interest: {0}".format(interest_v))
 
-result = moc_inrate.functions.getStablePower().call()
-print("getStablePower: {0} inrateTPl: (BtcxTmax, BtcxPower, BtcxTmin )".format(result))
 
-result = moc_inrate.functions.getStableTmin().call()
-print("getStableTmin: {0} inrateTPl: (BtcxTmax, BtcxPower, BtcxTmin )".format(result))
-
-interest_v = moc_inrate.functions.calcMintInterestValues(str.encode('X2'), 1 * 10 ** 18).call()
-print("Interest: {0}".format(interest_v))
+print("Calculation on buying 1.0 RIF2X")
 
 interest_v = moc_inrate.functions.riskProxInrateAvg(str.encode('X2'), 1 * 10 ** 18, True).call()
-print("Interest riskproxinrateavg: {0}".format(Web3.fromWei(interest_v, 'ether')))
+interest_no_days = Web3.fromWei(interest_v, 'ether')
+#print("riskProxInrateAvg: {0}".format(Web3.fromWei(interest_v, 'ether')))
 
-result = moc_inrate.functions.stableTokenInrateAvg(0).call()
-print("stableTokenInrateAvg: {0}".format(result))
+for day_to_sett in reversed(range(0, 30)):
+    print("Days to settlement: {0} Interest: {1}".format(day_to_sett, interest_no_days * day_to_sett))
+
+
+#interest_v = moc_inrate.functions.inrateToSettlement(interest_v, True).call()
+#print("inrateToSettlement: {0}".format(Web3.fromWei(interest_v, 'ether')))
+
+
 
