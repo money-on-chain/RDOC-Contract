@@ -4,7 +4,7 @@ from node_manager.utils import NodeManager
 import datetime
 import csv
 
-network = 'mocMainnet'
+network = 'mocTestnet'
 config_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'config.json')
 node_manager = NodeManager(path_to_config=config_path, network=network)
 node_manager.connect_node()
@@ -17,9 +17,9 @@ moc_factory_address = Web3.toChecksumAddress(node_manager.options['networks'][ne
 moc_factory = node_manager.load_json_contract(os.path.join(path_build, "oracle", "FeedFactory.json"),
                                               deploy_address=moc_factory_address)
 
-days = 15  # testnet 160
-day_blocks = 3000
-hours_delta = 3
+days = 60  # testnet 160
+day_blocks = 2880
+hours_delta = 0
 
 block_number = int(node_manager.block_number)
 

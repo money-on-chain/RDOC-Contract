@@ -46,7 +46,8 @@
         "stopper":"0x5bCdf8A2E61BD238AEe43b99962Ee8BfBda1Beca",
         "proxyAdmin":"0xffb65F6E24806B7e1A988EeD1Ad07BB2654fF695",
         "upgradeDelegator":"0xCDAbFbF334A5F6BCe900D2f73470D1e6722365d8",
-        "reserveToken": "0x19F64674D8A5B4E652319F5e239eFd3bc969A1fE"
+        "reserveToken": "0x19F64674D8A5B4E652319F5e239eFd3bc969A1fE",
+        "FeedFactory": "0xABAAff5aFAf29c85023C8C24024C3818A0320E62"
       }
 
     },
