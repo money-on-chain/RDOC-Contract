@@ -16,14 +16,18 @@ You need a node to run contracts. Ganache cli for developing purpose
 
 1. Ganache-cli
 
-- Globally:
+- Run ganache-cli
+
+```npm run ganache-cli```
+
+- Alternative: Globally
 
 ```sh
 npm install -g ganache-cli;
 ganache-cli
 ```
 
-- Using Docker:
+- Alternative: Using Docker:
 
 ```sh
 docker pull trufflesuite/ganache-cli;
@@ -398,6 +402,68 @@ Then run
 ```
 python price_feeder.py --config=config_rdoc.json --network=local
 ```
+
+### Pricefeeder Deployment Tutorial using Docker: example RDOC Testnet
+
+I'm going to use docker method.
+
+1. We need to have our account to sign transactions, also we need pk and funds. In my example I am going to use:
+0xbc6d77a5adfa6fb09c3d2cb8b4765d5729e7b8ba
+
+2. Initiate the process of whitelisting sending the address of the account from the step 1 to MOC team.
+
+3. Clone the repository:
+
+```
+git clone https://github.com/money-on-chain/price-feeder
+cd price-feeder
+git checkout master 
+```
+
+4. Set the base config por our deployment in our case config_rdoc.json is our base
+
+```
+cp config_rdoc.json config.json
+```
+
+5. Edit config.json and change to ensure this:
+
+```
+"app_mode": "RIF",
+...
+"uri": "https://public-node.testnet.rsk.co",
+"network_id": 31,
+...
+"addresses": {
+        "PriceFeed": "0xE0A3dce741b7EaD940204820B78E7990a136EAC1",
+        "MoCMedianizer": "0x9d4b2c05818A0086e641437fcb64ab6098c7BbEc",
+        "RIF_source_price_btc": "0x78c892Dc5b7139d0Ec1eF513C9E28eDfAA44f2d4"
+      }
+
+
+```
+
+6. Build docker
+
+```
+docker build -t price_feeder -f Dockerfile .
+```
+
+7. Run
+
+Replace **(PRIVATE KEY)** with private key
+
+```
+docker run -d \
+--name price_feeder_1 \
+--env ACCOUNT_ADDRESS=0xbc6d77a5adfa6fb09c3d2cb8b4765d5729e7b8ba \
+--env ACCOUNT_PK_SECRET=(PRIVATE KEY) \
+--env PRICE_FEEDER_NETWORK=local \
+price_feeder
+```
+
+
+
 
 
 ### Security and Audits
