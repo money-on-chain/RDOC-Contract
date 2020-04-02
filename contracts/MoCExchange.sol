@@ -69,6 +69,7 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection  {
   /**
   * @dev Mint RiskPros and give it to the msg.sender
   */
+  // solium-disable-next-line security/no-assign-params
   function mintRiskPro(address account, uint256 reserveTokenAmount) public onlyWhitelisted(msg.sender) returns(uint256, uint256) {
     uint256 riskProRegularPrice = mocState.riskProTecPrice();
     uint256 finalRiskProAmount = 0;
