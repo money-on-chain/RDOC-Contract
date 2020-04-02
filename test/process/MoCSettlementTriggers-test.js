@@ -11,7 +11,7 @@ const isDay = (precision, big, _expected) => {
 };
 
 // TODO: Fix this tests
-contract.skip('MoC', function([owner, userAccount]) {
+contract('MoC', function([owner, userAccount]) {
   const dayBlockSpan = 4 * 60 * 24;
   const twoDays = 2 * dayBlockSpan + 20;
   const arbitraryBlockSpan = 41;

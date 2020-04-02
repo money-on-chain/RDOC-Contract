@@ -81,7 +81,7 @@ const baseParams = {
   maxMintRiskPro: toContract(10000000 * 10 ** 18),
   stableTmin: toContract(0 * 10 ** 18),
   stablePower: toContract(1),
-  stableTmax: toContract(0.0002611578760678 * 10 ** 18),
+  stableTmax: toContract(0.0002611578760678 * 10 ** 18)
 };
 
 const createContracts = params => async ({ owner, useMock }) => {

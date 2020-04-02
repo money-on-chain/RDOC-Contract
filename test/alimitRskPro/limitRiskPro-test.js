@@ -24,7 +24,7 @@ contract('MoC: MoCExchange', function([owner, userAccount]) {
 
     describe('WHEN he tries to mint 1.000.000 RiskPro', function() {
       it('THEN transaction OK', async function() {
-        //await this.mocState.setMaxMintRiskPro(toContract(10000000 * mocHelper.MOC_PRECISION));
+        // await this.mocState.setMaxMintRiskPro(toContract(10000000 * mocHelper.MOC_PRECISION));
         await mocHelper.mintRiskProAmount(owner, 1000000);
         const balances = await mocHelper.getUserBalances(owner);
         mocHelper.assertBigDollar(balances.riskPro, 1000000, 'RiskPro balance is incorrect');
@@ -38,8 +38,5 @@ contract('MoC: MoCExchange', function([owner, userAccount]) {
         mocHelper.assertBigDollar(balances.riskPro, 10000000, 'RiskPro balance is incorrect');
       });
     });
-
-
-
   });
 });

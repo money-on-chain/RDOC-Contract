@@ -4,7 +4,7 @@ let mocHelper;
 let toContractBN;
 let BUCKET_X2;
 
-contract.skip('MoC', function([owner, userAccount, otherAccount]) {
+contract('MoC', function([owner, userAccount, otherAccount]) {
   before(async function() {
     const accounts = [owner, userAccount, otherAccount];
     mocHelper = await testHelperBuilder({ owner, accounts, useMock: true });
