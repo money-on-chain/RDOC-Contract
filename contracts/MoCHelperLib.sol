@@ -2,8 +2,8 @@ pragma solidity 0.5.8;
 
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
-library MoCHelperLib {
 
+library MoCHelperLib {
   struct MocLibConfig {
     uint256 reservePrecision;
     uint256 dayPrecision;
@@ -26,18 +26,19 @@ library MoCHelperLib {
     @return average interest rate [using mocPrecision]
   */
   function inrateAvg(MocLibConfig storage config, uint256 tMax, uint256 power, uint256 tMin, uint256 abRat1, uint256 abRat2)
-  public view returns(uint256) {
+    public
+    view
+    returns (uint256)
+  {
     require(tMax > tMin, "Max inrate should be bigger than Min inrate");
     uint256 abRat1Comp = config.mocPrecision.sub(abRat1);
     uint256 abRat2Comp = config.mocPrecision.sub(abRat2);
 
     if (abRat1 == abRat2) {
       return potential(config, tMax, power, tMin, abRat1Comp);
-    }
-    else if (abRat2 < abRat1) {
+    } else if (abRat2 < abRat1) {
       return avgInt(config, tMax, power, tMin, abRat1Comp, abRat2Comp);
-    }
-    else {
+    } else {
       return avgInt(config, tMax, power, tMin, abRat2Comp, abRat1Comp);
     }
   }
@@ -52,9 +53,7 @@ library MoCHelperLib {
     @param abRatio bucket C0  abundance Ratio [using mocPrecision]
 
    */
-  function spotInrate(
-    MocLibConfig storage config, uint256 tMax, uint256 power, uint256 tMin, uint256 abRatio
-  ) public view returns(uint256) {
+  function spotInrate(MocLibConfig storage config, uint256 tMax, uint256 power, uint256 tMin, uint256 abRatio) public view returns (uint256) {
     uint256 abRatioComp = config.mocPrecision.sub(abRatio);
 
     return potential(config, tMax, power, tMin, abRatioComp);
@@ -69,8 +68,7 @@ library MoCHelperLib {
     @param c minInterestRate C0 stableToken amount [using mocPrecision]
     @param value global stableToken amount [using mocPrecision]
   */
-  function potential(MocLibConfig storage config, uint256 a, uint256 b, uint256 c, uint256 value)
-  public view returns(uint256) {
+  function potential(MocLibConfig storage config, uint256 a, uint256 b, uint256 c, uint256 value) public view returns (uint256) {
     // value ** b
     // [MOC] ** [] = [MOC]
     uint256 aux1 = pow(value, b, config.mocPrecision);
@@ -93,15 +91,14 @@ library MoCHelperLib {
     @param value2 value to put in the function [using mocPrecision]
     @return average interest rate [using mocPrecision]
    */
-  function avgInt(MocLibConfig storage config, uint256 a, uint256 b, uint256 c, uint256 value1, uint256 value2)
-  public view returns(uint256) {
+  function avgInt(MocLibConfig storage config, uint256 a, uint256 b, uint256 c, uint256 value1, uint256 value2) public view returns (uint256) {
     // value2 - value1
     // [MOC]
     uint256 diff = value2.sub(value1);
     // ((c * (1 - value1) + ((a * ((1 - value1) ** (b + 1))) / (b + 1)))
     uint256 intV1 = integral(config, a, b, c, value1);
     // ((c * (1 - value2) + ((a * ((1 - value2) ** (b + 1))) / (b + 1)))
-    uint256 intV2 = integral(config,  a, b, c, value2);
+    uint256 intV2 = integral(config, a, b, c, value2);
     // (secOp - first) / diff
     // ([MOC][MOC] - [MOC][MOC]) / [MOC] = [MOC]
     return intV2.sub(intV1).div(diff);
@@ -118,8 +115,7 @@ library MoCHelperLib {
     @return integration result [using mocPrecision]
 
    */
-  function integral(MocLibConfig storage config, uint256 a, uint256 b, uint256 c, uint256 value)
-  public view returns(uint256) {
+  function integral(MocLibConfig storage config, uint256 a, uint256 b, uint256 c, uint256 value) public view returns (uint256) {
     // b + 1
     // [NONE]
     uint256 b2 = b.add(1);
@@ -137,13 +133,12 @@ library MoCHelperLib {
   }
 
   /**
-  * @dev Relation between stableTokens in bucket 0 and StableToken total supply
-  * @param stableToken0 stableToken count in bucket 0 [using mocPrecision]
-  * @param stableTokent total stableToken supply [using mocPrecision]
-  * @return abundance ratio [using mocPrecision]
-  */
-  function abundanceRatio(MocLibConfig storage config, uint256 stableToken0, uint256 stableTokent)
-  public view returns(uint256) {
+   * @dev Relation between stableTokens in bucket 0 and StableToken total supply
+   * @param stableToken0 stableToken count in bucket 0 [using mocPrecision]
+   * @param stableTokent total stableToken supply [using mocPrecision]
+   * @return abundance ratio [using mocPrecision]
+   */
+  function abundanceRatio(MocLibConfig storage config, uint256 stableToken0, uint256 stableTokent) public view returns (uint256) {
     if (stableTokent == 0) {
       return config.mocPrecision;
     }
@@ -161,10 +156,11 @@ library MoCHelperLib {
     @param cov Actual global Coverage threshold [using mocPrecision]
     @return Spot discount rate [using mocPrecision]
   **/
-  function riskProSpotDiscountRate(
-    MocLibConfig storage libConfig, uint256 riskProLiqDiscountRate,
-    uint256 liq, uint256 utpdu, uint256 cov
-  ) public view returns(uint256) {
+  function riskProSpotDiscountRate(MocLibConfig storage libConfig, uint256 riskProLiqDiscountRate, uint256 liq, uint256 utpdu, uint256 cov)
+    public
+    view
+    returns (uint256)
+  {
     require(riskProLiqDiscountRate < libConfig.mocPrecision, "Discount rate should be lower than 1");
 
     if (cov >= utpdu) {
@@ -198,9 +194,15 @@ library MoCHelperLib {
     @return Total RiskPro amount [using mocPrecision]
   **/
   function maxRiskProWithDiscount(
-    MocLibConfig storage libConfig, uint256 nReserve, uint256 nStableToken, uint256 utpdu,
-    uint256 peg, uint256 reservePrice, uint256 riskProUsdPrice, uint256 spotDiscount
-  ) public view returns(uint256)  {
+    MocLibConfig storage libConfig,
+    uint256 nReserve,
+    uint256 nStableToken,
+    uint256 utpdu,
+    uint256 peg,
+    uint256 reservePrice,
+    uint256 riskProUsdPrice,
+    uint256 spotDiscount
+  ) public view returns (uint256) {
     require(spotDiscount < libConfig.mocPrecision, "Discount Rate should be lower than 1");
 
     if (spotDiscount == 0) {
@@ -213,8 +215,7 @@ library MoCHelperLib {
 
     // (TPusd * (1 - TPD))
     // [MOC] * [MOC] / [MOC] = [MOC]
-    uint256 riskProDiscountPrice = riskProUsdPrice.mul(libConfig.mocPrecision.sub(spotDiscount))
-      .div(libConfig.mocPrecision);
+    uint256 riskProDiscountPrice = riskProUsdPrice.mul(libConfig.mocPrecision.sub(spotDiscount)).div(libConfig.mocPrecision);
 
     return maxRiskProWithDiscountAux(libConfig, nbUsdValue, nStableToken, utpdu, peg, riskProDiscountPrice);
   }
@@ -231,10 +232,13 @@ library MoCHelperLib {
     @return Total RiskPro amount [using reservePrecision]
   **/
   function maxRiskProWithDiscountAux(
-    MocLibConfig storage libConfig, uint256 nbUsdValue, uint256 nStableToken,
-    uint256 utpdu, uint256 peg, uint256 riskProDiscountPrice
-  ) internal view returns(uint256) {
-
+    MocLibConfig storage libConfig,
+    uint256 nbUsdValue,
+    uint256 nStableToken,
+    uint256 utpdu,
+    uint256 peg,
+    uint256 riskProDiscountPrice
+  ) internal view returns (uint256) {
     // uTPDU * nStableToken * PEG
     // [MOC] * [MOC] / [MOC] = [MOC]
     uint256 coverageUSDAmount = utpdu.mul(nStableToken).mul(peg).div(libConfig.mocPrecision);
@@ -256,9 +260,11 @@ library MoCHelperLib {
     @param peg peg value
     @return Locked ReserveTokens [using reservePrecision]
   **/
-  function lockedReserveTokens(
-    MocLibConfig storage libConfig, uint256 reservePrice, uint256 nStableToken, uint256 peg
-  ) public view returns(uint256) {
+  function lockedReserveTokens(MocLibConfig storage libConfig, uint256 reservePrice, uint256 nStableToken, uint256 peg)
+    public
+    view
+    returns (uint256)
+  {
     return nStableToken.mul(peg).mul(libConfig.reservePrecision).div(reservePrice);
   }
 
@@ -269,8 +275,7 @@ library MoCHelperLib {
     @param nStableToken StableTokens amount [using mocPrecision]
     @return Price at liquidation event [using mocPrecision]
   **/
-  function liquidationPrice(MocLibConfig storage libConfig, uint256 resTokenAmount, uint256 nStableToken)
-  public view returns(uint256) {
+  function liquidationPrice(MocLibConfig storage libConfig, uint256 resTokenAmount, uint256 nStableToken) public view returns (uint256) {
     // [MOC] * [RES] / [RES]
     return nStableToken.mul(libConfig.reservePrecision).div(resTokenAmount);
   }
@@ -284,8 +289,7 @@ library MoCHelperLib {
     @param nTP RiskPro amount [using mocPrecision]
     @return RiskPro ReserveTokens price [using reservePrecision]
   **/
-  function riskProTecPrice(MocLibConfig storage libConfig, uint256 nReserve, uint256 lb, uint256 nTP)
-    public view returns(uint256) {
+  function riskProTecPrice(MocLibConfig storage libConfig, uint256 nReserve, uint256 lb, uint256 nTP) public view returns (uint256) {
     // Liquidation happens before this condition turns true
     if (nReserve < lb) {
       return 0;
@@ -306,9 +310,7 @@ library MoCHelperLib {
     @param riskProPrice Trog ReserveTokens price [using reservePrecision]
     @return RiskProx price in RiskPro [using mocPrecision]
   **/
-  function riskProxRiskProPrice(
-    MocLibConfig storage libConfig, uint256 riskProxTecPrice, uint256 riskProPrice
-  ) public view returns(uint256) {
+  function riskProxRiskProPrice(MocLibConfig storage libConfig, uint256 riskProxTecPrice, uint256 riskProPrice) public view returns (uint256) {
     // [RES] * [MOC] / [RES] = [MOC]
     return riskProxTecPrice.mul(libConfig.mocPrecision).div(riskProPrice);
   }
@@ -321,9 +323,7 @@ library MoCHelperLib {
     @param discountRate Discount rate to apply [using mocPrecision]
     @return Price with discount applied [using SomePrecision]
   **/
-  function applyDiscountRate(MocLibConfig storage libConfig, uint256 price, uint256 discountRate)
-    public view returns(uint256) {
-
+  function applyDiscountRate(MocLibConfig storage libConfig, uint256 price, uint256 discountRate) public view returns (uint256) {
     uint256 discountCoeff = libConfig.mocPrecision.sub(discountRate);
 
     return price.mul(discountCoeff).div(libConfig.mocPrecision);
@@ -337,8 +337,7 @@ library MoCHelperLib {
     @param interestRate Interest rate to apply [using mocPrecision]
     @return Interest cost based on the value and interestRate [using SomePrecision]
   **/
-  function getInterestCost(MocLibConfig storage libConfig, uint256 value, uint256 interestRate)
-    public view returns(uint256) {
+  function getInterestCost(MocLibConfig storage libConfig, uint256 value, uint256 interestRate) public view returns (uint256) {
     // [ORIGIN] * [MOC] / [MOC] = [ORIGIN]
     return value.mul(interestRate).div(libConfig.mocPrecision);
   }
@@ -351,8 +350,7 @@ library MoCHelperLib {
     @param lB Locked ReserveTokens amount [using reservePrecision]
     @return Coverage [using mocPrecision]
   **/
-  function coverage(MocLibConfig storage libConfig, uint256 nReserve, uint256 lB) public view
-    returns(uint256) {
+  function coverage(MocLibConfig storage libConfig, uint256 nReserve, uint256 lB) public view returns (uint256) {
     if (lB == 0) {
       return UINT256_MAX;
     }
@@ -360,15 +358,14 @@ library MoCHelperLib {
     return nReserve.mul(libConfig.mocPrecision).div(lB);
   }
 
- /**
+  /**
   Leverage = C / (C - 1)
 
     @dev Calculates Leverage
     @param cov Coverage [using mocPrecision]
     @return Leverage [using mocPrecision]
   **/
-  function leverageFromCoverage(MocLibConfig storage libConfig, uint256 cov)
-  public view returns(uint256) {
+  function leverageFromCoverage(MocLibConfig storage libConfig, uint256 cov) public view returns (uint256) {
     if (cov == UINT256_MAX) {
       return libConfig.mocPrecision;
     }
@@ -380,7 +377,7 @@ library MoCHelperLib {
     return cov.mul(libConfig.mocPrecision).div(cov.sub(libConfig.mocPrecision));
   }
 
- /**
+  /**
   Leverage = nReserve / (nReserve - lB)
 
     @dev Calculates Leverage
@@ -388,8 +385,7 @@ library MoCHelperLib {
     @param lB Locked ReserveTokens amount [using reservePrecision]
     @return Leverage [using mocPrecision]
   **/
-  function leverage(MocLibConfig storage libConfig, uint256 nReserve,uint256 lB)
-  public view returns(uint256) {
+  function leverage(MocLibConfig storage libConfig, uint256 nReserve, uint256 lB) public view returns (uint256) {
     if (lB == 0) {
       return libConfig.mocPrecision;
     }
@@ -407,10 +403,12 @@ library MoCHelperLib {
     @param reservePrice ReserveTokens price [using mocPrecision]
     @return Total value [using reservePrecision]
   **/
-  function stableTokensResTokensValue(
-    MocLibConfig storage libConfig, uint256 amount,uint256 peg, uint256 reservePrice
-  ) public view returns(uint256) {
-    require(reservePrice > 0,"Price should be more than zero");
+  function stableTokensResTokensValue(MocLibConfig storage libConfig, uint256 amount, uint256 peg, uint256 reservePrice)
+    public
+    view
+    returns (uint256)
+  {
+    require(reservePrice > 0, "Price should be more than zero");
     require(libConfig.reservePrecision > 0, "Precision should be more than zero");
     //Total = amount / satoshi price
     //Total = amount / (reservePrice / precision)
@@ -420,14 +418,17 @@ library MoCHelperLib {
     return stableTokenResTokenTotal;
   }
 
- /**
+  /**
     @dev Price in ReserveTokens of the amount of RiskPros
     @param riskProAmount amount of RiskPro [using mocPrecision]
     @param riskProResTokenPrice RiskPro price in ReserveTokens [using reservePrecision]
     @return Total value [using reservePrecision]
   **/
   function riskProResTokensValuet(MocLibConfig storage libConfig, uint256 riskProAmount, uint256 riskProResTokenPrice)
-    public view returns(uint256) {
+    public
+    view
+    returns (uint256)
+  {
     require(libConfig.reservePrecision > 0, "Precision should be more than zero");
 
     // [MOC] * [RES] / [MOC] =  [RES]
@@ -449,15 +450,19 @@ library MoCHelperLib {
     @return Total StableTokens amount [using mocPrecision]
   **/
   function maxStableToken(
-    MocLibConfig storage libConfig, uint256 nReserve,
-    uint256 cobj, uint256 nStableToken, uint256 peg, uint256 reservePrice, uint256 bCons
-  ) public view returns(uint256) {
+    MocLibConfig storage libConfig,
+    uint256 nReserve,
+    uint256 cobj,
+    uint256 nStableToken,
+    uint256 peg,
+    uint256 reservePrice,
+    uint256 bCons
+  ) public view returns (uint256) {
     require(libConfig.reservePrecision > 0, "Invalid Precision");
     require(libConfig.mocPrecision > 0, "Invalid Precision");
 
     // If cobj is less than 1, just return zero
-    if (cobj < libConfig.mocPrecision)
-      return 0;
+    if (cobj < libConfig.mocPrecision) return 0;
 
     // Cobj * B / BCons
     // [MOC] * [MOC] / [MOC] = [MOC]
@@ -467,9 +472,13 @@ library MoCHelperLib {
   }
 
   function maxStableTokenAux(
-    MocLibConfig storage libConfig, uint256 nReserve,
-    uint256 adjCobj, uint256 nStableToken, uint256 peg, uint256 reservePrice
-  ) internal view returns(uint256) {
+    MocLibConfig storage libConfig,
+    uint256 nReserve,
+    uint256 adjCobj,
+    uint256 nStableToken,
+    uint256 peg,
+    uint256 reservePrice
+  ) internal view returns (uint256) {
     // (nReserve*B)
     // [RES] [MOC] [MOC] / [RES] = [MOC] [MOC]
     uint256 firstOperand = nReserve.mul(reservePrice).mul(libConfig.mocPrecision).div(libConfig.reservePrecision);
@@ -480,8 +489,7 @@ library MoCHelperLib {
     // [MOC]
     uint256 denom = adjCobj.sub(libConfig.mocPrecision).mul(peg);
 
-    if (firstOperand <= secOperand)
-      return 0;
+    if (firstOperand <= secOperand) return 0;
 
     // ([MOC][MOC] - [MOC][MOC]) / [MOC] = [MOC]
     return (firstOperand.sub(secOperand)).div(denom);
@@ -501,9 +509,15 @@ library MoCHelperLib {
     @return Total RiskPro amount [using mocPrecision]
   **/
   function maxRiskPro(
-    MocLibConfig storage libConfig, uint256 nReserve, uint256 cobj,
-    uint256 nStableToken, uint256 peg, uint256 reservePrice, uint256 bCons, uint256 riskProUsdPrice
-  ) public view returns(uint256) {
+    MocLibConfig storage libConfig,
+    uint256 nReserve,
+    uint256 cobj,
+    uint256 nStableToken,
+    uint256 peg,
+    uint256 reservePrice,
+    uint256 bCons,
+    uint256 riskProUsdPrice
+  ) public view returns (uint256) {
     require(libConfig.reservePrecision > 0, "Invalid Precision");
     require(libConfig.mocPrecision > 0, "Invalid Precision");
 
@@ -512,15 +526,12 @@ library MoCHelperLib {
     uint256 adjCobj = cobj.mul(reservePrice).div(bCons);
     // (nReserve * reservePrice)
     // [RES] * [MOC] * [MOC] / [RES] = [MOC] [MOC]
-    uint256 firstOperand = nReserve.mul(reservePrice)
-      .mul(libConfig.mocPrecision)
-      .div(libConfig.reservePrecision);
+    uint256 firstOperand = nReserve.mul(reservePrice).mul(libConfig.mocPrecision).div(libConfig.reservePrecision);
     // (adjCobj * nStableToken * PEG)
     // [MOC] * [MOC]
     uint256 secOperand = adjCobj.mul(nStableToken).mul(peg);
 
-    if (firstOperand <= secOperand)
-      return 0;
+    if (firstOperand <= secOperand) return 0;
 
     // ([MOC][MOC] - [MOC][MOC]) / [MOC] = [MOC]
     return (firstOperand.sub(secOperand)).div(riskProUsdPrice);
@@ -532,9 +543,7 @@ library MoCHelperLib {
     @param riskProPrice RiskPro ReserveTokens Price [using reservePrecision]
     @return RiskPro total value in ReserveTokens [using reservePrecision]
   **/
-  function totalRiskProInResTokens(
-    MocLibConfig storage libConfig, uint256 amount, uint256 riskProPrice
-  ) public view returns(uint256) {
+  function totalRiskProInResTokens(MocLibConfig storage libConfig, uint256 amount, uint256 riskProPrice) public view returns (uint256) {
     // [RES] * [MOC] / [MOC] = [RES]
     return riskProPrice.mul(amount).div(libConfig.mocPrecision);
   }
@@ -545,9 +554,11 @@ library MoCHelperLib {
     @param reservePrice ReserveTokens price [using mocPrecision]
     @return Equivalent StableToken amount [using mocPrecision]
   **/
-  function maxStableTokensWithResTokens(
-    MocLibConfig storage libConfig, uint256 resTokensAmount, uint256 reservePrice
-  ) public view returns(uint256) {
+  function maxStableTokensWithResTokens(MocLibConfig storage libConfig, uint256 resTokensAmount, uint256 reservePrice)
+    public
+    view
+    returns (uint256)
+  {
     // [RES] * [MOC] / [RES] = [MOC]
     return resTokensAmount.mul(reservePrice).div(libConfig.reservePrecision);
   }
@@ -558,9 +569,7 @@ library MoCHelperLib {
     @param riskProPrice RiskPro ReserveTokens price [using reservePrecision]
     @return Equivalent RiskPro amount [using mocPrecision]
   **/
-  function maxRiskProWithResTokens(
-    MocLibConfig storage libConfig, uint256 resTokensAmount, uint256 riskProPrice
-  ) public view returns(uint256) {
+  function maxRiskProWithResTokens(MocLibConfig storage libConfig, uint256 resTokensAmount, uint256 riskProPrice) public view returns (uint256) {
     if (riskProPrice == 0) {
       return 0;
     }
@@ -578,9 +587,7 @@ library MoCHelperLib {
     @param lev L bucket leverage [using mocPrecision]
     @return resTokens to move [using reservePrecision]
     **/
-  function bucketTransferAmount(
-    MocLibConfig storage libConfig, uint256 resTokensAmount, uint256 lev
-  ) public view returns(uint256) {
+  function bucketTransferAmount(MocLibConfig storage libConfig, uint256 resTokensAmount, uint256 lev) public view returns (uint256) {
     require(lev > libConfig.mocPrecision, "Leverage should be more than 1");
 
     if (lev == UINT256_MAX || resTokensAmount == 0) {
@@ -593,14 +600,13 @@ library MoCHelperLib {
     // Intentionally avaoid SafeMath
     // [RES] * [MOC]
     uint256 transferAmount = resTokensAmount * levSubOne;
-    if (transferAmount / resTokensAmount != levSubOne)
-      return 0;
+    if (transferAmount / resTokensAmount != levSubOne) return 0;
 
     // [RES] * [MOC] / [MOC] = [RES]
     return transferAmount.div(libConfig.mocPrecision);
   }
 
-   /**
+  /**
     MaxriskProx = nStableToken/ (PEG*B*(lev-1))
 
     @dev Max amount of ReserveTokens allowed to be used to mint riskProx
@@ -610,9 +616,11 @@ library MoCHelperLib {
     @param lev leverage [using mocPrecision]
     @return Max riskProx ReserveTokens value [using reservePrecision]
   **/
-  function maxRiskProxResTokenValue(
-    MocLibConfig storage libConfig, uint256 nStableToken, uint256 peg, uint256 reservePrice, uint256 lev
-  ) public view returns(uint256)  {
+  function maxRiskProxResTokenValue(MocLibConfig storage libConfig, uint256 nStableToken, uint256 peg, uint256 reservePrice, uint256 lev)
+    public
+    view
+    returns (uint256)
+  {
     require(libConfig.reservePrecision > 0, "Invalid Precision");
     require(libConfig.mocPrecision > 0, "Invalid Precision");
 
@@ -632,8 +640,7 @@ library MoCHelperLib {
     // [MOC] * [MOC]
     uint256 dividend = pegTimesPrice * levSubOne;
 
-    if (dividend / pegTimesPrice != levSubOne)
-      return 0; // INFINIT dividend means 0
+    if (dividend / pegTimesPrice != levSubOne) return 0; // INFINIT dividend means 0
 
     // nStableToken adjusted with precisions
     // [MOC] [RES]
@@ -649,7 +656,7 @@ library MoCHelperLib {
     @param y Multiplier
     @return Product
   **/
-  function mulr(uint x, uint y, uint256 precision) internal pure returns (uint z) {
+  function mulr(uint256 x, uint256 y, uint256 precision) internal pure returns (uint256 z) {
     return x.mul(y).add(precision.div(2)).div(precision);
   }
 
@@ -659,7 +666,7 @@ library MoCHelperLib {
     @param n Exponent
     @return power
   **/
-  function pow(uint256 x, uint256 n, uint256 precision) internal pure returns (uint z) {
+  function pow(uint256 x, uint256 n, uint256 precision) internal pure returns (uint256 z) {
     uint256 x2 = x;
     z = n % 2 != 0 ? x : precision;
 

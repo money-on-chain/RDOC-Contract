@@ -6,11 +6,13 @@ import "./base/PartialExecution.sol";
 import "./token/StableToken.sol";
 import "./MoCExchange.sol";
 
+
 contract MoCBurnoutEvents {
   event BurnoutAddressSet(address indexed account, address burnoutAddress);
   event BurnoutExecuted(uint256 addressCount);
   event BurnoutAddressProcessed(address indexed account, address burnoutAddress, uint256 amount);
 }
+
 
 /**
  * @title Burnout Queue for liquidation event
@@ -33,22 +35,20 @@ contract MoCBurnout is MoCBase, MoCBurnoutEvents, PartialExecution {
   address[] private burnoutQueue;
   uint256 private numElements;
 
-  function initialize(
-    address connectorAddress
-    ) public initializer {
+  function initialize(address connectorAddress) public initializer {
     initializeBase(connectorAddress);
     initializeContracts();
     initializeTasks();
   }
 
-  function isBurnoutRunning() public view returns(bool) {
+  function isBurnoutRunning() public view returns (bool) {
     return isTaskRunning(BURNOUT_TASK);
   }
 
   /**
     @dev Return current burnout queue size
    */
-  function burnoutQueueSize() public view returns(uint256) {
+  function burnoutQueueSize() public view returns (uint256) {
     return numElements;
   }
 
@@ -57,7 +57,7 @@ contract MoCBurnout is MoCBase, MoCBurnoutEvents, PartialExecution {
     @param _who Address to find burnout address
     @return Burnout address
    */
-  function getBurnoutAddress(address _who) public view returns(address) {
+  function getBurnoutAddress(address _who) public view returns (address) {
     return burnoutBook[_who];
   }
 
@@ -97,7 +97,7 @@ contract MoCBurnout is MoCBase, MoCBurnoutEvents, PartialExecution {
     clearBook();
   }
 
-  function burnoutStepCount() internal view returns(uint256) {
+  function burnoutStepCount() internal view returns (uint256) {
     return numElements;
   }
 

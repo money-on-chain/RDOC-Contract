@@ -11,21 +11,16 @@ import "./base/PartialExecution.sol";
 import "moc-governance/contracts/Governance/Governed.sol";
 import "moc-governance/contracts/Governance/IGovernor.sol";
 
+
 contract MoCSettlementEvents {
   event RedeemRequestAlter(address indexed redeemer, bool isAddition, uint256 delta);
   event RedeemRequestProcessed(address indexed redeemer, uint256 commission, uint256 amount);
   event SettlementRedeemStableToken(uint256 queueSize, uint256 accumCommissions, uint256 reservePrice);
   event SettlementDeleveraging(uint256 leverage, uint256 riskProxPrice, uint256 reservePrice, uint256 startBlockNumber);
-  event SettlementStarted(
-    uint256 stableTokenRedeemCount,
-    uint256 deleveragingCount,
-    uint256 riskProxPrice,
-    uint256 reservePrice
-  );
-  event SettlementCompleted(
-    uint256 commissionsPayed
-  );
+  event SettlementStarted(uint256 stableTokenRedeemCount, uint256 deleveragingCount, uint256 riskProxPrice, uint256 reservePrice);
+  event SettlementCompleted(uint256 commissionsPayed);
 }
+
 
 contract MoCSettlement is MoCSettlementEvents, MoCBase, PartialExecution, Governed {
   using Math for uint256;
@@ -83,21 +78,16 @@ contract MoCSettlement is MoCSettlementEvents, MoCBase, PartialExecution, Govern
   mapping(address => UserRedeemRequest) private redeemMapping;
   uint256 private redeemQueueLength;
 
-  function initialize(
-    address connectorAddress,
-    address _governor,
-    uint256 _blockSpan
-  ) public initializer {
+  function initialize(address connectorAddress, address _governor, uint256 _blockSpan) public initializer {
     initializeBase(connectorAddress);
     initializeContracts();
     initializeValues(_governor, _blockSpan);
   }
 
-
   /**
    *  @dev Set the blockspan configuration blockspan of settlement
    */
-  function setBlockSpan(uint256 bSpan) public onlyAuthorizedChanger(){
+  function setBlockSpan(uint256 bSpan) public onlyAuthorizedChanger() {
     blockSpan = bSpan;
   }
 
@@ -105,14 +95,14 @@ contract MoCSettlement is MoCSettlementEvents, MoCBase, PartialExecution, Govern
    *  @dev Set Settlement to be kept in finnished state after
    *  all execution is completed.
    */
-  function setSettlementToStall() public onlyAuthorizedChanger(){
+  function setSettlementToStall() public onlyAuthorizedChanger() {
     setAutoRestart(SETTLEMENT_TASK, false);
   }
 
   /**
    *  @dev Set Settlement state to Ready
    */
-  function restartSettlementState() public onlyAuthorizedChanger(){
+  function restartSettlementState() public onlyAuthorizedChanger() {
     resetGroup(SETTLEMENT_TASK);
     setAutoRestart(SETTLEMENT_TASK, true);
   }
@@ -122,15 +112,14 @@ contract MoCSettlement is MoCSettlementEvents, MoCBase, PartialExecution, Govern
     @param _index queue position to get
     @return redeemer's address and amount he submitted
   */
-  function getRedeemRequestAt(uint256 _index) public view
-    withinBoundaries(_index) returns(address payable, uint256) {
+  function getRedeemRequestAt(uint256 _index) public view withinBoundaries(_index) returns (address payable, uint256) {
     return (redeemQueue[_index].who, redeemQueue[_index].amount);
   }
 
   /**
     @dev Gets the number of blocks the settlemnet will be allowed to run
   */
-  function getBlockSpan() public view returns(uint256){
+  function getBlockSpan() public view returns (uint256) {
     return blockSpan;
   }
 
@@ -146,34 +135,35 @@ contract MoCSettlement is MoCSettlementEvents, MoCBase, PartialExecution, Govern
   /**
     @dev returns current redeem queue size
    */
-  function redeemQueueSize() public view returns(uint256) {
+  function redeemQueueSize() public view returns (uint256) {
     return redeemQueueLength;
   }
 
   /**
     @dev Returns true if blockSpan number of blocks has pass since last execution
   */
-  function isSettlementEnabled() public view returns(bool) {
+  function isSettlementEnabled() public view returns (bool) {
     return nextSettlementBlock() <= block.number;
   }
 
   /**
     @dev Returns true if the settlment is running
   */
-  function isSettlementRunning() public view returns(bool) {
+  function isSettlementRunning() public view returns (bool) {
     return isGroupRunning(SETTLEMENT_TASK);
   }
 
   /**
     @dev Returns true if the settlment is ready
   */
-  function isSettlementReady() public view returns(bool) {
+  function isSettlementReady() public view returns (bool) {
     return isGroupReady(SETTLEMENT_TASK);
   }
+
   /**
     @dev Returns the next block from which settlement is possible
    */
-  function nextSettlementBlock() public view returns(uint256) {
+  function nextSettlementBlock() public view returns (uint256) {
     return lastProcessedBlock.add(blockSpan);
   }
 
@@ -182,8 +172,7 @@ contract MoCSettlement is MoCSettlementEvents, MoCBase, PartialExecution, Govern
     @param _who address for which ^ is computed
     @return total amount of StableTokens in the redeem queue for _who [using mocPrecision]
    */
-  function stableTokenAmountToRedeem(address _who) public view returns(uint256) {
-
+  function stableTokenAmountToRedeem(address _who) public view returns (uint256) {
     if (!redeemMapping[_who].activeRedeemer) {
       return 0;
     }
@@ -208,8 +197,7 @@ contract MoCSettlement is MoCSettlementEvents, MoCBase, PartialExecution, Govern
 
       redeemMapping[redeemer] = UserRedeemRequest(index, true);
       emit RedeemRequestAlter(redeemer, true, amount);
-    }
-    else{
+    } else {
       alterRedeemRequestAmount(true, amount, redeemer);
     }
   }
@@ -228,8 +216,7 @@ contract MoCSettlement is MoCSettlementEvents, MoCBase, PartialExecution, Govern
     @param redeemer address to alter amount for
     @return the filled amount [using mocPrecision]
   */
-  function alterRedeemRequestAmount(bool isAddition, uint256 delta, address redeemer)
-  public onlyWhitelisted(msg.sender) {
+  function alterRedeemRequestAmount(bool isAddition, uint256 delta, address redeemer) public onlyWhitelisted(msg.sender) {
     require(redeemMapping[redeemer].activeRedeemer, "This is not an active redeemer");
     uint256 indexRedeem = redeemMapping[redeemer].index;
     RedeemRequest storage redeemRequest = redeemQueue[indexRedeem];
@@ -248,12 +235,12 @@ contract MoCSettlement is MoCSettlementEvents, MoCBase, PartialExecution, Govern
     emit RedeemRequestAlter(redeemer, isAddition, actualDelta);
   }
 
-/**
+  /**
   * @dev Runs settlement process in steps
     @param steps Amount of steps to run
     @return The commissions collected in the executed steps
   */
-  function runSettlement(uint256 steps) public onlyWhitelisted(msg.sender) isTime() returns(uint256) {
+  function runSettlement(uint256 steps) public onlyWhitelisted(msg.sender) isTime() returns (uint256) {
     executeGroup(SETTLEMENT_TASK, steps);
 
     return settlementInfo.finalCommissionAmount;
@@ -286,7 +273,7 @@ contract MoCSettlement is MoCSettlementEvents, MoCBase, PartialExecution, Govern
     @dev Returns the amount of steps for the Deleveraging task
     which is the amount of active RiskProx addresses
   */
-  function deleveragingStepCount() internal view returns(uint256) {
+  function deleveragingStepCount() internal view returns (uint256) {
     return riskProxManager.getActiveAddressesCount(BUCKET_X2);
   }
 
@@ -294,7 +281,7 @@ contract MoCSettlement is MoCSettlementEvents, MoCBase, PartialExecution, Govern
     @dev Returns the amount of steps for the StableToken Redemption task
     which is the amount of redeem requests in the queue
   */
-  function stableTokenRedemptionStepCount() internal view returns(uint256) {
+  function stableTokenRedemptionStepCount() internal view returns (uint256) {
     return redeemQueueLength;
   }
 
@@ -312,7 +299,6 @@ contract MoCSettlement is MoCSettlementEvents, MoCBase, PartialExecution, Govern
     settlementInfo.finalCommissionAmount = 0;
     settlementInfo.partialCommissionAmount = 0;
     settlementInfo.startBlockNumber = block.number;
-
 
     emit SettlementStarted(
       settlementInfo.stableTokenRedeemCount,
@@ -349,11 +335,7 @@ contract MoCSettlement is MoCSettlementEvents, MoCBase, PartialExecution, Govern
     @dev Execute final step of StableTokenRedemption task
   */
   function finishStableTokenRedemption() internal {
-    emit SettlementRedeemStableToken(
-      settlementInfo.stableTokenRedeemCount,
-      settlementInfo.finalCommissionAmount,
-      settlementInfo.reservePrice
-    );
+    emit SettlementRedeemStableToken(settlementInfo.stableTokenRedeemCount, settlementInfo.finalCommissionAmount, settlementInfo.reservePrice);
 
     clear();
   }
@@ -382,7 +364,11 @@ contract MoCSettlement is MoCSettlementEvents, MoCBase, PartialExecution, Govern
     uint256 userStableTokenBalance = stableToken.balanceOf(redeemer);
     uint256 amountToRedeem = Math.min(userStableTokenBalance, redeemAmount);
     if (amountToRedeem > 0) {
-      (bool result, uint256 reserveTokenCommissionSpent) = mocExchange.redeemStableTokenWithPrice(redeemer, amountToRedeem, settlementInfo.reservePrice);
+      (bool result, uint256 reserveTokenCommissionSpent) = mocExchange.redeemStableTokenWithPrice(
+        redeemer,
+        amountToRedeem,
+        settlementInfo.reservePrice
+      );
       // Redemption can fail if the receiving address is a contract
       if (result) {
         emit RedeemRequestProcessed(redeemer, reserveTokenCommissionSpent, amountToRedeem);

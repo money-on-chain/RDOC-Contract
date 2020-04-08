@@ -16,7 +16,7 @@
     "block-utils": "scripts/mine_blocks.sh",
     "truffle-compile": "truffle compile --all",
     "solium": "node ./node_modules/ethlint/bin/solium -d contracts/",
-    "eslint": "eslint 'test/**/*.js' 'scripts/**/*.js'",
+    "eslint": "eslint 'test/**/*.js' 'scripts/**/*.js' 'migrations/**/*.js'",
     "migrate-development": "truffle migrate --network development",
     "migrate-qaTestnet": "truffle migrate --network qaTestnet",
     "migrate-qaPrivate": "truffle migrate --network qaPrivate",
@@ -28,7 +28,8 @@
     "deploy-reset-qaPrivate": "cp zos-bck.json zos.json; rm zos.dev-*.json; rm -r build/contracts; truffle migrate --network qaPrivate --reset",
     "deploy-reset-uatTestnet": "cp zos-bck.json zos.json; rm zos.dev-*.json; rm -r build/contracts; truffle migrate --network uatTestnet --reset",
     "deploy-reset-mocTestnet": "cp zos-bck.json zos.json; rm zos.dev-*.json; rm -r build/contracts; truffle migrate --network mocTestnet --reset",
-    "deploy-reset-mocMainnet": "cp zos-bck.json zos.json; rm zos.dev-*.json; rm -r build/contracts; truffle migrate --network mocMainnet --reset"
+    "deploy-reset-mocMainnet": "cp zos-bck.json zos.json; rm zos.dev-*.json; rm -r build/contracts; truffle migrate --network mocMainnet --reset",
+    "pretty-sc": "prettier --write **/*.sol"
   },
   "repository": {
     "type": "git",
@@ -68,6 +69,7 @@
     "mocha": "6.2.0",
     "openzeppelin-test-helpers": "0.4.0",
     "prettier": "1.18.2",
+    "prettier-plugin-solidity": "1.0.0-alpha.47",
     "solidity-coverage": "0.6.4",
     "truffle": "5.0.26",
     "truffle-hdwallet-provider": "1.0.13",

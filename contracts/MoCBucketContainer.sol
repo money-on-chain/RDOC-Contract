@@ -6,13 +6,14 @@ import "./base/MoCBase.sol";
 import "moc-governance/contracts/Governance/Governed.sol";
 import "moc-governance/contracts/Governance/IGovernor.sol";
 
-contract MoCBucketContainer is MoCBase, Governed{
+
+contract MoCBucketContainer is MoCBase, Governed {
   using SafeMath for uint256;
   using Math for uint256;
 
   struct RiskProxBalance {
     uint256 value;
-    uint index; // Index start in 1, zero is reserved for NULL
+    uint256 index; // Index start in 1, zero is reserved for NULL
   }
 
   struct MoCBucket {
@@ -31,48 +32,34 @@ contract MoCBucketContainer is MoCBase, Governed{
     bool available;
   }
 
-  event BucketMovement(
-    bytes32 from,
-    bytes32 to,
-    uint256 reserves,
-    uint256 stableTokens
-  );
+  event BucketMovement(bytes32 from, bytes32 to, uint256 reserves, uint256 stableTokens);
 
-  event BucketCreation(
-    bytes32 name,
-    uint256 cobj
-  );
+  event BucketCreation(bytes32 name, uint256 cobj);
 
-  event BucketStateUpdate(
-    bytes32 name,
-    uint256 nReserve,
-    uint256 nStable,
-    uint256 nRiskProx,
-    uint256 inrateBag
-  );
+  event BucketStateUpdate(bytes32 name, uint256 nReserve, uint256 nStable, uint256 nRiskProx, uint256 inrateBag);
 
   mapping(bytes32 => MoCBucket) internal mocBuckets;
 
-   /**
+  /**
    GETTERS
    */
-  function getBucketNReserve(bytes32 bucket) public view returns(uint256) {
+  function getBucketNReserve(bytes32 bucket) public view returns (uint256) {
     return mocBuckets[bucket].nReserve;
   }
 
-  function getBucketNRiskPro(bytes32 bucket) public view returns(uint256) {
+  function getBucketNRiskPro(bytes32 bucket) public view returns (uint256) {
     return mocBuckets[bucket].nRiskPro;
   }
 
-  function getBucketNStableToken(bytes32 bucket) public view returns(uint256) {
+  function getBucketNStableToken(bytes32 bucket) public view returns (uint256) {
     return mocBuckets[bucket].nStable;
   }
 
-  function getBucketCobj(bytes32 bucket) public view returns(uint256) {
+  function getBucketCobj(bytes32 bucket) public view returns (uint256) {
     return mocBuckets[bucket].cobj;
   }
 
-  function getInrateBag(bytes32 bucket) public view returns(uint256) {
+  function getInrateBag(bytes32 bucket) public view returns (uint256) {
     return mocBuckets[bucket].inrateBag;
   }
 
@@ -81,7 +68,7 @@ contract MoCBucketContainer is MoCBase, Governed{
    * @param  _bucket - name of the bucket
    * @param  _cobj - new value of cobj
    */
-  function setBucketCobj(bytes32 _bucket, uint256 _cobj) public onlyAuthorizedChanger(){
+  function setBucketCobj(bytes32 _bucket, uint256 _cobj) public onlyAuthorizedChanger() {
     //TODO: It is necessary to analyze the impact in the model it has when changing X2. This
     mocBuckets[_bucket].cobj = _cobj;
   }
@@ -90,7 +77,7 @@ contract MoCBucketContainer is MoCBase, Governed{
     @dev returns true if the bucket is a base bucket
     @param bucket Name of the bucket
   **/
-  function isBucketBase(bytes32 bucket) public view returns(bool){
+  function isBucketBase(bytes32 bucket) public view returns (bool) {
     return mocBuckets[bucket].isBase;
   }
 
@@ -98,7 +85,7 @@ contract MoCBucketContainer is MoCBase, Governed{
     @dev returns true if the bucket have stableTokens in it
     @param bucket Name of the bucket
   **/
-  function isBucketEmpty(bytes32 bucket) public view returns(bool) {
+  function isBucketEmpty(bytes32 bucket) public view returns (bool) {
     return mocBuckets[bucket].nStable == 0;
   }
 
@@ -106,7 +93,7 @@ contract MoCBucketContainer is MoCBase, Governed{
     @dev Returns all the address that currently have riskProx position for this bucket
     @param bucket bucket of the active address
   */
-  function getActiveAddresses(bytes32 bucket) public view returns(address payable[] memory) {
+  function getActiveAddresses(bytes32 bucket) public view returns (address payable[] memory) {
     return mocBuckets[bucket].activeBalances;
   }
 
@@ -114,7 +101,7 @@ contract MoCBucketContainer is MoCBase, Governed{
     @dev Returns all the address that currently have riskProx position for this bucket
     @param bucket bucket of the active address
   */
-  function getActiveAddressesCount(bytes32 bucket) public view returns(uint256 count) {
+  function getActiveAddressesCount(bytes32 bucket) public view returns (uint256 count) {
     return mocBuckets[bucket].activeBalancesLength;
   }
 
@@ -126,7 +113,9 @@ contract MoCBucketContainer is MoCBase, Governed{
     @param riskProx RiskProx amount [using mocPrecision]
   **/
   function addValuesToBucket(bytes32 bucketName, uint256 reserveTokens, uint256 stableToken, uint256 riskProx)
-  public onlyWhitelisted(msg.sender) {
+    public
+    onlyWhitelisted(msg.sender)
+  {
     MoCBucket storage bucket = mocBuckets[bucketName];
 
     bucket.nReserve = bucket.nReserve.add(reserveTokens);
@@ -142,7 +131,9 @@ contract MoCBucketContainer is MoCBase, Governed{
     @param riskProx RiskProx amount [using mocPrecision]
   **/
   function substractValuesFromBucket(bytes32 bucketName, uint256 reserve, uint256 stableToken, uint256 riskProx)
-  public onlyWhitelisted(msg.sender)  {
+    public
+    onlyWhitelisted(msg.sender)
+  {
     MoCBucket storage bucket = mocBuckets[bucketName];
 
     bucket.nReserve = bucket.nReserve.sub(reserve);
@@ -155,8 +146,12 @@ contract MoCBucketContainer is MoCBase, Governed{
     @param bucketName Name of the bucket to operate
     @param amount value to move from inrateBag to main bag [using reservePrecision]
    */
-  function deliverInrate(bytes32 bucketName, uint256 amount) public
-   onlyWhitelisted(msg.sender) onlyBaseBucket(bucketName) bucketStateUpdate(bucketName) {
+  function deliverInrate(bytes32 bucketName, uint256 amount)
+    public
+    onlyWhitelisted(msg.sender)
+    onlyBaseBucket(bucketName)
+    bucketStateUpdate(bucketName)
+  {
     MoCBucket storage bucket = mocBuckets[bucketName];
 
     uint256 toMove = Math.min(bucket.inrateBag, amount);
@@ -171,8 +166,13 @@ contract MoCBucketContainer is MoCBase, Governed{
     @param amount value to move from inrateBag to main bag [using reservePrecision]
     @return Retrieved value
    */
-  function recoverInrate(bytes32 bucketName, uint256 amount) public
-  onlyWhitelisted(msg.sender) onlyBaseBucket(bucketName) bucketStateUpdate(bucketName) returns(uint256) {
+  function recoverInrate(bytes32 bucketName, uint256 amount)
+    public
+    onlyWhitelisted(msg.sender)
+    onlyBaseBucket(bucketName)
+    bucketStateUpdate(bucketName)
+    returns (uint256)
+  {
     MoCBucket storage bucket = mocBuckets[bucketName];
 
     uint256 toRetrieve = Math.min(bucket.inrateBag, amount);
@@ -187,8 +187,7 @@ contract MoCBucketContainer is MoCBase, Governed{
     @param bucketName name of the bucket to from which takes
     @param reserveAmount value to add to main bag [using reservePrecision]
   */
-  function payInrate(bytes32 bucketName, uint256 reserveAmount) public
-  onlyWhitelisted(msg.sender) onlyBaseBucket(bucketName) {
+  function payInrate(bytes32 bucketName, uint256 reserveAmount) public onlyWhitelisted(msg.sender) onlyBaseBucket(bucketName) {
     MoCBucket storage bucket = mocBuckets[bucketName];
     bucket.inrateBag = bucket.inrateBag.add(reserveAmount);
   }
@@ -200,8 +199,12 @@ contract MoCBucketContainer is MoCBase, Governed{
     @param reserve ReserveTokens amount [using reservePrecision]
     @param stableTokens StableTokens amount [using mocPrecision]
   **/
-  function moveResTokensAndStableTokens(bytes32 from, bytes32 to, uint256 reserve, uint256 stableTokens) public
-  onlyWhitelisted(msg.sender) bucketStateUpdate(from) bucketStateUpdate(to) {
+  function moveResTokensAndStableTokens(bytes32 from, bytes32 to, uint256 reserve, uint256 stableTokens)
+    public
+    onlyWhitelisted(msg.sender)
+    bucketStateUpdate(from)
+    bucketStateUpdate(to)
+  {
     MoCBucket storage bucketFrom = mocBuckets[from];
     MoCBucket storage bucketTo = mocBuckets[to];
 
@@ -239,7 +242,7 @@ contract MoCBucketContainer is MoCBase, Governed{
    * @dev checks if a bucket exists
    * @param bucket name of the bucket
    */
-  function isAvailableBucket(bytes32 bucket) public view returns(bool) {
+  function isAvailableBucket(bytes32 bucket) public view returns (bool) {
     return mocBuckets[bucket].available;
   }
 
@@ -282,7 +285,7 @@ contract MoCBucketContainer is MoCBase, Governed{
       mocBuckets[bucket].nStable,
       mocBuckets[bucket].nRiskPro,
       mocBuckets[bucket].inrateBag
-      );
+    );
   }
 
   // Leave a gap betweeen inherited contracts variables in order to be

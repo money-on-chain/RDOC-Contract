@@ -4,16 +4,12 @@ import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "./base/MoCBase.sol";
 import "./MoCBucketContainer.sol";
 
+
 contract MoCRiskProxManager is MoCBucketContainer {
   using SafeMath for uint256;
   uint256 constant MIN_ALLOWED_BALANCE = 0;
 
-  function initialize(
-    address connectorAddress,
-    address _governor,
-    uint256 _c0Cobj,
-    uint256 _x2Cobj
-  ) public initializer {
+  function initialize(address connectorAddress, address _governor, uint256 _c0Cobj, uint256 _x2Cobj) public initializer {
     initializeBase(connectorAddress);
     initializeValues(_governor);
     createBucket(BUCKET_C0, _c0Cobj, true);
@@ -26,7 +22,7 @@ contract MoCRiskProxManager is MoCBucketContainer {
     @param userAddress user address to get balance from
     @return total balance for the userAddress
   */
-  function riskProxBalanceOf(bytes32 bucket, address userAddress) public view returns(uint256) {
+  function riskProxBalanceOf(bytes32 bucket, address userAddress) public view returns (uint256) {
     RiskProxBalance memory userBalance = mocBuckets[bucket].riskProxBalances[userAddress];
     if (!hasValidBalance(bucket, userAddress, userBalance.index)) return 0;
     return userBalance.value;
@@ -39,10 +35,8 @@ contract MoCRiskProxManager is MoCBucketContainer {
     @param index index, starting from 1, where the address of the user is being kept
     @return true if the user has assigned balance
   */
-  function hasValidBalance(bytes32 bucket, address userAddress, uint index) public view returns(bool) {
-    return (index != 0) &&
-      (index <= getActiveAddressesCount(bucket)) &&
-      (mocBuckets[bucket].activeBalances[index - 1] == userAddress);
+  function hasValidBalance(bytes32 bucket, address userAddress, uint256 index) public view returns (bool) {
+    return (index != 0) && (index <= getActiveAddressesCount(bucket)) && (mocBuckets[bucket].activeBalances[index - 1] == userAddress);
   }
 
   /**
@@ -53,7 +47,9 @@ contract MoCRiskProxManager is MoCBucketContainer {
     @param totalCost btc value of bproxAmount [using reservePrecision]
   */
   function assignRiskProx(bytes32 bucket, address payable account, uint256 riskProxAmount, uint256 totalCost)
-  public onlyWhitelisted(msg.sender) {
+    public
+    onlyWhitelisted(msg.sender)
+  {
     uint256 currentBalance = riskProxBalanceOf(bucket, account);
 
     setRiskProxBalanceOf(bucket, account, currentBalance.add(riskProxAmount));
@@ -68,7 +64,9 @@ contract MoCRiskProxManager is MoCBucketContainer {
     @param totalCost reserveToken value of riskProxAmount [using reservePrecision]
   */
   function removeRiskProx(bytes32 bucket, address payable userAddress, uint256 riskProxAmount, uint256 totalCost)
-  public onlyWhitelisted(msg.sender) {
+    public
+    onlyWhitelisted(msg.sender)
+  {
     uint256 currentBalance = riskProxBalanceOf(bucket, userAddress);
 
     setRiskProxBalanceOf(bucket, userAddress, currentBalance.sub(riskProxAmount));
@@ -85,8 +83,7 @@ contract MoCRiskProxManager is MoCBucketContainer {
     mocBuckets[bucket].riskProxBalances[userAddress].value = value;
 
     uint256 index = mocBuckets[bucket].riskProxBalances[userAddress].index;
-    if (!hasValidBalance(bucket, userAddress, index))
-      index = 0;
+    if (!hasValidBalance(bucket, userAddress, index)) index = 0;
 
     bool hasBalance = value > MIN_ALLOWED_BALANCE;
     // The address is not in the array

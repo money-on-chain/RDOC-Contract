@@ -1,4 +1,5 @@
 /* eslint-disable import/no-unresolved */
+/* eslint-disable no-console */
 const ERC20 = require('../../build/contracts/ERC20.json');
 const MoC = require('../../build/contracts/MoC.json');
 const { getWeb3 } = require('../changers/changerHelper');
@@ -38,17 +39,6 @@ const approveAndDeposit = async from => {
     .on('receipt', async receipt => {
       console.log('Tx receipt:', receipt);
       await depositReserve(from);
-    })
-    .on('error', console.error);
-};
-
-const chainTxs = async (from, first, next) => {
-  first(from)
-    .on('transactionHash', hash => console.log('TxHash:', hash))
-    .on('confirmation', confirmationNumber => console.log('Tx confirmation:', confirmationNumber))
-    .on('receipt', async receipt => {
-      console.log('Tx receipt:', receipt);
-      await next(from);
     })
     .on('error', console.error);
 };
