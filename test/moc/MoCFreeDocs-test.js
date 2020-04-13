@@ -4,7 +4,7 @@ let mocHelper;
 let toContractBN;
 let BUCKET_X2;
 
-contract('MoC', function([owner, userAccount, otherAccount]) {
+contract.skip('MoC', function([owner, userAccount, otherAccount]) {
   before(async function() {
     const accounts = [owner, userAccount, otherAccount];
     mocHelper = await testHelperBuilder({ owner, accounts, useMock: true });
@@ -90,7 +90,7 @@ contract('MoC', function([owner, userAccount, otherAccount]) {
       ];
 
       scenarios.forEach(async scenario => {
-        describe.only(`GIVEN ${scenario.params.riskProToMint} RiskPro is minted and reserveToken price is ${scenario.params.initialReserveTokenPrice} usd`, function() {
+        describe(`GIVEN ${scenario.params.riskProToMint} RiskPro is minted and reserveToken price is ${scenario.params.initialReserveTokenPrice} usd`, function() {
           beforeEach(async function() {
             await mocHelper.revertState();
             await mocHelper.mintRiskProAmount(owner, scenario.params.riskProToMint);
