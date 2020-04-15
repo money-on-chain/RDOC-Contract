@@ -287,6 +287,32 @@ const makeUtils = async (artifacts, networkName, config, owner, deployer) => {
       upgradeDelegator: await proxyAdmin.owner()
     };
   };
+  const setGovernance = async () => {
+    const adminAddress = await proxyAdminContractAddress();
+    await setAdmin({ contractAlias: 'MoC', newAdmin: adminAddress, ...options });
+    await setAdmin({ contractAlias: 'MoCConnector', newAdmin: adminAddress, ...options });
+    await setAdmin({ contractAlias: 'MoCRiskProxManager', newAdmin: adminAddress, ...options });
+    await setAdmin({ contractAlias: 'MoCBurnout', newAdmin: adminAddress, ...options });
+    await setAdmin({ contractAlias: 'MoCSettlement', newAdmin: adminAddress, ...options });
+    await setAdmin({ contractAlias: 'MoCConverter', newAdmin: adminAddress, ...options });
+    await setAdmin({ contractAlias: 'MoCState', newAdmin: adminAddress, ...options });
+    await setAdmin({ contractAlias: 'MoCExchange', newAdmin: adminAddress, ...options });
+    await setAdmin({ contractAlias: 'MoCInrate', newAdmin: adminAddress, ...options });
+  };
+
+  const transferStableTokenRoles = async () => {
+    await transferOwnershipAndMinting(stableToken, mocExchange.address);
+  };
+
+  const transferRiskProRoles = async () => {
+    await transferOwnershipAndMinting(riskPro, mocExchange.address);
+  };
+
+  const transferRiskProPausingRole = async () => {
+    await transferPausingRole(riskPro, moc.address);
+  };
+
+  const settlementBlockSpan = () => toContract(config.dayBlockSpan * config.settlementDays);
 
   const initializeContracts = async () => {
     console.log('Initializing contracts');
@@ -326,14 +352,9 @@ const makeUtils = async (artifacts, networkName, config, owner, deployer) => {
 
     const commissionSplitter = await getCommissionSplitter();
 
-    var targetAddressRiskPro = owner;
-    if (config.targetAddressRiskProInterest != "") {
-        targetAddressRiskPro = config.targetAddressRiskProInterest;
-    }
-
-    var targetAddressCommission = owner;
-    if (config.targetAddressCommissionPayment != "") {
-        targetAddressCommission = config.targetAddressCommissionPayment;
+    let targetAddressRiskPro = owner;
+    if (config.targetAddressRiskProInterest !== '') {
+      targetAddressRiskPro = config.targetAddressRiskProInterest;
     }
 
     await mocInrate.initialize(
@@ -342,8 +363,10 @@ const makeUtils = async (artifacts, networkName, config, owner, deployer) => {
       toContract(config.riskProxTmin * 10 ** 18), // riskProxTmin [using mocPrecision]
       toContract(config.riskProxPower), // riskProxPower [no precision]
       toContract(config.riskProxTmax * 10 ** 18), // riskProxTmax [using mocPrecision]
-      toContract(config.riskProHolderRate * 10 ** 18), // RiskPro Holder rate .25% (annual 0.0025 / 365 * 7) with [mocPrecision]
-      config.dayBlockSpan * config.daysRiskProHolderExecutePayment, // Blockspan to execute payment once a week
+      // RiskPro Holder rate .25% (annual 0.0025 / 365 * 7) with [mocPrecision]
+      toContract(config.riskProHolderRate * 10 ** 18),
+      // Blockspan to execute payment once a week
+      config.dayBlockSpan * config.daysRiskProHolderExecutePayment,
       targetAddressRiskPro, // Target address of RiskPro interest
       commissionSplitter.address, // Target address of commission payment
       toContract(config.commissionRate * 10 ** 18), // commissionRate [mocPrecision]
@@ -387,33 +410,6 @@ const makeUtils = async (artifacts, networkName, config, owner, deployer) => {
     );
     console.log('State Initialized');
   };
-
-  const setGovernance = async () => {
-    const adminAddress = await proxyAdminContractAddress();
-    await setAdmin({ contractAlias: 'MoC', newAdmin: adminAddress, ...options });
-    await setAdmin({ contractAlias: 'MoCConnector', newAdmin: adminAddress, ...options });
-    await setAdmin({ contractAlias: 'MoCRiskProxManager', newAdmin: adminAddress, ...options });
-    await setAdmin({ contractAlias: 'MoCBurnout', newAdmin: adminAddress, ...options });
-    await setAdmin({ contractAlias: 'MoCSettlement', newAdmin: adminAddress, ...options });
-    await setAdmin({ contractAlias: 'MoCConverter', newAdmin: adminAddress, ...options });
-    await setAdmin({ contractAlias: 'MoCState', newAdmin: adminAddress, ...options });
-    await setAdmin({ contractAlias: 'MoCExchange', newAdmin: adminAddress, ...options });
-    await setAdmin({ contractAlias: 'MoCInrate', newAdmin: adminAddress, ...options });
-  };
-
-  const transferStableTokenRoles = async () => {
-    await transferOwnershipAndMinting(stableToken, mocExchange.address);
-  };
-
-  const transferRiskProRoles = async () => {
-    await transferOwnershipAndMinting(riskPro, mocExchange.address);
-  };
-
-  const transferRiskProPausingRole = async () => {
-    await transferPausingRole(riskPro, moc.address);
-  };
-
-  const settlementBlockSpan = () => toContract(config.dayBlockSpan * config.settlementDays);
 
   return {
     initializeContracts,

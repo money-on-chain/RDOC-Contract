@@ -51,10 +51,10 @@ module.exports = {
       provider: new HDWalletProvider(mnemonic, 'https://public-node.rsk.co'),
       network_id: '*',
       gasPrice: 60000000
-    },
+    }
   },
   mocha: {
     useColors: true,
-    bail: true
+    bail: false
   }
 };

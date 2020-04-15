@@ -1,4 +1,4 @@
-const { deployContract, getConfig } = require('./changerHelper');
+const { deployContract } = require('./changerHelper');
 const changerAbi = require('../../build/contracts/MakeUnstoppable.json');
 
 const input = {

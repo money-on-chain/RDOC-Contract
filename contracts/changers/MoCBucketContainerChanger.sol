@@ -23,7 +23,7 @@ contract MoCBucketContainerChanger is ChangeContract, Ownable {
     if (cobjC0 > 0){
       mocContainer.setBucketCobj(BUCKET_C0, cobjC0);
     }
-    
+
     if (cobjX2 > 0) {
       mocContainer.setBucketCobj(BUCKET_X2, cobjX2);
     }

@@ -258,7 +258,7 @@ const initializeSettlementStress = async (accounts, arrayRedeemSize) => {
     docAccounts.map(account => () => mocHelper.mintStableTokenAmount(account, 100000))
   );
 
-  let promises = [];
+  const promises = [];
 
   // Creates an array of identical functions to be called, the amount is arrayRedeemSize
   const createArrayRedeemSizeCalls = account =>

@@ -1,4 +1,6 @@
 /* eslint-disable import/no-unresolved */
+/* eslint-disable no-console */
+
 const CommissionSplitter = require('../../build/contracts/CommissionSplitter.json');
 const { getWeb3 } = require('../changers/changerHelper');
 

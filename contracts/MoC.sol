@@ -15,11 +15,13 @@ import "./base/MoCReserve.sol";
 import "moc-governance/contracts/Stopper/Stoppable.sol";
 import "moc-governance/contracts/Governance/IGovernor.sol";
 
+
 contract MoCEvents {
   event BucketLiquidation(bytes32 bucket);
 }
 
-contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable  {
+
+contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable {
   using SafeMath for uint256;
 
   // Contracts
@@ -36,12 +38,8 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable  {
   // Indicates if ReserveTokens remainder was sent and
   // RiskProToken was paused
   bool internal liquidationExecuted;
-  function initialize(
-    address connectorAddress,
-    address governorAddress,
-    address stopperAddress,
-    bool startStoppable
-  ) public initializer {
+
+  function initialize(address connectorAddress, address governorAddress, address stopperAddress, bool startStoppable) public initializer {
     initializePrecisions();
     initializeBase(connectorAddress);
     initializeContracts();
@@ -50,7 +48,7 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable  {
 
   /****************************INTERFACE*******************************************/
 
-  function riskProxBalanceOf(bytes32 bucket, address account) public view returns(uint256) {
+  function riskProxBalanceOf(bytes32 bucket, address account) public view returns (uint256) {
     return riskProxManager.riskProxBalanceOf(bucket, account);
   }
 
@@ -59,14 +57,14 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable  {
     @param index queue position to get
     @return redeemer's address and amount he submitted
   */
-  function getRedeemRequestAt(uint256 index) public view returns(address, uint256) {
+  function getRedeemRequestAt(uint256 index) public view returns (address, uint256) {
     return settlement.getRedeemRequestAt(index);
   }
 
   /**
     @dev returns current redeem queue size
    */
-  function redeemQueueSize() public view returns(uint256) {
+  function redeemQueueSize() public view returns (uint256) {
     return settlement.redeemQueueSize();
   }
 
@@ -74,15 +72,15 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable  {
     @dev returns the total amount of StableTokens in the redeem queue for redeemer
     @param redeemer address for which ^ is computed
    */
-  function stableTokenAmountToRedeem(address redeemer) public view returns(uint256) {
+  function stableTokenAmountToRedeem(address redeemer) public view returns (uint256) {
     return settlement.stableTokenAmountToRedeem(redeemer);
   }
 
   /**
-  * @dev Creates or updates the amount of a StableToken redeem Request from the msg.sender
-  * @param stableTokenAmount Amount of StableTokens to redeem on settlement [using mocPrecision]
-  */
-  function redeemStableTokenRequest(uint256 stableTokenAmount) public  whenNotPaused() whenSettlementReady() {
+   * @dev Creates or updates the amount of a StableToken redeem Request from the msg.sender
+   * @param stableTokenAmount Amount of StableTokens to redeem on settlement [using mocPrecision]
+   */
+  function redeemStableTokenRequest(uint256 stableTokenAmount) public whenNotPaused() whenSettlementReady() {
     settlement.addRedeemRequest(stableTokenAmount, msg.sender);
   }
 
@@ -158,9 +156,15 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable  {
      @param bucket Bucket to reedem, for example X2
      @param riskProxAmount Amount in RiskProx
    */
-  function redeemRiskProx(bytes32 bucket, uint256 riskProxAmount) public
-  whenNotPaused() whenSettlementReady() availableBucket(bucket) notBaseBucket(bucket)
-  transitionState() bucketStateTransition(bucket) {
+  function redeemRiskProx(bytes32 bucket, uint256 riskProxAmount)
+    public
+    whenNotPaused()
+    whenSettlementReady()
+    availableBucket(bucket)
+    notBaseBucket(bucket)
+    transitionState()
+    bucketStateTransition(bucket)
+  {
     (uint256 totalReserveTokenRedeemed, uint256 commissionSpent) = mocExchange.redeemRiskProx(msg.sender, bucket, riskProxAmount);
 
     safeWithdrawFromReserve(msg.sender, totalReserveTokenRedeemed);
@@ -170,13 +174,19 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable  {
   }
 
   /**
-  * @dev BUCKET riskProx minting
-  * @param bucket Name of the bucket used
-  * @param resTokensToMint amount to mint on ReserveTokens
-  **/
-  function mintRiskProx(bytes32 bucket, uint256 resTokensToMint) public
-  whenNotPaused() whenSettlementReady() availableBucket(bucket) notBaseBucket(bucket)
-  transitionState() bucketStateTransition(bucket) {
+   * @dev BUCKET riskProx minting
+   * @param bucket Name of the bucket used
+   * @param resTokensToMint amount to mint on ReserveTokens
+   **/
+  function mintRiskProx(bytes32 bucket, uint256 resTokensToMint)
+    public
+    whenNotPaused()
+    whenSettlementReady()
+    availableBucket(bucket)
+    notBaseBucket(bucket)
+    transitionState()
+    bucketStateTransition(bucket)
+  {
     uint256 allowedBalance = getAllowance(msg.sender);
     (uint256 resTokensExchangeSpent, uint256 commissionSpent) = mocExchange.mintRiskProx(msg.sender, bucket, resTokensToMint);
 
@@ -191,9 +201,9 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable  {
   }
 
   /**
-  * @dev Redeems the requested amount for the msg.sender, or the max amount of free stableTokens possible.
-  * @param stableTokenAmount Amount of StableTokens to redeem.
-  */
+   * @dev Redeems the requested amount for the msg.sender, or the max amount of free stableTokens possible.
+   * @param stableTokenAmount Amount of StableTokens to redeem.
+   */
   function redeemFreeStableToken(uint256 stableTokenAmount) public whenNotPaused() transitionState() {
     (uint256 resTokensAmount, uint256 commissionSpent) = mocExchange.redeemFreeStableToken(msg.sender, stableTokenAmount);
 
@@ -204,9 +214,9 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable  {
   }
 
   /**
-  * @dev Allow redeem on liquidation state, user StableTokens get burned and he receives
-  * the equivalent ReserveTokens if can be covered, or the maximum available
-  **/
+   * @dev Allow redeem on liquidation state, user StableTokens get burned and he receives
+   * the equivalent ReserveTokens if can be covered, or the maximum available
+   **/
   function redeemAllStableToken() public atState(MoCState.States.Liquidated) {
     mocExchange.redeemAllStableToken(msg.sender, msg.sender);
   }
@@ -219,9 +229,9 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable  {
   }
 
   /**
-  * @dev Pays the RiskPro interest and transfers it to the address mocInrate.riskProInterestAddress
-  * RiskPro interests = Nb (bucket 0) * riskProRate.
-  */
+   * @dev Pays the RiskPro interest and transfers it to the address mocInrate.riskProInterestAddress
+   * RiskPro interests = Nb (bucket 0) * riskProRate.
+   */
   function payRiskProHoldersInterestPayment() public whenNotPaused() {
     uint256 toPay = mocInrate.payRiskProHoldersInterestPayment();
     if (withdrawFromReserve(mocInrate.getRiskProInterestAddress(), toPay)) {
@@ -230,37 +240,37 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable  {
   }
 
   /**
-  * @dev Calculates RiskPro holders holder interest by taking the total amount of RBCs available on Bucket 0.
-  * RiskPro interests = Nb (bucket 0) * riskProRate.
-  */
-  function calculateRiskProHoldersInterest() public view returns(uint256, uint256) {
+   * @dev Calculates RiskPro holders holder interest by taking the total amount of RBCs available on Bucket 0.
+   * RiskPro interests = Nb (bucket 0) * riskProRate.
+   */
+  function calculateRiskProHoldersInterest() public view returns (uint256, uint256) {
     return mocInrate.calculateRiskProHoldersInterest();
   }
 
-  function getRiskProInterestAddress() public view returns(address payable) {
+  function getRiskProInterestAddress() public view returns (address payable) {
     return mocInrate.getRiskProInterestAddress();
   }
 
-  function getRiskProRate() public view returns(uint256) {
+  function getRiskProRate() public view returns (uint256) {
     return mocInrate.getRiskProRate();
   }
 
-  function getRiskProInterestBlockSpan() public view returns(uint256) {
+  function getRiskProInterestBlockSpan() public view returns (uint256) {
     return mocInrate.getRiskProInterestBlockSpan();
   }
 
-  function isDailyEnabled() public view returns(bool) {
+  function isDailyEnabled() public view returns (bool) {
     return mocInrate.isDailyEnabled();
   }
 
-  function isRiskProInterestEnabled() public view returns(bool) {
+  function isRiskProInterestEnabled() public view returns (bool) {
     return mocInrate.isRiskProInterestEnabled();
   }
 
   /**
     @dev Returns true if blockSpan number of blocks has pass since last execution
   */
-  function isSettlementEnabled() public view returns(bool) {
+  function isSettlementEnabled() public view returns (bool) {
     return settlement.isSettlementEnabled();
   }
 
@@ -268,7 +278,7 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable  {
    * @dev Checks if bucket liquidation is reached.
    * @return true if bucket liquidation is reached, false otherwise
    */
-  function isBucketLiquidationReached(bytes32 bucket) public view returns(bool) {
+  function isBucketLiquidationReached(bytes32 bucket) public view returns (bool) {
     if (mocState.coverage(bucket) <= mocState.liq()) {
       return true;
     }
@@ -284,23 +294,23 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable  {
   }
 
   /**
-  * @dev Set Burnout address.
-  * @param burnoutAddress Address to which the funds will be sent on liquidation.
-  */
+   * @dev Set Burnout address.
+   * @param burnoutAddress Address to which the funds will be sent on liquidation.
+   */
   function setBurnoutAddress(address payable burnoutAddress) public whenNotPaused() atLeastState(MoCState.States.RiskProDiscount) {
     mocBurnout.pushBurnoutAddress(msg.sender, burnoutAddress);
   }
 
   /**
-  * @dev Get Burnout address.
-  */
-  function getBurnoutAddress() public view returns(address) {
+   * @dev Get Burnout address.
+   */
+  function getBurnoutAddress() public view returns (address) {
     return mocBurnout.getBurnoutAddress(msg.sender);
   }
 
   /**
-  * @dev Evaluates if liquidation state has been reached and runs liq if that's the case
-  */
+   * @dev Evaluates if liquidation state has been reached and runs liq if that's the case
+   */
   function evalLiquidation(uint256 steps) public {
     mocState.nextState();
 
@@ -311,8 +321,8 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable  {
   }
 
   /**
-  * @dev Runs all settlement process
-  */
+   * @dev Runs all settlement process
+   */
   function runSettlement(uint256 steps) public whenNotPaused() transitionState() {
     uint256 accumCommissions = settlement.runSettlement(steps);
 
@@ -328,7 +338,7 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable  {
     @param tokenAmount Amount of tokens to send
     @return False if RRC20 transfer fails or revert and true if succeeds
   **/
-  function sendToAddress(address receiver, uint256 tokenAmount) public onlyWhitelisted(msg.sender) returns(bool) {
+  function sendToAddress(address receiver, uint256 tokenAmount) public onlyWhitelisted(msg.sender) returns (bool) {
     if (tokenAmount == 0) {
       return true;
     }
@@ -382,7 +392,7 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable  {
     @param tokenAmount Amount to extract from reserve
     @return False if RRC20 transfer fails or revert and true if succeeds
    */
-  function withdrawFromReserve(address receiver, uint256 tokenAmount) internal returns(bool) {
+  function withdrawFromReserve(address receiver, uint256 tokenAmount) internal returns (bool) {
     bool result = withdraw(tokenAmount, receiver);
 
     if (result) {
@@ -439,7 +449,7 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable  {
   }
 
   modifier availableBucket(bytes32 bucket) {
-    require (riskProxManager.isAvailableBucket(bucket), "Bucket is not available");
+    require(riskProxManager.isAvailableBucket(bucket), "Bucket is not available");
     _;
   }
 
@@ -448,14 +458,11 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable  {
     _;
   }
 
-  modifier transitionState()
-  {
+  modifier transitionState() {
     mocState.nextState();
     if (mocState.state() == MoCState.States.Liquidated) {
       liquidate();
-    }
-    else
-      _;
+    } else _;
   }
 
   // Leave a gap betweeen inherited contracts variables in order to be

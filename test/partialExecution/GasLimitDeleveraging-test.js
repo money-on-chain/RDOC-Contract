@@ -5,7 +5,7 @@ let mocHelper;
 let BUCKET_X2;
 let initialAccounts;
 let afterAccounts;
-contract.skip('MoC: Gas limit on deleveraging', function([owner, ...accounts]) {
+contract('MoC: Gas limit on deleveraging', function([owner, ...accounts]) {
   initialAccounts = accounts.slice(0, 300);
   afterAccounts = accounts.slice(300, 500);
   before(async function() {

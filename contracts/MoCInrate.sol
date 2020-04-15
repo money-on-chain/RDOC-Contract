@@ -7,10 +7,12 @@ import "./MoCRiskProxManager.sol";
 import "./MoCConverter.sol";
 import "./base/MoCBase.sol";
 
+
 contract MoCInrateEvents {
   event InrateDailyPay(uint256 amount, uint256 daysToSettlement, uint256 nReserveBucketC0);
   event RiskProHoldersInterestPay(uint256 amount, uint256 nReserveBucketC0BeforePay);
 }
+
 
 contract MoCInrateStructs {
   struct InrateParams {
@@ -19,12 +21,9 @@ contract MoCInrateStructs {
     uint256 power;
   }
 
-  InrateParams riskProxParams = InrateParams({
-    tMax: 261157876067800,
-    tMin: 0,
-    power: 1
-  });
+  InrateParams riskProxParams = InrateParams({tMax: 261157876067800, tMin: 0, power: 1});
 }
+
 
 contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnection, Governed {
   using SafeMath for uint256;
@@ -97,28 +96,27 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
     stableTmax = _stableTmax;
   }
 
-  function setStablePower(uint256 _stablePower) public onlyAuthorizedChanger(){
+  function setStablePower(uint256 _stablePower) public onlyAuthorizedChanger() {
     stablePower = _stablePower;
   }
 
-  function getStableTmin() public view returns(uint256) {
+  function getStableTmin() public view returns (uint256) {
     return stableTmin;
   }
 
-  function getStableTmax() public view returns(uint256) {
+  function getStableTmax() public view returns (uint256) {
     return stableTmax;
   }
 
-  function getStablePower() public view returns(uint256) {
+  function getStablePower() public view returns (uint256) {
     return stablePower;
   }
-
 
   /**
    * @dev gets tMin param of RiskProx tokens
    * @return returns tMin of RiskProx
    */
-  function getRiskProxTmin() public view returns(uint256) {
+  function getRiskProxTmin() public view returns (uint256) {
     return riskProxParams.tMin;
   }
 
@@ -126,7 +124,7 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
    * @dev gets tMax param of RiskProx tokens
    * @return returns tMax of RiskProx
    */
-  function getRiskProxTmax() public view returns(uint256) {
+  function getRiskProxTmax() public view returns (uint256) {
     return riskProxParams.tMax;
   }
 
@@ -134,7 +132,7 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
    * @dev gets power param of RiskProx tokens
    * @return returns power of RiskProx
    */
-  function getRiskProxPower() public view returns(uint256) {
+  function getRiskProxPower() public view returns (uint256) {
     return riskProxParams.power;
   }
 
@@ -142,7 +140,7 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
    * @dev Gets the blockspan of RiskPro that represents the frecuency of RiskPro holders intereset payment
    * @return returns power of riskProInterestBlockSpan
    */
-  function getRiskProInterestBlockSpan() public view returns(uint256) {
+  function getRiskProInterestBlockSpan() public view returns (uint256) {
     return riskProInterestBlockSpan;
   }
 
@@ -166,7 +164,7 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
    * @dev sets power param of RiskProx tokens
    * @param _btxcPower power of RiskProx
    */
-  function setRiskProxPower(uint256 _btxcPower) public onlyAuthorizedChanger(){
+  function setRiskProxPower(uint256 _btxcPower) public onlyAuthorizedChanger() {
     riskProxParams.power = _btxcPower;
   }
 
@@ -174,15 +172,15 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
    @dev Gets the rate for RiskPro Holders
    @return RiskPro Rate
   */
-  function getRiskProRate() public view returns(uint256){
+  function getRiskProRate() public view returns (uint256) {
     return riskProRate;
   }
 
-  function getCommissionRate() public view returns(uint256) {
+  function getCommissionRate() public view returns (uint256) {
     return commissionRate;
   }
 
-   /**
+  /**
     @dev Sets RiskPro Holders rate
     @param newRiskProRate New RiskPro rate
    */
@@ -190,7 +188,7 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
     riskProRate = newRiskProRate;
   }
 
-   /**
+  /**
     @dev Sets the blockspan RiskPro Intereset rate payment is enable to be executed
     @param newRiskProBlockSpan New RiskPro Block span
    */
@@ -202,19 +200,19 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
    @dev Gets the target address to transfer RiskPro Holders rate
    @return Target address to transfer RiskPro Holders interest
   */
-  function getRiskProInterestAddress() public view returns(address payable){
+  function getRiskProInterestAddress() public view returns (address payable) {
     return riskProInterestAddress;
   }
 
-   /**
+  /**
     @dev Sets the target address to transfer RiskPro Holders rate
     @param newRiskProInterestAddress New RiskPro rate
    */
-  function setRiskProInterestAddress(address payable newRiskProInterestAddress ) public onlyAuthorizedChanger() {
+  function setRiskProInterestAddress(address payable newRiskProInterestAddress) public onlyAuthorizedChanger() {
     riskProInterestAddress = newRiskProInterestAddress;
   }
 
-   /**
+  /**
     @dev Sets the target address to transfer commissions of Mint/Redeem transactions
     @param newCommissionsAddress New commisions address
    */
@@ -222,7 +220,7 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
     commissionsAddress = newCommissionsAddress;
   }
 
-   /**
+  /**
     @dev Sets the commission rate for Mint/Redeem transactions
     @param newCommissionRate New commission rate
    */
@@ -234,7 +232,7 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
     @dev Calculates interest rate for RiskProx Minting, redeem and Free StableToken Redeem
     @return Interest rate value [using RatePrecsion]
    */
-  function spotInrate() public view returns(uint256) {
+  function spotInrate() public view returns (uint256) {
     uint256 abRatio = mocState.currentAbundanceRatio();
 
     return mocLibConfig.spotInrate(riskProxParams.tMax, riskProxParams.power, riskProxParams.tMin, abRatio);
@@ -248,7 +246,7 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
     @param onMinting Value that represents if the calculation is based on mint or on redeem
     @return Interest rate value [using mocPrecision]
    */
-  function riskProxInrateAvg(bytes32 bucket, uint256 resTokensAmount, bool onMinting) public view returns(uint256) {
+  function riskProxInrateAvg(bytes32 bucket, uint256 resTokensAmount, bool onMinting) public view returns (uint256) {
     uint256 preAbRatio = mocState.currentAbundanceRatio();
     uint256 posAbRatio = mocState.abundanceRatio(simulateStableTokenMovement(bucket, resTokensAmount, onMinting));
 
@@ -261,7 +259,7 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
     @param stableTokenRedeem StableTokens to redeem [using mocPrecision]
     @return Interest rate value [using mocPrecision]
    */
-  function stableTokenInrateAvg(uint256 stableTokenRedeem) public view returns(uint256) {
+  function stableTokenInrateAvg(uint256 stableTokenRedeem) public view returns (uint256) {
     uint256 preAbRatio = mocState.currentAbundanceRatio();
     uint256 posAbRatio = mocState.abundanceRatio(riskProxManager.getBucketNStableToken(BUCKET_C0).sub(stableTokenRedeem));
 
@@ -272,7 +270,7 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
     @dev returns the amount of ReserveTokens to pay in concept of interest
     to bucket C0
    */
-  function dailyInrate() public view returns(uint256) {
+  function dailyInrate() public view returns (uint256) {
     uint256 daysToSettl = mocState.daysToSettlement();
     uint256 totalInrateInBag = riskProxManager.getInrateBag(BUCKET_C0);
 
@@ -282,9 +280,7 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
 
     // ([RES] * [DAY] / ([DAY] + [DAY])) = [RES]
     // inrateBag / (daysToSettlement + 1)
-    uint256 toPay = totalInrateInBag
-      .mul(mocLibConfig.dayPrecision)
-      .div(daysToSettl.add(mocLibConfig.dayPrecision));
+    uint256 toPay = totalInrateInBag.mul(mocLibConfig.dayPrecision).div(daysToSettl.add(mocLibConfig.dayPrecision));
 
     return toPay;
   }
@@ -295,7 +291,7 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
     @param reserveTokenAmount Total value from which extract the interest rate [using reservePrecision]
     @return ReserveTokens to pay in concept of interests [using reservePrecision]
   */
-  function calcMintInterestValues(bytes32 bucket, uint256 reserveTokenAmount) public view returns(uint256) {
+  function calcMintInterestValues(bytes32 bucket, uint256 reserveTokenAmount) public view returns (uint256) {
     // Calculate Reserves to move in the operation
     uint256 reservesToMove = mocLibConfig.bucketTransferAmount(reserveTokenAmount, mocState.leverage(bucket));
     // Calculate interest rate
@@ -312,7 +308,7 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
     @param reserveTokenAmount Total value from which extract the interest rate [using reservePrecision]
     @return finalInterest
   */
-  function calcStableTokenRedInterestValues(uint256 stableTokenAmount, uint256 reserveTokenAmount) public view returns(uint256) {
+  function calcStableTokenRedInterestValues(uint256 stableTokenAmount, uint256 reserveTokenAmount) public view returns (uint256) {
     uint256 rate = stableTokenInrateAvg(stableTokenAmount);
     uint256 finalInrate = inrateToSettlement(rate, true);
     uint256 interests = mocLibConfig.getInterestCost(reserveTokenAmount, finalInrate);
@@ -329,7 +325,7 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
     @param reserveTokenToRedeem Total value from which calculate interest [using reservePrecision]
     @return Reserves to recover in concept of interests [using reservePrecision]
   */
-  function calcFinalRedeemInterestValue(bytes32 bucket, uint256 reserveTokenToRedeem) public view returns(uint256) {
+  function calcFinalRedeemInterestValue(bytes32 bucket, uint256 reserveTokenToRedeem) public view returns (uint256) {
     // Get interests to return for redemption
     uint256 redeemInterest = calcRedeemInterestValue(bucket, reserveTokenToRedeem); // Redeem
     uint256 proportionalInterest = calcProportionalInterestValue(bucket, redeemInterest);
@@ -342,8 +338,7 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
     @param reserveTokenAmount Total value from which apply the Commission rate [using reservePrecision]
     @return finalCommissionAmount [using reservePrecision]
   */
-  function calcCommissionValue(uint256 reserveTokenAmount)
-  public view returns(uint256) {
+  function calcCommissionValue(uint256 reserveTokenAmount) public view returns (uint256) {
     uint256 finalCommissionAmount = reserveTokenAmount.mul(commissionRate).div(mocLibConfig.mocPrecision);
     return finalCommissionAmount;
   }
@@ -354,7 +349,7 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
     @param reserveTokenToRedeem Total value from which calculate interest [using reservePrecision]
     @return Reserves to recover in concept of interests [using reservePrecision]
   */
-  function calcRedeemInterestValue(bytes32 bucket, uint256 reserveTokenToRedeem) public view returns(uint256) {
+  function calcRedeemInterestValue(bytes32 bucket, uint256 reserveTokenToRedeem) public view returns (uint256) {
     // Calculate Reserves to move in the operation
     uint256 reservesToMove = mocLibConfig.bucketTransferAmount(reserveTokenToRedeem, mocState.leverage(bucket));
     // Get interests to return for redemption
@@ -368,8 +363,7 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
   /**
     @dev Moves the daily amount of interest rate to C0 bucket
   */
-  function dailyInratePayment() public
-  onlyWhitelisted(msg.sender) onlyOnceADay() returns(uint256) {
+  function dailyInratePayment() public onlyWhitelisted(msg.sender) onlyOnceADay() returns (uint256) {
     uint256 toPay = dailyInrate();
     lastDailyPayBlock = block.number;
 
@@ -380,11 +374,11 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
     emit InrateDailyPay(toPay, mocState.daysToSettlement(), mocState.getBucketNReserve(BUCKET_C0));
   }
 
-  function isDailyEnabled() public view returns(bool) {
+  function isDailyEnabled() public view returns (bool) {
     return lastDailyPayBlock == 0 || block.number > lastDailyPayBlock + mocState.dayBlockSpan();
   }
 
-  function isRiskProInterestEnabled() public view returns(bool) {
+  function isRiskProInterestEnabled() public view returns (bool) {
     return lastRiskProInterestBlock == 0 || block.number > (lastRiskProInterestBlock + riskProInterestBlockSpan);
   }
 
@@ -393,7 +387,7 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
    * @return toPay interest in ReserveTokens [using reservePrecsion]
    * @return bucketBtnc0 RTBC on bucket0 used to calculate de interest [using reservePrecsion]
    */
-  function calculateRiskProHoldersInterest() public view returns(uint256, uint256) {
+  function calculateRiskProHoldersInterest() public view returns (uint256, uint256) {
     uint256 bucketBtnc0 = riskProxManager.getBucketNReserve(BUCKET_C0);
     uint256 toPay = (bucketBtnc0.mul(riskProRate).div(mocLibConfig.mocPrecision));
     return (toPay, bucketBtnc0);
@@ -403,9 +397,7 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
    * @dev Pays the RiskPro Holders interest rates
    * @return interest payed in ReserveTokens [using reservePrecsion]
    */
-  function payRiskProHoldersInterestPayment() public
-  onlyWhitelisted(msg.sender)
-  onlyWhenRiskProInterestsIsEnabled() returns(uint256) {
+  function payRiskProHoldersInterestPayment() public onlyWhitelisted(msg.sender) onlyWhenRiskProInterestsIsEnabled() returns (uint256) {
     (uint256 riskProInterest, uint256 bucketBtnc0) = calculateRiskProHoldersInterest();
     lastRiskProInterestBlock = block.number;
     emit RiskProHoldersInterestPay(riskProInterest, bucketBtnc0);
@@ -418,7 +410,7 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
     @param countAllDays Value that represents if the calculation will use all days or one day less
     @return Interest rate value [using mocPrecision]
    */
-  function inrateToSettlement(uint256 inrate, bool countAllDays) internal view returns(uint256) {
+  function inrateToSettlement(uint256 inrate, bool countAllDays) internal view returns (uint256) {
     uint256 dayCount = inrateDayCount(countAllDays);
 
     return inrate.mul(dayCount).div(mocLibConfig.dayPrecision);
@@ -431,7 +423,7 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
     @param redeemInterest Total value from which calculate interest [using reservePrecision]
     @return InterestsInBag * (RedeemInterests / FullRedeemInterest) [using reservePrecision]
   */
-  function calcProportionalInterestValue(bytes32 bucket, uint256 redeemInterest) internal view returns(uint256) {
+  function calcProportionalInterestValue(bytes32 bucket, uint256 redeemInterest) internal view returns (uint256) {
     uint256 fullRedeemInterest = calcFullRedeemInterestValue(bucket);
     uint256 interestsInBag = riskProxManager.getInrateBag(BUCKET_C0);
 
@@ -449,7 +441,7 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
     @param bucket Bucket to use to calculate interest
     @return Interests [using reservePrecision]
   */
-  function calcFullRedeemInterestValue(bytes32 bucket) internal view returns(uint256) {
+  function calcFullRedeemInterestValue(bytes32 bucket) internal view returns (uint256) {
     // Value in ReserveTokens of all RiskProxs in the bucket
     uint256 fullRiskProxReserveTokenValue = mocConverter.riskProxToResToken(riskProxManager.getBucketNRiskPro(bucket), bucket);
     // Interests to return if a redemption of all RiskProx is done
@@ -463,7 +455,7 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
     @param resTokensAmount Value of the operation from which calculates the inrate [using reservePrecision]
     @return Final bucket 0 StableToken amount
    */
-  function simulateStableTokenMovement(bytes32 bucket, uint256 resTokensAmount, bool onMinting) internal view returns(uint256) {
+  function simulateStableTokenMovement(bytes32 bucket, uint256 resTokensAmount, bool onMinting) internal view returns (uint256) {
     // Calculates stableTokens to move
     uint256 reserveTokenToMove = mocLibConfig.bucketTransferAmount(resTokensAmount, mocState.leverage(bucket));
     uint256 stableTokensToMove = mocConverter.resTokenToStableToken(reserveTokenToMove);
@@ -472,7 +464,10 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
       /* Should not happen when minting riskPro because it's
       not possible to mint more than max riskProx but is
       useful when trying to calculate inrate before minting */
-      return riskProxManager.getBucketNStableToken(BUCKET_C0) > stableTokensToMove ? riskProxManager.getBucketNStableToken(BUCKET_C0).sub(stableTokensToMove) : 0;
+      return
+        riskProxManager.getBucketNStableToken(BUCKET_C0) > stableTokensToMove
+          ? riskProxManager.getBucketNStableToken(BUCKET_C0).sub(stableTokensToMove)
+          : 0;
     } else {
       return riskProxManager.getBucketNStableToken(BUCKET_C0).add(Math.min(stableTokensToMove, riskProxManager.getBucketNStableToken(bucket)));
     }
@@ -484,10 +479,10 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
     @param countAllDays Value that represents if the calculation is based on mint or on redeem
     @return days [using dayPrecision]
    */
-  function inrateDayCount(bool countAllDays) internal view returns(uint256) {
+  function inrateDayCount(bool countAllDays) internal view returns (uint256) {
     uint256 daysToSettl = mocState.daysToSettlement();
 
-    if (daysToSettl < mocLibConfig.dayPrecision){
+    if (daysToSettl < mocLibConfig.dayPrecision) {
       return 0;
     }
 
