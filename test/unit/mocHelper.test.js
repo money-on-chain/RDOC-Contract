@@ -6,7 +6,7 @@ const testHelperBuilder = require('../mocHelper.js');
 
 let mocHelper;
 
-contract.skip('Unit Test: Moc Helper', async function([owner]) {
+contract('Unit Test: Moc Helper', async function([owner]) {
   before(async function() {
     mocHelper = await testHelperBuilder({ owner, useMock: true });
   });
