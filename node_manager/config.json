@@ -27,7 +27,7 @@
 
     },
     "mocTestnet": {
-      "uri": "http://localhost:4444",
+      "uri": "https://public-node.testnet.rsk.co",
       "network_id": 31,
       "accounts": [
         {
