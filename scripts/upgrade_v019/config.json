@@ -3,12 +3,29 @@
   "timeout_web3": 300,
   "gas_price": 60000000,
   "networks": {
+    "rdocTestnetAlpha": {
+      "uri": "https://public-node.testnet.rsk.co",
+      "chain_id": 31,
+      "accounts": [
+        {
+          "address": "0xA8f94D08D3D9C045fe0B86A953dF39B14206153c",
+          "private_key": ""
+        }
+      ],
+      "addresses": {
+        "governor": "0x4eAC4518e81B3A5198aADAb998D2610B46aAA609",
+        "upgradeDelegator": "0xCDAbFbF334A5F6BCe900D2f73470D1e6722365d8",
+        "MoC": "0x4512f4C1d984bbf8B7f7404EddFb1881cFA79EfD",
+        "MoCHelperLib": "0xabe1A7b54CF489eCD3fD5844F8aBFdF7e4DF5c74"
+      }
+
+    },
     "rdocTestnet": {
       "uri": "https://public-node.testnet.rsk.co",
       "chain_id": 31,
       "accounts": [
         {
-          "address": "0xE2929d888015EB568AFfa06aaB946923a7236Ad9",
+          "address": "0xC67D9eE30d2119A384E02de568BE80FE785074Ba",
           "private_key": ""
         }
       ],
@@ -16,7 +33,7 @@
         "governor": "0x4eAC4518e81B3A5198aADAb998D2610B46aAA609",
         "upgradeDelegator": "0xCDAbFbF334A5F6BCe900D2f73470D1e6722365d8",
         "MoC": "0x7e2F245F7dc8e78576ECB13AEFc0a101E9BE1AD3",
-        "MoCHelperLib": "0x90689057a29733C1DDa2EDE8Fc3727504c0CB96d"
+        "MoCHelperLib": "0xB44721cD90E9063953831685aB0372A98ECC5EF4"
       }
 
     },
@@ -25,15 +42,15 @@
       "chain_id": 30,
       "accounts": [
         {
-          "address": "0xEA14c08764c9e5F212c916E11a5c47Eaf92571e4",
+          "address": "0xC67D9eE30d2119A384E02de568BE80FE785074Ba",
           "private_key": ""
         }
       ],
       "addresses": {
         "governor": "0xC61F0392d5170214b5D93C0BC4c4354163aBC1f7",
         "upgradeDelegator": "0x5cE577f6Ec969CE9a282838D350206C52A6F338C",
-        "MoC": "0xf773B590aF754D597770937Fa8ea7AbDf2668370",
-        "MoCHelperLib": "0x4E1894debD18b470706A20aC8FE0cc2D9e904218"
+        "MoC": "0xCfF3fcaeC2352C672C38d77cb1a064B7D50ce7e1",
+        "MoCHelperLib": "0x8B8ccC595Fe732eC46Ae5c9cd269feb834d1C791"
       }
     }
 

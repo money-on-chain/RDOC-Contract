@@ -40,8 +40,8 @@ module.exports = {
     },
     mocTestnet: {
       // 0xC67D9eE30d2119A384E02de568BE80FE785074Ba
-      host: 'https://public-node.testnet.rsk.co',
-      provider: new HDWalletProvider(mnemonic, 'https://public-node.testnet.rsk.co'),
+      host: 'http://localhost:4444',
+      provider: new HDWalletProvider(mnemonic, 'http://localhost:4444'),
       network_id: '*',
       gasPrice: 60000000
     },
