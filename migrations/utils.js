@@ -31,10 +31,12 @@ const makeUtils = async (artifacts, networkName, config, owner, deployer) => {
 
   const { network, txParams } = await ConfigVariablesInitializer.initNetworkConfiguration({
     network: networkName,
-    from: owner
+    from: owner,
+    gasPrice: 9e8
   });
-  const options = { network, txParams };
+  const newTxParams = Object.assign({}, txParams, { gasPrice: 9e8 });
   let stableToken;
+  const options = { network, txParams: newTxParams, force: true, reupload: true };
   let riskPro;
   let riskProx;
   let mocSettlement;
@@ -99,7 +101,6 @@ const makeUtils = async (artifacts, networkName, config, owner, deployer) => {
     if (config.commissionSplitter) {
       return CommissionSplitter.at(config.commissionSplitter);
     }
-
     return CommissionSplitter.deployed();
   };
 
@@ -288,15 +289,26 @@ const makeUtils = async (artifacts, networkName, config, owner, deployer) => {
     };
   };
   const setGovernance = async () => {
+    console.log('getting proxy admin');
     const adminAddress = await proxyAdminContractAddress();
-    await setAdmin({ contractAlias: 'MoC', newAdmin: adminAddress, ...options });
+    console.log('admin address', adminAddress, options);
+    console.log('seting moc');
+    console.log(await setAdmin({ contractAlias: 'MoC', newAdmin: adminAddress, ...options }));
+    console.log('seting mocConnector');
     await setAdmin({ contractAlias: 'MoCConnector', newAdmin: adminAddress, ...options });
+    console.log('seting mocriskprox');
     await setAdmin({ contractAlias: 'MoCRiskProxManager', newAdmin: adminAddress, ...options });
+    console.log('seting mocburnout');
     await setAdmin({ contractAlias: 'MoCBurnout', newAdmin: adminAddress, ...options });
+    console.log('seting settlement');
     await setAdmin({ contractAlias: 'MoCSettlement', newAdmin: adminAddress, ...options });
+    console.log('seting mocconverter');
     await setAdmin({ contractAlias: 'MoCConverter', newAdmin: adminAddress, ...options });
+    console.log('seting mocstate');
     await setAdmin({ contractAlias: 'MoCState', newAdmin: adminAddress, ...options });
+    console.log('seting mocexchange');
     await setAdmin({ contractAlias: 'MoCExchange', newAdmin: adminAddress, ...options });
+    console.log('seting mocinrate');
     await setAdmin({ contractAlias: 'MoCInrate', newAdmin: adminAddress, ...options });
   };
 
