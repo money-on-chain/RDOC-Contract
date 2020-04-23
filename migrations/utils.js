@@ -31,12 +31,10 @@ const makeUtils = async (artifacts, networkName, config, owner, deployer) => {
 
   const { network, txParams } = await ConfigVariablesInitializer.initNetworkConfiguration({
     network: networkName,
-    from: owner,
-    gasPrice: 9e8
+    from: owner
   });
-  const newTxParams = Object.assign({}, txParams, { gasPrice: 9e8 });
   let stableToken;
-  const options = { network, txParams: newTxParams, force: true, reupload: true };
+  const options = { network, txParams, force: true, reupload: true };
   let riskPro;
   let riskProx;
   let mocSettlement;
