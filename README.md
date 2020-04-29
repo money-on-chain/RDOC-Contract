@@ -4,7 +4,6 @@ This is the Rif Dollar on Chain main contract project.
 
 ## Getting Started
 
-
 ### Install dependencies
 
 - Use nodejs v8.12: `nvm install 8.12 && nvm alias default 8.12`
@@ -18,7 +17,7 @@ You need a node to run contracts. Ganache cli for developing purpose
 
 - Run ganache-cli
 
-```npm run ganache-cli```
+`npm run ganache-cli`
 
 - Alternative: Globally
 
@@ -49,7 +48,6 @@ First run test node example:
 
 **Tests**
 
-
 - run: `npm run test`
 
 **Tests With Coverage**
@@ -60,25 +58,23 @@ First run test node example:
 ## Deploy develop
 
 (Truffle suit)[https://github.com/trufflesuite/truffle] is recommended to compile and deploy the contracts.
- 
+
 1.  Edit truffle.js and change add network changes and point to your
     ganache cli or rsk node under development network.
-    
-2. Edit migrations/config/config.json and make changes
 
-3. Run `npm run truffle-compile` to compile the code
+2.  Edit migrations/config/config.json and make changes
 
-4. Run `npm run migrate-development` to deploy the contracts
- 
+3.  Run `npm run truffle-compile` to compile the code
+
+4.  Run `npm run migrate-development` to deploy the contracts
 
 ## Deploy Testnet or Mainnet (not develop)
 
 To deploy on production we need anothers steps:
 
-1. Contract Governanza project already deployed, you can get it  (here)[https://github.com/money-on-chain/Areopagus-Governance] 
+1. Contract Governanza project already deployed, you can get it (here)[https://github.com/money-on-chain/Areopagus-Governance]
 
-2. Contract Oracle project already deployed, you can get it  (here)[https://github.com/money-on-chain/Amphiraos-Oracle]
-
+2. Contract Oracle project already deployed, you can get it (here)[https://github.com/money-on-chain/Amphiraos-Oracle]
 
 ### Deploy gobernanza
 
@@ -112,7 +108,6 @@ Give us something like this
 ```
 
 We have need to know our account private key. Mine: XXX
-
 
 Change truffle.js:
 
@@ -161,7 +156,7 @@ Write down the contract adresses we are going to use later
 Deployed governor in 0xC61F0392d5170214b5D93C0BC4c4354163aBC1f7
 Deployed stopper in 0x40662eD57284B4B541A42D347BE2447ABd1b119d
 Deployed admin in 0x009C51E1f6feDcDB8014Ea9AE1E39B6dbF2AC0EC
-Deployed delegator in 0x5cE577f6Ec969CE9a282838D350206C52A6F338C  
+Deployed delegator in 0x5cE577f6Ec969CE9a282838D350206C52A6F338C
 ```
 
 ### Deploy Rif Oracle
@@ -200,7 +195,6 @@ rskMainnet: {
       gasPrice: 60000000
     }
 ```
-
 
 Edit migrations/configs/config.json, fill with governor address and initial rif price
 
@@ -266,7 +260,6 @@ FeedFactory:    0x54878866F5324B56AEE9B6619a1e1A213B2fCC30
 ```
 
 MoCMedianizer is our oracle contract write down this address: 0x504EfCadFB020d6bBaeC8a5c5BB21453719d0E00
-
 
 ### Deploy RDOC Main Contract
 
@@ -362,9 +355,9 @@ Give us..., write down because adressess of the contracts
 }
 ```
 
-## Price Feeder 
+## Price Feeder
 
-To run your own price feeder on RDOC. Take a look on repository (page)[https://github.com/money-on-chain/price-feeder/tree/develop]  
+To run your own price feeder on RDOC. Take a look on repository (page)[https://github.com/money-on-chain/price-feeder/tree/develop]
 
 Clone price feeder repository
 
@@ -388,7 +381,7 @@ Install dependencies
 pip install -r requirements.txt
 ```
 
-Use this config as template  (https://github.com/money-on-chain/price-feeder/blob/develop/config_rdoc.json)[https://github.com/money-on-chain/price-feeder/blob/develop/config_rdoc.json]  
+Use this config as template (https://github.com/money-on-chain/price-feeder/blob/develop/config_rdoc.json)[https://github.com/money-on-chain/price-feeder/blob/develop/config_rdoc.json]  
 Change to correct addresses
 
 ```
@@ -397,7 +390,7 @@ Change to correct addresses
 "RIF_source_price_btc": "0x78c892Dc5b7139d0Ec1eF513C9E28eDfAA44f2d4"
 ```
 
-Then run 
+Then run
 
 ```
 python price_feeder.py --config=config_rdoc.json --network=local
@@ -408,7 +401,7 @@ python price_feeder.py --config=config_rdoc.json --network=local
 I'm going to use docker method.
 
 1. We need to have our account to sign transactions, also we need pk and funds. In my example I am going to use:
-0xbc6d77a5adfa6fb09c3d2cb8b4765d5729e7b8ba
+   0xbc6d77a5adfa6fb09c3d2cb8b4765d5729e7b8ba
 
 2. Initiate the process of whitelisting sending the address of the account from the step 1 to MOC team.
 
@@ -417,7 +410,7 @@ I'm going to use docker method.
 ```
 git clone https://github.com/money-on-chain/price-feeder
 cd price-feeder
-git checkout master 
+git checkout master
 ```
 
 4. Set the base config por our deployment in our case config_rdoc.json is our base
@@ -462,12 +455,14 @@ docker run -d \
 price_feeder
 ```
 
-
-
-
-
 ### Security and Audits
 
 [Deployed Contracts](Contracts_Verification.md)
+
+### Extra documentation
+
+To get to know the platform and its model better have a look at [this explanation](MoC.md)
+
+To integrate to our platform through our SC suite you can follow [our guides](integration.md)
 
 For more technical information you can see our [abi documentation](smart-contracts-abi.md)
