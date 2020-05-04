@@ -1245,6 +1245,7 @@ You can send it immediately to you so you can start using it right away. In orde
 ​
 This will leave you with a contract similar to the following
 ​​
+
 ```js
 pragma solidity 0.5.8;
 ​
@@ -1391,7 +1392,6 @@ When a transaction is mined, smart contracts can emit events and write logs to t
 
 In the following example we will show you how to find events that are emitted by Money On Chain smart contract in **RSK Testnet** blockchain with **truffle**.
 
-
 **Code example**
 
 ```js
@@ -1476,7 +1476,9 @@ npm install --save bignumber.js
 npm install --save web3
 npm install --save truffle-hdwallet-provider
 ```
+
 **Example**
+
 ```js
 const HDWalletProvider = require('truffle-hdwallet-provider');
 const BigNumber = require('bignumber.js');
@@ -1494,9 +1496,9 @@ const provider = new HDWalletProvider(mnemonic, endpoint);
 const web3 = new Web3(provider);
 
 //Contract addresses on testnet
-const mocContractAddress = '0x2820f6d4D199B8D8838A4B26F9917754B86a....';
-const mocInrateAddress = '0x76790f846FAAf44cf1B2D717d0A6c5f6f515....';
-const mocStateAddress = '0x0adb40132cB0ffcEf6ED81c26A1881e21410....';
+const mocContractAddress = '<contract-address>';
+const mocStateAddress = '<contract-address>';
+const reserveTokenAddress = '<contract-address>';
 const gasPrice = 60000000;
 
 const execute = async () => {
@@ -1511,18 +1513,11 @@ const execute = async () => {
    * Transforms BigNumbers into
    * @param {*} number
    */
-  const toContract = (number) => new BigNumber(number).toFixed(0);
 
   // Loading moc contract
   const moc = await getContract(MocAbi.abi, mocContractAddress);
   if (!moc) {
     throw Error('Can not find MoC contract.');
-  }
-
-  // Loading mocInrate contract. It is necessary to compute commissions
-  const mocInrate = await getContract(MoCInrateAbi.abi, mocInrateAddress);
-  if (!mocInrate) {
-    throw Error('Can not find MoC Inrate contract.');
   }
 
   // Loading mocState contract. It is necessary to compute max RIFP available to mint
@@ -1531,18 +1526,29 @@ const execute = async () => {
     throw Error('Can not find MoCState contract.');
   }
 
-  const mintRiskPro = async (rifAmount) => {
-    web3.eth.getAccounts().then(console.log);
-    const from = '0x088f4B1313D161D83B4D8A5EB90905C263ce0DbD';
-    // Computes commision value
-    const commissionValue = new BigNumber(
-      await mocInrate.methods.calcCommissionValue(rifAmount).call()
-    );
-    // Computes totalRifAmount to call mintRiskPro
-    const totalRifAmount = toContract(commissionValue.plus(rifAmount));
-    console.log(`Calling RiskProx minting with account: ${from} and amount: ${rifAmount}.`);
+  // Loading ReserveToken contract. It is necessary to set max available RIF to spend
+  const reserveToken = await getContract(ReserveToken.abi, reserveTokenAddress);
+  if (!reserveToken) {
+    throw Error('Can not find ReserveToken contract.');
+  }
+
+  const [from] = await web3.eth.getAccounts();
+
+  const setAllowance = async allowanceAmount =>{
+    const weiAmount = web3.utils.toWei(allowanceAmount, 'ether');
+    console.log(`Calling approve: ${weiAmount}, for address account: ${from}.`);
+    await reserveToken.methods.approve(mocContractAddress, weiAmount).send({ from, gasPrice });
+    const spendableBalance = await moc.methods.getAllowance(from).call();
+    console.log(`Spendable balance for account ${from} is ${spendableBalance}`);
+  }
+
+  const mintRiskPro = async (rifAmount, allowanceAmount) => {
+    const weiAmount = web3.utils.toWei(rifAmount, 'ether');
+    await setAllowance(allowanceAmount);
+
+    console.log(`Calling RPro minting with account: ${from} and amount: ${weiAmount}.`);
     const tx = moc.methods
-      .mintRiskPro(rifAmount)
+      .mintRiskPro(weiAmount)
       .send({ from, gasPrice }, function (error, transactionHash) {
         if (error) console.log(error);
         if (transactionHash) console.log('txHash: '.concat(transactionHash));
@@ -1551,17 +1557,16 @@ const execute = async () => {
     return tx;
   };
 
-  function logEnd() {
-    console.log('End Example');
-  }
-
   // Gets max RIFP available to mint
   const maxRiskProAvailable = await mocState.methods.maxMintRiskProAvalaible().call();
+
   console.log('Max Available RIFP: '.concat(maxRiskProAvailable.toString()));
-  const rifAmount = '50';
+  const rifAmount = '0.0005';
+  // before start minting RPro we need to set the allowance of RIF available to spend.
+  const allowanceAmount = '0.001';
 
   // Call mint
-  await mintRiskPro(rifAmount, logEnd);
+  await mintRiskPro(rifAmount, allowanceAmount);
 };
 
 execute()
@@ -1569,6 +1574,7 @@ execute()
   .catch((err) => {
     console.log('Error', err);
   });
+};
 ```
 
 ## Example code minting RIFPros with truffle
@@ -1591,11 +1597,13 @@ npm install --save web3
 ```
 
 **Example**
+
 ```js
 const Web3 = require('web3');
 //You must compile the smart contracts or use the official ABIs of the //repository
 const MocAbi = require('../../build/contracts/MoC.json');
 const MoCStateAbi = require('../../build/contracts/MoCState.json');
+const ReserveToken = require('../../build/contracts/ReserveToken.json');
 const truffleConfig = require('../../truffle');
 
 /**
@@ -1627,6 +1635,7 @@ const gasPrice = getGasPrice('rskTestnet');
 //Contract addresses on testnet
 const mocContractAddress = '<contract-address>';
 const mocStateAddress = '<contract-address>';
+const reserveTokenAddress = '<contract-address>';
 
 const execute = async () => {
   web3.eth.defaultGas = 2000000;
@@ -1654,13 +1663,30 @@ const execute = async () => {
     throw Error('Can not find MoCState contract.');
   }
 
-  const mintRiskPro = async (rifAmount) => {
-    const [from] = await web3.eth.getAccounts();
+  // Loading ReserveToken contract. It is necessary to set max available RIF to spend
+  const reserveToken = await getContract(ReserveToken.abi, reserveTokenAddress);
+  if (!reserveToken) {
+    throw Error('Can not find ReserveToken contract.');
+  }
+
+  const [from] = await web3.eth.getAccounts();
+
+  const setAllowance = async allowanceAmount => {
+    const weiAmount = web3.utils.toWei(allowanceAmount, 'ether');
+    console.log(`Calling approve: ${weiAmount}, for address account: ${from}.`);
+    await reserveToken.methods.approve(mocContractAddress, weiAmount).send({ from, gasPrice });
+    const spendableBalance = await moc.methods.getAllowance(from).call();
+    console.log(`Spendable balance for account ${from} is ${spendableBalance}`);
+  };
+
+  const mintRiskPro = async (rifAmount, allowanceAmount) => {
     const weiAmount = web3.utils.toWei(rifAmount, 'ether');
-    console.log(`Calling RPro minting with account: ${from} and amount: ${rifAmount}.`);
+    await setAllowance(allowanceAmount);
+
+    console.log(`Calling RPro minting with account: ${from} and amount: ${weiAmount}.`);
     const tx = moc.methods
       .mintRiskPro(weiAmount)
-      .send({ from, gasPrice }, function (error, transactionHash) {
+      .send({ from, gasPrice }, function(error, transactionHash) {
         if (error) console.log(error);
         if (transactionHash) console.log('txHash: '.concat(transactionHash));
       });
@@ -1668,25 +1694,25 @@ const execute = async () => {
     return tx;
   };
 
-  function logEnd() {
-    console.log('End Example');
-  }
-
   // Gets max RIFP available to mint
   const maxRiskProAvailable = await mocState.methods.maxMintRiskProAvalaible().call();
+
   console.log('Max Available RIFP: '.concat(maxRiskProAvailable.toString()));
-  const rifAmount = '50';
+  const rifAmount = '0.0005';
+  // before start minting RPro we need to set the allowance of RIF available to spend.
+  const allowanceAmount = '0.001';
 
   // Call mint
-  await mintRiskPro(rifAmount, logEnd);
+  await mintRiskPro(rifAmount, allowanceAmount);
 };
 
 execute()
   .then(() => console.log('Completed'))
-  .catch((err) => {
+  .catch(err => {
     console.log('Error', err);
   });
 ```
+
 ## Example code redeeming RIFPros
 
 In the following example we will show how to:
@@ -1711,7 +1737,9 @@ cd example-redeem-riskpro
 npm install --save web3
 npm install --save truffle-hdwallet-provider
 ```
+
 **Example**
+
 ```js
 const HDWalletProvider = require('truffle-hdwallet-provider');
 const Web3 = require('web3');
@@ -1821,7 +1849,9 @@ Then we add the necessary dependencies to run the project
 cd example-redeem-riskpro
 npm install --save web3
 ```
+
 **Example**
+
 ```js
 const Web3 = require('web3');
 //You must compile the smart contracts or use the official ABIs of the //repository
@@ -1927,6 +1957,7 @@ execute()
     console.log('Error', err);
   });
 ```
+
 ## Example code minting RDOC with truffle
 
 In the following example we will show how to:
@@ -1950,12 +1981,15 @@ Then we add the necessary dependencies to run the project
 cd example-mint-stabletoken
 npm install --save web3
 ```
+
 **Example**
+
 ```js
 const Web3 = require('web3');
 //You must compile the smart contracts or use the official ABIs of the //repository
 const MocAbi = require('../../build/contracts/MoC.json');
 const MoCStateAbi = require('../../build/contracts/MoCState.json');
+const ReserveToken = require('../../build/contracts/ReserveToken.json');
 const truffleConfig = require('../../truffle');
 
 /**
@@ -1987,6 +2021,7 @@ const gasPrice = getGasPrice('rskTestnet');
 //Contract addresses on testnet
 const mocContractAddress = '<contract-address>';
 const mocStateAddress = '<contract-address>';
+const reserveTokenAddress = '<contract-address>';
 
 const execute = async () => {
   web3.eth.defaultGas = 2000000;
@@ -1997,7 +2032,6 @@ const execute = async () => {
    * @param {String} contractAddress
    */
   const getContract = async (abi, contractAddress) => new web3.eth.Contract(abi, contractAddress);
-
 
   // Loading moc contract
   const moc = await getContract(MocAbi.abi, mocContractAddress);
@@ -2011,13 +2045,29 @@ const execute = async () => {
     throw Error('Can not find MoCState contract.');
   }
 
-  const mintDoc = async rifAmount => {
-    const [from] = await web3.eth.getAccounts();
+  // Loading ReserveToken contract. It is necessary to set max available RIF to spend
+  const reserveToken = await getContract(ReserveToken.abi, reserveTokenAddress);
+  if (!reserveToken) {
+    throw Error('Can not find ReserveToken contract.');
+  }
+
+  const [from] = await web3.eth.getAccounts();
+
+  const setAllowance = async allowanceAmount => {
+    const weiAmount = web3.utils.toWei(allowanceAmount, 'ether');
+    console.log(`Calling approve: ${weiAmount}, for address account: ${from}.`);
+    await reserveToken.methods.approve(mocContractAddress, weiAmount).send({ from, gasPrice });
+    const spendableBalance = await moc.methods.getAllowance(from).call();
+    console.log(`Spendable balance for account ${from} is: ${spendableBalance}`);
+  };
+
+  const mintDoc = async (rifAmount, allowanceAmount) => {
     const weiAmount = web3.utils.toWei(rifAmount, 'ether');
+    await setAllowance(allowanceAmount);
     console.log(`Calling RDoc minting, account: ${from}, amount: ${weiAmount}.`);
     moc.methods
       .mintStableToken(weiAmount)
-      .send({ from, value: totalBtcAmount, gasPrice }, function(error, transactionHash) {
+      .send({ from, gasPrice }, function(error, transactionHash) {
         if (error) console.log(error);
         if (transactionHash) console.log('txHash: '.concat(transactionHash));
       })
@@ -2033,12 +2083,13 @@ const execute = async () => {
   // Gets max BPRO available to mint
   const getAbsoluteMaxRDoc = await mocState.methods.absoluteMaxStableToken().call();
   const rifAmount = '0.00001';
-  
+  //// before start minting RDoc we need to set the allowance of RIF available to spend.
+  const allowanceAmount = '0.001';
+
   console.log('=== Max RDoc amount available to mint: ', getAbsoluteMaxRDoc.toString());
-  console.log('=== RIFs that are gonna be minted:  ', rifAmount);
 
   // Call mint
-  await mintDoc(rifAmount);
+  await mintDoc(rifAmount, allowanceAmount);
 };
 
 execute()
@@ -2047,6 +2098,7 @@ execute()
     console.log('Error', err);
   });
 ```
+
 ## Example code redeeming Free RDOC with truffle
 
 You can see [here](#redeeming-rdocs) how RDOC's redeemption works.
@@ -2072,7 +2124,9 @@ Then we add the necessary dependencies to run the project
 cd example-redeem-free-stabletoken
 npm install --save web3
 ```
+
 **Example**
+
 ```js
 const Web3 = require('web3');
 //You must compile the smart contracts or use the official ABIs of the //repository
@@ -2158,7 +2212,6 @@ const execute = async () => {
         console.log(receipt);
       })
       .on('error', console.error);
-
   };
 
   const rDocAmount = '10000';
@@ -2166,7 +2219,7 @@ const execute = async () => {
   const userRDocBalance = await stableToken.methods.balanceOf(from).call();
   const finalDocAmount = Math.min(freeRDoc, userRDocBalance);
   console.log('=== User RDOC balance: ', userRDocBalance.toString());
-  console.log('=== Free RDOC: ',freeRDoc.toString());
+  console.log('=== Free RDOC: ', freeRDoc.toString());
   console.log('=== Max Available RDOC to redeem: ', finalDocAmount.toString());
 
   // Call redeem
@@ -2179,6 +2232,7 @@ execute()
     console.log('Error', err);
   });
 ```
+
 ## Example redeeming RDOC Request with Truffle
 
 You can see [here](#redeeming-rdocs) how RDOC's redeemption works.
@@ -2200,7 +2254,9 @@ Then we add the necessary dependencies to run the project
 cd example-redeem-stabletoken-request
 npm install --save web3
 ```
+
 **Example**
+
 ```js
 const Web3 = require('web3');
 //You must compile the smart contracts or use the official ABIs of the //repository
@@ -2251,7 +2307,6 @@ const execute = async () => {
     throw Error('Can not find MoC contract.');
   }
 
-
   const redeemRDocRequest = async rDocAmount => {
     const [from] = await web3.eth.getAccounts();
     const weiAmount = web3.utils.toWei(rDocAmount, 'ether');
@@ -2283,7 +2338,8 @@ execute()
   .catch(err => {
     console.log('Error', err);
   });
-  ```
+```
+
 ## Example redeeming all DOC with Truffle
 
 You can see [here](#redeeming-rdocs) how RDOC's redeemption works.
@@ -2305,7 +2361,9 @@ Then we add the necessary dependencies to run the project
 cd example-redeem-all-stabletoken
 npm install --save web3
 ```
+
 **Example**
+
 ```js
 const Web3 = require('web3');
 //You must compile the smart contracts or use the official ABIs of the //repository
@@ -2356,7 +2414,6 @@ const execute = async () => {
     throw Error('Can not find MoC contract.');
   }
 
-
   const redeemAllRDoc = async () => {
     const [from] = await web3.eth.getAccounts();
 
@@ -2386,6 +2443,7 @@ execute()
     console.log('Error', err);
   });
 ```
+
 ## Example minting RIF2X with Truffle
 
 In the following example we will learn how to:
@@ -2408,12 +2466,15 @@ Then we add the necessary dependencies to run the project
 cd example-mint-riskproxtoken
 npm install --save web3
 ```
+
 **Example**
+
 ```js
 const Web3 = require('web3');
 //You must compile the smart contracts or use the official ABIs of the //repository
 const Moc = require('../../build/contracts/MoC.json');
 const MoCState = require('../../build/contracts/MoCState.json');
+const ReserveToken = require('../../build/contracts/ReserveToken.json');
 const truffleConfig = require('../../truffle');
 
 /**
@@ -2445,6 +2506,7 @@ const gasPrice = getGasPrice('rskTestnet');
 //Contract addresses on testnet
 const mocContractAddress = '<contract-address>';
 const mocStateAddress = '<contract-address>';
+const reserveTokenAddress = '<contract-address>';
 
 const execute = async () => {
   web3.eth.defaultGas = 2000000;
@@ -2464,15 +2526,31 @@ const execute = async () => {
     throw Error('Can not find MoC contract.');
   }
 
-  // Loading mocState contract. It is necessary to compute max RIF2X available to mint
+  // Loading mocState contract. It is necessary to compute max BPRO available to mint
   const mocState = await getContract(MoCState.abi, mocStateAddress);
   if (!mocState) {
     throw Error('Can not find MoCState contract.');
   }
 
-  const mintRif2x = async rifAmount => {
-    const [from] = await web3.eth.getAccounts();
+  // Loading ReserveToken contract. It is necessary to set max available RIF to spend
+  const reserveToken = await getContract(ReserveToken.abi, reserveTokenAddress);
+  if (!reserveToken) {
+    throw Error('Can not find ReserveToken contract.');
+  }
+
+  const [from] = await web3.eth.getAccounts();
+
+  const setAllowance = async allowanceAmount =>{
+    const weiAmount = web3.utils.toWei(allowanceAmount, 'ether');
+    console.log(`Calling approve: ${weiAmount}, for address account: ${from}.`);
+    await reserveToken.methods.approve(mocContractAddress, weiAmount).send({ from, gasPrice });
+    const spendableBalance = await moc.methods.getAllowance(from).call();
+    console.log(`Spendable balance for account ${from} is ${spendableBalance}`);
+  }
+
+  const mintRif2x = async (rifAmount, allowanceAmount) => {
     const weiAmount = web3.utils.toWei(rifAmount, 'ether');
+    await setAllowance(allowanceAmount);
     console.log(`Calling mint RIF2X with ${rifAmount} RIFs with account: ${from}.`);
     moc.methods
       .mintRiskProx(strToBytes32(bucketX2), weiAmount)
@@ -2489,13 +2567,23 @@ const execute = async () => {
       .on('error', console.error);
   };
 
+  // before start minting RIF2X we need to set the allowance of RIF available to spend.
+  const allowanceAmount = '0.001';
   const rifToMint = '0.00001';
   // Gets max RIF2X amount available to mint
   const maxRif2xToMint = await mocState.methods.maxRiskProx(strToBytes32(bucketX2)).call();
   console.log('=== Max Available RIF2X to mint: '.concat(maxRif2xToMint.toString()));
 
   // Call mint
-  await mintRif2x(rifToMint);
+  await mintRif2x(rifToMint,allowanceAmount);
+};
+
+execute()
+  .then(() => console.log('Completed'))
+  .catch(err => {
+    console.log('Error', err);
+  });
+
 };
 
 execute()
@@ -2504,6 +2592,7 @@ execute()
     console.log('Error', err);
   });
 ```
+
 ## Example redeeming RIF2X with Truffle
 
 In the following script example we will learn how to:
@@ -2525,7 +2614,9 @@ Then we add the necessary dependencies to run the project
 cd example-redeem-riskproxtoken
 npm install --save web3
 ```
+
 **Example**
+
 ```js
 const Web3 = require('web3');
 //You must compile the smart contracts or use the official ABIs of the //repository
