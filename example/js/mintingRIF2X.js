@@ -78,7 +78,7 @@ const execute = async () => {
   };
 
   const rifToMint = '0.00001';
-  // Gets max BTC value available to mint BPROX2
+  // Gets max RIF2X amount available to mint
   const maxRif2xToMint = await mocState.methods.maxRiskProx(strToBytes32(bucketX2)).call();
   console.log('=== Max Available RIF2X to mint: '.concat(maxRif2xToMint.toString()));
 

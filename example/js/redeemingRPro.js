@@ -52,7 +52,7 @@ const execute = async () => {
     throw Error('Can not find MoC contract.');
   }
 
-  // Loading mocState contract. It is necessary to compute absolute max BPRO
+  // Loading mocState contract. It is necessary to compute absolute max RPRO
   const mocState = await getContract(MoCState.abi, mocStateAddress);
   if (!mocState) {
     throw Error('Can not find MoCState contract.');
