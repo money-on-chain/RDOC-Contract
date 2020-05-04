@@ -1342,11 +1342,9 @@ In the following example we will show how to invoke the mintRiskPro function of 
 
 First we create a new node project.
 
-````
-
+```
 mkdir example-mint-riskpro
 node init
-
 ```
 
 Then we add the necessary dependencies to run the project
@@ -1356,8 +1354,7 @@ cd example-mint-riskpro
 npm install --save bignumber.js
 npm install --save web3
 npm install --save truffle-hdwallet-provider
-
-````
+```
 
 ```js
 const HDWalletProvider = require('truffle-hdwallet-provider');
@@ -1449,6 +1446,594 @@ const execute = async () => {
 execute()
   .then(() => console.log('Completed'))
   .catch((err) => {
+    console.log('Error', err);
+  });
+```
+## Example code redeeming RIFPros with truffle
+
+In the following example we will show how to:
+
+- Get the maximum amount of RIFPro.
+- Get user BPRO balance.
+- Redeem BPROs.
+
+We will use the TestNet network.
+You can find code examples into _/examples_ dir.
+First we create a new node project.
+
+```
+mkdir example-redeem-riskpro
+node init
+```
+
+Then we add the necessary dependencies to run the project
+
+```
+cd example-redeem-riskpro
+npm install --save web3
+```
+
+```js
+const Web3 = require('web3');
+//You must compile the smart contracts or use the official ABIs of the //repository
+const Moc = require('../../build/contracts/MoC.json');
+const MoCState = require('../../build/contracts/MoCState.json');
+const RiskProToken = require('../../build/contracts/RiskProToken.json');
+const truffleConfig = require('../../truffle');
+
+/**
+ * Get a provider from truffle.js file
+ * @param {String} network
+ */
+const getDefaultProvider = network =>
+  truffleConfig.networks[network].provider || truffleConfig.networks[network].endpoint;
+
+/**
+ * Get a gasPrice from truffle.js file
+ * @param {String} network
+ */
+const getGasPrice = network => truffleConfig.networks[network].gasPrice || 60000000;
+
+/**
+ * Get a new web3 instance from truffle.js file
+ */
+const getWeb3 = network => {
+  const provider = getDefaultProvider(network);
+  return new Web3(provider, null, {
+    transactionConfirmationBlocks: 1
+  });
+};
+
+const web3 = getWeb3('rskTestnet');
+const gasPrice = getGasPrice('rskTestnet');
+
+//Contract addresses on testnet
+const mocContractAddress = '<contract-address>';
+const mocStateAddress = '<contract-address>';
+const riskProTokenAddress = '<contract-address>';
+
+const execute = async () => {
+  web3.eth.defaultGas = 2000000;
+
+  /**
+   * Loads an specified contract
+   * @param {ContractABI} abi
+   * @param {String} contractAddress
+   */
+  const getContract = async (abi, contractAddress) => new web3.eth.Contract(abi, contractAddress);
+
+  // Loading moc contract
+  const moc = await getContract(Moc.abi, mocContractAddress);
+  if (!moc) {
+    throw Error('Can not find MoC contract.');
+  }
+
+  // Loading mocState contract. It is necessary to compute absolute max BPRO
+  const mocState = await getContract(MoCState.abi, mocStateAddress);
+  if (!mocState) {
+    throw Error('Can not find MoCState contract.');
+  }
+
+  // Loading BProToken contract. It is necessary to compute user balance
+  const riskProToken = await getContract(RiskProToken.abi, riskProTokenAddress);
+  if (!riskProToken) {
+    throw Error('Can not find RiskProToken contract.');
+  }
+
+  const [from] = await web3.eth.getAccounts();
+
+  const redeemRPro = async rproAmount => {
+    const weiAmount = web3.utils.toWei(rproAmount, 'ether');
+    console.log(`Calling redeem RPro with account: ${from} and amount: ${weiAmount}.`);
+    moc.methods
+      .redeemRiskPro(weiAmount)
+      .send({ from, gasPrice }, function(error, transactionHash) {
+        if (error) console.log(error);
+        if (transactionHash) console.log('txHash: '.concat(transactionHash));
+      })
+      .on('transactionHash', function(hash) {
+        console.log('TxHash: '.concat(hash));
+      })
+      .on('receipt', function(receipt) {
+        console.log(receipt);
+      })
+      .on('error', console.error);
+  };
+
+  const getAbsoluteMaxRpro = await mocState.methods.absoluteMaxRiskPro().call();
+  const userAmount = await riskProToken.methods.balanceOf(from).call();
+
+  console.log('=== Max amount of RPro to redeem: ', getAbsoluteMaxRpro.toString());
+  console.log('=== User RPro Balance: ', userAmount.toString());
+
+  const rproAmount = '0.00001';
+
+  // Call redeem
+  await redeemRPro(rproAmount);
+};
+
+execute()
+  .then(() => console.log('Completed'))
+  .catch(err => {
+    console.log('Error', err);
+  });
+```
+## Example code minting RDOC with truffle
+
+In the following example we will show how to:
+
+- Get the maximum amount of RDOC available to mint.
+- Mint RDOCs.
+
+You can find code examples into _/examples_ dir.
+
+We will use the TestNet network.
+First we create a new node project.
+
+```
+mkdir example-mint-stabletoken
+node init
+```
+
+Then we add the necessary dependencies to run the project
+
+```
+cd example-mint-stabletoken
+npm install --save web3
+```
+
+```js
+const Web3 = require('web3');
+//You must compile the smart contracts or use the official ABIs of the //repository
+const MocAbi = require('../../build/contracts/MoC.json');
+const MoCStateAbi = require('../../build/contracts/MoCState.json');
+const truffleConfig = require('../../truffle');
+
+/**
+ * Get a provider from truffle.js file
+ * @param {String} network
+ */
+const getDefaultProvider = network =>
+  truffleConfig.networks[network].provider || truffleConfig.networks[network].endpoint;
+
+/**
+ * Get a gasPrice from truffle.js file
+ * @param {String} network
+ */
+const getGasPrice = network => truffleConfig.networks[network].gasPrice || 60000000;
+
+/**
+ * Get a new web3 instance from truffle.js file
+ */
+const getWeb3 = network => {
+  const provider = getDefaultProvider(network);
+  return new Web3(provider, null, {
+    transactionConfirmationBlocks: 1
+  });
+};
+
+const web3 = getWeb3('rskTestnet');
+const gasPrice = getGasPrice('rskTestnet');
+
+//Contract addresses on testnet
+const mocContractAddress = '<contract-address>';
+const mocStateAddress = '<contract-address>';
+
+const execute = async () => {
+  web3.eth.defaultGas = 2000000;
+
+  /**
+   * Loads an specified contract
+   * @param {ContractABI} abi
+   * @param {String} contractAddress
+   */
+  const getContract = async (abi, contractAddress) => new web3.eth.Contract(abi, contractAddress);
+
+
+  // Loading moc contract
+  const moc = await getContract(MocAbi.abi, mocContractAddress);
+  if (!moc) {
+    throw Error('Can not find MoC contract.');
+  }
+
+  // Loading mocState contract. It is necessary to compute max RDoc available to mint
+  const mocState = await getContract(MoCStateAbi.abi, mocStateAddress);
+  if (!mocState) {
+    throw Error('Can not find MoCState contract.');
+  }
+
+  const mintDoc = async rifAmount => {
+    const [from] = await web3.eth.getAccounts();
+    const weiAmount = web3.utils.toWei(rifAmount, 'ether');
+    console.log(`Calling RDoc minting, account: ${from}, amount: ${weiAmount}.`);
+    moc.methods
+      .mintStableToken(weiAmount)
+      .send({ from, value: totalBtcAmount, gasPrice }, function(error, transactionHash) {
+        if (error) console.log(error);
+        if (transactionHash) console.log('txHash: '.concat(transactionHash));
+      })
+      .on('transactionHash', function(hash) {
+        console.log('TxHash: '.concat(hash));
+      })
+      .on('receipt', function(receipt) {
+        console.log(receipt);
+      })
+      .on('error', console.error);
+  };
+
+  // Gets max BPRO available to mint
+  const getAbsoluteMaxRDoc = await mocState.methods.absoluteMaxStableToken().call();
+  const rifAmount = '0.00001';
+  
+  console.log('=== Max RDoc amount available to mint: ', getAbsoluteMaxRDoc.toString());
+  console.log('=== RIFs that are gonna be minted:  ', rifAmount);
+
+  // Call mint
+  await mintDoc(rifAmount);
+};
+
+execute()
+  .then(() => console.log('Completed'))
+  .catch(err => {
+    console.log('Error', err);
+  });
+```
+## Example code redeeming Free RDOC with truffle
+
+You can see [here](#redeeming-rdocs) how RDOC's redeemption works.
+In the following example we will show how to:
+
+- Get the maximum amount of free RDOC available to redeem.
+- Get RDOC balance of an account.
+- Redeem RDOCs.
+
+You can find code examples into _/examples_ dir.
+
+We will use the TestNet network.
+First we create a new node project.
+
+```
+mkdir example-redeem-free-stabletoken
+node init
+```
+
+Then we add the necessary dependencies to run the project
+
+```
+cd example-redeem-free-stabletoken
+npm install --save web3
+```
+
+```js
+const Web3 = require('web3');
+//You must compile the smart contracts or use the official ABIs of the //repository
+const MoC = require('../../build/contracts/MoC.json');
+const MocState = require('../../build/contracts/MoCState.json');
+const StableToken = require('../../build/contracts/StableToken.json');
+const truffleConfig = require('../../truffle');
+/**
+ * Get a provider from truffle.js file
+ * @param {String} network
+ */
+const getDefaultProvider = network =>
+  truffleConfig.networks[network].provider || truffleConfig.networks[network].endpoint;
+
+/**
+ * Get a gasPrice from truffle.js file
+ * @param {String} network
+ */
+const getGasPrice = network => truffleConfig.networks[network].gasPrice || 60000000;
+
+/**
+ * Get a new web3 instance from truffle.js file
+ */
+const getWeb3 = network => {
+  const provider = getDefaultProvider(network);
+  return new Web3(provider, null, {
+    transactionConfirmationBlocks: 1
+  });
+};
+
+const web3 = getWeb3('rskTestnet');
+const gasPrice = getGasPrice('rskTestnet');
+
+//Contract addresses on testnet
+const mocAddress = '<contract-address>';
+const mocStateAddress = '<contract-address>';
+const stableTokenAddress = '<contract-address>';
+
+const execute = async () => {
+  web3.eth.defaultGas = 2000000;
+
+  /**
+   * Loads an specified contract
+   * @param {ContractABI} abi
+   * @param {String} contractAddress
+   */
+  const getContract = async (abi, contractAddress) => new web3.eth.Contract(abi, contractAddress);
+
+  // Loading MoC contract
+  const moc = await getContract(MoC.abi, mocAddress);
+  if (!moc) {
+    throw Error('Can not find MoC contract.');
+  }
+
+  // Loading mocState contract. It is necessary to compute freeDoc
+  const mocState = await getContract(MocState.abi, mocStateAddress);
+  if (!mocState) {
+    throw Error('Can not find MoCState contract.');
+  }
+
+  // Loading DocToken contract. It is necessary to compute user balance
+  const stableToken = await getContract(StableToken.abi, stableTokenAddress);
+  if (!stableToken) {
+    throw Error('Can not find StableToken contract.');
+  }
+
+  const [from] = await web3.eth.getAccounts();
+
+  const redeemFreeRDoc = async rDocAmount => {
+    const weiAmount = web3.utils.toWei(rDocAmount, 'ether');
+
+    console.log(`Calling redeem free RDoc, account: ${from}, amount: ${weiAmount}.`);
+    moc.methods
+      .redeemFreeStableToken(weiAmount)
+      .send({ from, gasPrice }, function(error, transactionHash) {
+        if (error) console.log(error);
+        if (transactionHash) console.log('txHash: '.concat(transactionHash));
+      })
+      .on('transactionHash', function(hash) {
+        console.log('TxHash: '.concat(hash));
+      })
+      .on('receipt', function(receipt) {
+        console.log(receipt);
+      })
+      .on('error', console.error);
+
+  };
+
+  const rDocAmount = '10000';
+  const freeRDoc = await mocState.methods.freeStableTokeneDoc().call();
+  const userRDocBalance = await stableToken.methods.balanceOf(from).call();
+  const finalDocAmount = Math.min(freeRDoc, userRDocBalance);
+  console.log('=== User RDOC balance: ', userRDocBalance.toString());
+  console.log('=== Free RDOC: ',freeRDoc.toString());
+  console.log('=== Max Available RDOC to redeem: ', finalDocAmount.toString());
+
+  // Call redeem
+  await redeemFreeRDoc(rDocAmount);
+};
+
+execute()
+  .then(() => console.log('Completed'))
+  .catch(err => {
+    console.log('Error', err);
+  });
+```
+## Example redeeming DOC Request using Truffle
+
+You can see [here](#redeeming-rdocs) how RDOC's redeemption works.
+In the following example we will show how to invoke redeemStableTokenRequest using Money on Chain contract. We
+will use TestNet network.
+
+You can find code examples into _/examples_ dir.
+
+First we create a new node project.
+
+```
+mkdir example-redeem-stabletoken
+node init
+```
+
+Then we add the necessary dependencies to run the project
+
+```
+cd example-redeem-stabletoken
+npm install --save web3
+```
+
+```js
+const Web3 = require('web3');
+//You must compile the smart contracts or use the official ABIs of the //repository
+const MoC = require('../../build/contracts/MoC.json');
+const truffleConfig = require('../../truffle');
+/**
+ * Get a provider from truffle.js file
+ * @param {String} network
+ */
+const getDefaultProvider = network =>
+  truffleConfig.networks[network].provider || truffleConfig.networks[network].endpoint;
+
+/**
+ * Get a gasPrice from truffle.js file
+ * @param {String} network
+ */
+const getGasPrice = network => truffleConfig.networks[network].gasPrice || 60000000;
+
+/**
+ * Get a new web3 instance from truffle.js file
+ */
+const getWeb3 = network => {
+  const provider = getDefaultProvider(network);
+  return new Web3(provider, null, {
+    transactionConfirmationBlocks: 1
+  });
+};
+
+const web3 = getWeb3('rskTestnet');
+const gasPrice = getGasPrice('rskTestnet');
+
+//Loading MoC address on testnet
+const mocAddress = '<contract-address>';
+
+const execute = async () => {
+  web3.eth.defaultGas = 2000000;
+
+  /**
+   * Loads an specified contract
+   * @param {ContractABI} abi
+   * @param {String} contractAddress
+   */
+  const getContract = async (abi, contractAddress) => new web3.eth.Contract(abi, contractAddress);
+
+  // Loading MoC contract
+  const moc = await getContract(MoC.abi, mocAddress);
+  if (!moc) {
+    throw Error('Can not find MoC contract.');
+  }
+
+
+  const redeemRDocRequest = async rDocAmount => {
+    const [from] = await web3.eth.getAccounts();
+    const weiAmount = web3.utils.toWei(rDocAmount, 'ether');
+
+    console.log(`Calling redeem RDoc request, account: ${from}, amount: ${weiAmount}.`);
+    moc.methods
+      .redeemStableTokenRequest(weiAmount)
+      .send({ from, gasPrice }, function(error, transactionHash) {
+        if (error) console.log(error);
+        if (transactionHash) console.log('txHash: '.concat(transactionHash));
+      })
+      .on('transactionHash', function(hash) {
+        console.log('TxHash: '.concat(hash));
+      })
+      .on('receipt', function(receipt) {
+        console.log(receipt);
+      })
+      .on('error', console.error);
+  };
+
+  const rDocAmount = '10000';
+
+  // Call redeem
+  await redeemRDocRequest(rDocAmount);
+};
+
+execute()
+  .then(() => console.log('Completed'))
+  .catch(err => {
+    console.log('Error', err);
+  });
+  ```
+## Example redeeming all DOC using Truffle
+
+You can see [here](#redeeming-rdocs) how RDOC's redeemption works.
+In the following example we will show how to invoke redeemAllStableToken using Money on Chain contract. We
+will use TestNet network.
+
+You can find code examples into _/examples_ dir.
+
+First we create a new node project.
+
+```
+mkdir example-redeem-all-stabletoken
+node init
+```
+
+Then we add the necessary dependencies to run the project
+
+```
+cd example-redeem-all-stabletoken
+npm install --save web3
+```
+
+```js
+const Web3 = require('web3');
+//You must compile the smart contracts or use the official ABIs of the //repository
+const MoC = require('../../build/contracts/MoC.json');
+const truffleConfig = require('../../truffle');
+/**
+ * Get a provider from truffle.js file
+ * @param {String} network
+ */
+const getDefaultProvider = network =>
+  truffleConfig.networks[network].provider || truffleConfig.networks[network].endpoint;
+
+/**
+ * Get a gasPrice from truffle.js file
+ * @param {String} network
+ */
+const getGasPrice = network => truffleConfig.networks[network].gasPrice || 60000000;
+
+/**
+ * Get a new web3 instance from truffle.js file
+ */
+const getWeb3 = network => {
+  const provider = getDefaultProvider(network);
+  return new Web3(provider, null, {
+    transactionConfirmationBlocks: 1
+  });
+};
+
+const web3 = getWeb3('rskTestnet');
+const gasPrice = getGasPrice('rskTestnet');
+
+// Loading MoC address on testnet
+const mocAddress = '<contract-address>';
+
+const execute = async () => {
+  web3.eth.defaultGas = 2000000;
+
+  /**
+   * Loads an specified contract
+   * @param {ContractABI} abi
+   * @param {String} contractAddress
+   */
+  const getContract = async (abi, contractAddress) => new web3.eth.Contract(abi, contractAddress);
+
+  // Loading MoC contract
+  const moc = await getContract(MoC.abi, mocAddress);
+  if (!moc) {
+    throw Error('Can not find MoC contract.');
+  }
+
+
+  const redeemAllRDoc = async () => {
+    const [from] = await web3.eth.getAccounts();
+
+    console.log(`Calling redeem all RDoc.`);
+    moc.methods
+      .redeemAllStableToken()
+      .send({ from, gasPrice }, function(error, transactionHash) {
+        if (error) console.log(error);
+        if (transactionHash) console.log('txHash: '.concat(transactionHash));
+      })
+      .on('transactionHash', function(hash) {
+        console.log('TxHash: '.concat(hash));
+      })
+      .on('receipt', function(receipt) {
+        console.log(receipt);
+      })
+      .on('error', console.error);
+  };
+
+  // Call redeem
+  await redeemAllRDoc();
+};
+
+execute()
+  .then(() => console.log('Completed'))
+  .catch(err => {
     console.log('Error', err);
   });
 ```
