@@ -16,7 +16,15 @@
     1.  [Using RSK nodes](#using-rsk-nodes)
     1.  [Using web3](#using-web3)
     1.  [Official Money on Chain ABIS](#official-money-on-chain-abis)
+    1.  [Events](#events)
     1.  [Example code minting RIFPros](#example-code-minting-rifpros)
+    1.  [Example code redeeming RIFPros](#example-code-redeeming-rifpros)
+    1.  [Example code minting RDOCS](#example-code-minting-rdocs)
+    1.  [Example code redeeming RDOCS](#example-code-redeeming-rdocs)
+    1.  [Example code redeeming free RDOCS](#example-code-redeeming-free-rdocs)
+    1.  [Example code redeeming all RDOCS](#example-code-redeeming-all-rdocs)
+    1.  [Example code minting RIF2X](#example-code-minting-rif2x)
+    1.  [Example code redeeming RIF2X](#example-code-redeeming-rif2x)
 
 # Introduction to MoC
 
@@ -1315,6 +1323,50 @@ Money on Chain contracts are executed on the RSK blockchain whose public nodes a
 - Cryptocurrency symbol: RIF
 - Explorer: https://explorer.rsk.co/
 
+### Truffle config: truffle.js
+
+If you use truffle then you can use the following settings in your **truffle.js** file
+
+```js
+const HDWalletProvider = require('truffle-hdwallet-provider');
+
+const mnemonic = 'YOUR_MNEMO_PRHASE';
+
+module.exports = {
+  compilers: {
+    solc: {
+      version: '0.5.8',
+      evmVersion: 'byzantium',
+      settings: {
+        optimizer: {
+          enabled: true,
+          runs: 1
+        }
+      }
+    }
+  },
+  networks: {
+    development: {
+      host: '127.0.0.1',
+      port: 8545,
+      network_id: '*'
+    },
+    rskTestnet: {
+      host: 'https://public-node.testnet.rsk.co',
+      provider: new HDWalletProvider(mnemonic, 'https://public-node.testnet.rsk.co'),
+      network_id: '31',
+      gasPrice: 60000000
+    },
+    rskMainnet: {
+      host: 'https://public-node.rsk.co',
+      provider: new HDWalletProvider(mnemonic, 'https://public-node.rsk.co'),
+      network_id: '30',
+      gasPrice: 60000000
+    }
+  }
+};
+```
+
 ### Installing your own node
 
 The RSK node can be installed on different operating systems such as Linux, Windows and Mac. It is also possible to run them in environments running docker and in cloud service providers such as AWS, Azure and Google. For more information check the [official RSK documentation](https://developers.rsk.co/rsk/node/install/)
@@ -1329,11 +1381,81 @@ You can use the technology that suits you best for your project to integrate wit
 - .NET: [Getting Started with Nethereum](http://docs.nethereum.com/en/latest/getting-started/)
 - Swift: [Web3Swift README.md](https://github.com/zeriontech/web3swift)
 
-​
-
 ## Official Money on Chain ABIS
 
 In the Money on Chain repository you can find the [official ABIs of the platform](https://github.com/money-on-chain/web-billfold-app/tree/develop/contracts/poc). You can use them to build your own decentralized applications to invoke the functions of smart contracts.
+
+## Events
+
+When a transaction is mined, smart contracts can emit events and write logs to the blockchain that the frontend can then process. Click [here](https://media.consensys.net/technical-introduction-to-events-and-logs-in-ethereum-a074d65dd61e) for more information about events.
+
+In the following example we will show you how to find events that are emitted by Money On Chain smart contract in **RSK Testnet** blockchain with **truffle**.
+
+
+**Code example**
+
+```js
+const Web3 = require('web3');
+//You must compile the smart contracts or use the official ABIs of the //repository
+const MocExchange = require('../../build/contracts/MoCExchange.json');
+const truffleConfig = require('../../truffle');
+
+/**
+ * Get a provider from truffle.js file
+ * @param {String} network
+ */
+const getDefaultProvider = network =>
+  truffleConfig.networks[network].provider || truffleConfig.networks[network].endpoint;
+
+/**
+ * Get a new web3 instance from truffle.js file
+ */
+const getWeb3 = network => {
+  const provider = getDefaultProvider(network);
+  return new Web3(provider, null, {
+    transactionConfirmationBlocks: 1
+  });
+};
+
+const web3 = getWeb3('rskTestnet');
+
+//Contract address on testnet
+const mocExchangeAddress = '<contract-address>';
+
+const execute = async () => {
+  web3.eth.defaultGas = 2000000;
+
+  /**
+   * Loads an specified contract
+   * @param {ContractABI} abi
+   * @param {String} contractAddress
+   */
+  const getContract = async (abi, contractAddress) => new web3.eth.Contract(abi, contractAddress);
+
+  // Loading MoCExchange contract to get the events emitted by this
+  const mocExchange = await getContract(MocExchange.abi, mocExchangeAddress);
+  if (!mocExchange) {
+    throw Error('Can not find MoCExchange contract.');
+  }
+
+  // In this example we are getting BPro Mint events from MoCExchange contract
+  // in the interval of blocks passed by parameter
+  const getEvents = () =>
+    Promise.resolve(mocExchange.getPastEvents('RiskProMint', { fromBlock: 1000, toBlock: 1010 }))
+      .then(events => console.log(events))
+      .catch(err => console.log('Error getting past events ', err));
+
+  await getEvents();
+};
+
+execute()
+  .then(() => console.log('Completed'))
+  .catch(err => {
+    console.log('Error', err);
+  });
+```
+
+Check [official web3 documentation](https://web3js.readthedocs.io/en/v1.2.0/web3-eth-contract.html) for more details.
 
 ## Example code minting RIFPros
 
