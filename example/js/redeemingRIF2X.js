@@ -82,7 +82,7 @@ const execute = async () => {
   const userBalance = await mocRiskProxManager.methods
     .riskProxBalanceOf(strToBytes32(bucketX2), from)
     .call();
-  console.log('=== User BPROX2 Balance: '.concat(userBalance.toString()));
+  console.log('=== User RIF2X Balance: '.concat(userBalance.toString()));
 
   const rif2xAmount = '0.00001';
 

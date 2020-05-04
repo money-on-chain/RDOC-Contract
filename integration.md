@@ -1237,7 +1237,6 @@ You can send it immediately to you so you can start using it right away. In orde
 ​
 This will leave you with a contract similar to the following
 ​​
-
 ```js
 pragma solidity 0.5.8;
 ​
@@ -1355,7 +1354,7 @@ npm install --save bignumber.js
 npm install --save web3
 npm install --save truffle-hdwallet-provider
 ```
-
+**Example**
 ```js
 const HDWalletProvider = require('truffle-hdwallet-provider');
 const BigNumber = require('bignumber.js');
@@ -1472,7 +1471,7 @@ Then we add the necessary dependencies to run the project
 cd example-redeem-riskpro
 npm install --save web3
 ```
-
+**Example**
 ```js
 const Web3 = require('web3');
 //You must compile the smart contracts or use the official ABIs of the //repository
@@ -1601,7 +1600,7 @@ Then we add the necessary dependencies to run the project
 cd example-mint-stabletoken
 npm install --save web3
 ```
-
+**Example**
 ```js
 const Web3 = require('web3');
 //You must compile the smart contracts or use the official ABIs of the //repository
@@ -1723,7 +1722,7 @@ Then we add the necessary dependencies to run the project
 cd example-redeem-free-stabletoken
 npm install --save web3
 ```
-
+**Example**
 ```js
 const Web3 = require('web3');
 //You must compile the smart contracts or use the official ABIs of the //repository
@@ -1851,7 +1850,7 @@ Then we add the necessary dependencies to run the project
 cd example-redeem-stabletoken
 npm install --save web3
 ```
-
+**Example**
 ```js
 const Web3 = require('web3');
 //You must compile the smart contracts or use the official ABIs of the //repository
@@ -1956,7 +1955,7 @@ Then we add the necessary dependencies to run the project
 cd example-redeem-all-stabletoken
 npm install --save web3
 ```
-
+**Example**
 ```js
 const Web3 = require('web3');
 //You must compile the smart contracts or use the official ABIs of the //repository
@@ -2029,6 +2028,245 @@ const execute = async () => {
 
   // Call redeem
   await redeemAllRDoc();
+};
+
+execute()
+  .then(() => console.log('Completed'))
+  .catch(err => {
+    console.log('Error', err);
+  });
+```
+## Example minting RIF2X using Truffle
+
+In the following example we will learn how to:
+
+- Get the maximum amount of RIF2X available to mint.
+- Mint RIF2X.
+
+You can find code examples into _/examples_ dir.
+
+First we create a new node project.
+
+```
+mkdir example-mint-riskproxtoken
+node init
+```
+
+Then we add the necessary dependencies to run the project
+
+```
+cd example-mint-riskproxtoken
+npm install --save web3
+```
+**Example**
+```js
+const Web3 = require('web3');
+//You must compile the smart contracts or use the official ABIs of the //repository
+const Moc = require('../../build/contracts/MoC.json');
+const MoCState = require('../../build/contracts/MoCState.json');
+const truffleConfig = require('../../truffle');
+
+/**
+ * Get a provider from truffle.js file
+ * @param {String} network
+ */
+const getDefaultProvider = network =>
+  truffleConfig.networks[network].provider || truffleConfig.networks[network].endpoint;
+
+/**
+ * Get a gasPrice from truffle.js file
+ * @param {String} network
+ */
+const getGasPrice = network => truffleConfig.networks[network].gasPrice || 60000000;
+
+/**
+ * Get a new web3 instance from truffle.js file
+ */
+const getWeb3 = network => {
+  const provider = getDefaultProvider(network);
+  return new Web3(provider, null, {
+    transactionConfirmationBlocks: 1
+  });
+};
+
+const web3 = getWeb3('rskTestnet');
+const gasPrice = getGasPrice('rskTestnet');
+
+//Contract addresses on testnet
+const mocContractAddress = '<contract-address>';
+const mocStateAddress = '<contract-address>';
+
+const execute = async () => {
+  web3.eth.defaultGas = 2000000;
+
+  /**
+   * Loads an specified contract
+   * @param {ContractABI} abi
+   * @param {String} contractAddress
+   */
+  const getContract = async (abi, contractAddress) => new web3.eth.Contract(abi, contractAddress);
+  const strToBytes32 = bucket => web3.utils.asciiToHex(bucket, 32);
+  const bucketX2 = 'X2';
+
+  // Loading moc contract
+  const moc = await getContract(Moc.abi, mocContractAddress);
+  if (!moc) {
+    throw Error('Can not find MoC contract.');
+  }
+
+  // Loading mocState contract. It is necessary to compute max BPRO available to mint
+  const mocState = await getContract(MoCState.abi, mocStateAddress);
+  if (!mocState) {
+    throw Error('Can not find MoCState contract.');
+  }
+
+  const mintRif2x = async rifAmount => {
+    const [from] = await web3.eth.getAccounts();
+    const weiAmount = web3.utils.toWei(rifAmount, 'ether');
+    console.log(`Calling mint RIF2X with ${rifAmount} RIFs with account: ${from}.`);
+    moc.methods
+      .mintRiskProx(strToBytes32(bucketX2), weiAmount)
+      .send({ from, gasPrice }, function(error, transactionHash) {
+        if (error) console.log(error);
+        if (transactionHash) console.log('txHash: '.concat(transactionHash));
+      })
+      .on('transactionHash', function(hash) {
+        console.log('TxHash: '.concat(hash));
+      })
+      .on('receipt', function(receipt) {
+        console.log(receipt);
+      })
+      .on('error', console.error);
+  };
+
+  const rifToMint = '0.00001';
+  // Gets max BTC value available to mint BPROX2
+  const maxRif2xToMint = await mocState.methods.maxRiskProx(strToBytes32(bucketX2)).call();
+  console.log('=== Max Available RIF2X to mint: '.concat(maxRif2xToMint.toString()));
+
+  // Call mint
+  await mintRif2x(rifToMint);
+};
+
+execute()
+  .then(() => console.log('Completed'))
+  .catch(err => {
+    console.log('Error', err);
+  });
+```
+## Example redeeming RIF2X using Truffle
+
+In the following script example we will learn how to:
+
+- Get RIF2X balance of an account.
+- Redeem RIF2X.
+
+You can find code examples into _/examples_ dir.
+First we create a new node project.
+
+```
+mkdir example-redeem-riskproxtoken
+node init
+```
+
+Then we add the necessary dependencies to run the project
+
+```
+cd example-redeem-riskproxtoken
+npm install --save web3
+```
+**Example**
+```js
+const Web3 = require('web3');
+//You must compile the smart contracts or use the official ABIs of the //repository
+const MoC = require('../../build/contracts/MoC.json');
+const MoCRiskProxManager = require('../../build/contracts/MoCRiskProxManager.json');
+const truffleConfig = require('../../truffle');
+
+/**
+ * Get a provider from truffle.js file
+ * @param {String} network
+ */
+const getDefaultProvider = network =>
+  truffleConfig.networks[network].provider || truffleConfig.networks[network].endpoint;
+
+/**
+ * Get a gasPrice from truffle.js file
+ * @param {String} network
+ */
+const getGasPrice = network => truffleConfig.networks[network].gasPrice || 60000000;
+
+/**
+ * Get a new web3 instance from truffle.js file
+ */
+const getWeb3 = network => {
+  const provider = getDefaultProvider(network);
+  return new Web3(provider, null, {
+    transactionConfirmationBlocks: 1
+  });
+};
+
+const web3 = getWeb3('rskTestnet');
+const gasPrice = getGasPrice('rskTestnet');
+
+//Contract addresses on testnet
+const mocContractAddress = '<contract-address>';
+const mocRiskProxManagerAddress = '<contract-address>';
+
+const execute = async () => {
+  web3.eth.defaultGas = 2000000;
+
+  /**
+   * Loads an specified contract
+   * @param {ContractABI} abi
+   * @param {String} contractAddress
+   */
+  const getContract = async (abi, contractAddress) => new web3.eth.Contract(abi, contractAddress);
+  const strToBytes32 = bucket => web3.utils.asciiToHex(bucket, 32);
+  const bucketX2 = 'X2';
+
+  // Loading Moc contract
+  const moc = await getContract(MoC.abi, mocContractAddress);
+  if (!moc) {
+    throw Error('Can not find MoC contract.');
+  }
+
+  // Loading MoCRiskProxManager contract. It is necessary to compute user RIF2X balance
+  const mocRiskProxManager = await getContract(MoCRiskProxManager.abi, mocRiskProxManagerAddress);
+  if (!mocRiskProxManager) {
+    throw Error('Can not find MoCRiskProxManager contract.');
+  }
+
+  const [from] = await web3.eth.getAccounts();
+
+  const redeemRif2x = async rif2xAmount => {
+    const weiAmount = web3.utils.toWei(rif2xAmount, 'ether');
+
+    console.log(`Calling redeem RIF2X with account: ${from}, amount: ${weiAmount}.`);
+    moc.methods
+      .redeemRiskProx(strToBytes32(bucketX2), weiAmount)
+      .send({ from, gasPrice }, function(error, transactionHash) {
+        if (error) console.log(error);
+        if (transactionHash) console.log('txHash: '.concat(transactionHash));
+      })
+      .on('transactionHash', function(hash) {
+        console.log('TxHash: '.concat(hash));
+      })
+      .on('receipt', function(receipt) {
+        console.log(receipt);
+      })
+      .on('error', console.error);
+  };
+
+  const userBalance = await mocRiskProxManager.methods
+    .riskProxBalanceOf(strToBytes32(bucketX2), from)
+    .call();
+  console.log('=== User RIF2X Balance: '.concat(userBalance.toString()));
+
+  const rif2xAmount = '0.00001';
+
+  // Call redeem
+  await redeemRif2x(rif2xAmount);
 };
 
 execute()
