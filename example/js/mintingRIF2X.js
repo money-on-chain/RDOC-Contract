@@ -28,13 +28,13 @@ const getWeb3 = network => {
   });
 };
 
-const web3 = getWeb3('development');
-const gasPrice = getGasPrice('development');
+const web3 = getWeb3('mocTestnet');
+const gasPrice = getGasPrice('mocTestnet');
 
 //Contract addresses on testnet
-const mocContractAddress = '0xbb0BD84997De57e7525E6DBE7500080B8CD4176d';
-const mocStateAddress = '0x67Be008479198B1557376954383efDB0cEFE39Eb';
-const reserveTokenAddress = '0x2C3D623a095d8A774a3445c0d43554BF709de4ca';
+const mocContractAddress = '<contract-address>';
+const mocStateAddress = '<contract-address>';
+const reserveTokenAddress = '<contract-address>';
 
 const execute = async () => {
   web3.eth.defaultGas = 2000000;

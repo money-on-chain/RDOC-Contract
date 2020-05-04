@@ -28,8 +28,8 @@ const getWeb3 = network => {
   });
 };
 
-const web3 = getWeb3('rskTestnet');
-const gasPrice = getGasPrice('rskTestnet');
+const web3 = getWeb3('mocTestnet');
+const gasPrice = getGasPrice('mocTestnet');
 
 //Contract addresses on testnet
 const mocContractAddress = '<contract-address>';
@@ -58,7 +58,7 @@ const execute = async () => {
     throw Error('Can not find MoCState contract.');
   }
 
-  // Loading BProToken contract. It is necessary to compute user balance
+  // Loading RiskProToken contract. It is necessary to compute user balance
   const riskProToken = await getContract(RiskProToken.abi, riskProTokenAddress);
   if (!riskProToken) {
     throw Error('Can not find RiskProToken contract.');

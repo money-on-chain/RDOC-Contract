@@ -27,8 +27,8 @@ const getWeb3 = network => {
   });
 };
 
-const web3 = getWeb3('rskTestnet');
-const gasPrice = getGasPrice('rskTestnet');
+const web3 = getWeb3('mocTestnet');
+const gasPrice = getGasPrice('mocTestnet');
 
 //Contract addresses on testnet
 const mocAddress = '<contract-address>';
@@ -86,7 +86,7 @@ const execute = async () => {
   };
 
   const rDocAmount = '10000';
-  const freeRDoc = await mocState.methods.freeStableTokeneDoc().call();
+  const freeRDoc = await mocState.methods.freeStableToken().call();
   const userRDocBalance = await stableToken.methods.balanceOf(from).call();
   const finalDocAmount = Math.min(freeRDoc, userRDocBalance);
   console.log('=== User RDOC balance: ', userRDocBalance.toString());
