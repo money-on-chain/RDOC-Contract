@@ -18,11 +18,13 @@
     1.  [Official Money on Chain ABIS](#official-money-on-chain-abis)
     1.  [Events](#events)
     1.  [Example code minting RIFPros](#example-code-minting-rifpros)
+    1.  [Example code minting RIFPros without truffle](#example-code-minting-rifpros-without-truffle)
     1.  [Example code redeeming RIFPros](#example-code-redeeming-rifpros)
-    1.  [Example code minting RDOCS](#example-code-minting-rdocs)
-    1.  [Example code redeeming RDOCS](#example-code-redeeming-rdocs)
-    1.  [Example code redeeming free RDOCS](#example-code-redeeming-free-rdocs)
-    1.  [Example code redeeming all RDOCS](#example-code-redeeming-all-rdocs)
+    1.  [Example code redeeming RIFPros without truffle](#example-code-redeeming-rifpros-without-truffle)
+    1.  [Example code minting RDOC](#example-code-minting-rdoc)
+    1.  [Example code redeeming RDOC Request](#example-code-redeeming-rdoc-request)
+    1.  [Example code redeeming free RDOC](#example-code-redeeming-free-rdoc)
+    1.  [Example code redeeming all RDOC](#example-code-redeeming-all-rdoc)
     1.  [Example code minting RIF2X](#example-code-minting-rif2x)
     1.  [Example code redeeming RIF2X](#example-code-redeeming-rif2x)
 
@@ -95,7 +97,7 @@ That RIFPro is an _ERC20_ Token also means that any user that has already some t
 ​
 But in some circumstances you may not find such a user. In those cases, you may be happy to know that you can create them(or mint them, as it is usually said) using the Smart Contracts.
 ​
-​## Minting RIFPros
+## Minting RIFPros
 
 In this tutorial the method(or function) that is of interest to us is `function mintRiskPro(uint256 resTokensToMint) public`.
 
@@ -1352,7 +1354,7 @@ module.exports = {
       port: 8545,
       network_id: '*'
     },
-    rskTestnet: {
+    mocTestnet: {
       host: 'https://public-node.testnet.rsk.co',
       provider: new HDWalletProvider(mnemonic, 'https://public-node.testnet.rsk.co'),
       network_id: '31',
@@ -1417,7 +1419,7 @@ const getWeb3 = network => {
   });
 };
 
-const web3 = getWeb3('rskTestnet');
+const web3 = getWeb3('mocTestnet');
 
 //Contract address on testnet
 const mocExchangeAddress = '<contract-address>';
@@ -1438,7 +1440,7 @@ const execute = async () => {
     throw Error('Can not find MoCExchange contract.');
   }
 
-  // In this example we are getting BPro Mint events from MoCExchange contract
+  // In this example we are getting RPro Mint events from MoCExchange contract
   // in the interval of blocks passed by parameter
   const getEvents = () =>
     Promise.resolve(mocExchange.getPastEvents('RiskProMint', { fromBlock: 1000, toBlock: 1010 }))
@@ -1459,7 +1461,144 @@ Check [official web3 documentation](https://web3js.readthedocs.io/en/v1.2.0/web3
 
 ## Example code minting RIFPros
 
-In the following example we will show how to invoke the mintRiskPro function of the Money on Chain contract in testnet.
+In the following example we will show how to invoke the mintRiskPro function of the Money on Chain contract in testnet. Before calling this method we must set an allowance of RIF token available to spend. Check the [minting RIFPros section](#minting-rifpros) for more information.
+
+We will use **truffle** and **testnet** network.
+First we create a new node project.
+
+```
+mkdir example-mint-riskpro
+node init
+```
+
+Then we add the necessary dependencies to run the project
+
+```
+cd example-mint-riskpro
+npm install --save bignumber.js
+npm install --save web3
+```
+
+**Example**
+
+```js
+const Web3 = require('web3');
+//You must compile the smart contracts or use the official ABIs of the //repository
+const MocAbi = require('../../build/contracts/MoC.json');
+const MoCStateAbi = require('../../build/contracts/MoCState.json');
+const ReserveToken = require('../../build/contracts/ReserveToken.json');
+const truffleConfig = require('../../truffle');
+
+/**
+ * Get a provider from truffle.js file
+ * @param {String} network
+ */
+const getDefaultProvider = network =>
+  truffleConfig.networks[network].provider || truffleConfig.networks[network].endpoint;
+
+/**
+ * Get a gasPrice from truffle.js file
+ * @param {String} network
+ */
+const getGasPrice = network => truffleConfig.networks[network].gasPrice || 60000000;
+
+/**
+ * Get a new web3 instance from truffle.js file
+ */
+const getWeb3 = network => {
+  const provider = getDefaultProvider(network);
+  return new Web3(provider, null, {
+    transactionConfirmationBlocks: 1
+  });
+};
+
+const web3 = getWeb3('mocTestnet');
+const gasPrice = getGasPrice('mocTestnet');
+
+//Contract addresses on testnet
+const mocContractAddress = '<contract-address>';
+const mocStateAddress = '<contract-address>';
+const reserveTokenAddress = '<contract-address>';
+
+const execute = async () => {
+  web3.eth.defaultGas = 2000000;
+  /**
+   * Loads an specified contract
+   * @param {json ABI} abi
+   * @param {localhost/testnet/mainnet} contractAddress
+   */
+  const getContract = async (abi, contractAddress) => new web3.eth.Contract(abi, contractAddress);
+
+  /**
+   * Transforms BigNumbers into
+   * @param {*} number
+   */
+
+  // Loading moc contract
+  const moc = await getContract(MocAbi.abi, mocContractAddress);
+  if (!moc) {
+    throw Error('Can not find MoC contract.');
+  }
+
+  // Loading mocState contract. It is necessary to compute max RIFP available to mint
+  const mocState = await getContract(MoCStateAbi.abi, mocStateAddress);
+  if (!mocState) {
+    throw Error('Can not find MoCState contract.');
+  }
+
+  // Loading ReserveToken contract. It is necessary to set max available RIF to spend
+  const reserveToken = await getContract(ReserveToken.abi, reserveTokenAddress);
+  if (!reserveToken) {
+    throw Error('Can not find ReserveToken contract.');
+  }
+
+  const [from] = await web3.eth.getAccounts();
+
+  const setAllowance = async allowanceAmount => {
+    const weiAmount = web3.utils.toWei(allowanceAmount, 'ether');
+    console.log(`Calling approve: ${weiAmount}, for address account: ${from}.`);
+    await reserveToken.methods.approve(mocContractAddress, weiAmount).send({ from, gasPrice });
+    const spendableBalance = await moc.methods.getAllowance(from).call();
+    console.log(`Spendable balance for account ${from} is ${spendableBalance}`);
+  };
+
+  const mintRiskPro = async (rifAmount, allowanceAmount) => {
+    const weiAmount = web3.utils.toWei(rifAmount, 'ether');
+    await setAllowance(allowanceAmount);
+
+    console.log(`Calling RPro minting with account: ${from} and amount: ${weiAmount}.`);
+    const tx = moc.methods
+      .mintRiskPro(weiAmount)
+      .send({ from, gasPrice }, function(error, transactionHash) {
+        if (error) console.log(error);
+        if (transactionHash) console.log('txHash: '.concat(transactionHash));
+      });
+
+    return tx;
+  };
+
+  // Gets max RIFP available to mint
+  const maxRiskProAvailable = await mocState.methods.maxMintRiskProAvalaible().call();
+
+  console.log('Max Available RIFP: '.concat(maxRiskProAvailable.toString()));
+  const rifAmount = '0.0005';
+  // before start minting RPro we need to set the allowance of RIF available to spend.
+  const allowanceAmount = '0.001';
+
+  // Call mint
+  await mintRiskPro(rifAmount, allowanceAmount);
+};
+
+execute()
+  .then(() => console.log('Completed'))
+  .catch(err => {
+    console.log('Error', err);
+  });
+```
+
+## Example code minting RIFPros without truffle
+
+In the following example we will show how to invoke the mintRiskPro function of the Money on Chain contract in testnet. Before calling this method we must set an allowance of RIF token available to spend. Check the [minting RIFPros section](#minting-rifpros) for more information.
 
 First we create a new node project.
 
@@ -1577,22 +1716,27 @@ execute()
 };
 ```
 
-## Example code minting RIFPros with truffle
+## Example code redeeming RIFPros
 
-In the following example we will show how to invoke the mintRiskPro function of the Money on Chain contract in testnet.
+In the following example we will show how to:
 
+- Get the maximum amount of RIFPro.
+- Get user RPRO balance.
+- Redeem RPROs.
+
+We will use **truffle** and **testnet** network.
+You can find code examples into _/examples_ dir.
 First we create a new node project.
 
 ```
-mkdir example-mint-riskpro
+mkdir example-redeem-riskpro
 node init
 ```
 
 Then we add the necessary dependencies to run the project
 
 ```
-cd example-mint-riskpro
-npm install --save bignumber.js
+cd example-redeem-riskpro
 npm install --save web3
 ```
 
@@ -1601,9 +1745,9 @@ npm install --save web3
 ```js
 const Web3 = require('web3');
 //You must compile the smart contracts or use the official ABIs of the //repository
-const MocAbi = require('../../build/contracts/MoC.json');
-const MoCStateAbi = require('../../build/contracts/MoCState.json');
-const ReserveToken = require('../../build/contracts/ReserveToken.json');
+const Moc = require('../../build/contracts/MoC.json');
+const MoCState = require('../../build/contracts/MoCState.json');
+const RiskProToken = require('../../build/contracts/RiskProToken.json');
 const truffleConfig = require('../../truffle');
 
 /**
@@ -1629,81 +1773,72 @@ const getWeb3 = network => {
   });
 };
 
-const web3 = getWeb3('rskTestnet');
-const gasPrice = getGasPrice('rskTestnet');
+const web3 = getWeb3('mocTestnet');
+const gasPrice = getGasPrice('mocTestnet');
 
 //Contract addresses on testnet
 const mocContractAddress = '<contract-address>';
 const mocStateAddress = '<contract-address>';
-const reserveTokenAddress = '<contract-address>';
+const riskProTokenAddress = '<contract-address>';
 
 const execute = async () => {
   web3.eth.defaultGas = 2000000;
+
   /**
    * Loads an specified contract
-   * @param {json ABI} abi
-   * @param {localhost/testnet/mainnet} contractAddress
+   * @param {ContractABI} abi
+   * @param {String} contractAddress
    */
   const getContract = async (abi, contractAddress) => new web3.eth.Contract(abi, contractAddress);
 
-  /**
-   * Transforms BigNumbers into
-   * @param {*} number
-   */
-
   // Loading moc contract
-  const moc = await getContract(MocAbi.abi, mocContractAddress);
+  const moc = await getContract(Moc.abi, mocContractAddress);
   if (!moc) {
     throw Error('Can not find MoC contract.');
   }
 
-  // Loading mocState contract. It is necessary to compute max RIFP available to mint
-  const mocState = await getContract(MoCStateAbi.abi, mocStateAddress);
+  // Loading mocState contract. It is necessary to compute absolute max RPRO
+  const mocState = await getContract(MoCState.abi, mocStateAddress);
   if (!mocState) {
     throw Error('Can not find MoCState contract.');
   }
 
-  // Loading ReserveToken contract. It is necessary to set max available RIF to spend
-  const reserveToken = await getContract(ReserveToken.abi, reserveTokenAddress);
-  if (!reserveToken) {
-    throw Error('Can not find ReserveToken contract.');
+  // Loading RProToken contract. It is necessary to compute user balance
+  const riskProToken = await getContract(RiskProToken.abi, riskProTokenAddress);
+  if (!riskProToken) {
+    throw Error('Can not find RiskProToken contract.');
   }
 
   const [from] = await web3.eth.getAccounts();
 
-  const setAllowance = async allowanceAmount => {
-    const weiAmount = web3.utils.toWei(allowanceAmount, 'ether');
-    console.log(`Calling approve: ${weiAmount}, for address account: ${from}.`);
-    await reserveToken.methods.approve(mocContractAddress, weiAmount).send({ from, gasPrice });
-    const spendableBalance = await moc.methods.getAllowance(from).call();
-    console.log(`Spendable balance for account ${from} is ${spendableBalance}`);
-  };
-
-  const mintRiskPro = async (rifAmount, allowanceAmount) => {
-    const weiAmount = web3.utils.toWei(rifAmount, 'ether');
-    await setAllowance(allowanceAmount);
-
-    console.log(`Calling RPro minting with account: ${from} and amount: ${weiAmount}.`);
-    const tx = moc.methods
-      .mintRiskPro(weiAmount)
+  const redeemRPro = async rproAmount => {
+    const weiAmount = web3.utils.toWei(rproAmount, 'ether');
+    console.log(`Calling redeem RPro with account: ${from} and amount: ${weiAmount}.`);
+    moc.methods
+      .redeemRiskPro(weiAmount)
       .send({ from, gasPrice }, function(error, transactionHash) {
         if (error) console.log(error);
         if (transactionHash) console.log('txHash: '.concat(transactionHash));
-      });
-
-    return tx;
+      })
+      .on('transactionHash', function(hash) {
+        console.log('TxHash: '.concat(hash));
+      })
+      .on('receipt', function(receipt) {
+        console.log(receipt);
+      })
+      .on('error', console.error);
   };
 
-  // Gets max RIFP available to mint
-  const maxRiskProAvailable = await mocState.methods.maxMintRiskProAvalaible().call();
+  const getAbsoluteMaxRpro = await mocState.methods.absoluteMaxRiskPro().call();
+  const userAmount = await riskProToken.methods.balanceOf(from).call();
 
-  console.log('Max Available RIFP: '.concat(maxRiskProAvailable.toString()));
-  const rifAmount = '0.0005';
-  // before start minting RPro we need to set the allowance of RIF available to spend.
-  const allowanceAmount = '0.001';
+  console.log('=== Max amount of RPro to redeem: ', getAbsoluteMaxRpro.toString());
+  console.log('=== User RPro Balance: ', userAmount.toString());
 
-  // Call mint
-  await mintRiskPro(rifAmount, allowanceAmount);
+  const rproAmount = '0.00001';
+
+  // Call redeem
+  await redeemRPro(rproAmount);
 };
 
 execute()
@@ -1712,14 +1847,13 @@ execute()
     console.log('Error', err);
   });
 ```
-
-## Example code redeeming RIFPros
+## Example code redeeming RIFPros without truffle
 
 In the following example we will show how to:
 
 - Get the maximum amount of RIFPro.
-- Get user BPRO balance.
-- Redeem BPROs.
+- Get user RPRO balance.
+- Redeem RPRO.
 
 We will use the TestNet network.
 You can find code examples into _/examples_ dir.
@@ -1781,7 +1915,7 @@ const execute = async () => {
     throw Error('Can not find MoCState contract.');
   }
 
-  // Loading BProToken contract. It is necessary to compute user balance
+  // Loading RProToken contract. It is necessary to compute user balance
   const riskProToken = await getContract(RiskProToken.abi, riskProTokenAddress);
   if (!riskProToken) {
     throw Error('Can not find RiskProToken contract.');
@@ -1826,145 +1960,15 @@ execute()
   });
 ```
 
-## Example code redeeming RIFPros with truffle
-
-In the following example we will show how to:
-
-- Get the maximum amount of RIFPro.
-- Get user BPRO balance.
-- Redeem BPROs.
-
-We will use the TestNet network.
-You can find code examples into _/examples_ dir.
-First we create a new node project.
-
-```
-mkdir example-redeem-riskpro
-node init
-```
-
-Then we add the necessary dependencies to run the project
-
-```
-cd example-redeem-riskpro
-npm install --save web3
-```
-
-**Example**
-
-```js
-const Web3 = require('web3');
-//You must compile the smart contracts or use the official ABIs of the //repository
-const Moc = require('../../build/contracts/MoC.json');
-const MoCState = require('../../build/contracts/MoCState.json');
-const RiskProToken = require('../../build/contracts/RiskProToken.json');
-const truffleConfig = require('../../truffle');
-
-/**
- * Get a provider from truffle.js file
- * @param {String} network
- */
-const getDefaultProvider = network =>
-  truffleConfig.networks[network].provider || truffleConfig.networks[network].endpoint;
-
-/**
- * Get a gasPrice from truffle.js file
- * @param {String} network
- */
-const getGasPrice = network => truffleConfig.networks[network].gasPrice || 60000000;
-
-/**
- * Get a new web3 instance from truffle.js file
- */
-const getWeb3 = network => {
-  const provider = getDefaultProvider(network);
-  return new Web3(provider, null, {
-    transactionConfirmationBlocks: 1
-  });
-};
-
-const web3 = getWeb3('rskTestnet');
-const gasPrice = getGasPrice('rskTestnet');
-
-//Contract addresses on testnet
-const mocContractAddress = '<contract-address>';
-const mocStateAddress = '<contract-address>';
-const riskProTokenAddress = '<contract-address>';
-
-const execute = async () => {
-  web3.eth.defaultGas = 2000000;
-
-  /**
-   * Loads an specified contract
-   * @param {ContractABI} abi
-   * @param {String} contractAddress
-   */
-  const getContract = async (abi, contractAddress) => new web3.eth.Contract(abi, contractAddress);
-
-  // Loading moc contract
-  const moc = await getContract(Moc.abi, mocContractAddress);
-  if (!moc) {
-    throw Error('Can not find MoC contract.');
-  }
-
-  // Loading mocState contract. It is necessary to compute absolute max RPRO
-  const mocState = await getContract(MoCState.abi, mocStateAddress);
-  if (!mocState) {
-    throw Error('Can not find MoCState contract.');
-  }
-
-  // Loading BProToken contract. It is necessary to compute user balance
-  const riskProToken = await getContract(RiskProToken.abi, riskProTokenAddress);
-  if (!riskProToken) {
-    throw Error('Can not find RiskProToken contract.');
-  }
-
-  const [from] = await web3.eth.getAccounts();
-
-  const redeemRPro = async rproAmount => {
-    const weiAmount = web3.utils.toWei(rproAmount, 'ether');
-    console.log(`Calling redeem RPro with account: ${from} and amount: ${weiAmount}.`);
-    moc.methods
-      .redeemRiskPro(weiAmount)
-      .send({ from, gasPrice }, function(error, transactionHash) {
-        if (error) console.log(error);
-        if (transactionHash) console.log('txHash: '.concat(transactionHash));
-      })
-      .on('transactionHash', function(hash) {
-        console.log('TxHash: '.concat(hash));
-      })
-      .on('receipt', function(receipt) {
-        console.log(receipt);
-      })
-      .on('error', console.error);
-  };
-
-  const getAbsoluteMaxRpro = await mocState.methods.absoluteMaxRiskPro().call();
-  const userAmount = await riskProToken.methods.balanceOf(from).call();
-
-  console.log('=== Max amount of RPro to redeem: ', getAbsoluteMaxRpro.toString());
-  console.log('=== User RPro Balance: ', userAmount.toString());
-
-  const rproAmount = '0.00001';
-
-  // Call redeem
-  await redeemRPro(rproAmount);
-};
-
-execute()
-  .then(() => console.log('Completed'))
-  .catch(err => {
-    console.log('Error', err);
-  });
-```
-
-## Example code minting RDOC with truffle
+## Example code minting RDOC
 
 In the following example we will show how to:
 
 - Get the maximum amount of RDOC available to mint.
 - Mint RDOCs.
 
+Before minting RDOC we must set an allowance of RIF token available to spend. Check the [minting RDOCs section](#minting-rdocs) for more information.
+We will use **truffle** and **testnet network**
 You can find code examples into _/examples_ dir.
 
 We will use the TestNet network.
@@ -2015,8 +2019,8 @@ const getWeb3 = network => {
   });
 };
 
-const web3 = getWeb3('rskTestnet');
-const gasPrice = getGasPrice('rskTestnet');
+const web3 = getWeb3('mocTestnet');
+const gasPrice = getGasPrice('mocTestnet');
 
 //Contract addresses on testnet
 const mocContractAddress = '<contract-address>';
@@ -2080,7 +2084,7 @@ const execute = async () => {
       .on('error', console.error);
   };
 
-  // Gets max BPRO available to mint
+  // Gets max RDOC available to mint
   const getAbsoluteMaxRDoc = await mocState.methods.absoluteMaxStableToken().call();
   const rifAmount = '0.00001';
   //// before start minting RDoc we need to set the allowance of RIF available to spend.
@@ -2099,15 +2103,17 @@ execute()
   });
 ```
 
-## Example code redeeming Free RDOC with truffle
+## Example code redeeming Free RDOC
 
-You can see [here](#redeeming-rdocs) how RDOC's redeemption works.
-In the following example we will show how to:
+In the following example we will show how to invoke redeemFreeStableToken from Money on Chain contract.This method allows to redeem RDOC outside the settlement and they are limited by user balance. Check the [RDOC redeemption section](#redeeming-rdocs) for more details. 
+
+We will learn how to:
 
 - Get the maximum amount of free RDOC available to redeem.
 - Get RDOC balance of an account.
 - Redeem RDOCs.
 
+We will use **truffle** and **testnet network**
 You can find code examples into _/examples_ dir.
 
 We will use the TestNet network.
@@ -2157,8 +2163,8 @@ const getWeb3 = network => {
   });
 };
 
-const web3 = getWeb3('rskTestnet');
-const gasPrice = getGasPrice('rskTestnet');
+const web3 = getWeb3('mocTestnet');
+const gasPrice = getGasPrice('mocTestnet');
 
 //Contract addresses on testnet
 const mocAddress = '<contract-address>';
@@ -2233,12 +2239,10 @@ execute()
   });
 ```
 
-## Example redeeming RDOC Request with Truffle
+## Example code redeeming RDOC Request
 
-You can see [here](#redeeming-rdocs) how RDOC's redeemption works.
-In the following example we will show how to invoke redeemStableTokenRequest using Money on Chain contract. We
-will use TestNet network.
-
+In the following example we will show how to invoke redeemStableTokenRequest using Money on Chain contract. This method can recieve any amount of RDOCs to redeem, but this will be processed on the next settlement. Check the [RDOC redeemption section](#redeeming-rdocs) for more details.
+We will use **truffle** and **testnet network**
 You can find code examples into _/examples_ dir.
 
 First we create a new node project.
@@ -2285,8 +2289,8 @@ const getWeb3 = network => {
   });
 };
 
-const web3 = getWeb3('rskTestnet');
-const gasPrice = getGasPrice('rskTestnet');
+const web3 = getWeb3('mocTestnet');
+const gasPrice = getGasPrice('mocTestnet');
 
 //Loading MoC address on testnet
 const mocAddress = '<contract-address>';
@@ -2340,14 +2344,11 @@ execute()
   });
 ```
 
-## Example redeeming all DOC with Truffle
+## Example code redeeming all RDOC
 
-You can see [here](#redeeming-rdocs) how RDOC's redeemption works.
-In the following example we will show how to invoke redeemAllStableToken using Money on Chain contract. We
-will use TestNet network.
-
+In the following example we will show how to invoke redeemAllStableToken using Money on Chain contract. As a condition to do this the Moc contract must be paused(). Check the [RDOC redeemption section](#redeeming-rdocs) for more details.
+We will use **truffle** and **testnet network**
 You can find code examples into _/examples_ dir.
-
 First we create a new node project.
 
 ```
@@ -2392,8 +2393,8 @@ const getWeb3 = network => {
   });
 };
 
-const web3 = getWeb3('rskTestnet');
-const gasPrice = getGasPrice('rskTestnet');
+const web3 = getWeb3('mocTestnet');
+const gasPrice = getGasPrice('mocTestnet');
 
 // Loading MoC address on testnet
 const mocAddress = '<contract-address>';
@@ -2444,15 +2445,16 @@ execute()
   });
 ```
 
-## Example minting RIF2X with Truffle
+## Example code minting RIF2X
 
 In the following example we will learn how to:
 
 - Get the maximum amount of RIF2X available to mint.
 - Mint RIF2X.
 
+Before minting RIF2X we must set an allowance of RIF token available to spend. Check the [minting RIF2X section](#minting-rif2x) for more information.
+We will use **truffle** and **testnet network**
 You can find code examples into _/examples_ dir.
-
 First we create a new node project.
 
 ```
@@ -2500,8 +2502,8 @@ const getWeb3 = network => {
   });
 };
 
-const web3 = getWeb3('rskTestnet');
-const gasPrice = getGasPrice('rskTestnet');
+const web3 = getWeb3('mocTestnet');
+const gasPrice = getGasPrice('mocTestnet');
 
 //Contract addresses on testnet
 const mocContractAddress = '<contract-address>';
@@ -2526,7 +2528,7 @@ const execute = async () => {
     throw Error('Can not find MoC contract.');
   }
 
-  // Loading mocState contract. It is necessary to compute max BPRO available to mint
+  // Loading mocState contract. It is necessary to compute max RIF2X available to mint
   const mocState = await getContract(MoCState.abi, mocStateAddress);
   if (!mocState) {
     throw Error('Can not find MoCState contract.');
@@ -2593,13 +2595,14 @@ execute()
   });
 ```
 
-## Example redeeming RIF2X with Truffle
+## Example code redeeming RIF2X
 
 In the following script example we will learn how to:
 
 - Get RIF2X balance of an account.
 - Redeem RIF2X.
 
+We will use **truffle** and **testnet network**
 You can find code examples into _/examples_ dir.
 First we create a new node project.
 
@@ -2647,8 +2650,8 @@ const getWeb3 = network => {
   });
 };
 
-const web3 = getWeb3('rskTestnet');
-const gasPrice = getGasPrice('rskTestnet');
+const web3 = getWeb3('mocTestnet');
+const gasPrice = getGasPrice('mocTestnet');
 
 //Contract addresses on testnet
 const mocContractAddress = '<contract-address>';
