@@ -2,6 +2,7 @@ const Web3 = require('web3');
 //You must compile the smart contracts or use the official ABIs of the //repository
 const MocAbi = require('../../build/contracts/MoC.json');
 const MoCStateAbi = require('../../build/contracts/MoCState.json');
+const ReserveToken = require('../../build/contracts/ReserveToken.json');
 const truffleConfig = require('../../truffle');
 
 /**
@@ -27,12 +28,13 @@ const getWeb3 = network => {
   });
 };
 
-const web3 = getWeb3('rskTestnet');
-const gasPrice = getGasPrice('rskTestnet');
+const web3 = getWeb3('development');
+const gasPrice = getGasPrice('development');
 
 //Contract addresses on testnet
-const mocContractAddress = '<contract-address>';
-const mocStateAddress = '<contract-address>';
+const mocContractAddress = '0xbb0BD84997De57e7525E6DBE7500080B8CD4176d';
+const mocStateAddress = '0x67Be008479198B1557376954383efDB0cEFE39Eb';
+const reserveTokenAddress = '0x2C3D623a095d8A774a3445c0d43554BF709de4ca';
 
 const execute = async () => {
   web3.eth.defaultGas = 2000000;
@@ -60,10 +62,26 @@ const execute = async () => {
     throw Error('Can not find MoCState contract.');
   }
 
-  const mintRiskPro = async (rifAmount) => {
-    const [from] = await web3.eth.getAccounts();
+  // Loading ReserveToken contract. It is necessary to set max available RIF to spend
+  const reserveToken = await getContract(ReserveToken.abi, reserveTokenAddress);
+  if (!reserveToken) {
+    throw Error('Can not find ReserveToken contract.');
+  }
+
+  const [from] = await web3.eth.getAccounts();
+
+  const setAllowance = async allowanceAmount =>{
+    const weiAmount = web3.utils.toWei(allowanceAmount, 'ether');
+    console.log(`Calling approve: ${weiAmount}, for address account: ${from}.`);
+    await reserveToken.methods.approve(mocContractAddress, weiAmount).send({ from, gasPrice });
+    const spendableBalance = await moc.methods.getAllowance(from).call();
+    console.log(`Spendable balance for account ${from} is ${spendableBalance}`);
+  }
+
+  const mintRiskPro = async (rifAmount, allowanceAmount) => {
     const weiAmount = web3.utils.toWei(rifAmount, 'ether');
-    console.log(`Calling RPro minting with account: ${from} and amount: ${rifAmount}.`);
+    await setAllowance(allowanceAmount);
+    console.log(`Calling RPro minting with account: ${from} and amount: ${weiAmount}.`);
     const tx = moc.methods
       .mintRiskPro(weiAmount)
       .send({ from, gasPrice }, function (error, transactionHash) {
@@ -74,17 +92,16 @@ const execute = async () => {
     return tx;
   };
 
-  function logEnd() {
-    console.log('End Example');
-  }
-
   // Gets max RIFP available to mint
   const maxRiskProAvailable = await mocState.methods.maxMintRiskProAvalaible().call();
+  const rifAmount = '0.0005';
+  // before start minting RPro we need to set the allowance of RIF available to spend.
+  const allowanceAmount = '0.001';
+
   console.log('Max Available RIFP: '.concat(maxRiskProAvailable.toString()));
-  const rifAmount = '50';
 
   // Call mint
-  await mintRiskPro(rifAmount, logEnd);
+  await mintRiskPro(rifAmount, allowanceAmount);
 };
 
 execute()

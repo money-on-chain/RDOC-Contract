@@ -47,7 +47,6 @@ const execute = async () => {
     throw Error('Can not find MoC contract.');
   }
 
-
   const redeemRDocRequest = async rDocAmount => {
     const [from] = await web3.eth.getAccounts();
     const weiAmount = web3.utils.toWei(rDocAmount, 'ether');
