@@ -24,9 +24,9 @@ contract MoCSettlement is MoCSettlementEvents, MoCBase, PartialExecution, Govern
     using Math for uint256;
     using SafeMath for uint256;
 
-    bytes32 public constant StableToken_REDEMPTION_TASK = keccak256('StableTokenRedemption');
-    bytes32 public constant DELEVERAGING_TASK = keccak256('Deleveraging');
-    bytes32 public constant SETTLEMENT_TASK = keccak256('Settlement');
+    bytes32 public constant StableToken_REDEMPTION_TASK = keccak256("StableTokenRedemption");
+    bytes32 public constant DELEVERAGING_TASK = keccak256("Deleveraging");
+    bytes32 public constant SETTLEMENT_TASK = keccak256("Settlement");
 
     struct RedeemRequest {
         address payable who;
@@ -134,7 +134,7 @@ contract MoCSettlement is MoCSettlementEvents, MoCBase, PartialExecution, Govern
    @param _index queue position to get
    */
     modifier withinBoundaries(uint256 _index) {
-        require(_index < redeemQueueLength, 'Index out of boundaries');
+        require(_index < redeemQueueLength, "Index out of boundaries");
         _;
     }
 
@@ -229,10 +229,10 @@ contract MoCSettlement is MoCSettlementEvents, MoCBase, PartialExecution, Govern
         public
         onlyWhitelisted(msg.sender)
     {
-        require(redeemMapping[redeemer].activeRedeemer, 'This is not an active redeemer');
+        require(redeemMapping[redeemer].activeRedeemer, "This is not an active redeemer");
         uint256 indexRedeem = redeemMapping[redeemer].index;
         RedeemRequest storage redeemRequest = redeemQueue[indexRedeem];
-        require(redeemRequest.who == redeemer, 'Not allowed redeemer');
+        require(redeemRequest.who == redeemer, "Not allowed redeemer");
         uint256 actualDelta = delta;
         if (isAddition) {
             redeemRequest.amount = redeemRequest.amount.add(delta);
@@ -278,7 +278,7 @@ contract MoCSettlement is MoCSettlementEvents, MoCBase, PartialExecution, Govern
     }
 
     modifier isTime() {
-        require(isSettlementEnabled(), 'Settlement not yet enabled');
+        require(isSettlementEnabled(), "Settlement not yet enabled");
         _;
     }
 
