@@ -1,4 +1,4 @@
-# Integration to Money on Chain Platform
+# Integration to RIF on Chain Platform
 
 1.  [Introduction to MoC](#introduction-to-moc)
     1.  [The Moc Contract](#the-moc-contract)
