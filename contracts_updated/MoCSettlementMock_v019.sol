@@ -1,12 +1,13 @@
 pragma solidity 0.5.8;
 
-import '../MoCSettlement.sol';
+import '../MoCSettlement_v019.sol';
 
-contract MoCSettlementMock is MoCSettlement {
+
+contract MoCSettlementMock_v019 is MoCSettlement_v019 {
     //Step count that complete the execution in all tests
     uint256 constant STEPS = 100;
 
-    constructor() public MoCSettlementMock() {}
+    constructor() public MoCSettlementMock_v019() {}
 
     function() external {
         require(false, 'fallback function is not enabled');
