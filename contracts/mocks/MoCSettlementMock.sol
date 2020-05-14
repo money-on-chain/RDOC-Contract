@@ -9,7 +9,7 @@ contract MoCSettlementMock is MoCSettlement {
     constructor() public MoCSettlementMock() {}
 
     function() external {
-        require(false, 'fallback function is not enabled');
+        require(false, "fallback function is not enabled");
     }
 
     function pubRunDeleveraging() public {
