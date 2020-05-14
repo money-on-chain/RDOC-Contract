@@ -1,15 +1,15 @@
 pragma solidity 0.5.8;
 
-import 'openzeppelin-solidity/contracts/math/Math.sol';
-import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
-import './base/MoCBase.sol';
-import './token/StableToken.sol';
-import './MoCState.sol';
-import './MoCExchange.sol';
-import './MoCRiskProxManager.sol';
-import './PartialExecution.sol';
-import 'moc-governance/contracts/Governance/Governed.sol';
-import 'moc-governance/contracts/Governance/IGovernor.sol';
+import "openzeppelin-solidity/contracts/math/Math.sol";
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "./base/MoCBase.sol";
+import "./token/StableToken.sol";
+import "./MoCState.sol";
+import "./MoCExchange.sol";
+import "./MoCRiskProxManager.sol";
+import "./PartialExecution.sol";
+import "moc-governance/contracts/Governance/Governed.sol";
+import "moc-governance/contracts/Governance/IGovernor.sol";
 
 contract MoCSettlementEvents {
   event RedeemRequestAlter(address indexed redeemer, bool isAddition, uint256 delta);

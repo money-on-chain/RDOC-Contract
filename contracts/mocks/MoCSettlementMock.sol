@@ -1,6 +1,6 @@
 pragma solidity 0.5.8;
 
-import '../MoCSettlement.sol';
+import "../MoCSettlement.sol";
 
 contract MoCSettlementMock is MoCSettlement {
     //Step count that complete the execution in all tests
