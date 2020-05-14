@@ -133,7 +133,7 @@ contract('MoC: Partial Settlement execution', function([owner, ...allAccounts]) 
             accounts.map(account => mocHelper.getUserBalances(account))
           );
           await mocHelper.waitNBlocks(100);
-          const tx = await mocHelper.moc.runSettlement(0);
+          const tx = await mocHelper.moc.runSettlement(1);
           [secondSettlementEvent] = mocHelper.findEvents(tx, 'SettlementStarted');
         });
         it('THEN Settlement is not enabled anymore', async function() {

@@ -1,32 +1,24 @@
 pragma solidity 0.5.8;
 
-import "openzeppelin-solidity/contracts/math/Math.sol";
-import "openzeppelin-solidity/contracts/math/SafeMath.sol";
-import "./base/MoCBase.sol";
-import "./token/StableToken.sol";
-import "./MoCState.sol";
-import "./MoCExchange.sol";
-import "./MoCRiskProxManager.sol";
-import "./PartialExecution.sol";
-import "moc-governance/contracts/Governance/Governed.sol";
-import "moc-governance/contracts/Governance/IGovernor.sol";
+import 'openzeppelin-solidity/contracts/math/Math.sol';
+import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
+import './base/MoCBase.sol';
+import './token/StableToken.sol';
+import './MoCState.sol';
+import './MoCExchange.sol';
+import './MoCRiskProxManager.sol';
+import './PartialExecution_v019.sol';
+import 'moc-governance/contracts/Governance/Governed.sol';
+import 'moc-governance/contracts/Governance/IGovernor.sol';
 
-contract MoCSettlementEvents {
-  event RedeemRequestAlter(address indexed redeemer, bool isAddition, uint256 delta);
-  event RedeemRequestProcessed(address indexed redeemer, uint256 commission, uint256 amount);
-  event SettlementRedeemStableToken(uint256 queueSize, uint256 accumCommissions, uint256 reservePrice);
-  event SettlementDeleveraging(uint256 leverage, uint256 riskProxPrice, uint256 reservePrice, uint256 startBlockNumber);
-  event SettlementStarted(uint256 stableTokenRedeemCount, uint256 deleveragingCount, uint256 riskProxPrice, uint256 reservePrice);
-  event SettlementCompleted(uint256 commissionsPayed);
-}
 
-contract MoCSettlement is MoCSettlementEvents, MoCBase, PartialExecution, Governed {
+contract MoCSettlement_v019 is MoCSettlementEvents, MoCBase, PartialExecution_v019, Governed {
     using Math for uint256;
     using SafeMath for uint256;
 
-    bytes32 public constant StableToken_REDEMPTION_TASK = keccak256("StableTokenRedemption");
-    bytes32 public constant DELEVERAGING_TASK = keccak256("Deleveraging");
-    bytes32 public constant SETTLEMENT_TASK = keccak256("Settlement");
+    bytes32 public constant StableToken_REDEMPTION_TASK = keccak256('StableTokenRedemption');
+    bytes32 public constant DELEVERAGING_TASK = keccak256('Deleveraging');
+    bytes32 public constant SETTLEMENT_TASK = keccak256('Settlement');
 
     struct RedeemRequest {
         address payable who;
@@ -134,7 +126,7 @@ contract MoCSettlement is MoCSettlementEvents, MoCBase, PartialExecution, Govern
    @param _index queue position to get
    */
     modifier withinBoundaries(uint256 _index) {
-        require(_index < redeemQueueLength, "Index out of boundaries");
+        require(_index < redeemQueueLength, 'Index out of boundaries');
         _;
     }
 
@@ -229,10 +221,10 @@ contract MoCSettlement is MoCSettlementEvents, MoCBase, PartialExecution, Govern
         public
         onlyWhitelisted(msg.sender)
     {
-        require(redeemMapping[redeemer].activeRedeemer, "This is not an active redeemer");
+        require(redeemMapping[redeemer].activeRedeemer, 'This is not an active redeemer');
         uint256 indexRedeem = redeemMapping[redeemer].index;
         RedeemRequest storage redeemRequest = redeemQueue[indexRedeem];
-        require(redeemRequest.who == redeemer, "Not allowed redeemer");
+        require(redeemRequest.who == redeemer, 'Not allowed redeemer');
         uint256 actualDelta = delta;
         if (isAddition) {
             redeemRequest.amount = redeemRequest.amount.add(delta);
@@ -278,7 +270,7 @@ contract MoCSettlement is MoCSettlementEvents, MoCBase, PartialExecution, Govern
     }
 
     modifier isTime() {
-        require(isSettlementEnabled(), "Settlement not yet enabled");
+        require(isSettlementEnabled(), 'Settlement not yet enabled');
         _;
     }
 

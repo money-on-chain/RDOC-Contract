@@ -13,6 +13,7 @@ const MoCConverter = artifacts.require('./contracts/MoCConverter.sol');
 const MoCExchange = artifacts.require('./contracts/MoCExchange.sol');
 const MoCInrate = artifacts.require('./contracts/MoCInrate.sol');
 const MoCSettlementMock = artifacts.require('./contracts/mocks/MoCSettlementMock.sol');
+
 const RiskPro = artifacts.require('./contracts/RiskProToken.sol');
 const RiskProxManager = artifacts.require('./contracts/MoCRiskProxManager.sol');
 const MoCSettlement = artifacts.require('./contracts/MoCSettlement.sol');
@@ -21,6 +22,7 @@ const MoCConnector = artifacts.require('./contracts/base/MoCConnector.sol');
 const Governor = artifacts.require('moc-governance/contracts/Governance/Governor.sol');
 const ProxyAdmin = artifacts.require('ProxyAdmin');
 const UpgradeDelegator = artifacts.require('UpgradeDelegator');
+const UpgraderTemplate = artifacts.require('UpgraderTemplate');
 const Stopper = artifacts.require('moc-governance/contracts/Stopper/Stopper.sol');
 const MocStateChanger = artifacts.require('./contracts/MocStateChanger.sol');
 const MocInrateChanger = artifacts.require('./contracts/MocInrateChanger.sol');

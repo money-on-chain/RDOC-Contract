@@ -1,3 +1,5 @@
+const { expectRevert } = require('openzeppelin-test-helpers');
+const { expect } = require('chai');
 const testHelperBuilder = require('../mocHelper.js');
 
 let mocHelper;
@@ -26,9 +28,6 @@ contract('MoC: Delever X', function([owner, blacklisted, ...allAccounts]) {
       beforeEach(async function() {
         await mocHelper.mintRiskProAmount(owner, 3);
         await mocHelper.mintStableTokenAmount(owner, 15000);
-
-        mocHelper.getBucketState(BUCKET_X2);
-
         await mocHelper.mintRiskProxAmount(accounts[1], BUCKET_X2, 0.5);
         await mocHelper.mintRiskProxAmount(accounts[2], BUCKET_X2, 0.5);
         // Account is not yet blacklisted
@@ -64,6 +63,110 @@ contract('MoC: Delever X', function([owner, blacklisted, ...allAccounts]) {
     });
   });
 
+  describe('During settlement bucket liquidation is not enabled', function() {
+    const riskProx2Positions = [0.5, 0.5, 0.5, 0.5, 0.01];
+    describe('GIVEN five users have RiskProX and there is a position and the settlement is enabled', function() {
+      beforeEach(async function() {
+        await mocHelper.mintRiskProAmount(owner, 25);
+        await mocHelper.mintStableTokenAmount(owner, 25000);
+
+        await Promise.all(
+          riskProx2Positions.map((position, i) =>
+            mocHelper.mintRiskProxAmount(accounts[i + 1], BUCKET_X2, position)
+          )
+        );
+        await mocHelper.moc.redeemStableTokenRequest(toContractBN(1, 'USD'), {
+          from: owner
+        });
+        // Verify that the positions are placed
+        await Promise.all(
+          riskProx2Positions.map(async (position, i) =>
+            mocHelper.assertBigReserve(
+              await mocHelper.getRiskProxBalance(BUCKET_X2, accounts[i + 1]),
+              position
+            )
+          )
+        );
+        await mocHelper.waitNBlocks(100);
+      });
+      describe('WHEN deleveraging has run almost completely', function() {
+        beforeEach(async function() {
+          // Run only a few deleveraging step
+          await this.moc.runSettlement(3);
+          // eslint-disable-next-line no-unused-expressions
+          expect(await this.mocSettlement.isSettlementRunning()).to.be.true;
+        });
+        it(`THEN bucket liquidation should not be enabled ${BUCKET_X2} until the settlement finishes`, async function() {
+          await expectRevert(
+            this.moc.evalBucketLiquidation(BUCKET_X2),
+            'Function can only be called when settlement is ready'
+          );
+        });
+      });
+    });
+  });
+
+  describe('Setllement does not finish prematurely', function() {
+    const SETTLEMENT_STEPS_TO_RUN = 3;
+    const riskProx2Positions = [0.5, 0.5, 0.5, 0.5, 0.5];
+
+    describe('GIVEN five users have RiskProX2 and the settlement is enabled', function() {
+      beforeEach(async function() {
+        await mocHelper.mintRiskProAmount(owner, 25);
+        await mocHelper.mintStableTokenAmount(owner, 25000);
+
+        mocHelper.getBucketState(BUCKET_X2);
+        await Promise.all(
+          riskProx2Positions.map((position, i) =>
+            mocHelper.mintRiskProxAmount(accounts[i + 1], BUCKET_X2, position)
+          )
+        );
+        await Promise.all(
+          riskProx2Positions.map(async (position, i) =>
+            mocHelper.assertBigReserve(
+              await mocHelper.getRiskProxBalance(BUCKET_X2, accounts[i + 1]),
+              position
+            )
+          )
+        );
+        await mocHelper.waitNBlocks(100);
+      });
+      describe('WHEN deleveraging has run almost completely', function() {
+        beforeEach(async function() {
+          await this.moc.runSettlement(SETTLEMENT_STEPS_TO_RUN); // Run only a few deleveraging step
+        });
+        it('THEN the settlement is running', async function() {
+          // eslint-disable-next-line no-unused-expressions
+          expect(await this.mocSettlement.isSettlementRunning()).to.be.true;
+        });
+        it(`THEN the bucket ${BUCKET_X2}'s liquitadion should not be enabled until the settlement finishes`, async function() {
+          await expectRevert(
+            this.moc.evalBucketLiquidation(BUCKET_X2),
+            'Function can only be called when settlement is ready'
+          );
+        });
+        it('THEN two positions are still on place', async function() {
+          const expectedPositionsInPlace = riskProx2Positions.length - SETTLEMENT_STEPS_TO_RUN;
+          const individualResults = await Promise.all(
+            riskProx2Positions.map(async (position, i) =>
+              toContractBN(position, 'RES').eq(
+                await mocHelper.getRiskProxBalance(BUCKET_X2, accounts[i + 1])
+              )
+            )
+          );
+
+          const positionsInPlace = individualResults.reduce(
+            (previousPositionsInPlace, currentPositionIsInPlace) =>
+              currentPositionIsInPlace ? previousPositionsInPlace + 1 : previousPositionsInPlace
+          );
+          expect(
+            positionsInPlace === expectedPositionsInPlace,
+            `Positions in place should be ${expectedPositionsInPlace} and they actually are ${positionsInPlace}`
+          );
+        });
+      });
+    });
+  });
   const scenarios = [
     {
       description: 'If there is one X2 position, it gets delevered and coverage is restored',
