@@ -2,105 +2,11 @@
 
 ## Upgrade v019
 
-### Intro
-
-The upgrade v019, make small change to MoC Main Contract **MoC.sol**.
-
-Original:
-
-```
-function evalBucketLiquidation(bytes32 bucket) public availableBucket(bucket) notBaseBucket(bucket)  {
-    if (mocState.coverage(bucket) <= mocState.liq()) {
-      bproxManager.liquidateBucket(bucket, BUCKET_C0);
-    
-      emit BucketLiquidation(bucket);
-    }
-} 
-```
-
-Change:
-
-```
-function evalBucketLiquidation(bytes32 bucket) public availableBucket(bucket) notBaseBucket(bucket) whenSettlementReady() {
-    if (mocState.coverage(bucket) <= mocState.liq()) {
-      bproxManager.liquidateBucket(bucket, BUCKET_C0);
-    
-      emit BucketLiquidation(bucket);
-    }
-} 
-```
-
-this change is modifier of Smart Contract **whenSettlementReady** prevent to enter in Bucket 
-Liquidation when settlement is running.
-
-The upgrade v019, make small change to MoCSettlement Main Contract **MoCSettlement.sol**.
-
-**PartialExecution.sol**
-
-**Original**:
-
-```
-function executeGroup(bytes32 groupId, uint256 stepCount) internal {
-    TaskGroup storage group = taskGroups[groupId];
-
-    if (group.state == ExecutionState.Ready) {
-      group.onStart();
-      group.state = ExecutionState.Running;
-    }
-
-    uint256 leftSteps = stepCount;
-
-    for (uint256 i = 0; i < group.subTasks.length; i++) {
-      uint256 consumed = executeTask(group.subTasks[i], leftSteps);
-      leftSteps = leftSteps.sub(consumed);
-    }
-
-    if (groupFinished(groupId)) {
-      group.state = ExecutionState.Finished;
-      group.onFinish();
-      if (group.autoRestart) {
-        resetGroup(groupId);
-      }
-    }
-  } 
-```
-
-**Change**:
-
-```
-function executeGroup(bytes32 groupId, uint256 stepCount) internal {
-    TaskGroup storage group = taskGroups[groupId];
-
-    if (group.state == ExecutionState.Ready) {
-      group.onStart();
-      group.state = ExecutionState.Running;
-    }
-
-    uint256 leftSteps = stepCount;
-
-    for (uint256 i = 0; i < group.subTasks.length && leftSteps > 0; i++) {
-      uint256 consumed = executeTask(group.subTasks[i], leftSteps);
-      leftSteps = leftSteps.sub(consumed);
-    }
-
-    if (groupFinished(groupId)) {
-      group.state = ExecutionState.Finished;
-      group.onFinish();
-      if (group.autoRestart) {
-        resetGroup(groupId);
-      }
-    }
-  } 
-```
-
-
-
-### Upgrade Smart Contract
 
 **Requirements**
 
 1. Python >= 3.6
-2. `pip install moneyonchain==0.04`
+2. `pip install moneyonchain>=0.04`
 
 **Steps:**
 

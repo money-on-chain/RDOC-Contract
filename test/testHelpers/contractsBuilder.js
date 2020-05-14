@@ -13,14 +13,18 @@ const MoCConverter = artifacts.require('./contracts/MoCConverter.sol');
 const MoCExchange = artifacts.require('./contracts/MoCExchange.sol');
 const MoCInrate = artifacts.require('./contracts/MoCInrate.sol');
 const MoCSettlementMock = artifacts.require('./contracts/mocks/MoCSettlementMock.sol');
+
+const MoCSettlementMockV019 = artifacts.require('./contracts/mocks/MoCSettlementMock_v019.sol');
 const RiskPro = artifacts.require('./contracts/RiskProToken.sol');
 const RiskProxManager = artifacts.require('./contracts/MoCRiskProxManager.sol');
 const MoCSettlement = artifacts.require('./contracts/MoCSettlement.sol');
+const MoCSettlementV019 = artifacts.require('./contracts/MoCSettlement_v019.sol');
 const MoCBurnout = artifacts.require('./contracts/MoCBurnout.sol');
 const MoCConnector = artifacts.require('./contracts/base/MoCConnector.sol');
 const Governor = artifacts.require('moc-governance/contracts/Governance/Governor.sol');
 const ProxyAdmin = artifacts.require('ProxyAdmin');
 const UpgradeDelegator = artifacts.require('UpgradeDelegator');
+const UpgraderTemplate = artifacts.require('UpgraderTemplate');
 const Stopper = artifacts.require('moc-governance/contracts/Stopper/Stopper.sol');
 const MocStateChanger = artifacts.require('./contracts/MocStateChanger.sol');
 const MocInrateChanger = artifacts.require('./contracts/MocInrateChanger.sol');
@@ -81,7 +85,7 @@ const baseParams = {
   maxMintRiskPro: toContract(10000000 * 10 ** 18),
   stableTmin: toContract(0 * 10 ** 18),
   stablePower: toContract(1),
-  stableTmax: toContract(0.0002611578760678 * 10 ** 18),
+  stableTmax: toContract(0.0002611578760678 * 10 ** 18)
 };
 
 const createContracts = params => async ({ owner, useMock }) => {
@@ -284,6 +288,22 @@ const createContracts = params => async ({ owner, useMock }) => {
   await project.changeProxyAdmin(mocProxy.address, proxyAdmin.address);
   await project.changeProxyAdmin(governorProxy.address, proxyAdmin.address);
   await project.changeProxyAdmin(stopperProxy.address, proxyAdmin.address);
+
+  const newMoCSettlementImplementation = useMock
+    ? await MoCSettlementMockV019.new()
+    : await MoCSettlementV019.new();
+
+  const upgrader = await UpgraderTemplate.new(
+    mocSettlement.address,
+    upgradeDelegator.address,
+    newMoCSettlementImplementation.address
+  );
+
+  await governor.executeChange(upgrader.address, { from: owner, gas: 6e6 });
+
+  const newMoCSettlementProxy = await MoCSettlementV019.at(mocSettlement.address);
+
+  await newMoCSettlementProxy.fixTasksPointer();
 
   return {
     mocConnector,
