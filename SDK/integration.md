@@ -43,8 +43,8 @@ Also you can read official information about [MoC architecture and Money on Chai
 
 The Money On Chain's Smart Contract suite is in control of the minting and redeeming of its tokens, including the RIFPro, RDOC and RIF2X tokens. This means that the generation of new tokens is controlled programmatically by said suite. To get some new tokens you should interact with the suite. The entry point is the MoC smart contract whose addresses are available on the following networks:
 
-- mainnet: [ ADDRESS_MAINNET ](https://explorer.rsk.co/address/ADDRESS_MAINNET)
-- testnet: [ ADDRESS_TESTNET ](https://explorer.testnet.rsk.co/address/ADDRESS_TESTNET)
+- mainnet: [0xCfF3fcaeC2352C672C38d77cb1a064B7D50ce7e1](https://explorer.rsk.co/address/0xCfF3fcaeC2352C672C38d77cb1a064B7D50ce7e1)
+- testnet: [0x7e2F245F7dc8e78576ECB13AEFc0a101E9BE1AD3](https://explorer.testnet.rsk.co/address/0x7e2F245F7dc8e78576ECB13AEFc0a101E9BE1AD3)
 
 In the world of second and third generation blockchains it is not possible to update the code of an already deployed smart contract. If we need to fix a bug or update the logic of a function, then we can use the proxy architecture pattern.
 
@@ -65,15 +65,15 @@ The Money on Chain system handles different types of currency precision to opera
 
 Deals with interest payments on leverage deposits and defines the interest rates to trade with RDOC and RIF2X. Also with the commission rates to operate on the Money on Chain platform.
 
-- mainnet: [ MOC_INRATE_MAINNET_ADDRESS ](https://explorer.rsk.co/address/MOC_INRATE_MAINNET_ADDRESS)
-- testnet: [ MOC_INRATE_TESTNET_ADDRESS ](https://explorer.testnet.rsk.co/address/MOC_INRATE_TESTNET_ADDRESS)
+- mainnet: [0x1DaB07c4FD07d6eE1359a5198ACa2DEe64F371f3](https://explorer.rsk.co/address/0x1DaB07c4FD07d6eE1359a5198ACa2DEe64F371f3)
+- testnet: [0x4C54053845F4f219AddB43ef3A7d4478E89a2A47](https://explorer.testnet.rsk.co/address/0x4C54053845F4f219AddB43ef3A7d4478E89a2A47)
 
 #### MocState
 
 This contract holds the system variables to manage the state, whether it's the state itself or the liquidation thresholds, as well as many `view` functions to access and evaluate it.
 
-- mainnet: [ MOC_STATE_MAINNET_ADDRESS ](https://explorer.rsk.co/address/MOC_STATE_MAINNET_ADDRESS)
-- testnet: [ MOC_STATE_TESTNET_ADDRESS ](https://explorer.testnet.rsk.co/address/MOC_STATE_TESTNET_ADDRESS)
+- mainnet: [0x541F68a796Fe5ae3A381d2Aa5a50b975632e40A6](https://explorer.rsk.co/address/0x541F68a796Fe5ae3A381d2Aa5a50b975632e40A6)
+- testnet: [0x496eD67F77D044C8d9471fe86085Ccb5DC4d2f63](https://explorer.testnet.rsk.co/address/0x496eD67F77D044C8d9471fe86085Ccb5DC4d2f63)
 
 # Getting RIFPros
 
