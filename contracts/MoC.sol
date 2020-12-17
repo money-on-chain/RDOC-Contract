@@ -80,9 +80,11 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable {
    * @dev Creates or updates the amount of a StableToken redeem Request from the msg.sender
    * @param stableTokenAmount Amount of StableTokens to redeem on settlement [using mocPrecision]
    */
+
+  /*
   function redeemStableTokenRequest(uint256 stableTokenAmount) public whenNotPaused() whenSettlementReady() {
     settlement.addRedeemRequest(stableTokenAmount, msg.sender);
-  }
+  }*/
 
   /**
     @dev Alters the redeem amount position for the redeemer
@@ -125,6 +127,8 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable {
    * @dev Redeems RiskPro Tokens and pays the comissions of the operation in ReserveTokens
      @param riskProAmount Amout in RiskPro
    */
+
+  /*
   function redeemRiskPro(uint256 riskProAmount) public whenNotPaused() transitionState() atLeastState(MoCState.States.AboveCobj) {
     (uint256 resTokensAmount, uint256 commissionSpent) = mocExchange.redeemRiskPro(msg.sender, riskProAmount);
 
@@ -132,7 +136,7 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable {
 
     // Transfer commissions to commissions address
     safeWithdrawFromReserve(mocInrate.commissionsAddress(), commissionSpent);
-  }
+  }*/
 
   /**
    * @dev Mint StableToken tokens and pays the commisions of the operation
@@ -156,6 +160,8 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable {
      @param bucket Bucket to reedem, for example X2
      @param riskProxAmount Amount in RiskProx
    */
+
+  /*
   function redeemRiskProx(bytes32 bucket, uint256 riskProxAmount)
     public
     whenNotPaused()
@@ -171,7 +177,7 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable {
 
     // Transfer commissions to commissions address
     safeWithdrawFromReserve(mocInrate.commissionsAddress(), commissionSpent);
-  }
+  }*/
 
   /**
    * @dev BUCKET riskProx minting
@@ -204,6 +210,8 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable {
    * @dev Redeems the requested amount for the msg.sender, or the max amount of free stableTokens possible.
    * @param stableTokenAmount Amount of StableTokens to redeem.
    */
+
+  /*
   function redeemFreeStableToken(uint256 stableTokenAmount) public whenNotPaused() transitionState() {
     (uint256 resTokensAmount, uint256 commissionSpent) = mocExchange.redeemFreeStableToken(msg.sender, stableTokenAmount);
 
@@ -211,15 +219,17 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable {
 
     // Transfer commissions to commissions address
     safeWithdrawFromReserve(mocInrate.commissionsAddress(), commissionSpent);
-  }
+  }*/
 
   /**
    * @dev Allow redeem on liquidation state, user StableTokens get burned and he receives
    * the equivalent ReserveTokens if can be covered, or the maximum available
    **/
+
+  /*
   function redeemAllStableToken() public atState(MoCState.States.Liquidated) {
     mocExchange.redeemAllStableToken(msg.sender, msg.sender);
-  }
+  }*/
 
   /**
     @dev Moves the daily amount of interest rate to C0 bucket
