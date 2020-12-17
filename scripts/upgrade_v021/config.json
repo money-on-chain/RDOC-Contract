@@ -1,0 +1,63 @@
+{
+  "timeout": 60,
+  "timeout_web3": 300,
+  "gas_price": 68000000,
+  "networks": {
+    "rdocTestnetAlpha": {
+      "uri": "https://public-node.testnet.rsk.co",
+      "chain_id": 31,
+      "accounts": [
+        {
+          "address": "0xA8f94D08D3D9C045fe0B86A953dF39B14206153c",
+          "private_key": ""
+        }
+      ],
+      "addresses": {
+        "governor": "0x4eAC4518e81B3A5198aADAb998D2610B46aAA609",
+        "upgradeDelegator": "0xCDAbFbF334A5F6BCe900D2f73470D1e6722365d8",
+        "MoC": "0x4512f4C1d984bbf8B7f7404EddFb1881cFA79EfD",
+        "MoCState": "0xB80C23576053A1a5278C1a43DC8471F432f77245",
+        "MoCHelperLib": "0xabe1A7b54CF489eCD3fD5844F8aBFdF7e4DF5c74"
+      }
+
+    },
+    "rdocTestnet": {
+      "uri": "https://public-node.testnet.rsk.co",
+      "chain_id": 31,
+      "accounts": [
+        {
+          "address": "0xC67D9eE30d2119A384E02de568BE80FE785074Ba",
+          "private_key": ""
+        }
+      ],
+      "addresses": {
+        "governor": "0x4eAC4518e81B3A5198aADAb998D2610B46aAA609",
+        "upgradeDelegator": "0xCDAbFbF334A5F6BCe900D2f73470D1e6722365d8",
+        "MoC": "0x7e2F245F7dc8e78576ECB13AEFc0a101E9BE1AD3",
+        "MoCState": "0x496eD67F77D044C8d9471fe86085Ccb5DC4d2f63",
+        "MoCHelperLib": "0xB44721cD90E9063953831685aB0372A98ECC5EF4"
+      }
+
+    },
+    "rdocMainnet": {
+      "uri": "https://public-node.rsk.co",
+      "chain_id": 30,
+      "accounts": [
+        {
+          "address": "0xC67D9eE30d2119A384E02de568BE80FE785074Ba",
+          "private_key": ""
+        }
+      ],
+      "addresses": {
+        "governor": "0xC61F0392d5170214b5D93C0BC4c4354163aBC1f7",
+        "upgradeDelegator": "0x5cE577f6Ec969CE9a282838D350206C52A6F338C",
+        "MoC": "0xCfF3fcaeC2352C672C38d77cb1a064B7D50ce7e1",
+        "MoCState": "0x541F68a796Fe5ae3A381d2Aa5a50b975632e40A6",
+        "MoCHelperLib": "0x8B8ccC595Fe732eC46Ae5c9cd269feb834d1C791"
+      }
+    }
+
+
+  }
+
+}
