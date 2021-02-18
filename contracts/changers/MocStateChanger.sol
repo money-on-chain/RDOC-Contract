@@ -7,7 +7,7 @@ import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
  * @dev This contract is used to update the configuration of MoCState
  * with MoC --- governance.
  */
-contract MocStateChanger is ChangeContract, Ownable{
+contract MocStateChanger is ChangeContract, Ownable {
   MoCState public mocState;
   address public priceProvider;
   uint256 public newPeg;
@@ -18,6 +18,11 @@ contract MocStateChanger is ChangeContract, Ownable{
   uint256 public smoothingFactor;
   uint256 public emaCalculationBlockSpan;
   uint256 public maxMintRiskPro;
+  address public mocPriceProvider;
+  address public mocToken;
+  address public mocVendors;
+  bool public liquidationEnabled;
+  uint256 public protected;
 
   constructor(
     MoCState _mocState,
@@ -29,7 +34,12 @@ contract MocStateChanger is ChangeContract, Ownable{
     uint256 _liq,
     uint256 _smoothingFactor,
     uint256 _emaCalculationBlockSpan,
-    uint256 _maxMintRiskPro
+    uint256 _maxMintRiskPro,
+    address _mocPriceProvider,
+    address _mocTokenAddress,
+    address _mocVendorsAddress,
+    bool _liquidationEnabled,
+    uint256 _protected
   ) public {
     mocState = _mocState;
     newPeg = _newPeg;
@@ -41,6 +51,11 @@ contract MocStateChanger is ChangeContract, Ownable{
     emaCalculationBlockSpan = _emaCalculationBlockSpan;
     priceProvider = _priceProvider;
     maxMintRiskPro = _maxMintRiskPro;
+    mocPriceProvider = _mocPriceProvider;
+    mocToken = _mocTokenAddress;
+    mocVendors = _mocVendorsAddress;
+    liquidationEnabled = _liquidationEnabled;
+    protected = _protected;
   }
 
   function execute() external {
@@ -53,6 +68,11 @@ contract MocStateChanger is ChangeContract, Ownable{
     mocState.setSmoothingFactor(smoothingFactor);
     mocState.setPriceProvider(priceProvider);
     mocState.setMaxMintRiskPro(maxMintRiskPro);
+    mocState.setMoCPriceProvider(mocPriceProvider);
+    mocState.setMoCToken(mocToken);
+    mocState.setMoCVendors(mocVendors);
+    mocState.setLiquidationEnabled(liquidationEnabled);
+    mocState.setProtected(protected);
   }
 
   function setMaxMintRiskPro(uint256 _maxMintRiskPro) public onlyOwner() {
@@ -61,6 +81,26 @@ contract MocStateChanger is ChangeContract, Ownable{
 
   function setPriceProvider(address _priceProvider) public onlyOwner() {
     priceProvider = _priceProvider;
+  }
+
+  function setMoCPriceProvider(address _mocPriceProvider) public onlyOwner() {
+    mocPriceProvider = _mocPriceProvider;
+  }
+
+  function setMoCToken(address _mocTokenAddress) public onlyOwner() {
+    mocToken = _mocTokenAddress;
+  }
+
+  function setMoCVendors(address _mocVendorsAddress) public onlyOwner() {
+    mocVendors = _mocVendorsAddress;
+  }
+
+  function setLiquidationEnabled(bool _liquidationEnabled) public onlyOwner() {
+    liquidationEnabled = _liquidationEnabled;
+  }
+
+  function setProtected(uint _protected) public onlyOwner() {
+    protected = _protected;
   }
 
   function setSmoothingFactor(uint256 factor) public onlyOwner() {
