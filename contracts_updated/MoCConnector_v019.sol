@@ -7,7 +7,7 @@ import "./MoCWhitelist.sol";
 /**
   @dev Provides access control between all MoC Contracts
  */
-contract MoCConnector is MoCWhitelist, Initializable {
+contract MoCConnector_v019 is MoCWhitelist, Initializable {
   // References
   address payable public moc;
   address public stableToken;
@@ -18,27 +18,11 @@ contract MoCConnector is MoCWhitelist, Initializable {
   address public mocSettlement;
   address public mocExchange;
   address public mocInrate;
-  /** DEPRECATED **/
-  // solium-disable-next-line mixedcase
-  address public DEPRECATED_mocBurnout;
+  address public mocBurnout;
   address public reserveToken;
 
   bool internal initialized;
 
-  /**
-    @dev Initializes the contract
-    @param mocAddress MoC contract address
-    @param stableTokenAddress Stable token contract address
-    @param riskProAddress RiskPro token contract address
-    @param riskProxAddress RiskProxManager contract address
-    @param stateAddress MoCState contract address
-    @param settlementAddress MoCSettlement contract address
-    @param converterAddress MoCConverter contract address
-    @param exchangeAddress MoCExchange contract address
-    @param inrateAddress MoCInrate contract address
-    @param burnoutBookAddress (DEPRECATED) MoCBurnout contract address. DO NOT USE.
-    @param reserveTokenAddress Reserve token contract address
-  */
   function initialize(
     address payable mocAddress,
     address stableTokenAddress,
@@ -61,7 +45,7 @@ contract MoCConnector is MoCWhitelist, Initializable {
     mocConverter = converterAddress;
     mocExchange = exchangeAddress;
     mocInrate = inrateAddress;
-    DEPRECATED_mocBurnout = burnoutBookAddress;
+    mocBurnout = burnoutBookAddress;
     reserveToken = reserveTokenAddress;
 
     // Add to Whitelist

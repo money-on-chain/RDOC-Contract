@@ -4,12 +4,14 @@ import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "moc-governance/contracts/Governance/Governed.sol";
 import "moc-governance/contracts/Governance/IGovernor.sol";
 
-
 /** @title ReserveToken Price Provider. */
 contract MoCEMACalculator is Governed {
   using SafeMath for uint256;
 
-  event MovingAverageCalculation(uint256 price, uint256 movingAverage);
+  event MovingAverageCalculation (
+    uint256 price,
+    uint256 movingAverage
+  );
 
   uint256 internal exponentialMovingAverage;
   uint256 public smoothingFactor;
@@ -54,11 +56,12 @@ contract MoCEMACalculator is Governed {
     return lastEmaCalculation;
   }
 
-  /** @dev Provides ResToken's Price and Moving average.
-   * More information of EMA calculation https://en.wikipedia.org/wiki/Exponential_smoothing
-   * @param initialEma Initial ema value
-   * @param smoothFactor Weight coefficient for EMA calculation.
-   * @param emaBlockSpan Block count in a period for EMA calculation
+  /**
+    @dev Provides ResToken's Price and Moving average.
+    More information of EMA calculation https://en.wikipedia.org/wiki/Exponential_smoothing
+    @param initialEma Initial ema value
+    @param smoothFactor Weight coefficient for EMA calculation.
+    @param emaBlockSpan Block count in a period for EMA calculation
    */
   function initializeMovingAverage(uint256 initialEma, uint256 smoothFactor, uint256 emaBlockSpan) internal {
     _doSetSmoothingFactor(smoothFactor);
@@ -67,14 +70,16 @@ contract MoCEMACalculator is Governed {
     emaCalculationBlockSpan = emaBlockSpan;
   }
 
-  /** @dev Calculates a EMA of the price.
-   * More information of EMA calculation https://en.wikipedia.org/wiki/Exponential_smoothing
-   * @param reservePrice Current price.
+  /**
+    @dev Calculates a EMA of the price.
+    More information of EMA calculation https://en.wikipedia.org/wiki/Exponential_smoothing
+    @param reservePrice Current price.
    */
   function setExponentalMovingAverage(uint256 reservePrice) internal {
     if (shouldCalculateEma()) {
       uint256 weightedPrice = reservePrice.mul(smoothingFactor);
-      uint256 currentEma = exponentialMovingAverage.mul(coefficientComp()).add(weightedPrice).div(FACTOR_PRECISION);
+      uint256 currentEma = exponentialMovingAverage.mul(coefficientComp()).add(weightedPrice)
+        .div(FACTOR_PRECISION);
 
       lastEmaCalculation = block.number;
       exponentialMovingAverage = currentEma;
@@ -83,8 +88,9 @@ contract MoCEMACalculator is Governed {
     }
   }
 
-  /** @dev Calculates the smoothing factor complement
-   */
+  /**
+    @dev Calculates the smoothing factor complement
+  */
   function coefficientComp() internal view returns (uint256) {
     return FACTOR_PRECISION.sub(smoothingFactor);
   }

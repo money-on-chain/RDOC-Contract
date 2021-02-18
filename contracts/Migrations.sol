@@ -1,6 +1,5 @@
 pragma solidity 0.5.8;
 
-
 contract Migrations {
   address public owner;
   uint256 public last_completed_migration; // solium-disable-line mixedcase

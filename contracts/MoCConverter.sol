@@ -4,7 +4,6 @@ import "./MoCState.sol";
 import "./MoCLibConnection.sol";
 import "./base/MoCBase.sol";
 
-
 contract MoCConverter is MoCBase, MoCLibConnection {
   MoCState internal mocState;
 
@@ -15,25 +14,31 @@ contract MoCConverter is MoCBase, MoCLibConnection {
   }
 
   /**
-   * @dev ReserveTokens equivalent for the amount of riskPros given
-   * @param amount Amount of RiskPro to calculate the total price
-   * @return total ReserveTokens Price of the amount RiskPros [using reservePrecision].
-   */
+  * @dev ReserveTokens equivalent for the amount of riskPros given
+  * @param amount Amount of RiskPro to calculate the total price
+  * @return total ReserveTokens Price of the amount RiskPros [using reservePrecision].
+  */
   function riskProToResToken(uint256 amount) public view returns (uint256) {
     uint256 tecPrice = mocState.riskProTecPrice();
 
     return mocLibConfig.totalRiskProInResTokens(amount, tecPrice);
   }
 
+  /**
+  * @dev Converts Reserve to RiskPro
+  * @param resTokensAmount Reserve amount
+  * @return RiskPro amount
+  */
   function resTokenToRiskPro(uint256 resTokensAmount) public view returns (uint256) {
     return mocLibConfig.maxRiskProWithResTokens(resTokensAmount, mocState.riskProTecPrice());
   }
 
   /**
-   * @dev ReserveTokens equivalent for the amount of riskPro given applying the spotDiscountRate
-   * @param amount amount of RiskPro [using reservePrecision]
-   */
-  function riskProDiscToResToken(uint256 amount) public view returns (uint256) {
+  * @dev ReserveTokens equivalent for the amount of riskPro given applying the spotDiscountRate
+  * @param amount amount of RiskPro [using reservePrecision]
+  * @return Reserve amount
+  */
+  function riskProDiscToResToken(uint256 amount) public view returns(uint256) {
     uint256 discountRate = mocState.riskProSpotDiscountRate();
     uint256 totalResTokensValuet = riskProToResToken(amount);
 
@@ -60,6 +65,10 @@ contract MoCConverter is MoCBase, MoCLibConnection {
     return mocLibConfig.riskProResTokensValuet(riskProxAmount, mocState.bucketRiskProTecPrice(bucket));
   }
 
+  function riskProxToResTokenHelper(uint256 riskProxAmount, bytes32 bucket) public view returns(uint256) {
+    return mocLibConfig.bproBtcValue(bproxAmount, mocState.bucketRiskProTecPriceHelper(bucket));
+  }
+
   function resTokenToRiskProx(uint256 resTokensAmount, bytes32 bucket) public view returns (uint256) {
     return mocLibConfig.maxRiskProWithResTokens(resTokensAmount, mocState.bucketRiskProTecPrice(bucket));
   }
@@ -70,6 +79,22 @@ contract MoCConverter is MoCBase, MoCLibConnection {
 
   function riskProToResTokenWithPrice(uint256 riskProAmount, uint256 riskProPrice) public view returns (uint256) {
     return mocLibConfig.riskProResTokensValuet(riskProAmount, riskProPrice);
+  }
+
+  function mocToResToken(uint256 mocAmount) public view returns(uint256) {
+    return mocLibConfig.mocReserveTokenValue(mocAmount, mocState.getReserveTokenPrice(), mocState.getMoCPrice());
+  }
+
+  function resTokenToMoC(uint256 resTokensAmount) public view returns(uint256) {
+    return mocLibConfig.maxMoCWithReserveToken(btcAmount, mocState.getReserveTokenPrice(), mocState.getMoCPrice());
+  }
+
+  function mocToResTokenWithPrice(uint256 mocAmount, uint256 reservePrice, uint256 mocPrice) public view returns(uint256) {
+    return mocLibConfig.mocReserveTokenValue(mocAmount, reservePrice, mocPrice);
+  }
+
+  function resTokenToMoCWithPrice(uint256 resTokensAmount, uint256 reservePrice, uint256 mocPrice) public view returns(uint256) {
+    return mocLibConfig.maxMoCWithReserveToken(btcAmount, reservePrice, mocPrice);
   }
 
   // Leave a gap betweeen inherited contracts variables in order to be

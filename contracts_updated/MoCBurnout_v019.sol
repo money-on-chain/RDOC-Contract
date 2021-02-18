@@ -7,7 +7,7 @@ import "./token/StableToken.sol";
 import "./MoCExchange.sol";
 
 
-contract MoCBurnoutEvents {
+contract MoCBurnoutEvents_v019 {
   event BurnoutAddressSet(address indexed account, address burnoutAddress);
   event BurnoutExecuted(uint256 addressCount);
   event BurnoutAddressProcessed(address indexed account, address burnoutAddress, uint256 amount);
@@ -19,7 +19,7 @@ contract MoCBurnoutEvents {
  * @dev Track all Burnout addresses that will be used in liquidation event. When liquidation happens
  * all StableTokens of the holders in the queue will be sent to the corresponding burnout address.
  */
-contract MoCBurnout is MoCBase, MoCBurnoutEvents, PartialExecution {
+contract MoCBurnout_v019 is MoCBase, MoCBurnoutEvents_v019, PartialExecution {
   using SafeMath for uint256;
 
   // Contracts

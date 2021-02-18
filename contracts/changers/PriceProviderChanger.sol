@@ -19,7 +19,7 @@ contract PriceProviderChanger is ChangeContract, Ownable {
     priceProvider = _priceProvider;
   }
 
-  function execute() external {    
+  function execute() external {
     mocState.setPriceProvider(priceProvider);
   }
 
