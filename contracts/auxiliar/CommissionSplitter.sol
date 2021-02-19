@@ -5,13 +5,14 @@ import "moc-governance/contracts/Governance/IGovernor.sol";
 import "../MoC.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "openzeppelin-eth/contracts/utils/ReentrancyGuard.sol";
 
 /**
   @dev Contract that split his balance between two addresses based on a
   proportion defined by Governance. One of those addresses should
   be a Money on Chain RRC20 contract.
  */
-contract CommissionSplitter is Governed {
+contract CommissionSplitter is Governed, ReentrancyGuard {
   event SplitExecuted(uint256 commissionAmount, uint256 mocAmount);
   // Math
   using SafeMath for uint256;
@@ -26,13 +27,27 @@ contract CommissionSplitter is Governed {
   MoC public moc;
   IERC20 public reserveToken;
 
-  constructor(address _mocAddress, address _reserveToken, address _commissionAddress, uint256 _mocProportion, address _governor) public {
+  /**
+    @dev Initialize commission splitter contract
+    @param _mocAddress the address of MoC contract
+    @param _commissionsAddress the address in which the remaining commissions (profit ones) are sent
+    @param _mocProportion the proportion of commission that moc will keep, it should have PRECISION precision
+    @param _governor the address of the IGovernor contract
+    @param _reserveToken the address of the ReserveToken contract
+   */
+  function initialize(
+    MoC _mocAddress,
+    address payable _commissionsAddress,
+    uint256 _mocProportion,
+    IGovernor _governor,
+    address _reserveToken
+  ) public initializer {
     _setMocProportion(_mocProportion);
-    moc = MoC(_mocAddress);
+    moc = _mocAddress;
     reserveToken = IERC20(_reserveToken);
-    commissionsAddress = _commissionAddress;
+    commissionsAddress = _commissionsAddress;
 
-    governor = IGovernor(_governor);
+    Governed.initialize(_governor);
   }
 
   /**

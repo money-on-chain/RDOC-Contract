@@ -408,9 +408,4 @@ contract MoCHelperLibHarness is MoCLibConnection, Initializable {
   public view returns(uint256) {
     return mocLibConfig.mocBtcValue(amount, btcPrice, mocPrice);
   }
-
-  function getPayableAddress(address account)
-  public view returns (address payable) {
-    return mocLibConfig.getPayableAddress(account);
-  }
 }
