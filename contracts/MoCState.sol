@@ -727,6 +727,131 @@ contract MoCState is MoCLibConnection, MoCBase, MoCEMACalculator {
     return maxMintRiskPro;
   }
 
+  /************************************/
+  /***** UPGRADE v0110      ***********/
+  /************************************/
+
+  /** START UPDATE V0110: 24/09/2020  **/
+  /** Upgrade to support multiple commission rates **/
+  /** and rename price interfaces **/
+  /** Public functions **/
+
+  /**********************
+    MoC PRICE PROVIDER
+   *********************/
+
+  /**
+   @dev Sets a new MoCProvider contract
+   @param mocProviderAddress MoC price provider address
+  */
+  function setMoCPriceProvider(address mocProviderAddress) public onlyAuthorizedChanger() {
+    address oldMoCPriceProviderAddress = address(mocPriceProvider);
+    mocPriceProvider = TexPriceProvider(mocProviderAddress);
+    emit MoCPriceProviderUpdated(oldMoCPriceProviderAddress, address(mocPriceProvider));
+  }
+
+  /**
+   @dev Gets the MoCPriceProviderAddress
+   @return MoC price provider address
+  */
+  function getMoCPriceProvider() public view returns(address) {
+    return address(mocPriceProvider);
+  }
+
+  /**
+   @dev Gets the MoCPrice
+   @return MoC price
+  */
+  function getMoCPrice() public view returns(uint256 price) {
+    price = mocPriceProvider.getLastClosingPrice(address(stableToken), address(mocToken));
+    require(price > 0, "Invalid price");
+
+    return price;
+  }
+
+  /**********************
+    MoC TOKEN
+   *********************/
+
+  /**
+   @dev Sets the MoC token contract address
+   @param mocTokenAddress MoC token contract address
+  */
+  // TODO: Suggestion: create a "MoCConnectorChanger" contract and whitelist the address
+  function setMoCToken(address mocTokenAddress) public onlyAuthorizedChanger() {
+    setMoCTokenInternal(mocTokenAddress);
+  }
+
+  /**
+   @dev Gets the MoC token contract address
+   @return MoC token contract address
+  */
+  function getMoCToken() public view returns(address) {
+    return address(mocToken);
+  }
+
+  /**********************
+    MoC VENDORS
+   *********************/
+
+  // TODO: Suggestion: create a "MoCConnectorChanger" contract and whitelist the address
+  /**
+   @dev Sets the MoCVendors contract address
+   @param mocVendorsAddress MoCVendors contract address
+  */
+  function setMoCVendors(address mocVendorsAddress) public onlyAuthorizedChanger() {
+    setMoCVendorsInternal(mocVendorsAddress);
+  }
+
+  /**
+   @dev Gets the MoCVendors contract addfress
+   @return MoCVendors contract address
+  */
+  function getMoCVendors() public view returns(address) {
+    return address(mocVendors);
+  }
+
+  /** END UPDATE V0110: 24/09/2020 **/
+
+  /************************************/
+  /***** UPGRADE v0110      ***********/
+  /************************************/
+
+  /** START UPDATE V0110: 24/09/2020  **/
+  /** Upgrade to support multiple commission rates **/
+  /** and rename price interfaces **/
+  /** Internal functions **/
+
+  /**********************
+    MoC TOKEN
+   *********************/
+
+  /**
+   @dev Sets the MoC token contract address (internal function)
+   @param mocTokenAddress MoC token contract address
+  */
+  function setMoCTokenInternal(address mocTokenAddress) internal {
+    mocToken = MoCToken(mocTokenAddress);
+
+    emit MoCTokenChanged(mocTokenAddress);
+  }
+
+  /**********************
+    MoC VENDORS
+   *********************/
+
+  /**
+   @dev Sets the MoCVendors contract address (internal function)
+   @param mocVendorsAddress MoCVendors contract address
+  */
+  function setMoCVendorsInternal(address mocVendorsAddress) internal {
+    mocVendors = MoCVendors(mocVendorsAddress);
+
+    emit MoCVendorsChanged(mocVendorsAddress);
+  }
+
+  /** END UPDATE V0110: 24/09/2020 **/
+
   /**
     @dev Calculates price at liquidation event as the relation between
     the stableToken total supply and the amount of ReserveTokens available to distribute
@@ -760,7 +885,7 @@ contract MoCState is MoCLibConnection, MoCBase, MoCEMACalculator {
     maxMintRiskPro = _maxMintRiskPro;
   }
 
-  function initializeContracts() internal {
+  function initializeContracts(address _mocTokenAddress, address _mocVendorsAddress) internal {
     mocSettlement = MoCSettlement(connector.mocSettlement());
     stableToken = StableToken(connector.stableToken());
     riskProToken = RiskProToken(connector.riskProToken());

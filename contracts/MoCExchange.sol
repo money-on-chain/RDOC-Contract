@@ -152,9 +152,9 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
     uint256 mocPrice = mocState.getMoCPrice();
 
     // Calculate amount in MoC
-    uint256 amountInMoC = mocConverter.resTokenToMoCWithPrice(reserveTokenAmount, reserveToken, mocPrice);
+    uint256 amountInMoC = mocConverter.resTokenToMoCWithPrice(reserveTokenAmount, reserveTokenPrice, mocPrice);
 
-    return (amountInMoC, reserveToken, mocPrice);
+    return (amountInMoC, reserveTokenPrice, mocPrice);
   }
 
   /**
@@ -303,7 +303,7 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
     uint256 userAmount = Math.min(riskProAmount, userBalance);
 
     details.riskProFinalAmount = Math.min(userAmount, mocState.absoluteMaxRiskPro());
-    uint256 totalReserveToken = mocConverter.riskProToResToken(riskProFinalAmount);
+    uint256 totalReserveToken = mocConverter.riskProToResToken(details.riskProFinalAmount);
 
     /** UPDATE V0110: 24/09/2020 - Upgrade to support multiple commission rates **/
     CommissionParamsStruct memory params;
@@ -324,16 +324,16 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
       BUCKET_C0,
       totalReserveToken,
       0,
-      riskProFinalAmount
+      details.riskProFinalAmount
     );
 
-    details.resTokenTotalWithoutCommission = totalReserveToken.sub(
+    details.reserveTokenTotalWithoutCommission = totalReserveToken.sub(
       details.commission.reserveTokenCommission).sub(details.commission.reserveTokenMarkup);
 
     redeemRiskProInternal(account, details, vendorAccount);
 
     return (
-      details.resTokenTotalWithoutCommission,
+      details.reserveTokenTotalWithoutCommission,
       details.commission.reserveTokenCommission,
       details.commission.mocCommission,
       details.commission.reserveTokenMarkup,
@@ -363,11 +363,11 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
       );
       uint256 stableTokensReserveTokenValue = mocConverter.stableTokensToResToken(details.finalStableTokenAmount);
 
-      details.interestAmount = mocInrate.calcStableTokenRedInterestValues(
+      details.reserveTokenInterestAmount = mocInrate.calcStableTokenRedInterestValues(
         details.finalStableTokenAmount,
         stableTokensReserveTokenValue
       );
-      details.finalReserveTokenAmount = stableTokensReserveTokenValue.sub(details.interestAmount);
+      details.finalReserveTokenAmount = stableTokensReserveTokenValue.sub(details.reserveTokenInterestAmount);
 
       /** UPDATE V0110: 24/09/2020 - Upgrade to support multiple commission rates **/
       CommissionParamsStruct memory params;
@@ -382,7 +382,7 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
       /** END UPDATE V0110: 24/09/2020 - Upgrade to support multiple commission rates **/
 
       doStableTokenRedeem(account, details.finalStableTokenAmount, stableTokensReserveTokenValue);
-      riskProxManager.payInrate(BUCKET_C0, details.interestAmount);
+      riskProxManager.payInrate(BUCKET_C0, details.reserveTokenInterestAmount);
 
       redeemFreeStableTokenInternal(account, details, vendorAccount);
 
@@ -407,16 +407,16 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
     // StableTokens to issue with tx value amount
     if (resTokensToMint > 0) {
       details.stableTokens = mocConverter.resTokenToStableToken(resTokensToMint);
-      details.stableTokenAmount = Math.min(stableTokens, mocState.absoluteMaxStableToken());
-      details.totalCost = stableTokenAmount == stableTokens
+      details.stableTokenAmount = Math.min(details.stableTokens, mocState.absoluteMaxStableToken());
+      details.totalCost = details.stableTokenAmount == details.stableTokens
         ? resTokensToMint
         : mocConverter.stableTokensToResToken(details.stableTokenAmount);
 
       // Mint Token
-      stableToken.mint(account, stableTokenAmount);
+      stableToken.mint(account, details.stableTokenAmount);
 
       // Update Buckets
-      riskProxManager.addValuesToBucket(BUCKET_C0, totalCost, stableTokenAmount, 0);
+      riskProxManager.addValuesToBucket(BUCKET_C0, details.totalCost, details.stableTokenAmount, 0);
 
       /** UPDATE V0110: 24/09/2020 - Upgrade to support multiple commission rates **/
       CommissionParamsStruct memory params;
@@ -568,7 +568,7 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
    @param vendorAccount Vendor address
    @return total ReserveTokens Spent (resTokensToMint more interest) and commission spent [using reservePrecision]
   */
-  function mintRiskProx(address payable account, bytes32 bucket, uint256 resTokensToMint)
+  function mintRiskProx(address payable account, bytes32 bucket, uint256 resTokensToMint, address vendorAccount)
     public
     onlyWhitelisted(msg.sender)
     returns (uint256, uint256, uint256, uint256, uint256)
@@ -584,13 +584,13 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
       );
 
       // Get interest and the adjusted RiskProAmount
-      details.reserveTokennterestAmount = mocInrate.calcMintInterestValues(
+      details.reserveTokenInterestAmount = mocInrate.calcMintInterestValues(
         bucket,
         details.finalReserveTokenToMint
       );
 
       // pay interest
-      riskProxManager.payInrate(BUCKET_C0, details.interestAmount);
+      riskProxManager.payInrate(BUCKET_C0, details.reserveTokenInterestAmount);
 
       details.riskProxToMint = mocConverter.resTokenToRiskProx(details.finalReserveTokenToMint, bucket);
 
@@ -652,7 +652,7 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
     burnRiskProxFor(
       bucket,
       account,
-      riskProxToRedeem,
+      details.riskProxToRedeem,
       mocState.bucketRiskProTecPrice(bucket)
     );
 
@@ -676,11 +676,11 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
 
     /** END UPDATE V0110: 24/09/2020 - Upgrade to support multiple commission rates **/
 
-    details.totalWithoutCommission = details.resTokenToRedeem.sub(
+    details.reserveTokenTotalWithoutCommission = details.resTokenToRedeem.sub(
       details.commission.reserveTokenCommission).sub(details.commission.reserveTokenMarkup);
-    details.totalReserveTokenRedeemed = details.totalWithoutCommission.add(details.resTokenInterests);
+    details.totalReserveTokenRedeemed = details.reserveTokenTotalWithoutCommission.add(details.resTokenInterests);
 
-    redeemRiskProxInternal(account, bucket, riskproxAmount, details, vendorAccount);
+    redeemRiskProxInternal(account, bucket, riskProxAmount, details, vendorAccount);
 
     return (
       details.totalReserveTokenRedeemed,

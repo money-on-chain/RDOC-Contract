@@ -261,7 +261,7 @@ library MoCHelperLib {
     @param nStableToken StableTokens amount [using mocPrecision]
     @return Price at liquidation event [using mocPrecision]
   */
-  function liquidationPrice(MocLibConfig storage libConfig, uint256 resTokenAmount, uint256 nDoc)
+  function liquidationPrice(MocLibConfig storage libConfig, uint256 resTokenAmount, uint256 nStableToken)
   public view returns(uint256) {
     // [MOC] * [RES] / [RES]
     return nStableToken.mul(libConfig.reservePrecision).div(resTokenAmount);
@@ -362,11 +362,11 @@ library MoCHelperLib {
 
  /**
     @dev Calculates Leverage: Leverage = nReserve / (nReserve - lB)
-    @param nB Total ReserveToken amount [using reservePrecision]
-    @param lB Locked bitcoins amount [using reservePrecision]
+    @param nReserve Total ReserveTokens amount [using reservePrecision]
+    @param lB Locked ReserveTokens amount [using reservePrecision]
     @return Leverage [using mocPrecision]
   */
-  function leverage(MocLibConfig storage libConfig, uint256 nB,uint256 lB)
+  function leverage(MocLibConfig storage libConfig, uint256 nReserve,uint256 lB)
   public view returns(uint256) {
     if (lB == 0) {
       return libConfig.mocPrecision;

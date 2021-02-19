@@ -215,11 +215,11 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable {
   }
 
   /**
-   * @dev Mint StableToken tokens and pays the commisions of the operation
-   * @param resTokensToMint Amount in ReserveTokens to mint
-   * @param vendorAccount Vendor address
-   */
-  function mintStableTokenVendors(uint256 resTokensToMint)
+    @dev Mint StableToken tokens and pays the commisions of the operation
+    @param resTokensToMint Amount in ReserveTokens to mint
+    @param vendorAccount Vendor address
+  */
+  function mintStableTokenVendors(uint256 resTokensToMint, address vendorAccount)
   public
   whenNotPaused() transitionState() atLeastState(MoCState.States.AboveCobj) {
     /** UPDATE V0110: 24/09/2020 - Upgrade to support multiple commission rates **/
@@ -325,7 +325,7 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable {
    * @dev Redeems the requested amount for the msg.sender, or the max amount of free stableTokens possible.
    * @param stableTokenAmount Amount of StableTokens to redeem.
    */
-  function redeemFreeStableTokenVendors(uint256 docAmount, address vendorAccount)
+  function redeemFreeStableTokenVendors(uint256 stableTokenAmount, address vendorAccount)
   public
   whenNotPaused() transitionState() notInProtectionMode() {
     /** UPDATE V0110: 24/09/2020 - Upgrade to support multiple commission rates **/
@@ -333,7 +333,7 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable {
     uint256 reserveTokenCommission,
     uint256 mocCommission,
     uint256 reserveTokenMarkup,
-    uint256 mocMarkup) = mocExchange.redeemFreeDoc(msg.sender, docAmount, vendorAccount);
+    uint256 mocMarkup) = mocExchange.redeemFreeStableToken(msg.sender, stableTokenAmount, vendorAccount);
 
     safeWithdrawFromReserve(msg.sender, resTokensAmount);
 
@@ -525,7 +525,7 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable {
 
     transferMocCommission(sender, mocCommission, vendorAccount, mocMarkup, totalMoCFee);
 
-    transferreserveTokenCommission(vendorAccount, reserveTokenCommission, reserveTokenMarkup);
+    transferReserveTokenCommission(vendorAccount, reserveTokenCommission, reserveTokenMarkup);
   }
 
   /**
@@ -592,7 +592,7 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable {
       totalMoCFee = mocCommission.add(mocMarkup);
       transferMocCommission(sender, mocCommission, vendorAccount, mocMarkup, totalMoCFee);
     } else {
-      transferreserveTokenCommission(vendorAccount, reserveTokenCommission, reserveTokenMarkup);
+      transferReserveTokenCommission(vendorAccount, reserveTokenCommission, reserveTokenMarkup);
     }
   }
 
@@ -602,7 +602,7 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable {
     @param reserveTokenCommission commission amount in ReserveToken
     @param reserveTokenMarkup vendor markup in ReserveToken
   */
-  function transferreserveTokenCommission(address vendorAccount, uint256 reserveTokenCommission, uint256 reserveTokenMarkup) internal {
+  function transferReserveTokenCommission(address vendorAccount, uint256 reserveTokenCommission, uint256 reserveTokenMarkup) internal {
     MoCVendors mocVendors = MoCVendors(mocState.getMoCVendors());
 
     uint256 totalResTokenFee = reserveTokenCommission.add(reserveTokenMarkup);
@@ -616,7 +616,7 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable {
       // Transfer ReserveToken to vendor address
       safeWithdrawFromReserve(vendorAccount, reserveTokenMarkup);
       // Transfer ReserveToken to commissions address
-      safeWithdrawFromReserve(mocInrate.commissionsAddress(), commissionSpent);
+      safeWithdrawFromReserve(mocInrate.commissionsAddress(), reserveTokenCommission);
     } else {
       // Transfer ReserveToken to commissions address
       safeWithdrawFromReserve(mocInrate.commissionsAddress(), totalResTokenFee);
