@@ -644,18 +644,6 @@ library MoCHelperLib {
   }
 
   /**
-    @dev Transform an address to payable address
-    @param account Address to transform to payable
-    @return Payable address for account
-  */
-  function getPayableAddress(
-    MocLibConfig storage /*libConfig*/, address account
-  ) public pure
-  returns (address payable) {
-    return address(uint160(account));
-  }
-
-  /**
     @dev Rounding product adapted from DSMath but with custom precision
     @param x Multiplicand
     @param y Multiplier

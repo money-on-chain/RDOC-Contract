@@ -75,6 +75,7 @@ contract MoCConnector is MoCWhitelist, Initializable {
     add(exchangeAddress);
     add(inrateAddress);
     add(burnoutBookAddress);
+    add(reserveTokenAddress);
   }
 
   // Leave a gap betweeen inherited contracts variables in order to be
