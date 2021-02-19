@@ -66,7 +66,7 @@ contract MoCConverter is MoCBase, MoCLibConnection {
   }
 
   function riskProxToResTokenHelper(uint256 riskProxAmount, bytes32 bucket) public view returns(uint256) {
-    return mocLibConfig.bproBtcValue(bproxAmount, mocState.bucketRiskProTecPriceHelper(bucket));
+    return mocLibConfig.riskProResTokensValuet(riskProxAmount, mocState.bucketRiskProTecPriceHelper(bucket));
   }
 
   function resTokenToRiskProx(uint256 resTokensAmount, bytes32 bucket) public view returns (uint256) {
@@ -86,7 +86,7 @@ contract MoCConverter is MoCBase, MoCLibConnection {
   }
 
   function resTokenToMoC(uint256 resTokensAmount) public view returns(uint256) {
-    return mocLibConfig.maxMoCWithReserveToken(btcAmount, mocState.getReserveTokenPrice(), mocState.getMoCPrice());
+    return mocLibConfig.maxMoCWithReserveToken(resTokensAmount, mocState.getReserveTokenPrice(), mocState.getMoCPrice());
   }
 
   function mocToResTokenWithPrice(uint256 mocAmount, uint256 reservePrice, uint256 mocPrice) public view returns(uint256) {
@@ -94,7 +94,7 @@ contract MoCConverter is MoCBase, MoCLibConnection {
   }
 
   function resTokenToMoCWithPrice(uint256 resTokensAmount, uint256 reservePrice, uint256 mocPrice) public view returns(uint256) {
-    return mocLibConfig.maxMoCWithReserveToken(btcAmount, reservePrice, mocPrice);
+    return mocLibConfig.maxMoCWithReserveToken(resTokensAmount, reservePrice, mocPrice);
   }
 
   // Leave a gap betweeen inherited contracts variables in order to be
