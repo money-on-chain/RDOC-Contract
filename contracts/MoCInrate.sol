@@ -103,9 +103,9 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
     @param blockSpanRiskPro BitPro blockspan to configure payments periods[using mocPrecision]
     @param riskProInterestTargetAddress Target address to transfer the weekly BitPro holders interest
     @param commissionsAddressTarget Target addres to transfer commissions of mint/redeem
-    @param _stableTmin Upgrade to support red doc inrate parameter
-    @param _stablePower Upgrade to support red doc inrate parameter
-    @param _stableTmax Upgrade to support red doc inrate parameter
+    @param _stableTmin Upgrade to support red stable inrate parameter
+    @param _stablePower Upgrade to support red stable inrate parameter
+    @param _stableTmax Upgrade to support red stable inrate parameter
   */
   function initialize(
     address connectorAddress,
@@ -132,7 +132,7 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
       riskProxTmax,
       _riskProRate,
       commissionsAddressTarget,
-      commissionRateParam,
+      //commissionRateParam,
       blockSpanRiskPro,
       riskProInterestTargetAddress,
       _stableTmin,
@@ -249,13 +249,13 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
     commissionsAddress = newCommissionsAddress;
   }
 
-  /**
-    @dev Sets the commission rate for Mint/Redeem transactions
-    @param newCommissionRate New commission rate
-   */
-  function setCommissionRate(uint256 newCommissionRate) public onlyAuthorizedChanger() {
-    commissionRate = newCommissionRate;
-  }
+  //  /**
+  //   @dev Sets the commission rate for Mint/Redeem transactions
+  //   @param newCommissionRate New commission rate
+  //  */
+  // function setCommissionRate(uint256 newCommissionRate) public onlyAuthorizedChanger() {
+  //   commissionRate = newCommissionRate;
+  // }
 
   /**
     @dev Calculates interest rate for RiskProx Minting, redeem and Free StableToken Redeem
@@ -377,8 +377,12 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
     @param txType Transaction type according to constant values defined in this contract
     @return finalCommissionAmount [using reservePrecision]
   */
-  function calcCommissionValue(uint256 reserveTokenAmount, uint8 txType) public view returns (uint256) {
-    uint256 finalCommissionAmount = reserveTokenAmount.mul(commissionRate).div(mocLibConfig.mocPrecision);
+  function calcCommissionValue(uint256 reserveTokenAmount, uint8 txType)
+  public view returns(uint256) {
+    // Validate txType
+    require (txType > 0, "Invalid transaction type 'txType'");
+
+    uint256 finalCommissionAmount = reserveTokenAmount.mul(commissionRatesByTxType[txType]).div(mocLibConfig.mocPrecision);
     return finalCommissionAmount;
   }
 
@@ -636,7 +640,7 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
   uint8 public constant REDEEM_RISKPRO_FEES_RESERVE = 2;
   uint8 public constant MINT_STABLETOKEN_FEES_RESERVE = 3;
   uint8 public constant REDEEM_STABLETOKEN_FEES_RESERVE = 4;
-  uint8 public constant MINT_RISKPROXX_FEES_RESERVE = 5;
+  uint8 public constant MINT_RISKPROX_FEES_RESERVE = 5;
   uint8 public constant REDEEM_RISKPROX_FEES_RESERVE = 6;
   uint8 public constant MINT_RISKPRO_FEES_MOC = 7;
   uint8 public constant REDEEM_RISKPRO_FEES_MOC = 8;

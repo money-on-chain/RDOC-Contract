@@ -35,10 +35,10 @@ contract MoCSettlementMock is MoCSettlement {
   }
 
   /**
-    @dev Returns the amount of steps for the Doc Redemption task
+    @dev Returns the amount of steps for the StableToken Redemption task
     which is the amount of redeem requests in the queue. (Used in tests only)
   */
-  function docRedemptionStepCountForTest() public view returns (uint256) {
-    return super.docRedemptionStepCount();
+  function stableTokenRedemptionStepCountForTest() public view returns (uint256) {
+    return super.stableTokenRedemptionStepCount();
   }
 }

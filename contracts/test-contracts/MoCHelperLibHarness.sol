@@ -93,9 +93,9 @@ contract MoCHelperLibHarness is MoCLibConnection, Initializable {
   * @param stableTokent total stableToken supply [using mocPrecision]
   * @return abundance ratio [using mocPrecision]
   */
-  function abundanceRatio(uint256 doc0, uint256 doct)
+  function abundanceRatio(uint256 stableToken0, uint256 stableTokent)
   public view returns(uint256) {
-    return mocLibConfig.abundanceRatio(doc0, doct);
+    return mocLibConfig.abundanceRatio(stableToken0, stableTokent);
   }
 
   /**
@@ -127,7 +127,7 @@ contract MoCHelperLibHarness is MoCLibConnection, Initializable {
   )
   public view returns(uint256)  {
     return mocLibConfig.maxRiskProWithDiscount(
-      nReserve, nStableToken, utpdu, peg, btcPrice, bproUsdPrice, spotDiscount
+      nReserve, nStableToken, utpdu, peg, reservePrice, riskProUsdPrice, spotDiscount
     );
   }
 
@@ -224,13 +224,13 @@ contract MoCHelperLibHarness is MoCLibConnection, Initializable {
 
  /**
     @dev Calculates Leverage: Leverage = nReserve / (nReserve - lB)
-    @param nB Total ReserveToken amount [using reservePrecision]
-    @param lB Locked bitcoins amount [using reservePrecision]
+    @param nReserve Total ReserveTokens amount [using reservePrecision]
+    @param lB Locked ReserveTokens amount [using reservePrecision]
     @return Leverage [using mocPrecision]
   */
-  function leverage(uint256 nB,uint256 lB)
+  function leverage(uint256 nReserve,uint256 lB)
   public view returns(uint256) {
-    return mocLibConfig.leverage(nB, lB);
+    return mocLibConfig.leverage(nReserve, lB);
   }
 
   /**

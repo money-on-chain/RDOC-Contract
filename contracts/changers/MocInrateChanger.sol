@@ -62,7 +62,7 @@ contract MocInrateChanger is ChangeContract, Ownable {
     btxcTmax = _btxcTmax;
     btxcPower = _btxcPower;
     newRiskProRate = _newRiskProRate;
-    newCommissionRate = _newComRate;
+    //newCommissionRate = _newComRate;
     stableTmin = _stableTmin;
     stableTmax = _stableTmax;
     stablePower = _stablePower;
