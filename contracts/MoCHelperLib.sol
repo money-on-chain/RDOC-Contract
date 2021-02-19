@@ -192,7 +192,7 @@ library MoCHelperLib {
     @param spotDiscount spot discount [using mocPrecision]
     @return Total RiskPro amount [using mocPrecision]
   */
-  function maxBProWithDiscount(
+  function maxRiskProWithDiscount(
     MocLibConfig storage libConfig, uint256 nReserve, uint256 nStableToken, uint256 utpdu,
     uint256 peg, uint256 reservePrice, uint256 riskProUsdPrice, uint256 spotDiscount
   ) public view returns(uint256)  {
@@ -223,7 +223,7 @@ library MoCHelperLib {
     @param peg peg value
     @return Total RiskPro amount [using reservePrecision]
   */
-  function maxBProWithDiscountAux(
+  function maxRiskProWithDiscountAux(
     MocLibConfig storage libConfig, uint256 nbUsdValue, uint256 nStableToken,
     uint256 utpdu, uint256 peg, uint256 riskProDiscountPrice
   ) internal view returns(uint256) {
@@ -261,7 +261,7 @@ library MoCHelperLib {
     @param nStableToken StableTokens amount [using mocPrecision]
     @return Price at liquidation event [using mocPrecision]
   */
-  function liquidationPrice(MocLibConfig storage libConfig, uint256 rbtcAmount, uint256 nDoc)
+  function liquidationPrice(MocLibConfig storage libConfig, uint256 resTokenAmount, uint256 nDoc)
   public view returns(uint256) {
     // [MOC] * [RES] / [RES]
     return nStableToken.mul(libConfig.reservePrecision).div(resTokenAmount);
@@ -289,7 +289,7 @@ library MoCHelperLib {
   }
 
   /**
-    @dev Calculates BPro BTC price: RiskProxInRiskPro = riskProxTecPrice / riskProPrice
+    @dev Calculates RiskPro ReserveToken price: RiskProxInRiskPro = riskProxTecPrice / riskProPrice
     @param riskProxTecPrice RiskProx ReserveTokens price [using reservePrecision]
     @param riskProPrice Trog ReserveTokens price [using reservePrecision]
     @return RiskProx price in RiskPro [using mocPrecision]
@@ -362,7 +362,7 @@ library MoCHelperLib {
 
  /**
     @dev Calculates Leverage: Leverage = nReserve / (nReserve - lB)
-    @param nB Total BTC amount [using reservePrecision]
+    @param nB Total ReserveToken amount [using reservePrecision]
     @param lB Locked bitcoins amount [using reservePrecision]
     @return Leverage [using mocPrecision]
   */
@@ -638,9 +638,9 @@ library MoCHelperLib {
     require(reservePrice > 0,"ReserveToken price should be more than zero");
     require(mocPrice > 0,"MoC price should be more than zero");
 
-    uint256 mocBtcTotal = amount.mul(mocPrice).div(reservePrice);
+    uint256 mocReserveTokenTotal = amount.mul(mocPrice).div(reservePrice);
 
-    return mocBtcTotal;
+    return mocReserveTokenTotal;
   }
 
   /**

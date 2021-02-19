@@ -10,8 +10,7 @@ contract MoCHelperLibHarness is MoCLibConnection, Initializable {
   }
 
   /**
-    Returns max uint256 value constant.
-
+    @dev Returns max uint256 value constant.
     @return max uint256 value constant
   */
   function getMaxInt() public view returns(uint256) {
@@ -19,12 +18,10 @@ contract MoCHelperLibHarness is MoCLibConnection, Initializable {
   }
 
   /**
-    Calculates average interest using integral function
-
-    @dev T =  Rate = a * (x ** b) + c
+    @dev Calculates average interest using integral function: T =  Rate = a * (x ** b) + c
     @param tMax maxInterestRate [using mocPrecision]
     @param power factor [using noPrecision]
-    @param tMin minInterestRate C0 doc amount [using mocPrecision]
+    @param tMin minInterestRate C0 stableToken amount [using mocPrecision]
     @param abRat1 initial abundance ratio [using mocPrecision]
     @param abRat2 final abundance ratio [using mocPrecision]
     @return average interest rate [using mocPrecision]
@@ -35,9 +32,7 @@ contract MoCHelperLibHarness is MoCLibConnection, Initializable {
   }
 
   /**
-    Calculates spot interest rate that BProx owners should pay to BPro owners
-
-    @dev Rate = tMax * (abRatio ** power) + tMin
+    @dev Calculates spot interest rate that RiskProx owners should pay to RiskPro owners: Rate = tMax * (abRatio ** power) + tMin
     @param tMin min interest rate [using mocPrecision]
     @param power power to use in the formula [using NoPrecision]
     @param tMax max interest rate [using mocPrecision]
@@ -49,29 +44,26 @@ contract MoCHelperLibHarness is MoCLibConnection, Initializable {
   }
 
   /**
-    Calculates potential interests function with given parameters
-
-    @dev Rate = a * (x ** b) + c
+    @dev Calculates potential interests function with given parameters: Rate = a * (x ** b) + c
     @param a maxInterestRate [using mocPrecision]
     @param b factor [using NoPrecision]
-    @param c minInterestRate C0 doc amount [using mocPrecision]
-    @param value global doc amount [using mocPrecision]
+    @param c minInterestRate C0 stableToken amount [using mocPrecision]
+    @param value global stableToken amount [using mocPrecision]
   */
   function potential(uint256 a, uint256 b, uint256 c, uint256 value)
   public view returns(uint256) {
     return mocLibConfig.potential(a, b, c, value);
   }
 
-  /**
-    Calculates average of the integral function
-
-    @dev T = (
+    /**
+    @dev Calculates average of the integral function:
+     T = (
               (c * xf + ((a * (xf ** (b + 1))) / (b + 1))) -
               (c * xi + ((a * (xi ** (b + 1))) / (b + 1)))
              ) / (xf - xi)
     @param a maxInterestRate [using mocPrecision]
     @param b factor [using NoPrecision]
-    @param c minInterestRate C0 doc amount [using mocPrecision]
+    @param c minInterestRate C0 stableToken amount [using mocPrecision]
     @param value1 value to put in the function [using mocPrecision]
     @param value2 value to put in the function [using mocPrecision]
     @return average interest rate [using mocPrecision]
@@ -82,12 +74,10 @@ contract MoCHelperLibHarness is MoCLibConnection, Initializable {
   }
 
   /**
-    Calculates integral of the exponential function
-
-    @dev T = c * (value) + (a * value ** (b + 1)) / (b + 1))
+    @dev Calculates integral of the exponential function: T = c * (value) + (a * value ** (b + 1)) / (b + 1))
     @param a maxInterestRate [using mocPrecision]
     @param b factor [using NoPrecision]
-    @param c minInterestRate C0 doc amount [using mocPrecision]
+    @param c minInterestRate C0 stableToken amount [using mocPrecision]
     @param value value to put in the function [using mocPrecision]
     @return integration result [using mocPrecision]
 
@@ -98,9 +88,9 @@ contract MoCHelperLibHarness is MoCLibConnection, Initializable {
   }
 
   /**
-  * @dev Relation between docs in bucket 0 and Doc total supply
-  * @param doc0 doc count in bucket 0 [using mocPrecision]
-  * @param doct total doc supply [using mocPrecision]
+  * @dev Relation between stableTokens in bucket 0 and StableToken total supply
+  * @param stableToken0 stableToken count in bucket 0 [using mocPrecision]
+  * @param stableTokent total stableToken supply [using mocPrecision]
   * @return abundance ratio [using mocPrecision]
   */
   function abundanceRatio(uint256 doc0, uint256 doct)
@@ -109,303 +99,274 @@ contract MoCHelperLibHarness is MoCLibConnection, Initializable {
   }
 
   /**
-    SpotDiscountRate = TPD * (utpdu - cob) / (uptdu -liq)
-
-    @dev Returns the Ratio to apply to BPro Price in discount situations
-    @param bproLiqDiscountRate Discount rate applied at Liquidation level coverage [using mocPrecision]
+    @dev Returns the Ratio to apply to RiskPro Price in discount situations: SpotDiscountRate = TPD * (utpdu - cob) / (uptdu -liq)
+    @param riskProLiqDiscountRate Discount rate applied at Liquidation level coverage [using mocPrecision]
     @param liq Liquidation coverage threshold [using mocPrecision]
     @param utpdu Discount coverage threshold [using mocPrecision]
     @param cov Actual global Coverage threshold [using mocPrecision]
     @return Spot discount rate [using mocPrecision]
-  **/
-  function bproSpotDiscountRate(uint256 bproLiqDiscountRate, uint256 liq, uint256 utpdu, uint256 cov) public view returns(uint256) {
-    return mocLibConfig.bproSpotDiscountRate(bproLiqDiscountRate, liq, utpdu, cov);
+  */
+  function riskProSpotDiscountRate(uint256 riskProLiqDiscountRate, uint256 liq, uint256 utpdu, uint256 cov) public view returns(uint256) {
+    return mocLibConfig.riskProSpotDiscountRate(riskProLiqDiscountRate, liq, utpdu, cov);
   }
 
   /**
-    MaxBProWithDiscount = (uTPDU * nDOC * PEG - (nBTC * B)) / (TPusd * TPD)
-
-    @dev Max amount of BPro to available with discount
-    @param nB Total BTC amount [using reservePrecision]
-    @param nDoc DOC amount [using mocPrecision]
+    @dev Max amount of RiskPro to available with discount: MaxRiskProWithDiscount = (uTPDU * nStableToken * PEG - (nReserve * B)) / (TPusd * TPD)
+    @param nReserve Total ReserveTokens amount [using reservePrecision]
+    @param nStableToken StableToken amount [using mocPrecision]
     @param utpdu Discount coverage threshold [using mocPrecision]
     @param peg peg value
-    @param btcPrice BTC price [using mocPrecision]
-    @param bproUsdPrice bproUsdPrice [using mocPrecision]
+    @param reservePrice ReserveTokens price [using mocPrecision]
+    @param riskProUsdPrice riskProUsdPrice [using mocPrecision]
     @param spotDiscount spot discount [using mocPrecision]
-    @return Total BPro amount [using mocPrecision]
-  **/
-  function maxBProWithDiscount(
-    uint256 nB, uint256 nDoc, uint256 utpdu,
-    uint256 peg, uint256 btcPrice, uint256 bproUsdPrice, uint256 spotDiscount
+    @return Total RiskPro amount [using mocPrecision]
+  */
+  function maxRiskProWithDiscount(
+    uint256 nReserve, uint256 nStableToken, uint256 utpdu,
+    uint256 peg, uint256 reservePrice, uint256 riskProUsdPrice, uint256 spotDiscount
   )
   public view returns(uint256)  {
-    return mocLibConfig.maxBProWithDiscount(
-      nB, nDoc, utpdu, peg, btcPrice, bproUsdPrice, spotDiscount
+    return mocLibConfig.maxRiskProWithDiscount(
+      nReserve, nStableToken, utpdu, peg, btcPrice, bproUsdPrice, spotDiscount
     );
   }
 
   /**
-
-    @dev Calculates Locked bitcoin
-    @param btcPrice BTC price [using mocPrecision]
-    @param nDoc Docs amount [using mocPrecision]
+    @dev Calculates Locked ReserveTokens
+    @param reservePrice ReserveTokens price [using mocPrecision]
+    @param nStableToken StableTokens amount [using mocPrecision]
     @param peg peg value
-    @return Locked bitcoin [using reservePrecision]
-  **/
-  function lockedBitcoin(uint256 btcPrice, uint256 nDoc, uint256 peg)
-  public view returns(uint256) {
-    return mocLibConfig.lockedBitcoin(btcPrice, nDoc, peg);
+    @return Locked ReserveTokens [using reservePrecision]
+  */
+  function lockedReserveTokens(uint256 reservePrice, uint256 nStableToken, uint256 peg)
+  public view returns (uint256)
+  {
+    return mocLibConfig.lockedReserveTokens(reservePrice, nStableToken, peg);
   }
 
   /**
-    @dev Calculates price at liquidation event as a relation between the doc total supply
-    and the amount of RBTC available to distribute
-    @param rbtcAmount RBTC to distribute [using reservePrecision]
-    @param nDoc Docs amount [using mocPrecision]
+    @dev Calculates price at liquidation event as a relation between the stableToken total supply
+    and the amount of ReserveTokens available to distribute
+    @param resTokenAmount ReserveTokens to distribute [using reservePrecision]
+    @param nStableToken StableTokens amount [using mocPrecision]
     @return Price at liquidation event [using mocPrecision]
-  **/
-  function liquidationPrice(uint256 rbtcAmount, uint256 nDoc)
+  */
+  function liquidationPrice(uint256 resTokenAmount, uint256 nStableToken)
   public view returns(uint256) {
-    return mocLibConfig.liquidationPrice(rbtcAmount, nDoc);
+    return mocLibConfig.liquidationPrice(resTokenAmount, nStableToken);
   }
 
   /**
-   TPbtc = (nB-LB) / nTP
-
-    @dev Calculates BPro BTC price
-    @param nB Total BTC amount [using reservePrecision]
-    @param lb Locked bitcoins amount [using reservePrecision]
-    @param nTP BPro amount [using mocPrecision]
-    @return BPro BTC price [using reservePrecision]
-  **/
-  function bproTecPrice(uint256 nB, uint256 lb, uint256 nTP)
-  public view returns(uint256) {
-    return mocLibConfig.bproTecPrice(nB, lb, nTP);
+    @dev Calculates RiskPro ReserveTokens: (nReserve-LB) / nTP
+    @param nReserve Total ReserveTokens amount [using reservePrecision]
+    @param lb Locked ReserveTokens amount [using reservePrecision]
+    @param nTP RiskPro amount [using mocPrecision]
+    @return RiskPro ReserveTokens price [using reservePrecision]
+  */
+  function riskProTecPrice(uint256 nReserve, uint256 lb, uint256 nTP)
+  public view returns (uint256) {
+    return mocLibConfig.riskProTecPrice(nReserve, lb, nTP);
   }
 
   /**
-   BProxInBPro = bproxTecPrice / bproPrice
-
-    @dev Calculates BPro BTC price
-    @param bproxTecPrice BProx BTC price [using reservePrecision]
-    @param bproPrice Trog BTC price [using reservePrecision]
-    @return BProx price in BPro [using mocPrecision]
-  **/
-  function bproxBProPrice(uint256 bproxTecPrice, uint256 bproPrice)
-  public view returns(uint256) {
-    return mocLibConfig.bproxBProPrice(bproxTecPrice, bproPrice);
+    @dev Calculates RiskPro ReserveToken price: RiskProxInRiskPro = riskProxTecPrice / riskProPrice
+    @param riskProxTecPrice RiskProx ReserveTokens price [using reservePrecision]
+    @param riskProPrice Trog ReserveTokens price [using reservePrecision]
+    @return RiskProx price in RiskPro [using mocPrecision]
+  */
+  function riskProxRiskProPrice(uint256 riskProxTecPrice, uint256 riskProPrice)
+  public view returns (uint256) {
+    return mocLibConfig.riskProxRiskProPrice(riskProxTecPrice, riskProPrice);
   }
 
   /**
-   TPbtc = (price)* (1 - discountRate)
-
-    @dev Returns a new value with the discountRate applied
+    @dev Returns a new value with the discountRate applied: (price)* (1 - discountRate)
     @param price Price [using SomePrecision]
     @param discountRate Discount rate to apply [using mocPrecision]
     @return Price with discount applied [using SomePrecision]
-  **/
+  */
   function applyDiscountRate(uint256 price, uint256 discountRate)
   public view returns(uint256) {
-    return applyDiscountRate(price, discountRate);
+    return mocLibConfig.applyDiscountRate(price, discountRate);
   }
 
   /**
-   TPbtc = price * interestRate
-
-    @dev Returns the amount of interest to pay
+    @dev Returns the amount of interest to pay: = price * interestRate
     @param value Cost to apply interest [using SomePrecision]
     @param interestRate Interest rate to apply [using mocPrecision]
     @return Interest cost based on the value and interestRate [using SomePrecision]
-  **/
+  */
   function getInterestCost(uint256 value, uint256 interestRate)
   public view returns(uint256) {
     return mocLibConfig.getInterestCost(value, interestRate);
   }
 
   /**
-    Coverage = nB / LB
-
-    @dev Calculates Coverage
-    @param nB Total BTC amount [using reservePrecision]
-    @param lB Locked bitcoins amount [using reservePrecision]
+    @dev Calculates Coverage: nReserve / LB
+    @param nReserve Total ReserveTokens amount [using reservePrecision]
+    @param lB Locked ReserveTokens amount [using reservePrecision]
     @return Coverage [using mocPrecision]
-  **/
-  function coverage(uint256 nB, uint256 lB)
+  */
+  function coverage(uint256 nReserve, uint256 lB)
   public view returns(uint256) {
-    return mocLibConfig.coverage(nB, lB);
+    return mocLibConfig.coverage(nReserve, lB);
   }
 
  /**
-  Leverage = C / (C - 1)
-
-    @dev Calculates Leverage
+    @dev Calculates Leverage from Coverage: Leverage = C / (C - 1)
     @param cov Coverage [using mocPrecision]
     @return Leverage [using mocPrecision]
-  **/
+  */
   function leverageFromCoverage(uint256 cov)
   public view returns(uint256) {
     return mocLibConfig.leverageFromCoverage(cov);
   }
 
  /**
-  Leverage = nB / (nB - lB)
-
-    @dev Calculates Leverage
-    @param nB Total BTC amount [using reservePrecision]
+    @dev Calculates Leverage: Leverage = nReserve / (nReserve - lB)
+    @param nB Total ReserveToken amount [using reservePrecision]
     @param lB Locked bitcoins amount [using reservePrecision]
     @return Leverage [using mocPrecision]
-  **/
-  function leverage(uint256 nB, uint256 lB)
+  */
+  function leverage(uint256 nB,uint256 lB)
   public view returns(uint256) {
     return mocLibConfig.leverage(nB, lB);
   }
 
   /**
-    @dev Price in BTC of the amount of Docs
-    @param amount Total BTC amount [using reservePrecision]
-    @param btcPrice BTC price [using mocPrecision]
+    @dev Price in ReserveTokens of the amount of StableTokens
+    @param amount Total ReserveTokens amount [using reservePrecision]
+    @param reservePrice ReserveTokens price [using mocPrecision]
     @return Total value [using reservePrecision]
-  **/
-  function docsBtcValue(uint256 amount,uint256 peg, uint256 btcPrice)
-  public view returns(uint256) {
-    return docsBtcValue(amount, peg, btcPrice);
+  */
+  function stableTokensResTokensValue(uint256 amount, uint256 peg, uint256 reservePrice)
+  public view returns (uint256) {
+    return mocLibConfig.stableTokensResTokensValue(amount, peg, reservePrice);
   }
 
- /**
-    @dev Price in RBTC of the amount of BPros
-    @param bproAmount amount of BPro [using mocPrecision]
-    @param bproBtcPrice BPro price in RBTC [using reservePrecision]
+  /**
+    @dev Price in ReserveTokens of the amount of RiskPros
+    @param riskProAmount amount of RiskPro [using mocPrecision]
+    @param riskProResTokenPrice RiskPro price in ReserveTokens [using reservePrecision]
     @return Total value [using reservePrecision]
-  **/
-  function bproBtcValue(uint256 bproAmount, uint256 bproBtcPrice)
-  public view returns(uint256) {
-    return mocLibConfig.bproBtcValue(bproAmount, bproBtcPrice);
+  */
+  function riskProResTokensValuet(uint256 riskProAmount, uint256 riskProResTokenPrice)
+  public view returns (uint256) {
+    return mocLibConfig.riskProResTokensValuet(riskProAmount, riskProResTokenPrice);
   }
 
   /**
-   MaxDoc = ((nB*B)-(Cobj*B/Bcons*nDoc*PEG))/(PEG*(Cobj*B/BCons-1))
-
-    @dev Max amount of Docs to issue
-    @param nB Total BTC amount [using reservePrecision]
+    @dev Max amount of Docs to issue: MaxStableToken = ((nReserve*B)-(Cobj*B/Bcons*nStableToken*PEG))/(PEG*(Cobj*B/BCons-1))
+    @param nReserve Total ReserveTokens amount [using reservePrecision]
     @param cobj Target Coverage [using mocPrecision]
-    @param nDoc DOC amount [using mocPrecision]
+    @param nStableToken StableToken amount [using mocPrecision]
     @param peg peg value
-    @param btcPrice BTC price [using mocPrecision]
-    @param bCons BTC conservative price [using mocPrecision]
-    @return Total Docs amount [using mocPrecision]
-  **/
-  function maxDoc(uint256 nB, uint256 cobj, uint256 nDoc, uint256 peg, uint256 btcPrice, uint256 bCons)
+    @param reservePrice ReserveTokens price [using mocPrecision]
+    @param bCons ReserveTokens conservative price [using mocPrecision]
+    @return Total StableTokens amount [using mocPrecision]
+  */
+  function maxStableToken(uint256 nReserve, uint256 cobj, uint256 nStableToken, uint256 peg, uint256 reservePrice, uint256 bCons)
   public view returns(uint256) {
-    return mocLibConfig.maxDoc(nB, cobj, nDoc, peg, btcPrice, bCons);
+    return mocLibConfig.maxStableToken(cobj, nStableToken, peg, reservePrice, bCons);
   }
 
   /**
-   MaxBPro = ((nB*B)-(Cobj*nDoc*PEG))/TPusd
-
-    @dev Max amount of BPro to redeem
-    @param nB Total BTC amount [using reservePrecision]
+    @dev Max amount of RiskPro to redeem: MaxRiskPro = ((nReserve*B)-(Cobj*nStableToken*PEG))/TPusd
+    @param nReserve Total ReserveTokens amount [using reservePrecision]
     @param cobj Target Coverage [using mocPrecision]
-    @param nDoc Target Coverage [using mocPrecision]
+    @param nStableToken Target Coverage [using mocPrecision]
     @param peg peg value
-    @param btcPrice BTC price [using mocPrecision]
-    @param bCons BTC conservative price [using mocPrecision]
-    @param bproUsdPrice bproUsdPrice [using mocPrecision]
-    @return Total BPro amount [using mocPrecision]
-  **/
-  function maxBPro(
-    uint256 nB, uint256 cobj, uint256 nDoc, uint256 peg,
-    uint256 btcPrice, uint256 bCons, uint256 bproUsdPrice
-  )
-  public view returns(uint256) {
-    return mocLibConfig.maxBPro(
-      nB, cobj, nDoc, peg, btcPrice, bCons, bproUsdPrice
-    );
+    @param reservePrice ReserveTokens price [using mocPrecision]
+    @param bCons ReserveTokens conservative price [using mocPrecision]
+    @param riskProUsdPrice riskProUsdPrice [using mocPrecision]
+    @return Total RiskPro amount [using mocPrecision]
+  */
+  function maxRiskPro(
+    uint256 nReserve, uint256 cobj,
+    uint256 nStableToken, uint256 peg, uint256 reservePrice, uint256 bCons, uint256 riskProUsdPrice
+  ) public view returns(uint256) {
+    return mocLibConfig.maxRiskPro(nStableToken, peg, reservePrice, bCons, riskProUsdPrice);
   }
 
   /**
-    @dev Calculates the total BTC price of the amount of BPros
-    @param amount Amount of BPro [using mocPrecision]
-    @param bproPrice BPro BTC Price [using reservePrecision]
-    @return BPro total value in BTC [using reservePrecision]
-  **/
-  function totalBProInBtc(uint256 amount, uint256 bproPrice)
+    @dev Calculates the total ReserveTokens price of the amount of RiskPros
+    @param amount Amount of RiskPro [using mocPrecision]
+    @param riskProPrice RiskPro ReserveTokens Price [using reservePrecision]
+    @return RiskPro total value in ReserveTokens [using reservePrecision]
+  */
+  function totalRiskProInResTokens(uint256 amount, uint256 riskProPrice)
   public view returns(uint256) {
-    return mocLibConfig.totalBProInBtc(amount, bproPrice);
+    return mocLibConfig.totalRiskProInResTokens(amount, riskProPrice);
   }
 
   /**
-    @dev Calculates the equivalent in Docs of the btcAmount
-    @param btcAmount BTC  amount [using reservePrecision]
-    @param btcPrice BTC price [using mocPrecision]
-    @return Equivalent Doc amount [using mocPrecision]
-  **/
-  function maxDocsWithBtc(uint256 btcAmount, uint256 btcPrice)
+    @dev Calculates the equivalent in StableTokens of the resTokensAmount
+    @param resTokensAmount ReserveTokens  amount [using reservePrecision]
+    @param reservePrice ReserveTokens price [using mocPrecision]
+    @return Equivalent StableToken amount [using mocPrecision]
+  */
+  function maxStableTokensWithResTokens(uint256 resTokensAmount, uint256 reservePrice)
   public view returns(uint256) {
-    return mocLibConfig.maxDocsWithBtc(btcAmount, btcPrice);
+    return mocLibConfig.maxStableTokensWithResTokens(resTokensAmount, reservePrice);
   }
 
   /**
-    @dev Calculates the equivalent in BPro of the btcAmount
-    @param btcAmount BTC amount [using reservePrecision]
-    @param bproPrice BPro BTC price [using reservePrecision]
-    @return Equivalent Bpro amount [using mocPrecision]
-  **/
-  function maxBProWithBtc(uint256 btcAmount, uint256 bproPrice)
+    @dev Calculates the equivalent in RiskPro of the resTokensAmount
+    @param resTokensAmount ReserveTokens amount [using reservePrecision]
+    @param riskProPrice RiskPro ReserveTokens price [using reservePrecision]
+    @return Equivalent RiskPro amount [using mocPrecision]
+  */
+  function maxRiskProWithResTokens(uint256 resTokensAmount, uint256 riskProPrice)
   public view returns(uint256) {
-    return mocLibConfig.maxBProWithBtc(btcAmount, bproPrice);
+    return mocLibConfig.maxRiskProWithResTokens(resTokensAmount, riskProPrice);
   }
 
   /**
-    toMove = btcAmount * (lev - 1)
-
-    @dev Calculates the Btc amount to move from C0 bucket to
-    an L bucket when a BProx minting occurs
-    @param btcAmount Total BTC amount [using reservePrecision]
+    @dev Calculates the ResToken amount to move from C0 bucket to
+    an L bucket when a RiskProx minting occurs: toMove = resTokensAmount * (lev - 1)
+    @param resTokensAmount Total ReserveTokens amount [using reservePrecision]
     @param lev L bucket leverage [using mocPrecision]
-    @return btc to move [using reservePrecision]
-    **/
-  function bucketTransferAmount(uint256 btcAmount, uint256 lev)
+    @return resTokens to move [using reservePrecision]
+  */
+  function bucketTransferAmount(uint256 resTokensAmount, uint256 lev)
   public view returns(uint256) {
-    return mocLibConfig.bucketTransferAmount(btcAmount, lev);
+    return mocLibConfig.bucketTransferAmount(resTokensAmount, lev);
   }
 
    /**
-    Maxbprox = nDOC/ (PEG*B*(lev-1))
-
-    @dev Max amount of BTC allowed to be used to mint bprox
-    @param nDoc number of DOC [using mocPrecision]
+    @dev Max amount of ReserveTokens allowed to be used to mint riskProx: MaxriskProx = nStableToken/ (PEG*B*(lev-1))
+    @param nStableToken number of StableToken [using mocPrecision]
     @param peg peg value
-    @param btcPrice BTC price [using mocPrecision]
+    @param reservePrice ReserveTokens price [using mocPrecision]
     @param lev leverage [using mocPrecision]
-    @return Max bprox BTC value [using reservePrecision]
-  **/
-  function maxBProxBtcValue(uint256 nDoc, uint256 peg, uint256 btcPrice, uint256 lev)
+    @return Max riskProx ReserveTokens value [using reservePrecision]
+  */
+  function maxRiskProxResTokenValue(uint256 nStableToken, uint256 peg, uint256 reservePrice, uint256 lev)
   public view returns(uint256)  {
-    return mocLibConfig.maxBProxBtcValue(nDoc, peg, btcPrice, lev);
+    return mocLibConfig.maxRiskProxResTokenValue(nStableToken, peg, reservePrice, lev);
   }
 
   /**
-    @dev Calculates the equivalent in MoC of the btcAmount
-    @param btcAmount BTC  amount
-    @param btcPrice BTC price
+    @dev Calculates the equivalent in MoC of the reserve token
+    @param resTokensAmount Total ReserveTokens amount
+    @param reservePrice ReserveTokens price
     @param mocPrice MoC price
     @return Equivalent MoC amount
-  **/
-  function maxMoCWithBtc(uint256 btcAmount, uint256 btcPrice, uint256 mocPrice)
-  public view returns(uint256) {
-    return mocLibConfig.maxMoCWithBtc(btcAmount, btcPrice, mocPrice);
+  */
+  function maxMoCWithReserveToken(uint256 resTokensAmount, uint256 reservePrice, uint256 mocPrice)
+  public pure returns(uint256) {
+    return mocLibConfig.maxMoCWithReserveToken(resTokensAmount, reservePrice, mocPrice);
   }
 
   /**
-    @dev Calculates the equivalent in BTC of the MoC amount
-    @param amount BTC  amount
-    @param btcPrice BTC price
+    @dev Calculates the equivalent in reserve token of the MoC amount
+    @param amount MoC amount
+    @param reservePrice ReserveTokens price
     @param mocPrice MoC price
-    @return Equivalent MoC amount
-  **/
-  function mocBtcValue(uint256 amount, uint256 btcPrice, uint256 mocPrice)
-  public view returns(uint256) {
-    return mocLibConfig.mocBtcValue(amount, btcPrice, mocPrice);
+    @return Equivalent ReserveToken amount
+  */
+  function mocReserveTokenValue(uint256 amount, uint256 reservePrice, uint256 mocPrice)
+  public pure returns(uint256) {
+    return mocLibConfig.mocReserveTokenValue(amount, reservePrice, mocPrice);
   }
 }

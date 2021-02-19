@@ -43,10 +43,10 @@ contract MoCVendors is MoCVendorsEvents, MoCBase, MoCLibConnection, Governed {
   struct VendorDetails {
     bool isActive;
     uint256 markup;
-    uint256 totalPaidInMoC;  // TopeMoc
-    uint256 staking;  // provisorio - lo que le retienen
-    uint256 paidMoC; // MocaCobrar
-    uint256 paidRBTC; // RBTCaCobrar
+    uint256 totalPaidInMoC;
+    uint256 staking;
+    uint256 paidMoC;
+    uint256 paidReserveToken;
   }
 
   // Contracts
@@ -175,15 +175,15 @@ contract MoCVendors is MoCVendorsEvents, MoCBase, MoCLibConnection, Governed {
     @dev Allows to update paid markup to vendor
     @param account Vendor address
     @param mocAmount paid markup in MoC
-    @param rbtcAmount paid markup in RBTC
+    @param resTokenAmount paid markup in ReserveToken
     @param totalMoCAmount total paid in MoC
   */
-  function updatePaidMarkup(address account, uint256 mocAmount, uint256 rbtcAmount, uint256 totalMoCAmount)
+  function updatePaidMarkup(address account, uint256 mocAmount, uint256 resTokenAmount, uint256 totalMoCAmount)
   public
   onlyWhitelisted(msg.sender) {
     vendors[account].totalPaidInMoC = vendors[account].totalPaidInMoC.add(totalMoCAmount);
     vendors[account].paidMoC = vendors[account].paidMoC.add(mocAmount);
-    vendors[account].paidRBTC = vendors[account].paidRBTC.add(rbtcAmount);
+    vendors[account].paidReserveToken = vendors[account].paidReserveToken.add(resTokenAmount);
   }
 
   /**
@@ -237,13 +237,13 @@ contract MoCVendors is MoCVendorsEvents, MoCBase, MoCLibConnection, Governed {
   }
 
   /**
-    @dev Gets vendor paid in RBTC
+    @dev Gets vendor paid in ReserveToken
     @param account Vendor address
-    @return Vendor total paid in RBTC
+    @return Vendor total paid in ReserveToken
   */
-  function getPaidRBTC(address account) public view
+  function getpaidReserveToken(address account) public view
   returns (uint256) {
-    return vendors[account].paidRBTC;
+    return vendors[account].paidReserveToken;
   }
 
   /**
