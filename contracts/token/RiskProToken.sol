@@ -10,10 +10,15 @@ contract RiskProToken is ERC20Detailed, ERC20Pausable, OwnerBurnableToken {
   string private _symbol = "RIFP";
   uint8 private _decimals = 18;
 
+  /**
+    @dev Constructor
+  */
   constructor() Ownable() ERC20Detailed(_name, _symbol, _decimals) public {
   }
 
-  //Fallback
+  /**
+    @dev Fallback function
+  */
   function() external {
   }
 }

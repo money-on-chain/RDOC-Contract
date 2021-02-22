@@ -9,11 +9,16 @@ contract StableToken is ERC20Detailed, OwnerBurnableToken {
   string private _symbol = "RDOC";
   uint8 private _decimals = 18;
 
+  /**
+    @dev Constructor
+  */
   constructor() Ownable() ERC20Detailed(_name, _symbol, _decimals) public {
 
   }
 
-  //Fallback
+  /**
+    @dev Fallback function
+  */
   function() external {
   }
 }
