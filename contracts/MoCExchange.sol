@@ -629,7 +629,7 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
    @return the actual amount of resTokens to redeem and the resTokens commission for them [using reservePresicion]
   */
   function redeemRiskProx(
-    address account,
+    address payable account,
     bytes32 bucket,
     uint256 riskProxAmount,
     address vendorAccount
@@ -702,7 +702,7 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
   */
   function forceRedeemRiskProx(
     bytes32 bucket,
-    address account,
+    address payable account,
     uint256 riskProxAmount,
     uint256 riskProxPrice
   ) public onlyWhitelisted(msg.sender) returns (bool) {
@@ -729,7 +729,7 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
   **/
   function burnRiskProxFor(
     bytes32 bucket,
-    address account,
+    address payable account,
     uint256 riskProxAmount,
     uint256 riskProxPrice
   ) public onlyWhitelisted(msg.sender) returns (uint256) {
