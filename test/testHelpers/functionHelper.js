@@ -18,6 +18,23 @@ const { BN, isBN } = web3.utils;
 
 chai.use(require('chai-bn')(BN)).should();
 
+const zeroAddress = '0x0000000000000000000000000000000000000000';
+
+const comissionsTxType = {
+  MINT_RISKPRO_FEES_RESERVE: new BN(1),
+  REDEEM_RISKPRO_FEES_RESERVE: new BN(2),
+  MINT_STABLETOKEN_FEES_RESERVE: new BN(3),
+  REDEEM_STABLETOKEN_FEES_RESERVE: new BN(4),
+  MINT_RISKPROX_FEES_RESERVE: new BN(5),
+  REDEEM_RISKPROX_FEES_RESERVE: new BN(6),
+  MINT_RISKPRO_FEES_MOC: new BN(7),
+  REDEEM_RISKPRO_FEES_MOC: new BN(8),
+  MINT_STABLETOKEN_FEES_MOC: new BN(9),
+  REDEEM_STABLETOKEN_FEES_MOC: new BN(10),
+  MINT_RISKPROX_FEES_MOC: new BN(11),
+  REDEEM_RISKPROX_FEES_MOC: new BN(12)
+};
+
 const allowReserve = (reserve, moc) => async (from, amount) =>
   reserve.approve(moc.address, amount, { from });
 
@@ -30,12 +47,37 @@ const getReserveTokenPrice = priceProvider => async () => {
   return priceValue['0'];
 };
 
+// Mock MoC price provider doesn't use second and third parameter
+const setMoCPrice = mocPriceProvider => async mocPrice =>
+  mocPriceProvider.setPrice(toContract(mocPrice));
+
+const getMoCPrice = mocPriceProvider => async () => {
+  const priceValue = await mocPriceProvider.peek();
+  return priceValue['0'];
+};
+
 const setSmoothingFactor = (governor, mockMocStateChanger) => async _coeff => {
   const coeff = isBN(_coeff) ? _coeff : toContractBNNoPrec(_coeff);
   await mockMocStateChanger.setSmoothingFactor(coeff);
   const setSmooth = await governor.executeChange(mockMocStateChanger.address);
 
   return setSmooth;
+};
+
+const redeemFreeStableToken = moc => async ({ userAccount, stableTokenAmount, vendorAccount }) => {
+  let _vendorAccount = vendorAccount;
+  if (!vendorAccount) {
+    _vendorAccount = zeroAddress;
+  }
+
+  const stableTokenPrecision = await moc.getMocPrecision();
+  const formattedAmount = toContract(stableTokenAmount * stableTokenPrecision);
+
+  return _vendorAccount !== zeroAddress
+    ? moc.redeemFreeStableTokenVendors(formattedAmount, _vendorAccount, {
+        from: userAccount
+      })
+    : moc.redeemFreeStableToken(formattedAmount, { from: userAccount });
 };
 
 const calculateRiskProHoldersInterest = moc => async () => moc.calculateRiskProHoldersInterest();
@@ -50,17 +92,54 @@ const isRiskProInterestEnabled = moc => async () => moc.isRiskProInterestEnabled
 
 const getRiskProInterestAddress = moc => async () => moc.getRiskProInterestAddress();
 
-const redeemStableTokenRequest = moc => async (from, amount) => {
-  const stableTokenPrecision = await moc.getMocPrecision();
-
-  moc.redeemStableTokenRequest(toContract(amount * stableTokenPrecision), {
-    from
-  });
+const mintMoCToken = mocToken => async (anotherAccount, initialBalance, owner) => {
+  await mocToken.mint(anotherAccount, web3.utils.toWei(initialBalance.toString()), { from: owner });
 };
 
-const redeemRiskPro = moc => async (from, amount) => {
+const approveMoCToken = mocToken => async (anotherAccount, amount, owner) => {
+  await mocToken.approve(anotherAccount, web3.utils.toWei(amount.toString()), { from: owner });
+};
+
+const mintRiskPro = moc => async (
+  from,
+  resTokensAmount,
+  vendorAccount = zeroAddress,
+  applyPrecision = true
+) => {
   const reservePrecision = await moc.getReservePrecision();
-  return moc.redeemRiskPro(toContract(amount * reservePrecision), { from });
+
+  const reserveAmountToMint = applyPrecision
+    ? toContract(resTokensAmount * reservePrecision)
+    : toContract(resTokensAmount);
+
+  return vendorAccount !== zeroAddress
+    ? moc.mintRiskProVendors(reserveAmountToMint, vendorAccount, { from })
+    : moc.mintRiskPro(toContract(reserveAmountToMint), { from });
+};
+
+const mintStableToken = moc => async (from, resTokensAmount, vendorAccount = zeroAddress) => {
+  const reservePrecision = await moc.getReservePrecision();
+  const reserveTokenAmountWithReservePrecision = toContract(resTokensAmount * reservePrecision);
+  return vendorAccount !== zeroAddress
+    ? moc.mintStableTokenVendors(reserveTokenAmountWithReservePrecision, vendorAccount, {
+        from
+      })
+    : moc.mintStableToken(reserveTokenAmountWithReservePrecision, {
+        from
+      });
+};
+
+const mintRiskProx = moc => async (from, bucket, resTokensToMint, vendorAccount = zeroAddress) => {
+  const reservePrecision = await moc.getReservePrecision();
+  return vendorAccount !== zeroAddress
+    ? moc.mintRiskProxVendors(bucket, toContract(resTokensToMint * reservePrecision), vendorAccount, {
+        from,
+        value: toContract(msgValue * reservePrecision)
+      })
+    : moc.mintRiskProx(bucket, toContract(resTokensToMint * reservePrecision), {
+        from,
+        value: toContract(msgValue * reservePrecision)
+      });
 };
 
 const redeemRiskProx = moc => async (bucket, userAccount, riskProxAmount) => {
@@ -81,29 +160,46 @@ const redeemFreeStableToken = moc => async ({ userAccount, stableTokenAmount }) 
   });
 };
 
-const mintRiskPro = moc => async (from, resTokensAmount, applyPrecision = true) => {
-  if (!applyPrecision) {
-    return moc.mintRiskPro(toContract(resTokensAmount), { from });
+const mintRiskProAmount = (moc, mocState) => async (account, riskProAmount) => {
+  if (!riskProAmount) {
+    return;
+  }
+
+  const reserveTotal = await reserveTokenNeededToMintRiskPro(moc, mocState)(riskProAmount);
+  // User should have more than this balance to pay commissions
+  return moc.mintRiskProVendors(toContract(reserveTotal), { from: account });
+};
+
+const mintStableTokenAmount = (moc, priceProvider) => async (account, stableTokensToMint) => {
+  if (!stableTokensToMint) {
+    return;
   }
   const reservePrecision = await moc.getReservePrecision();
-  return moc.mintRiskPro(toContract(resTokensAmount * reservePrecision), {
-    from
-  });
+  const stableTokenPrecision = await moc.getMocPrecision();
+
+  const formattedAmount = stableTokensToMint * stableTokenPrecision;
+  const reservePrice = await getReserveTokenPrice(priceProvider)();
+  const reserveTotal = (formattedAmount / reservePrice) * reservePrecision;
+  // Account should have enough allowance to pay commissions
+  return moc.mintStableTokenVendors(toContract(reserveTotal), { from: account });
 };
 
-const mintStableToken = moc => async (from, resTokensAmount) => {
-  const reservePrecision = await moc.getReservePrecision();
-  const reserveTokenAmountWithReservePrecision = toContract(resTokensAmount * reservePrecision);
-  return moc.mintStableToken(reserveTokenAmountWithReservePrecision, {
-    from
-  });
+const mintRiskProxAmount = (moc, mocState) => async (account, bucket, riskProxAmount) => {
+  if (!riskProxAmount) {
+    return;
+  }
+
+  const riskProxTecPrice = await mocState.bucketRiskProTecPrice(BUCKET_X2);
+  const reserveTotal = toContractBNNoPrec(riskProxAmount * riskProxTecPrice);
+
+  return moc.mintRiskProxVendors(bucket, reserveTotal, { from: account });
 };
 
-const mintRiskProx = moc => async (from, bucket, resTokensToMint) => {
+const redeemRiskPro = moc => async (from, amount, vendorAccount = zeroAddress) => {
   const reservePrecision = await moc.getReservePrecision();
-  return moc.mintRiskProx(bucket, toContract(resTokensToMint * reservePrecision), {
-    from
-  });
+  return vendorAccount !== zeroAddress
+    ? moc.redeemRiskProVendors(toContract(amount * reservePrecision), vendorAccount, { from })
+    : moc.rredeemRiskPro(toContract(amount * reservePrecision), { from });
 };
 
 const reserveTokenNeededToMintRiskPro = (moc, mocState) => async riskProAmount => {
@@ -119,39 +215,20 @@ const reserveTokenNeededToMintRiskPro = (moc, mocState) => async riskProAmount =
   return reserveTotal;
 };
 
-const mintRiskProAmount = (moc, mocState) => async (account, riskProAmount) => {
-  if (!riskProAmount) {
-    return;
-  }
-
-  const reserveTotal = await reserveTokenNeededToMintRiskPro(moc, mocState)(riskProAmount);
-  // User should have more than this balance to pay commissions
-  return moc.mintRiskPro(toContract(reserveTotal), { from: account });
+const redeemRiskPro = moc => async (from, amount, vendorAccount = zeroAddress) => {
+  const reservePrecision = await moc.getReservePrecision();
+  return vendorAccount !== zeroAddress
+    ? moc.redeemRiskProVendors(toContract(amount * reservePrecision), vendorAccount, { from })
+    : moc.rredeemRiskPro(toContract(amount * reservePrecision), { from });
 };
 
-const mintStableTokenAmount = (moc, priceProvider) => async (account, stableTokensToMint) => {
-  if (!stableTokensToMint) {
-    return;
-  }
-  const reservePrecision = await moc.getReservePrecision();
+
+const redeemStableTokenRequest = moc => async (from, amount) => {
   const stableTokenPrecision = await moc.getMocPrecision();
 
-  const formattedAmount = stableTokensToMint * stableTokenPrecision;
-  const reservePrice = await getReserveTokenPrice(priceProvider)();
-  const reserveTotal = (formattedAmount / reservePrice) * reservePrecision;
-  // Account should have enough allowance to pay commissions
-  return moc.mintStableToken(toContract(reserveTotal), { from: account });
-};
-
-const mintRiskProxAmount = (moc, mocState) => async (account, bucket, riskProxAmount) => {
-  if (!riskProxAmount) {
-    return;
-  }
-
-  const riskProxTecPrice = await mocState.bucketRiskProTecPrice(BUCKET_X2);
-  const reserveTotal = toContractBNNoPrec(riskProxAmount * riskProxTecPrice);
-
-  return moc.mintRiskProx(bucket, reserveTotal, { from: account });
+  moc.redeemStableTokenRequest(toContract(amount * stableTokenPrecision), {
+    from
+  });
 };
 
 const getTokenBalance = token => async address => token.balanceOf(address);
@@ -159,25 +236,27 @@ const getTokenBalance = token => async address => token.balanceOf(address);
 // Runs settlement with a default fixed step count
 const executeSettlement = moc => () => moc.runSettlement(SETTLEMENT_STEPS);
 
+const getRedeemRequestAt = moc => async index => moc.getRedeemRequestAt(index);
+
 const getRiskProxBalance = riskProx => async (bucket, address) =>
   riskProx.riskProxBalanceOf(bucket, address);
-
-const getRedeemRequestAt = moc => async index => moc.getRedeemRequestAt(index);
 
 const getUserBalances = (
   riskProToken,
   stableToken,
   riskProxManager,
-  reserveToken
+  reserveToken,
+  mocToken
 ) => async account => {
-  const [stable, riskPro, riskPro2x, reserve] = await Promise.all([
+  const [stable, riskPro, riskPro2x, reserve, moc] = await Promise.all([
     stableToken.balanceOf(account),
     riskProToken.balanceOf(account),
     riskProxManager.riskProxBalanceOf(BUCKET_X2, account),
-    reserveToken.balanceOf(account)
+    reserveToken.balanceOf(account),
+    mocToken.balanceOf(account)
   ]);
 
-  return { stable, riskPro, riskPro2x, reserve };
+  return { stable, riskPro, riskPro2x, reserve, moc };
 };
 
 const getGlobalState = mocState => async () => {
@@ -292,6 +371,147 @@ const setMocCommissionProportion = (commissionSplitter, governor) => async propo
   return governor.executeChange(setCommissionMocProportionChanger.address);
 };
 
+const getCommissionsArrayNonZero = (moc, mocInrate) => async () => {
+  let mocPrecision = 10 ** 18;
+  if (typeof moc !== 'undefined') {
+    mocPrecision = await moc.getMocPrecision();
+  }
+
+  const ret = [
+    {
+      txType: (await mocInrate.MINT_RISKPRO_FEES_RESERVE()).toString(),
+      fee: BigNumber(0.001)
+        .times(mocPrecision)
+        .toString()
+    },
+    {
+      txType: (await mocInrate.REDEEM_RISKPRO_FEES_RESERVE()).toString(),
+      fee: BigNumber(0.002)
+        .times(mocPrecision)
+        .toString()
+    },
+    {
+      txType: (await mocInrate.MINT_STABLETOKEN_FEES_RESERVE()).toString(),
+      fee: BigNumber(0.003)
+        .times(mocPrecision)
+        .toString()
+    },
+    {
+      txType: (await mocInrate.REDEEM_STABLETOKEN_FEES_RESERVE()).toString(),
+      fee: BigNumber(0.004)
+        .times(mocPrecision)
+        .toString()
+    },
+    {
+      txType: (await mocInrate.MINT_RISKPROX_FEES_RESERVE()).toString(),
+      fee: BigNumber(0.005)
+        .times(mocPrecision)
+        .toString()
+    },
+    {
+      txType: (await mocInrate.REDEEM_RISKPROX_FEES_RESERVE()).toString(),
+      fee: BigNumber(0.006)
+        .times(mocPrecision)
+        .toString()
+    },
+    {
+      txType: (await mocInrate.MINT_RISKPRO_FEES_MOC()).toString(),
+      fee: BigNumber(0.007)
+        .times(mocPrecision)
+        .toString()
+    },
+    {
+      txType: (await mocInrate.REDEEM_RISKPRO_FEES_MOC()).toString(),
+      fee: BigNumber(0.008)
+        .times(mocPrecision)
+        .toString()
+    },
+    {
+      txType: (await mocInrate.MINT_STABLETOKEN_FEES_MOC()).toString(),
+      fee: BigNumber(0.009)
+        .times(mocPrecision)
+        .toString()
+    },
+    {
+      txType: (await mocInrate.REDEEM_STABLETOKEN_FEES_MOC()).toString(),
+      fee: BigNumber(0.01)
+        .times(mocPrecision)
+        .toString()
+    },
+    {
+      txType: (await mocInrate.MINT_RISKPROX_FEES_MOC()).toString(),
+      fee: BigNumber(0.011)
+        .times(mocPrecision)
+        .toString()
+    },
+    {
+      txType: (await mocInrate.REDEEM_RISKPROX_FEES_MOC()).toString(),
+      fee: BigNumber(0.012)
+        .times(mocPrecision)
+        .toString()
+    }
+  ];
+  return ret;
+};
+
+const getCommissionsArrayInvalidLength = async () => {
+  const ret = [];
+  const length = 60;
+  const mocPrecision = 10 ** 18;
+
+  for (let i = 1; i <= length; i++) {
+    ret.push({
+      txType: i.toString(),
+      fee: BigNumber(i)
+        .times(mocPrecision)
+        .toString()
+    });
+  }
+
+  return ret;
+};
+
+const getCommissionsArrayChangingTest = async () => {
+  const ret = [];
+  const length = 12;
+  const mocPrecision = 10 ** 18;
+
+  for (let i = 1; i <= length; i++) {
+    ret.push({
+      txType: i.toString(),
+      fee: BigNumber(i * 2)
+        .times(mocPrecision)
+        .toString()
+    });
+  }
+
+  return ret;
+};
+
+const getVendorToRegisterAsArray = moc => async (account, markup) => {
+  const ret = [];
+
+  let mocPrecision = 10 ** 18;
+  if (typeof moc !== 'undefined') {
+    mocPrecision = await moc.getMocPrecision();
+  }
+
+  ret.push({
+    account,
+    markup: toContractBNNoPrec(markup * mocPrecision).toString()
+  });
+
+  return ret;
+};
+
+const consolePrintTestVariables = obj => {
+  for (let i = 0; i < Object.keys(obj).length; i++) {
+    const variableName = Object.keys(obj)[i];
+    // eslint-disable-next-line no-console
+    console.log(`${variableName}: ${obj[variableName].toString()}`);
+  }
+};
+
 module.exports = async contracts => {
   const {
     stableToken,
@@ -300,10 +520,14 @@ module.exports = async contracts => {
     mocState,
     riskProx,
     priceProvider,
+    mocInrate,
     governor,
     mockMocStateChanger,
     reserveToken,
-    commissionSplitter
+    commissionSplitter,
+    mocToken,
+    mocPriceProvider,
+    mocVendors
   } = contracts;
 
   return {
@@ -345,6 +569,20 @@ module.exports = async contracts => {
     maxStableToken: maxStableToken(mocState),
     maxRiskPro: maxRiskPro(mocState),
     setFinalCommissionAddress: setFinalCommissionAddress(commissionSplitter, governor),
-    setMocCommissionProportion: setMocCommissionProportion(commissionSplitter, governor)
+    setMocCommissionProportion: setMocCommissionProportion(commissionSplitter, governor),
+    mintMoCToken: mintMoCToken(mocToken),
+    getMoCBalance: getMoCBalance(mocToken),
+    approveMoCToken: approveMoCToken(mocToken),
+    getMoCAllowance: getMoCAllowance(mocToken),
+    comissionsTxType,
+    getCommissionsArrayNonZero: getCommissionsArrayNonZero(moc, mocInrate),
+    getCommissionsArrayInvalidLength,
+    getCommissionsArrayChangingTest,
+    BUCKET_C0,
+    BUCKET_X2,
+    setMoCPrice: setMoCPrice(mocPriceProvider),
+    getMoCPrice: getMoCPrice(mocPriceProvider),
+    getVendorToRegisterAsArray: getVendorToRegisterAsArray(moc),
+    consolePrintTestVariables
   };
 };
