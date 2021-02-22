@@ -871,7 +871,10 @@ contract MoCState is MoCLibConnection, MoCBase, MoCEMACalculator {
     uint256 _utpdu,
     uint256 _maxDiscRate,
     uint256 _dayBlockSpan,
-    uint256 _maxMintRiskPro
+    uint256 _maxMintRiskPro,
+    address _mocPriceProvider,
+    bool _liquidationEnabled,
+    uint256 _protected
   ) internal {
     liq = _liq;
     utpdu = _utpdu;
@@ -883,6 +886,9 @@ contract MoCState is MoCLibConnection, MoCBase, MoCEMACalculator {
     state = States.AboveCobj;
     peg = 1;
     maxMintRiskPro = _maxMintRiskPro;
+    mocPriceProvider = TexPriceProvider(_mocPriceProvider);
+    liquidationEnabled = _liquidationEnabled;
+    protected = _protected;
   }
 
   function initializeContracts(address _mocTokenAddress, address _mocVendorsAddress) internal {

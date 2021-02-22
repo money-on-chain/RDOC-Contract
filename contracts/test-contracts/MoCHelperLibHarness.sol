@@ -267,7 +267,7 @@ contract MoCHelperLibHarness is MoCLibConnection, Initializable {
   */
   function maxStableToken(uint256 nReserve, uint256 cobj, uint256 nStableToken, uint256 peg, uint256 reservePrice, uint256 bCons)
   public view returns(uint256) {
-    return mocLibConfig.maxStableToken(cobj, nStableToken, peg, reservePrice, bCons);
+    return mocLibConfig.maxStableToken(nReserve, cobj, nStableToken, peg, reservePrice, bCons);
   }
 
   /**
@@ -285,7 +285,7 @@ contract MoCHelperLibHarness is MoCLibConnection, Initializable {
     uint256 nReserve, uint256 cobj,
     uint256 nStableToken, uint256 peg, uint256 reservePrice, uint256 bCons, uint256 riskProUsdPrice
   ) public view returns(uint256) {
-    return mocLibConfig.maxRiskPro(nStableToken, peg, reservePrice, bCons, riskProUsdPrice);
+    return mocLibConfig.maxRiskPro(nReserve, cobj, nStableToken, peg, reservePrice, bCons, riskProUsdPrice);
   }
 
   /**
@@ -354,7 +354,7 @@ contract MoCHelperLibHarness is MoCLibConnection, Initializable {
     @return Equivalent MoC amount
   */
   function maxMoCWithReserveToken(uint256 resTokensAmount, uint256 reservePrice, uint256 mocPrice)
-  public pure returns(uint256) {
+  public view returns(uint256) {
     return mocLibConfig.maxMoCWithReserveToken(resTokensAmount, reservePrice, mocPrice);
   }
 
@@ -366,7 +366,7 @@ contract MoCHelperLibHarness is MoCLibConnection, Initializable {
     @return Equivalent ReserveToken amount
   */
   function mocReserveTokenValue(uint256 amount, uint256 reservePrice, uint256 mocPrice)
-  public pure returns(uint256) {
+  public view returns(uint256) {
     return mocLibConfig.mocReserveTokenValue(amount, reservePrice, mocPrice);
   }
 }
