@@ -282,10 +282,13 @@ contract MoCHelperLibHarness is MoCLibConnection, Initializable {
     @return Total RiskPro amount [using mocPrecision]
   */
   function maxRiskPro(
-    uint256 nReserve, uint256 cobj,
-    uint256 nStableToken, uint256 peg, uint256 reservePrice, uint256 bCons, uint256 riskProUsdPrice
-  ) public view returns(uint256) {
-    return mocLibConfig.maxRiskPro(nReserve, cobj, nStableToken, peg, reservePrice, bCons, riskProUsdPrice);
+    uint256 nReserve, uint256 cobj, uint256 nStableToken, uint256 peg,
+    uint256 reservePrice, uint256 bCons, uint256 riskProUsdPrice
+  )
+  public view returns(uint256) {
+    return mocLibConfig.maxRiskPro(
+      nReserve, cobj, nStableToken, peg, reservePrice, bCons, riskProUsdPrice
+    );
   }
 
   /**
