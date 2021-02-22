@@ -115,8 +115,7 @@ library MoCHelperLib {
     @param c minInterestRate C0 stableToken amount [using mocPrecision]
     @param value value to put in the function [using mocPrecision]
     @return integration result [using mocPrecision]
-
-   */
+  */
   function integral(MocLibConfig storage config, uint256 a, uint256 b, uint256 c, uint256 value)
   public view returns(uint256) {
     // b + 1

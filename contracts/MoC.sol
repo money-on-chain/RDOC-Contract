@@ -21,11 +21,10 @@ contract MoCEvents {
   event ContractLiquidated(address mocAddress);
 }
 
-
 contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable {
   using SafeMath for uint256;
 
-  // Contracts
+  /// @dev Contracts.
   StableToken internal stableToken;
   RiskProToken internal riskProToken;
   MoCRiskProxManager internal riskProxManager;
@@ -322,9 +321,10 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable {
   }
 
   /**
-   * @dev Redeems the requested amount for the msg.sender, or the max amount of free stableTokens possible.
-   * @param stableTokenAmount Amount of StableTokens to redeem.
-   */
+    @dev Redeems the requested amount for the msg.sender, or the max amount of free stableTokens possible.
+    @param stableTokenAmount Amount of StableTokens to redeem.
+    @param vendorAccount Vendor address
+  */
   function redeemFreeStableTokenVendors(uint256 stableTokenAmount, address vendorAccount)
   public
   whenNotPaused() transitionState() notInProtectionMode() {
@@ -452,9 +452,7 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable {
   }
 
   /**
-  * @dev Public function to extract and send tokens from the reserve.
-    Will return false if transfer reverts or fails.
-
+    @dev Public function to extract and send tokens from the reserve. Will return false if transfer reverts or fails.
     @param receiver Account to which the tokens will be send
     @param tokenAmount Amount of tokens to send
     @return False if RRC20 transfer fails or revert and true if succeeds
@@ -463,7 +461,6 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable {
     if (tokenAmount == 0) {
       return true;
     }
-
     return withdrawFromReserve(receiver, tokenAmount);
   }
 
@@ -630,7 +627,7 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable {
     @param receiver Account to which the tokens will be send
     @param tokenAmount Amount to extract from reserve
     @return False if RRC20 transfer fails or revert and true if succeeds
-   */
+  */
   function withdrawFromReserve(address receiver, uint256 tokenAmount) internal returns (bool) {
     bool result = withdraw(tokenAmount, receiver);
 
@@ -702,11 +699,14 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable {
     _;
   }
 
-  modifier transitionState() {
+  modifier transitionState()
+  {
     mocState.nextState();
     if (mocState.state() == MoCState.States.Liquidated) {
       liquidate();
-    } else _;
+    }
+    else
+      _;
   }
 
   // Leave a gap betweeen inherited contracts variables in order to be

@@ -20,7 +20,7 @@ contract MoCSettlementMock is MoCSettlement {
     executeTask(DELEVERAGING_TASK, STEPS);
   }
 
-  function pubRunRedeemDoc() public returns (uint256) {
+  function pubRunRedeemDoc() public returns(uint256) {
     initializeSettlement();
     executeTask(StableToken_REDEMPTION_TASK, STEPS);
     return settlementInfo.finalCommissionAmount;
@@ -35,8 +35,8 @@ contract MoCSettlementMock is MoCSettlement {
   }
 
   /**
-    @dev Returns the amount of steps for the StableToken Redemption task
-    which is the amount of redeem requests in the queue. (Used in tests only)
+  @dev Returns the amount of steps for the StableToken Redemption task
+  which is the amount of redeem requests in the queue. (Used in tests only)
   */
   function stableTokenRedemptionStepCountForTest() public view returns (uint256) {
     return super.stableTokenRedemptionStepCount();
