@@ -90,6 +90,18 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
     return stablePower;
   }
 
+  /**
+    @dev Calculates an average interest rate between after and before free stableToken Redemption
+    @param stableTokenRedeem StableTokens to redeem [using mocPrecision]
+    @return Interest rate value [using mocPrecision]
+   */
+  function stableTokenInrateAvg(uint256 stableTokenRedeem) public view returns (uint256) {
+    uint256 preAbRatio = mocState.currentAbundanceRatio();
+    uint256 posAbRatio = mocState.abundanceRatio(riskProxManager.getBucketNStableToken(BUCKET_C0).sub(stableTokenRedeem));
+
+    return mocLibConfig.inrateAvg(stableTmax, stablePower, stableTmin, preAbRatio, posAbRatio);
+  }
+
   /** END UPDATE V017: 01/11/2019 **/
 
   /**
@@ -209,7 +221,7 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
   //   return commissionRate;
   // }
 
-  /**
+   /**
     @dev Sets RiskPro Holders rate
     @param newRiskProRate New RiskPro rate
    */
@@ -217,7 +229,7 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
     riskProRate = newRiskProRate;
   }
 
-  /**
+   /**
     @dev Sets the blockspan RiskPro Intereset rate payment is enable to be executed
     @param newRiskProBlockSpan New RiskPro Block span
    */
@@ -234,17 +246,17 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
   }
 
   /**
-    @dev Sets the target address to transfer RiskPro Holders rate
-    @param newRiskProInterestAddress New RiskPro rate
-   */
+   @dev Sets the target address to transfer RiskPro Holders rate
+   @param newRiskProInterestAddress New RiskPro rate
+  */
   function setRiskProInterestAddress(address payable newRiskProInterestAddress) public onlyAuthorizedChanger() {
     riskProInterestAddress = newRiskProInterestAddress;
   }
 
   /**
-    @dev Sets the target address to transfer commissions of Mint/Redeem transactions
-    @param newCommissionsAddress New commisions address
-   */
+   @dev Sets the target address to transfer commissions of Mint/Redeem transactions
+   @param newCommissionsAddress New commisions address
+  */
   function setCommissionsAddress(address payable newCommissionsAddress) public onlyAuthorizedChanger() {
     commissionsAddress = newCommissionsAddress;
   }
@@ -282,23 +294,9 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
   }
 
   /**
-    @dev Calculates an average interest rate between after and before free stableToken Redemption
-
-    @param stableTokenRedeem StableTokens to redeem [using mocPrecision]
-    @return Interest rate value [using mocPrecision]
+    @dev returns the amount of ReserveTokens to pay in concept of interest to bucket C0
    */
-  function stableTokenInrateAvg(uint256 stableTokenRedeem) public view returns (uint256) {
-    uint256 preAbRatio = mocState.currentAbundanceRatio();
-    uint256 posAbRatio = mocState.abundanceRatio(riskProxManager.getBucketNStableToken(BUCKET_C0).sub(stableTokenRedeem));
-
-    return mocLibConfig.inrateAvg(stableTmax, stablePower, stableTmin, preAbRatio, posAbRatio);
-  }
-
-  /**
-    @dev returns the amount of ReserveTokens to pay in concept of interest
-    to bucket C0
-   */
-  function dailyInrate() public view returns (uint256) {
+  function dailyInrate() public view returns(uint256) {
     uint256 daysToSettl = mocState.daysToSettlement();
     uint256 totalInrateInBag = riskProxManager.getInrateBag(BUCKET_C0);
 
@@ -461,7 +459,9 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
    * @dev Pays the RiskPro Holders interest rates
    * @return interest payed in ReserveTokens [using reservePrecsion]
    */
-  function payRiskProHoldersInterestPayment() public onlyWhitelisted(msg.sender) onlyWhenRiskProInterestsIsEnabled() returns (uint256) {
+  function payRiskProHoldersInterestPayment() public
+  onlyWhitelisted(msg.sender)
+  onlyWhenRiskProInterestsIsEnabled() returns(uint256) {
     (uint256 riskProInterest, uint256 bucketBtnc0) = calculateRiskProHoldersInterest();
     lastRiskProInterestBlock = block.number;
     emit RiskProHoldersInterestPay(riskProInterest, bucketBtnc0);
@@ -557,7 +557,7 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
     @param countAllDays Value that represents if the calculation is based on mint or on redeem
     @return days [using dayPrecision]
    */
-  function inrateDayCount(bool countAllDays) internal view returns (uint256) {
+  function inrateDayCount(bool countAllDays) internal view returns(uint256) {
     uint256 daysToSettl = mocState.daysToSettlement();
 
     if (daysToSettl < mocLibConfig.dayPrecision) {
