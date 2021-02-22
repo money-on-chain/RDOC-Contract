@@ -129,7 +129,7 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
     uint256 blockSpanRiskPro,
     address payable riskProInterestTargetAddress,
     address payable commissionsAddressTarget,
-    uint256 commissionRateParam,
+    //uint256 commissionRateParam,
     uint256 _stableTmin,
     uint256 _stablePower,
     uint256 _stableTmax
