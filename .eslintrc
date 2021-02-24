@@ -51,7 +51,8 @@
     "mocha/max-top-level-suites": "off",
     "mocha/no-setup-in-describe": "off",
     "mocha/no-hooks-for-single-case": "off",
-    "mocha/no-top-level-hooks": "off"
+    "mocha/no-top-level-hooks": "off",
+    "mocha/no-skipped-tests": "off"
   },
   "plugins": ["import", "promise", "mocha"],
   "globals": {

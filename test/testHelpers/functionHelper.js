@@ -133,15 +133,20 @@ const mintStableToken = moc => async (from, resTokensAmount, vendorAccount = zer
 const mintRiskProx = moc => async (from, bucket, resTokensToMint, vendorAccount = zeroAddress) => {
   const reservePrecision = await moc.getReservePrecision();
   return vendorAccount !== zeroAddress
-    ? moc.mintRiskProxVendors(bucket, toContract(resTokensToMint * reservePrecision), vendorAccount, {
-        from
-      })
+    ? moc.mintRiskProxVendors(
+        bucket,
+        toContract(resTokensToMint * reservePrecision),
+        vendorAccount,
+        {
+          from
+        }
+      )
     : moc.mintRiskProx(bucket, toContract(resTokensToMint * reservePrecision), {
         from
       });
 };
 
-const redeemRiskProx = moc => async (bucket, userAccount, riskProxAmount) => {
+const redeemRiskProx = moc => async (from, bucket, amount, vendorAccount = zeroAddress) => {
   const reservePrecision = await moc.getReservePrecision();
   const amountWithPrecision = new BN(amount).mul(reservePrecision);
   return vendorAccount !== zeroAddress
@@ -149,6 +154,19 @@ const redeemRiskProx = moc => async (bucket, userAccount, riskProxAmount) => {
         from
       })
     : moc.redeemRiskProx(bucket, toContract(amountWithPrecision), { from });
+};
+
+const reserveTokenNeededToMintRiskPro = (moc, mocState) => async riskProAmount => {
+  // TODO: manage max Bitpro with discount
+  const mocPrecision = await moc.getMocPrecision();
+  const riskProTecPrice = await mocState.riskProTecPrice();
+  // Check discount rate
+  const riskProSpotDiscount = await mocState.riskProSpotDiscountRate();
+  const factor = mocPrecision.sub(riskProSpotDiscount);
+  const finalPrice = riskProTecPrice.mul(factor).div(mocPrecision);
+
+  const reserveTotal = toContractBNNoPrec(riskProAmount * finalPrice);
+  return reserveTotal;
 };
 
 const mintRiskProAmount = (moc, mocState) => async (account, riskProAmount) => {
@@ -193,19 +211,6 @@ const redeemRiskPro = moc => async (from, amount, vendorAccount = zeroAddress) =
     : moc.rredeemRiskPro(toContract(amount * reservePrecision), { from });
 };
 
-const reserveTokenNeededToMintRiskPro = (moc, mocState) => async riskProAmount => {
-  // TODO: manage max Bitpro with discount
-  const mocPrecision = await moc.getMocPrecision();
-  const riskProTecPrice = await mocState.riskProTecPrice();
-  // Check discount rate
-  const riskProSpotDiscount = await mocState.riskProSpotDiscountRate();
-  const factor = mocPrecision.sub(riskProSpotDiscount);
-  const finalPrice = riskProTecPrice.mul(factor).div(mocPrecision);
-
-  const reserveTotal = toContractBNNoPrec(riskProAmount * finalPrice);
-  return reserveTotal;
-};
-
 const redeemStableTokenRequest = moc => async (from, amount) => {
   const stableTokenPrecision = await moc.getMocPrecision();
 
@@ -213,6 +218,10 @@ const redeemStableTokenRequest = moc => async (from, amount) => {
     from
   });
 };
+
+const getMoCBalance = mocToken => async address => mocToken.balanceOf(address);
+
+const getMoCAllowance = mocToken => async (owner, spender) => mocToken.allowance(owner, spender);
 
 const getTokenBalance = token => async address => token.balanceOf(address);
 
@@ -302,17 +311,17 @@ const getBucketState = mocState => async bucket => {
   return { coverage, leverage, lB, nReserve, nRiskPro, nStableToken, inrateBag, riskProxTecPrice };
 };
 
-const bucketString = moc => async bucket => {
-  const bucketState = await getBucketState(moc)(bucket);
-  return bucketStateToString(bucketState);
-};
-
 const bucketStateToString = state =>
   Object.keys(state).reduce(
     (last, key) => `${last}${key}: ${state[key].toString()}
   `,
     ''
   );
+
+const bucketString = moc => async bucket => {
+  const bucketState = await getBucketState(moc)(bucket);
+  return bucketStateToString(bucketState);
+};
 
 const logBucket = moc => async bucket => {
   // eslint-disable-next-line no-console
@@ -531,9 +540,9 @@ module.exports = async contracts => {
     redeemFreeStableToken: redeemFreeStableToken(moc),
     redeemStableTokenRequest: redeemStableTokenRequest(moc),
     reserveTokenNeededToMintRiskPro: reserveTokenNeededToMintRiskPro(moc, mocState),
-    mintRiskProAmount: mintRiskProAmount(moc, mocState),
-    mintStableTokenAmount: mintStableTokenAmount(moc, priceProvider),
-    mintRiskProxAmount: mintRiskProxAmount(moc, mocState),
+    mintRiskProAmount: mintRiskProAmount(moc, mocState, mocVendors),
+    mintStableTokenAmount: mintStableTokenAmount(moc, priceProvider, mocVendors),
+    mintRiskProxAmount: mintRiskProxAmount(moc, mocState, mocVendors),
     calculateRiskProHoldersInterest: calculateRiskProHoldersInterest(moc),
     getRiskProRate: getRiskProRate(moc),
     getRiskProInterestBlockSpan: getRiskProInterestBlockSpan(moc),
