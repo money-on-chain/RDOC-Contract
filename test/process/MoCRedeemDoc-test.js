@@ -7,7 +7,7 @@ let mocHelper;
 let toContractBN;
 let BUCKET_C0;
 
-contract('MoC', function([owner, userAccount, blacklisted, ...allAccounts]) {
+contract('MoC', function([owner, userAccount, blacklisted, vendorAccount, ...allAccounts]) {
   const accounts = allAccounts.slice(0, 9);
   // FIXME: This number is pretty tricky, ganache-cli will mint blocks on every operation
   // so it could happen that when adding transacctions in middle of the test,
@@ -17,7 +17,7 @@ contract('MoC', function([owner, userAccount, blacklisted, ...allAccounts]) {
   before(async function() {
     mocHelper = await testHelperBuilder({
       owner,
-      accounts: [owner, userAccount, blacklisted, ...accounts],
+      accounts: [owner, userAccount, blacklisted, vendorAccount, ...accounts],
       useMock: true
     });
     ({ toContractBN, BUCKET_C0 } = mocHelper);
@@ -27,10 +27,17 @@ contract('MoC', function([owner, userAccount, blacklisted, ...allAccounts]) {
     this.mocSettlement = mocHelper.mocSettlement;
     this.mockMoCSettlementChanger = mocHelper.mockMoCSettlementChanger;
     this.governor = mocHelper.governor;
+    this.mockMoCVendorsChanger = mocHelper.mockMoCVendorsChanger;
   });
 
-  beforeEach(function() {
-    return mocHelper.revertState();
+  beforeEach(async function() {
+    await mocHelper.revertState();
+
+    // Register vendor for test
+    await this.mockMoCVendorsChanger.setVendorsToRegister(
+      await mocHelper.getVendorToRegisterAsArray(vendorAccount, 0)
+    );
+    await this.governor.executeChange(this.mockMoCVendorsChanger.address);
   });
 
   describe('StableToken Redeem DoS attack mitigation', function() {
@@ -39,12 +46,12 @@ contract('MoC', function([owner, userAccount, blacklisted, ...allAccounts]) {
       beforeEach(async function() {
         await mocHelper.setReserveTokenPrice(10000 * mocHelper.MOC_PRECISION);
 
-        await mocHelper.mintRiskProAmount(owner, 3);
-        await mocHelper.mintStableTokenAmount(from, 1000);
+        await mocHelper.mintRiskProAmount(owner, 3, vendorAccount);
+        await mocHelper.mintStableTokenAmount(from, 1000, vendorAccount);
         await mocHelper.redeemStableTokenRequest(from, 1000);
         // Account is not yet blacklisted. Mints stableTokens and adds redeem requests
-        await mocHelper.mintStableTokenAmount(blacklisted, 1000);
-        await mocHelper.redeemStableTokenRequest(blacklisted, 1000);
+        await mocHelper.mintStableTokenAmount(blacklisted, 1000, vendorAccount);
+        await mocHelper.redeemStableTokenRequest(blacklisted, 1000, vendorAccount);
         // Gets blacklisted
         await mocHelper.reserveToken.blacklistAccount(blacklisted);
 
@@ -86,8 +93,8 @@ contract('MoC', function([owner, userAccount, blacklisted, ...allAccounts]) {
       const from = userAccount;
       beforeEach(async function() {
         await mocHelper.setReserveTokenPrice(4000 * mocHelper.MOC_PRECISION);
-        await mocHelper.mintRiskProAmount(from, 1);
-        await mocHelper.mintStableToken(from, 0.25);
+        await mocHelper.mintRiskProAmount(from, 1, vendorAccount);
+        await mocHelper.mintStableToken(from, 0.25, vendorAccount);
         await mocHelper.mockMoCSettlementChanger.setBlockSpan(blockSpan);
         await mocHelper.governor.executeChange(mocHelper.mockMoCSettlementChanger.address);
       });
@@ -277,15 +284,15 @@ contract('MoC', function([owner, userAccount, blacklisted, ...allAccounts]) {
       const from = userAccount;
       beforeEach(async function() {
         await mocHelper.setReserveTokenPrice(toContractBN(4000 * mocHelper.MOC_PRECISION));
-        await mocHelper.mintRiskProAmount(from, 1);
+        await mocHelper.mintRiskProAmount(from, 1, vendorAccount);
         const toMint = 0.25;
-        await mocHelper.mintStableToken(from, toMint);
+        await mocHelper.mintStableToken(from, toMint, vendorAccount);
         await this.moc.redeemStableTokenRequest(toContractBN(200 * mocHelper.MOC_PRECISION), {
           from
         });
 
         // Add other redeemer
-        await mocHelper.mintStableToken(accounts[2], toMint);
+        await mocHelper.mintStableToken(accounts[2], toMint, vendorAccount);
         await this.moc.redeemStableTokenRequest(toContractBN(200 * mocHelper.MOC_PRECISION), {
           from: accounts[2]
         });

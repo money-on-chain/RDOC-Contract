@@ -4,14 +4,16 @@ let mocHelper;
 let toContractBN;
 let BUCKET_X2;
 
-contract('MoC : MoCExchange', function([owner, userAccount]) {
+contract('MoC : MoCExchange', function([owner, userAccount, vendorAccount]) {
   before(async function() {
-    const accounts = [owner, userAccount];
+    const accounts = [owner, userAccount, vendorAccount];
     mocHelper = await testHelperBuilder({ owner, accounts, useMock: true });
     ({ toContractBN } = mocHelper);
     this.moc = mocHelper.moc;
     this.mocState = mocHelper.mocState;
     this.mocInrate = mocHelper.mocInrate;
+    this.governor = mocHelper.governor;
+    this.mockMoCVendorsChanger = mocHelper.mockMoCVendorsChanger;
     ({ BUCKET_X2 } = mocHelper);
   });
 
@@ -23,9 +25,16 @@ contract('MoC : MoCExchange', function([owner, userAccount]) {
       describe(`GIVEN a user mints 5 RiskProx AND there are ${days} days til next settlement`, function() {
         before(async function() {
           await mocHelper.revertState();
+
+          // Register vendor for test
+          await this.mockMoCVendorsChanger.setVendorsToRegister(
+            await mocHelper.getVendorToRegisterAsArray(vendorAccount, 0)
+          );
+          await this.governor.executeChange(this.mockMoCVendorsChanger.address);
+
           await this.mocState.setDaysToSettlement(toContractBN(days, 'DAY'));
-          await mocHelper.mintRiskPro(userAccount, 18);
-          await mocHelper.mintStableToken(userAccount, 80000);
+          await mocHelper.mintRiskPro(userAccount, 18, vendorAccount);
+          await mocHelper.mintStableToken(userAccount, 80000, vendorAccount);
 
           originalInrate = await this.mocInrate.riskProxInrateAvg(
             BUCKET_X2,
@@ -33,7 +42,7 @@ contract('MoC : MoCExchange', function([owner, userAccount]) {
             true
           );
 
-          const mintTx = await mocHelper.mintRiskProx(userAccount, BUCKET_X2, 5);
+          const mintTx = await mocHelper.mintRiskProx(userAccount, BUCKET_X2, 5, vendorAccount);
           [mintEvent] = mocHelper.findEvents(mintTx, 'RiskProxMint');
         });
         it('THEN the interest taken includes all days to settlement', function() {
@@ -53,9 +62,7 @@ contract('MoC : MoCExchange', function([owner, userAccount]) {
               mintEvent.reserveTotal,
               false
             );
-            const redeemTx = await this.moc.redeemRiskProx(BUCKET_X2, toContractBN(5, 'RES'), {
-              from: userAccount
-            });
+            const redeemTx = await mocHelper.redeemRiskProx(userAccount, BUCKET_X2, 5, vendorAccount);
 
             [redeemEvent] = mocHelper.findEvents(redeemTx, 'RiskProxRedeem');
           });

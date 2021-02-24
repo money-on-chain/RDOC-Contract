@@ -5,25 +5,33 @@ let toContractBN;
 let BUCKET_X2;
 let BUCKET_C0;
 
-contract('MoC', function([owner, userAccount, userAccount2]) {
+contract('MoC', function([owner, userAccount, userAccount2, vendorAccount]) {
   before(async function() {
-    const accounts = [owner, userAccount, userAccount2];
+    const accounts = [owner, userAccount, userAccount2, vendorAccount];
     mocHelper = await testHelperBuilder({ owner, accounts, useMock: true });
     ({ toContractBN } = mocHelper);
     ({ BUCKET_X2, BUCKET_C0 } = mocHelper);
     this.moc = mocHelper.moc;
     this.mocState = mocHelper.mocState;
     this.mocInrate = mocHelper.mocInrate;
+    this.governor = mocHelper.governor;
+    this.mockMoCVendorsChanger = mocHelper.mockMoCVendorsChanger;
   });
 
   beforeEach(async function() {
     await mocHelper.revertState();
+
+    // Register vendor for test
+    await this.mockMoCVendorsChanger.setVendorsToRegister(
+      await mocHelper.getVendorToRegisterAsArray(vendorAccount, 0)
+    );
+    await this.governor.executeChange(this.mockMoCVendorsChanger.address);
   });
 
   describe('GIVEN the interest rate for 1 day to settlement is 0.00002611578760678', function() {
     beforeEach(async function() {
-      await mocHelper.mintRiskPro(owner, 10);
-      await mocHelper.mintStableToken(userAccount, 10000); // 10000 ReserveToken = all StableTokens
+      await mocHelper.mintRiskPro(owner, 10, vendorAccount);
+      await mocHelper.mintStableToken(userAccount, 10000, vendorAccount); // 10000 ReserveToken = all StableTokens
       await this.mocState.setDaysToSettlement(toContractBN(1, 'DAY'));
     });
 
@@ -47,7 +55,8 @@ contract('MoC', function([owner, userAccount, userAccount2]) {
       it('AND the user redeems all the Free StableTokens THEN the ReserveTokens interests are 0.000156694725640680 ReserveTokens', async function() {
         const redeemTx = await mocHelper.redeemFreeStableToken({
           userAccount,
-          stableTokenAmount: 10000
+          stableTokenAmount: 10000,
+          vendorAccount
         });
         const [freeStableTokenRedeemEvent] = mocHelper.findEvents(
           redeemTx,
@@ -66,9 +75,9 @@ contract('MoC', function([owner, userAccount, userAccount2]) {
     const expectedInRate = '0.000130578938033900'; // 5 * 0,00002611578760678
     let prevNB;
     beforeEach(async function() {
-      await mocHelper.mintRiskPro(owner, 10);
+      await mocHelper.mintRiskPro(owner, 10, vendorAccount);
       ({ nReserve: prevNB } = await mocHelper.getBucketState(BUCKET_C0));
-      await mocHelper.mintStableToken(userAccount, 1); // 1 ReserveToken = 10000 StableTokens
+      await mocHelper.mintStableToken(userAccount, 1, vendorAccount); // 1 ReserveToken = 10000 StableTokens
       await this.mocState.setDaysToSettlement(toContractBN(1, 'DAY'));
     });
 
@@ -80,7 +89,7 @@ contract('MoC', function([owner, userAccount, userAccount2]) {
     describe('WHEN the user redeems all his stableTokens', function() {
       let redeemTx;
       beforeEach(async function() {
-        redeemTx = await mocHelper.redeemFreeStableToken({ userAccount, stableTokenAmount: 10000 });
+        redeemTx = await mocHelper.redeemFreeStableToken({ userAccount, stableTokenAmount: 10000, vendorAccount });
       });
 
       it(`THEN the ReserveTokens interests are ${expectedInRate} ReserveTokens`, function() {

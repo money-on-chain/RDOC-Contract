@@ -9,19 +9,27 @@ let mocHelper;
 let toContractBN;
 let BUCKET_X2;
 let BUCKET_C0;
-contract('MoCBucketContainer', function([owner, account2]) {
+contract('MoCBucketContainer', function([owner, account2, vendorAccount]) {
   const c0Cobj = 3;
   before(async function() {
-    mocHelper = await testHelperBuilder({ owner, accounts: [owner, account2] });
+    mocHelper = await testHelperBuilder({ owner, accounts: [owner, account2, vendorAccount] });
     ({ toContractBN } = mocHelper);
     this.mocState = mocHelper.mocState;
     this.moc = mocHelper.moc;
     this.riskprox = mocHelper.riskprox;
+    this.governor = mocHelper.governor;
+    this.mockMoCVendorsChanger = mocHelper.mockMoCVendorsChanger;
     ({ BUCKET_C0, BUCKET_X2 } = mocHelper);
   });
 
-  beforeEach(function() {
-    return mocHelper.revertState();
+  beforeEach(async function() {
+    await mocHelper.revertState();
+
+    // Register vendor for test
+    await this.mockMoCVendorsChanger.setVendorsToRegister(
+      await mocHelper.getVendorToRegisterAsArray(vendorAccount, 0)
+    );
+    await this.governor.executeChange(this.mockMoCVendorsChanger.address);
   });
 
   describe('GIVEN the Moc contract was created', function() {
@@ -37,15 +45,15 @@ contract('MoCBucketContainer', function([owner, account2]) {
   describe('GIVEN a user tries to trades RiskProx', function() {
     describe('AND the bucket C0 is used', function() {
       beforeEach(async function() {
-        await mocHelper.mintRiskProAmount(owner, 100);
-        await mocHelper.mintStableTokenAmount(account2, 10000);
+        await mocHelper.mintRiskProAmount(owner, 100, vendorAccount);
+        await mocHelper.mintStableTokenAmount(account2, 10000, vendorAccount);
       });
       it('THEN mintRiskProx must revert', async function() {
         await expectRevert(mocHelper.mintRiskProx(account2, bucketC0, 1), NOT_BUCKET_BASE);
       });
       it('THEN redeemRiskProx must revert', async function() {
         await expectRevert(
-          this.moc.redeemRiskProx(bucketC0, toContractBN(0.5 * mocHelper.RESERVE_PRECISION)),
+          mocHelper.redeemBProx(account2, bucketC0, 0.5, vendorAccount),
           NOT_BUCKET_BASE
         );
       });
@@ -55,11 +63,11 @@ contract('MoCBucketContainer', function([owner, account2]) {
     });
     describe('AND the bucket H8 does not exists', function() {
       it('THEN mintRiskProx must revert', async function() {
-        await expectRevert(mocHelper.mintRiskProx(account2, bucketH8, 1), BUCKET_NOT_AVAILABLE);
+        await expectRevert(mocHelper.mintRiskProx(account2, bucketH8, 1, vendorAccount), BUCKET_NOT_AVAILABLE);
       });
       it('THEN redeemRiskProx must revert', async function() {
         await expectRevert(
-          this.moc.redeemRiskProx(bucketH8, toContractBN(0.5 * mocHelper.RESERVE_PRECISION)),
+          mocHelper.redeemBProx(account2, bucketH8, 0.5, vendorAccount),
           BUCKET_NOT_AVAILABLE
         );
       });

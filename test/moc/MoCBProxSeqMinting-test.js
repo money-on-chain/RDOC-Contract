@@ -5,20 +5,28 @@ let userAccount;
 let BUCKET_X2;
 let toContractBN;
 
-contract('MoC', function([owner]) {
+contract('MoC', function([owner, vendorAccount]) {
   before(async function() {
     userAccount = owner;
-    mocHelper = await testHelperBuilder({ owner, accounts: [owner], useMock: true });
+    mocHelper = await testHelperBuilder({ owner, accounts: [owner, vendorAccount], useMock: true });
     this.moc = mocHelper.moc;
     this.mocState = mocHelper.mocState;
+    this.governor = mocHelper.governor;
+    this.mockMoCVendorsChanger = mocHelper.mockMoCVendorsChanger;
     ({ BUCKET_X2, toContractBN } = mocHelper);
   });
 
   describe('GIVEN the user have 100 RiskPro and 100000 StableTokens', function() {
     before(async function() {
+      // Register vendor for test
+      await this.mockMoCVendorsChanger.setVendorsToRegister(
+        await mocHelper.getVendorToRegisterAsArray(vendorAccount, 0)
+      );
+      await this.governor.executeChange(this.mockMoCVendorsChanger.address);
+
       await this.mocState.setDaysToSettlement(0);
-      await mocHelper.mintRiskProAmount(userAccount, 100);
-      await mocHelper.mintStableTokenAmount(userAccount, 1000000);
+      await mocHelper.mintRiskProAmount(userAccount, 100, vendorAccount);
+      await mocHelper.mintStableTokenAmount(userAccount, 1000000, vendorAccount);
     });
 
     describe('WHEN a user mints RiskProx in sequence', function() {

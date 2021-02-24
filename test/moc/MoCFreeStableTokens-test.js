@@ -4,21 +4,30 @@ let mocHelper;
 let toContractBN;
 let BUCKET_X2;
 
-contract.skip('MoC', function([owner, userAccount, otherAccount]) {
+contract.skip('MoC', function([owner, userAccount, otherAccount, vendorAccount]) {
   before(async function() {
-    const accounts = [owner, userAccount, otherAccount];
+    const accounts = [owner, userAccount, otherAccount, vendorAccount];
     mocHelper = await testHelperBuilder({ owner, accounts, useMock: true });
     ({ toContractBN } = mocHelper);
     this.moc = mocHelper.moc;
     this.mocState = mocHelper.mocState;
     this.mocConnector = mocHelper.mocConnector;
+    this.governor = mocHelper.governor;
+    this.mockMoCVendorsChanger = mocHelper.mockMoCVendorsChanger;
     ({ BUCKET_X2 } = mocHelper);
   });
 
   describe('Free StableToken redeem without interests', function() {
     before(async function() {
       await mocHelper.revertState();
-      // This makes stableToken redemption interests zero
+
+      // Register vendor for test
+      await this.mockMoCVendorsChanger.setVendorsToRegister(
+        await mocHelper.getVendorToRegisterAsArray(vendorAccount, 0)
+      );
+      await this.governor.executeChange(this.mockMoCVendorsChanger.address);
+
+      // This makes doc redemption interests zero
       await this.mocState.setDaysToSettlement(0);
     });
     describe('Redeem free stableTokens locking some of them', function() {
@@ -93,7 +102,7 @@ contract.skip('MoC', function([owner, userAccount, otherAccount]) {
         describe(`GIVEN ${scenario.params.riskProToMint} RiskPro is minted and reserveToken price is ${scenario.params.initialReserveTokenPrice} usd`, function() {
           beforeEach(async function() {
             await mocHelper.revertState();
-            await mocHelper.mintRiskProAmount(owner, scenario.params.riskProToMint);
+            await mocHelper.mintRiskProAmount(owner, scenario.params.riskProToMint, vendorAccount);
             const riskProTokenBalance = await mocHelper.getRiskProBalance(owner);
             mocHelper.assertBigReserve(
               riskProTokenBalance,
@@ -105,7 +114,8 @@ contract.skip('MoC', function([owner, userAccount, otherAccount]) {
             beforeEach(async function() {
               await mocHelper.mintStableTokenAmount(
                 userAccount,
-                scenario.params.stableTokensToMint
+                scenario.params.stableTokensToMint,
+                vendorAccount
               );
             });
             it(`THEN the user has ${scenario.params.stableTokensToMint} stableTokens`, async function() {
@@ -136,7 +146,8 @@ contract.skip('MoC', function([owner, userAccount, otherAccount]) {
                 await mocHelper.mintRiskProxAmount(
                   owner,
                   BUCKET_X2,
-                  scenario.params.riskProxToMint
+                  scenario.params.riskProxToMint,
+                  vendorAccount
                 );
               });
               it(`THEN the user has ${scenario.params.riskProxToMint} riskProx `, async function() {
@@ -388,10 +399,11 @@ contract.skip('MoC', function([owner, userAccount, otherAccount]) {
           describe(`GIVEN ${scenario.params.riskProToMint} bitpro is minted and reserveToken price is ${scenario.params.initialReserveTokenPrice} usd`, function() {
             before(async function() {
               await mocHelper.revertState();
-              await mocHelper.mintRiskProAmount(owner, scenario.params.riskProToMint);
+              await mocHelper.mintRiskProAmount(owner, scenario.params.riskProToMint, vendorAccount);
               await mocHelper.mintStableTokenAmount(
                 userAccount,
-                scenario.params.stableTokensToMint
+                scenario.params.stableTokensToMint,
+                vendorAccount
               );
             });
             it(`THEN there are ${scenario.params.stableTokensToMint} stableToken are minted`, async function() {

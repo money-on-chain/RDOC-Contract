@@ -5,19 +5,28 @@ let mocHelper;
 let toContractBN;
 let BUCKET_X2;
 let BUCKET_C0;
-contract('MoC : MoCExchange', function([owner, userAccount]) {
+
+contract('MoC : MoCExchange', function([owner, userAccount, vendorAccount]) {
   before(async function() {
-    const accounts = [owner, userAccount];
+    const accounts = [owner, userAccount, vendorAccount];
     mocHelper = await testHelperBuilder({ owner, accounts, useMock: true });
     ({ toContractBN } = mocHelper);
     ({ BUCKET_C0, BUCKET_X2 } = mocHelper);
     this.moc = mocHelper.moc;
     this.mocState = mocHelper.mocState;
     this.mocInrate = mocHelper.mocInrate;
+    this.governor = mocHelper.governor;
+    this.mockMoCVendorsChanger = mocHelper.mockMoCVendorsChanger;
   });
 
-  beforeEach(function() {
-    return mocHelper.revertState();
+  beforeEach(async function() {
+    await mocHelper.revertState();
+
+    // Register vendor for test
+    await this.mockMoCVendorsChanger.setVendorsToRegister(
+      await mocHelper.getVendorToRegisterAsArray(vendorAccount, 0)
+    );
+    await this.governor.executeChange(this.mockMoCVendorsChanger.address);
   });
 
   describe('GIVEN a user owns 5, RiskProxs', function() {
@@ -27,10 +36,10 @@ contract('MoC : MoCExchange', function([owner, userAccount]) {
     beforeEach(async function() {
       // Set days to settlement to calculate interests
       await this.mocState.setDaysToSettlement(5 * mocHelper.DAY_PRECISION);
-      await mocHelper.mintRiskProAmount(userAccount, 10);
-      await mocHelper.mintStableTokenAmount(userAccount, 50000);
+      await mocHelper.mintRiskProAmount(userAccount, 10, vendorAccount);
+      await mocHelper.mintStableTokenAmount(userAccount, 50000, vendorAccount);
 
-      await mocHelper.mintRiskProxAmount(userAccount, BUCKET_X2, 5);
+      await mocHelper.mintRiskProxAmount(userAccount, BUCKET_X2, 5, vendorAccount);
 
       initialReserveTokenBalance = toContractBN(await mocHelper.getReserveBalance(userAccount));
       c0InitialState = await mocHelper.getBucketState(BUCKET_C0);
@@ -148,9 +157,7 @@ contract('MoC : MoCExchange', function([owner, userAccount]) {
           ({ params } = await mocHelper.getContractReadyState(s));
           await mocHelper.setReserveTokenPrice(params.reservePrice);
 
-          tx = await this.moc.redeemRiskProx(BUCKET_X2, toContractBN(params.nRiskProx), {
-            from: userAccount
-          });
+          tx = await mocHelper.redeemBProx(userAccount, BUCKET_X2, s.params.nRiskProx, vendorAccount);
 
           finalReserveTokenBalance = toContractBN(await mocHelper.getReserveBalance(userAccount));
           c0FinalState = await mocHelper.getBucketState(BUCKET_C0);

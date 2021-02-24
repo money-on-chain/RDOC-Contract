@@ -5,21 +5,29 @@ let toContractBN;
 let BUCKET_C0;
 let BUCKET_X2;
 
-contract('MoC: Reserves control', function([owner, userAccount]) {
+contract('MoC: Reserves control', function([owner, userAccount, vendorAccount]) {
   before(async function() {
-    const accounts = [owner, userAccount];
+    const accounts = [owner, userAccount, vendorAccount];
     mocHelper = await testHelperBuilder({ owner, accounts });
     ({ toContractBN, BUCKET_C0, BUCKET_X2 } = mocHelper);
+    this.governor = mocHelper.governor;
+    this.mockMoCVendorsChanger = mocHelper.mockMoCVendorsChanger;
   });
 
   beforeEach(async function() {
     await mocHelper.revertState();
+
+    // Register vendor for test
+    await this.mockMoCVendorsChanger.setVendorsToRegister(
+      await mocHelper.getVendorToRegisterAsArray(vendorAccount, 0)
+    );
+    await this.governor.executeChange(this.mockMoCVendorsChanger.address)
   });
 
   describe('GIVEN there are RiskPros and StableTokens minted', function() {
     beforeEach(async function() {
-      await mocHelper.mintRiskPro(owner, 1);
-      await mocHelper.mintStableToken(owner, 10000);
+      await mocHelper.mintRiskPro(owner, 1, vendorAccount);
+      await mocHelper.mintStableToken(owner, 10000, vendorAccount);
     });
 
     it('THEN there are no Docs or BitPro available', async function() {

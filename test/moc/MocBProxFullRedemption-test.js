@@ -2,15 +2,23 @@ const testHelperBuilder = require('../mocHelper.js');
 
 let mocHelper;
 let BUCKET_X2;
-contract('MoC: RedeemRiskProx', function([owner, ...accounts]) {
+contract('MoC: RedeemRiskProx', function([owner, vendorAccount, ...accounts]) {
   before(async function() {
-    mocHelper = await testHelperBuilder({ owner, accounts: [owner, ...accounts], useMock: true });
+    mocHelper = await testHelperBuilder({ owner, accounts: [owner, vendorAccount, ...accounts], useMock: true });
     this.moc = mocHelper.moc;
+    this.governor = mocHelper.governor;
+    this.mockMoCVendorsChanger = mocHelper.mockMoCVendorsChanger;
     ({ BUCKET_X2 } = mocHelper);
   });
 
-  beforeEach(function() {
-    return mocHelper.revertState();
+  beforeEach(async function() {
+    await mocHelper.revertState();
+
+    // Register vendor for test
+    await this.mockMoCVendorsChanger.setVendorsToRegister(
+      await mocHelper.getVendorToRegisterAsArray(vendorAccount, 0)
+    );
+    await this.governor.executeChange(this.mockMoCVendorsChanger.address);
   });
 
   const scenarios = [
@@ -108,9 +116,9 @@ contract('MoC: RedeemRiskProx', function([owner, ...accounts]) {
           s.users.forEach(async (user, index) => {
             const account = accounts[index + 1];
 
-            await mocHelper.mintRiskProAmount(account, user.nRiskPro);
-            await mocHelper.mintStableTokenAmount(account, user.nStableToken);
-            await mocHelper.mintRiskProx(account, BUCKET_X2, user.riskProxMint.nReserve);
+            await mocHelper.mintRiskProAmount(account, user.nRiskPro, vendorAccount);
+            await mocHelper.mintStableTokenAmount(account, user.nStableToken, vendorAccount);
+            await mocHelper.mintRiskProx(account, BUCKET_X2, user.riskProxMint.nReserve, vendorAccount);
             if (index === s.users.length - 1) resolve();
           });
         });
@@ -128,7 +136,12 @@ contract('MoC: RedeemRiskProx', function([owner, ...accounts]) {
                 await mocHelper.setReserveTokenPrice(user.reservePrice * mocHelper.MOC_PRECISION);
               }
 
-              await mocHelper.redeemRiskProx(BUCKET_X2, accounts[index + 1], userRiskProxBalance);
+              await mocHelper.redeemBProx(
+                accounts[index + 1],
+                BUCKET_X2,
+                userRiskProxBalance,
+                vendorAccount
+              );
 
               if (index === s.users.length - 1) resolve();
             });

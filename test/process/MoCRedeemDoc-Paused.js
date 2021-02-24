@@ -7,11 +7,11 @@ let mocHelper;
 let toContractBN;
 const blockSpan = 41;
 
-contract('MoC Paused', function([owner, userAccount, ...accounts]) {
+contract('MoC Paused', function([owner, userAccount, vendorAccount, ...accounts]) {
   before(async function() {
     mocHelper = await testHelperBuilder({
       owner,
-      accounts: [owner, userAccount, ...accounts],
+      accounts: [owner, userAccount, vendorAccount, ...accounts],
       useMock: true
     });
     ({ toContractBN } = mocHelper);
@@ -21,10 +21,17 @@ contract('MoC Paused', function([owner, userAccount, ...accounts]) {
     this.mocSettlement = mocHelper.mocSettlement;
     this.mockMoCSettlementChanger = mocHelper.mockMoCSettlementChanger;
     this.governor = mocHelper.governor;
+    this.mockMoCVendorsChanger = mocHelper.mockMoCVendorsChanger;
   });
 
-  beforeEach(function() {
-    return mocHelper.revertState();
+  beforeEach(async function() {
+    await mocHelper.revertState();
+
+    // Register vendor for test
+    await this.mockMoCVendorsChanger.setVendorsToRegister(
+      await mocHelper.getVendorToRegisterAsArray(vendorAccount, 0)
+    );
+    await this.governor.executeChange(this.mockMoCVendorsChanger.address);
   });
 
   describe('StableToken Redeem', function() {
@@ -32,8 +39,8 @@ contract('MoC Paused', function([owner, userAccount, ...accounts]) {
       const from = userAccount;
       beforeEach(async function() {
         await mocHelper.setReserveTokenPrice(4000 * mocHelper.MOC_PRECISION);
-        await mocHelper.mintRiskProAmount(from, 1);
-        await mocHelper.mintStableToken(from, 0.25);
+        await mocHelper.mintRiskProAmount(from, 1, vendorAccount);
+        await mocHelper.mintStableToken(from, 0.25, vendorAccount);
         await mocHelper.mockMoCSettlementChanger.setBlockSpan(blockSpan);
         await mocHelper.governor.executeChange(mocHelper.mockMoCSettlementChanger.address);
       });
@@ -88,7 +95,7 @@ contract('MoC Paused', function([owner, userAccount, ...accounts]) {
       const toMint = 0.25;
       beforeEach(async function() {
         await mocHelper.setReserveTokenPrice(toContractBN(4000 * mocHelper.MOC_PRECISION));
-        await mocHelper.mintRiskProAmount(from, 1);
+        await mocHelper.mintRiskProAmount(from, 1, vendorAccount);
         await mocHelper.mockMoCSettlementChanger.setBlockSpan(1);
         await mocHelper.governor.executeChange(mocHelper.mockMoCSettlementChanger.address);
         await mocHelper.stopper.pause(mocHelper.moc.address);
@@ -96,7 +103,7 @@ contract('MoC Paused', function([owner, userAccount, ...accounts]) {
         assert(paused, 'MoC contract must be paused');
       });
       it('THEN mintStableToken and redeemStableTokenRequest must revert', async function() {
-        await expectRevert(mocHelper.mintStableToken(from, toMint), CONTRACT_IS_PAUSED);
+        await expectRevert(mocHelper.mintStableToken(from, toMint, vendorAccount), CONTRACT_IS_PAUSED);
         await expectRevert(
           this.moc.redeemStableTokenRequest(toContractBN(200, 'USD'), {
             from
@@ -112,12 +119,12 @@ contract('MoC Paused', function([owner, userAccount, ...accounts]) {
           const paused = await mocHelper.moc.paused();
           assert(!paused, 'MoC contract must not be paused');
 
-          await mocHelper.mintStableToken(from, toMint);
+          await mocHelper.mintStableToken(from, toMint, vendorAccount);
           await this.moc.redeemStableTokenRequest(toContractBN(200, 'USD'), {
             from
           });
 
-          await mocHelper.mintStableToken(accounts[2], toMint);
+          await mocHelper.mintStableToken(accounts[2], toMint, vendorAccount);
           await this.moc.redeemStableTokenRequest(toContractBN(200, 'USD'), {
             from: accounts[2]
           });

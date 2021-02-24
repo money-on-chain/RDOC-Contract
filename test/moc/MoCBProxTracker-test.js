@@ -1,32 +1,39 @@
 const testHelperBuilder = require('../mocHelper.js');
 
 let mocHelper;
-let toContractBN;
 let BUCKET_X2;
 
 contract('MoCRiskProxManager: RiskProx Address tracking ', function([
   owner,
   account1,
   account2,
-  account3
+  account3,
+  vendorAccount
 ]) {
   before(async function() {
-    const accounts = [owner, account1, account2, account3];
+    const accounts = [owner, account1, account2, account3, vendorAccount];
     mocHelper = await testHelperBuilder({ owner, accounts });
-    ({ toContractBN } = mocHelper);
     ({ BUCKET_X2 } = mocHelper);
     this.moc = mocHelper.moc;
     this.riskProx = mocHelper.riskProx;
+    this.governor = mocHelper.governor;
+    this.mockMoCVendorsChanger = mocHelper.mockMoCVendorsChanger;
   });
 
-  beforeEach(function() {
-    return mocHelper.revertState();
+  beforeEach(async function() {
+    await mocHelper.revertState();
+
+    // Register vendor for test
+    await this.mockMoCVendorsChanger.setVendorsToRegister(
+      await mocHelper.getVendorToRegisterAsArray(vendorAccount, 0)
+    );
+    await this.governor.executeChange(this.mockMoCVendorsChanger.address);
   });
 
   describe('GIVEN a new user mints RiskProx', function() {
     beforeEach(async function() {
-      await mocHelper.mintRiskProAmount(owner, 30);
-      await mocHelper.mintStableTokenAmount(owner, 50000);
+      await mocHelper.mintRiskProAmount(owner, 30, vendorAccount);
+      await mocHelper.mintStableTokenAmount(owner, 50000, vendorAccount);
       await mocHelper.mintRiskProx(account1, BUCKET_X2, 1);
     });
     it('THEN he enters the address tracker', async function() {
@@ -41,7 +48,7 @@ contract('MoCRiskProxManager: RiskProx Address tracking ', function([
     });
     describe('AND another account also mints', function() {
       beforeEach(async function() {
-        await mocHelper.mintRiskProx(account2, BUCKET_X2, 1);
+        await mocHelper.mintRiskProx(account2, BUCKET_X2, 1, vendorAccount);
       });
       it('THEN both get tracked', async function() {
         const activeAddress = await this.riskProx.getActiveAddresses(BUCKET_X2);
@@ -51,9 +58,7 @@ contract('MoCRiskProxManager: RiskProx Address tracking ', function([
       });
       describe('WHEN account 1 liquidates his entire position', function() {
         beforeEach(async function() {
-          await this.moc.redeemRiskProx(BUCKET_X2, toContractBN(1 * mocHelper.RESERVE_PRECISION), {
-            from: account1
-          });
+          await mocHelper.redeemBProx(account1, BUCKET_X2, 1, vendorAccount);
         });
         it('THEN tracker shrinks', async function() {
           const activeAddress = await this.riskProx.getActiveAddresses(BUCKET_X2);
@@ -63,7 +68,7 @@ contract('MoCRiskProxManager: RiskProx Address tracking ', function([
         });
         describe('AND a third user mints', function() {
           it('THEN tracker length is two and third user is tracked', async function() {
-            await mocHelper.mintRiskProx(account3, BUCKET_X2, 1);
+            await mocHelper.mintRiskProx(account3, BUCKET_X2, 1, vendorAccount);
             const activeAddress = await this.riskProx.getActiveAddresses(BUCKET_X2);
             const activeAddressLength = await this.riskProx.getActiveAddressesCount(BUCKET_X2);
             assert.equal(activeAddressLength, 2, 'length should be two');
@@ -72,7 +77,7 @@ contract('MoCRiskProxManager: RiskProx Address tracking ', function([
         });
         describe('AND account1 mints again', function() {
           it('THEN tracker length is two and owner is last', async function() {
-            await mocHelper.mintRiskProx(account1, BUCKET_X2, 1);
+            await mocHelper.mintRiskProx(account1, BUCKET_X2, 1, vendorAccount);
             const activeAddress = await this.riskProx.getActiveAddresses(BUCKET_X2);
             const activeAddressLength = await this.riskProx.getActiveAddressesCount(BUCKET_X2);
             assert.equal(activeAddressLength, 2, 'length should be two');
@@ -82,7 +87,7 @@ contract('MoCRiskProxManager: RiskProx Address tracking ', function([
       });
       describe('WHEN account 1 partially liquidates his position', function() {
         it('THEN tracker remains the same', async function() {
-          await this.moc.redeemRiskProx(BUCKET_X2, toContractBN(0.5 * mocHelper.RESERVE_PRECISION));
+          await mocHelper.redeemRiskProx(account1, BUCKET_X2, 0.5, vendorAccount);
           const activeAddress = await this.riskProx.getActiveAddresses(BUCKET_X2);
           const activeAddressLength = await this.riskProx.getActiveAddressesCount(BUCKET_X2);
           assert.equal(activeAddressLength, 2, 'length should be unchanged');
