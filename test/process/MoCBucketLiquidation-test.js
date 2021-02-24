@@ -2,26 +2,34 @@ const testHelperBuilder = require('../mocHelper.js');
 
 let mocHelper;
 let BUCKET_X2;
-contract('MoC: Bucket Liquidation', function([owner, userAccount, otherAccount]) {
+contract('MoC: Bucket Liquidation', function([owner, userAccount, otherAccount, vendorAccount]) {
   before(async function() {
-    const accounts = [owner, userAccount, otherAccount];
+    const accounts = [owner, userAccount, otherAccount, vendorAccount];
     mocHelper = await testHelperBuilder({ owner, accounts });
     ({ BUCKET_X2 } = mocHelper);
     this.moc = mocHelper.moc;
     this.mocState = mocHelper.mocState;
+    this.governor = mocHelper.governor;
+    this.mockMoCVendorsChanger = mocHelper.mockMoCVendorsChanger;
   });
 
-  beforeEach(function() {
-    return mocHelper.revertState();
+  beforeEach(async function() {
+    await mocHelper.revertState();
+
+    // Register vendor for test
+    await this.mockMoCVendorsChanger.setVendorsToRegister(
+      await mocHelper.getVendorToRegisterAsArray(vendorAccount, 0)
+    );
+    await this.governor.executeChange(this.mockMoCVendorsChanger.address);
   });
 
   describe('GIVEN user has X2 positions AND ReserveTokens price drops to half', function() {
     let globalCoverage;
     let tx;
     beforeEach(async function() {
-      await mocHelper.mintRiskProAmount(userAccount, 10);
-      await mocHelper.mintStableTokenAmount(userAccount, 50000);
-      await mocHelper.mintRiskProxAmount(userAccount, BUCKET_X2, 5);
+      await mocHelper.mintRiskProAmount(userAccount, 10, vendorAccount);
+      await mocHelper.mintStableTokenAmount(userAccount, 50000, vendorAccount);
+      await mocHelper.mintRiskProxAmount(userAccount, BUCKET_X2, 5, vendorAccount);
       await mocHelper.setReserveTokenPrice(5000 * mocHelper.MOC_PRECISION);
       globalCoverage = await this.mocState.globalCoverage();
     });
@@ -58,7 +66,7 @@ contract('MoC: Bucket Liquidation', function([owner, userAccount, otherAccount])
     });
     describe('WHEN user tries to redeem his X2 position', function() {
       beforeEach(async function() {
-        tx = await mocHelper.redeemRiskProx(BUCKET_X2, userAccount, 5);
+        tx = await mocHelper.redeemRiskProx(BUCKET_X2, userAccount, 5, vendorAccount);
       });
       it('AND BucketLiquidation event should be emitted', async function() {
         const bucketLiqEvents = mocHelper.findEvents(tx, 'BucketLiquidation');
@@ -74,7 +82,7 @@ contract('MoC: Bucket Liquidation', function([owner, userAccount, otherAccount])
         const resTokensToMint = 2;
         // Intentionally uses this method instead of mintRiskProxAmount,
         // as X2 Price is zero at this state
-        tx = await mocHelper.mintRiskProx(otherAccount, BUCKET_X2, resTokensToMint);
+        tx = await mocHelper.mintRiskProx(otherAccount, BUCKET_X2, resTokensToMint, vendorAccount);
       });
       it('AND BucketLiquidation event is emitted', async function() {
         const bucketLiqEvents = mocHelper.findEvents(tx, 'BucketLiquidation');

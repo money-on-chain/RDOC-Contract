@@ -5,15 +5,15 @@ let commissionSplitter;
 let splitterPrecision;
 let toContractBN;
 
-const executeOperations = (user, operations) => {
-  const promises = operations.map(async op => mocHelper.mintRiskPro(user, op.reserve));
+const executeOperations = (user, operations, vendorAccount) => {
+  const promises = operations.map(async op => mocHelper.mintRiskPro(user, op.reserve, vendorAccount));
 
   return Promise.all(promises);
 };
 
 const operationsTotal = operations => operations.reduce((last, op) => op.reserve + last, 0);
 
-contract('CommissionSplitter', function([owner, userAccount, commissionsAccount]) {
+contract('CommissionSplitter', function([owner, userAccount, commissionsAccount, vendorAccount]) {
   before(async function() {
     const accounts = [owner, userAccount];
     mocHelper = await testHelperBuilder({ owner, accounts });
@@ -68,8 +68,12 @@ contract('CommissionSplitter', function([owner, userAccount, commissionsAccount]
         before(async function() {
           // deploying Commission splitter
           splitterPrecision = await commissionSplitter.PRECISION();
-          // set commissions rate
-          await mocHelper.mockMocInrateChanger.setCommissionRate(toContractBN(0.002, 'RAT'));
+
+          // Commission rates for test are set in functionHelper.js
+          await mocHelper.mockMocInrateChanger.setCommissionRates(
+            await mocHelper.getCommissionsArrayNonZero()
+          );
+
           // set commissions address
           await mocHelper.mockMocInrateChanger.setCommissionsAddress(commissionSplitter.address);
           // update params

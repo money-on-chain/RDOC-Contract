@@ -6,15 +6,71 @@ let toContractBN;
 let BUCKET_X2;
 const ACCOUNTS_QUANTITY = 10;
 
-contract('MoC: Partial Settlement execution', function([owner, ...accounts]) {
+const testFunctionPromises = vendorAccount => {
+  const testFunctions = [
+    { name: 'mintRiskProxVendors', args: [BUCKET_X2, 0, vendorAccount] },
+    { name: 'redeemRiskProxVendors', args: [BUCKET_X2, 0, vendorAccount] },
+    { name: 'redeemStableTokenRequest', args: [0] },
+    { name: 'alterRedeemRequestAmount', args: [true, 1] }
+  ];
+
+  // Get all tx promises
+  return testFunctions.map(func => mocHelper.moc[func.name](...func.args));
+};
+
+const assertNonStoppedFunctions = async vendorAccount => {
+  const promises = testFunctionPromises(vendorAccount);
+  const txResults = await Promise.all(promises);
+
+  return assert(txResults.every(result => result.receipt.status), 'Some transactions reverted');
+};
+
+const assertAllStoppedFunctions = vendorAccount => {
+  const promises = testFunctionPromises(vendorAccount);
+  return Promise.all(
+    promises.map(tx => expectRevert(tx, 'Function can only be called when settlement is ready'))
+  );
+};
+
+const initializeSettlement = async (vendorAccount, accounts) => {
+  await mocHelper.revertState();
+  // Avoid interests
+  await mocHelper.mocState.setDaysToSettlement(0);
+  const stableTokenAccounts = accounts.slice(0, 5);
+  await Promise.all(
+    stableTokenAccounts.map(account => mocHelper.mintRiskProAmount(account, 10000, vendorAccount))
+  );
+  await Promise.all(
+    stableTokenAccounts.map(account => mocHelper.mintStableTokenAmount(account, 10000, vendorAccount))
+  );
+  await Promise.all(
+    stableTokenAccounts.map(account =>
+      mocHelper.moc.redeemStableTokenRequest(toContractBN(10, 'USD'), {
+        from: account
+      })
+    )
+  );
+
+  await mocHelper.mocSettlement.setBlockSpan(1);
+};
+
+const setToStall = async () =>
+  mocHelper.governor.executeChange(mocHelper.mockMoCStallSettlementChanger.address);
+
+const restartSettlement = async () =>
+  mocHelper.governor.executeChange(mocHelper.mockMoCRestartSettlementChanger.address);
+
+contract('MoC: Partial Settlement execution', function([owner, vendorAccount, ...accounts]) {
   const testAccounts = accounts.slice(0, ACCOUNTS_QUANTITY);
   before(async function() {
     mocHelper = await testHelperBuilder({
       owner,
-      accounts: [owner, ...testAccounts],
+      accounts: [owner, vendorAccount, ...testAccounts],
       useMock: true
     });
     ({ toContractBN, BUCKET_X2 } = mocHelper);
+    this.governor = mocHelper.governor;
+    this.mockMoCVendorsChanger = mocHelper.mockMoCVendorsChanger;
   });
 
   describe('WHEN the settlement is only partially executed', function() {
@@ -84,57 +140,3 @@ contract('MoC: Partial Settlement execution', function([owner, ...accounts]) {
     });
   });
 });
-
-const testFunctionPromises = () => {
-  const testFunctions = [
-    { name: 'mintRiskProx', args: [BUCKET_X2, 0] },
-    { name: 'redeemRiskProx', args: [BUCKET_X2, 0] },
-    { name: 'redeemStableTokenRequest', args: [0] },
-    { name: 'alterRedeemRequestAmount', args: [true, 1] }
-  ];
-
-  // Get all tx promises
-  return testFunctions.map(func => mocHelper.moc[func.name](...func.args));
-};
-
-const assertNonStoppedFunctions = async () => {
-  const promises = testFunctionPromises();
-  const txResults = await Promise.all(promises);
-
-  return assert(txResults.every(result => result.receipt.status), 'Some transactions reverted');
-};
-
-const assertAllStoppedFunctions = () => {
-  const promises = testFunctionPromises();
-  return Promise.all(
-    promises.map(tx => expectRevert(tx, 'Function can only be called when settlement is ready'))
-  );
-};
-
-const initializeSettlement = async accounts => {
-  mocHelper.revertState();
-  // Avoid interests
-  await mocHelper.mocState.setDaysToSettlement(0);
-  const stableTokenAccounts = accounts.slice(0, 5);
-  await Promise.all(
-    stableTokenAccounts.map(account => mocHelper.mintRiskProAmount(account, 10000))
-  );
-  await Promise.all(
-    stableTokenAccounts.map(account => mocHelper.mintStableTokenAmount(account, 10000))
-  );
-  await Promise.all(
-    stableTokenAccounts.map(account =>
-      mocHelper.moc.redeemStableTokenRequest(toContractBN(10, 'USD'), {
-        from: account
-      })
-    )
-  );
-
-  await mocHelper.mocSettlement.setBlockSpan(1);
-};
-
-const setToStall = async () =>
-  mocHelper.governor.executeChange(mocHelper.mockMoCStallSettlementChanger.address);
-
-const restartSettlement = async () =>
-  mocHelper.governor.executeChange(mocHelper.mockMoCRestartSettlementChanger.address);

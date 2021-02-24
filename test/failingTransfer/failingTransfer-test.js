@@ -8,45 +8,45 @@ const DEPOSIT_FAILED = 'Token deposit failed on RRC20 Reserve token transfer';
 const WITHDRAWAL_FAILED = 'Token withdrawal failed on RRC20 Reserve token transfer';
 
 // Expected behaviour
-const shouldRevertBasicFunctions = userAccount => {
+const shouldRevertBasicFunctions = (userAccount, vendorAccount) => {
   describe('WHEN a blacklisted user tries to mint RiskPro', function() {
     it('THEN the transaction reverts', async function() {
-      const tx = mocHelper.mintRiskProAmount(userAccount, 1);
+      const tx = mocHelper.mintRiskProAmount(userAccount, 1, vendorAccount);
 
       await expectRevert(tx, DEPOSIT_FAILED);
     });
   });
   describe('WHEN a blacklisted user tries to mint StableToken', function() {
     it('THEN the transaction reverts', async function() {
-      const tx = mocHelper.mintStableTokenAmount(userAccount, 1);
+      const tx = mocHelper.mintStableTokenAmount(userAccount, 1, vendorAccount);
 
       await expectRevert(tx, DEPOSIT_FAILED);
     });
   });
   describe('WHEN a blacklisted user tries to mint RiskProx', function() {
     it('THEN the transaction reverts', async function() {
-      const tx = mocHelper.mintRiskProxAmount(userAccount, BUCKET_X2, 1);
+      const tx = mocHelper.mintRiskProxAmount(userAccount, BUCKET_X2, 1, vendorAccount);
 
       await expectRevert(tx, DEPOSIT_FAILED);
     });
   });
   describe('WHEN a blacklisted user tries to redeem RiskPro', function() {
     it('THEN the transaction reverts', async function() {
-      const tx = mocHelper.redeemRiskPro(userAccount, 1);
+      const tx = mocHelper.redeemRiskPro(userAccount, 1, vendorAccount);
 
       await expectRevert(tx, WITHDRAWAL_FAILED);
     });
   });
   describe('WHEN a blacklisted user tries to redeem StableToken', function() {
     it('THEN the transaction reverts', async function() {
-      const tx = mocHelper.redeemFreeStableToken({ userAccount, stableTokenAmount: 1 });
+      const tx = mocHelper.redeemFreeStableToken({ userAccount, stableTokenAmount: 1, vendorAccount });
 
       await expectRevert(tx, WITHDRAWAL_FAILED);
     });
   });
   describe('WHEN a blacklisted user tries to redeem RiskProx', function() {
     it('THEN the transaction reverts', async function() {
-      const tx = mocHelper.redeemRiskProx(BUCKET_X2, userAccount, 1);
+      const tx = mocHelper.redeemRiskProx(BUCKET_X2, userAccount, 1, vendorAccount);
 
       await expectRevert(tx, WITHDRAWAL_FAILED);
     });
@@ -54,24 +54,24 @@ const shouldRevertBasicFunctions = userAccount => {
 };
 
 const initializeScenario = async userAccount => {
-  await mocHelper.mintRiskProAmount(userAccount, 100);
-  await mocHelper.mintStableTokenAmount(userAccount, 10000);
-  await mocHelper.mintRiskProxAmount(userAccount, BUCKET_X2, 10);
+  await mocHelper.mintRiskProAmount(userAccount, 100, vendorAccount);
+  await mocHelper.mintStableTokenAmount(userAccount, 10000, vendorAccount);
+  await mocHelper.mintRiskProxAmount(userAccount, BUCKET_X2, 10, vendorAccount);
 };
 
 /** The goal of this test is to check the behaviour on transfer
  * and transferFrom revert or fail on the RRC20 token
  */
-contract('MoC: Reverting Transfer on basic operations', function([owner, userAccount]) {
+contract('MoC: Reverting Transfer on basic operations', function([owner, userAccount, vendorAccount]) {
   before(async function() {
-    const accounts = [owner, userAccount];
+    const accounts = [owner, userAccount, vendorAccount];
     mocHelper = await testHelperBuilder({ owner, accounts });
     ({ BUCKET_X2, reserveToken } = mocHelper);
   });
 
   describe('GIVEN all tokens can be minted and redeemed by the user', function() {
     before(async function() {
-      await initializeScenario(userAccount);
+      await initializeScenario(userAccount, vendorAccount);
     });
 
     describe('AND the reserveToken contract starts to fail with all transactions', function() {
@@ -82,7 +82,7 @@ contract('MoC: Reverting Transfer on basic operations', function([owner, userAcc
         await mocHelper.revertState();
       });
 
-      shouldRevertBasicFunctions(userAccount);
+      shouldRevertBasicFunctions(userAccount, vendorAccount);
     });
   });
 
@@ -91,6 +91,6 @@ contract('MoC: Reverting Transfer on basic operations', function([owner, userAcc
       await reserveToken.blacklistAccount(userAccount);
     });
 
-    shouldRevertBasicFunctions(userAccount);
+    shouldRevertBasicFunctions(userAccount, vendorAccount);
   });
 });

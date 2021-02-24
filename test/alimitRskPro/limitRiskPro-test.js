@@ -5,9 +5,9 @@ const { toContract } = require('../../utils/numberHelper');
 let mocHelper;
 let toContractBN;
 
-contract('MoC: MoCExchange', function([owner, userAccount]) {
+contract('MoC: MoCExchange', function([owner, vendorAccount]) {
   before(async function() {
-    mocHelper = await testHelperBuilder({ owner, accounts: [owner] });
+    mocHelper = await testHelperBuilder({ owner, accounts: [owner, vendorAccount] });
     ({ toContractBN } = mocHelper);
     this.moc = mocHelper.moc;
     this.mocState = mocHelper.mocState;
@@ -25,7 +25,7 @@ contract('MoC: MoCExchange', function([owner, userAccount]) {
     describe('WHEN he tries to mint 1.000.000 RiskPro', function() {
       it('THEN transaction OK', async function() {
         // await this.mocState.setMaxMintRiskPro(toContract(10000000 * mocHelper.MOC_PRECISION));
-        await mocHelper.mintRiskProAmount(owner, 1000000);
+        await mocHelper.mintRiskProAmount(owner, 1000000, vendorAccount);
         const balances = await mocHelper.getUserBalances(owner);
         mocHelper.assertBigDollar(balances.riskPro, 1000000, 'RiskPro balance is incorrect');
       });
@@ -33,7 +33,7 @@ contract('MoC: MoCExchange', function([owner, userAccount]) {
 
     describe('WHEN he tries to mint 20.000.000 RiskPro', function() {
       it('THEN transaction OK but it only mint 10.000.000 because is the mint limit', async function() {
-        await mocHelper.mintRiskProAmount(owner, 20000000);
+        await mocHelper.mintRiskProAmount(owner, 20000000, vendorAccount);
         const balances = await mocHelper.getUserBalances(owner);
         mocHelper.assertBigDollar(balances.riskPro, 10000000, 'RiskPro balance is incorrect');
       });
