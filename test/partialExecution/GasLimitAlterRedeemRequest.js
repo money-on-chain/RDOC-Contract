@@ -64,10 +64,10 @@ const initializeSettlementStress = async (accounts, arrayRedeemSize, vendorAccou
     docAccounts.map(account => () => mocHelper.mintRiskProAmount(account, 100000, vendorAccount))
   );
   await executeBatched(
-    docAccounts.map(account => () => mocHelper.mintStableTokenAmount(account, 100000, vendorAccount))
+    docAccounts.map(account => () =>
+      mocHelper.mintStableTokenAmount(account, 100000, vendorAccount)
+    )
   );
-
-  const promises = [];
 
   // Creates an array of identical functions to be called, the amount is arrayRedeemSize
   const createArrayRedeemSizeCalls = account =>

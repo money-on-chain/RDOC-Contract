@@ -149,7 +149,7 @@ contract('MoC: Delever X', function([owner, blacklisted, vendorAccount, ...allAc
         });
         it('THEN all users RiskProx are burnt', async function() {
           await Promise.all(
-            bprox2Positions.map(async (position, i) => {
+            riskProx2Positions.map(async (position, i) => {
               mocHelper.assertBigRBTC(
                 await mocHelper.getRiskProxBalance(BUCKET_X2, accounts[i + 1]),
                 0
@@ -305,7 +305,12 @@ contract('MoC: Delever X', function([owner, blacklisted, vendorAccount, ...allAc
             await mocHelper.mintStableTokenAmount(account, user.nStableToken, vendorAccount);
 
             if (user.riskProxMint.nReserve) {
-              await mocHelper.mintRiskProx(account, BUCKET_X2, user.riskProxMint.nReserve, vendorAccount);
+              await mocHelper.mintRiskProx(
+                account,
+                BUCKET_X2,
+                user.riskProxMint.nReserve,
+                vendorAccount
+              );
             }
             userPrevBalances[index] = {
               nRiskProx: await mocHelper.getRiskProxBalance(BUCKET_X2, accounts[index + 1]),

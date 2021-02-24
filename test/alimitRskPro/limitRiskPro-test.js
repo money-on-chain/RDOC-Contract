@@ -1,14 +1,10 @@
-const { expectRevert } = require('openzeppelin-test-helpers');
 const testHelperBuilder = require('../mocHelper.js');
-const { toContract } = require('../../utils/numberHelper');
 
 let mocHelper;
-let toContractBN;
 
 contract('MoC: MoCExchange', function([owner, vendorAccount]) {
   before(async function() {
     mocHelper = await testHelperBuilder({ owner, accounts: [owner, vendorAccount] });
-    ({ toContractBN } = mocHelper);
     this.moc = mocHelper.moc;
     this.mocState = mocHelper.mocState;
   });

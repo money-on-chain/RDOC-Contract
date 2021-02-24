@@ -57,7 +57,9 @@ const initializeSettlement = async (vendorAccount, accounts) => {
     stableTokenAccounts.map(account => mocHelper.mintRiskProAmount(account, 10000, vendorAccount))
   );
   await Promise.all(
-    stableTokenAccounts.map(account => mocHelper.mintStableTokenAmount(account, 10000, vendorAccount))
+    stableTokenAccounts.map(account =>
+      mocHelper.mintStableTokenAmount(account, 10000, vendorAccount)
+    )
   );
   await Promise.all(
     stableTokenAccounts.map(account =>
@@ -68,7 +70,9 @@ const initializeSettlement = async (vendorAccount, accounts) => {
   );
 
   await Promise.all(
-    riskProxAccounts.map(account => mocHelper.mintRiskProxAmount(account, BUCKET_X2, 1, vendorAccount))
+    riskProxAccounts.map(account =>
+      mocHelper.mintRiskProxAmount(account, BUCKET_X2, 1, vendorAccount)
+    )
   );
   initialBalances = await Promise.all(accounts.map(address => mocHelper.getUserBalances(address)));
   await mocHelper.mocSettlement.setBlockSpan(1);
@@ -92,7 +96,11 @@ const runScenario = scenario => {
 contract('MoC: Partial Settlement execution', function([owner, vendorAccount, ...allAccounts]) {
   const accounts = allAccounts.slice(0, ACCOUNTS_QUANTITY);
   before(async function() {
-    mocHelper = await testHelperBuilder({ owner, accounts: [owner, vendorAccount, ...accounts], useMock: true });
+    mocHelper = await testHelperBuilder({
+      owner,
+      accounts: [owner, vendorAccount, ...accounts],
+      useMock: true
+    });
     ({ toContractBN, BUCKET_X2 } = mocHelper);
   });
 

@@ -37,7 +37,11 @@ contract('MoC: Retrocompatibility', function([owner, userAccount]) {
       // Mint
       await mocHelper.mintRiskPro(userAccount, mintAmount);
       const balance = await mocHelper.getRiskProBalance(userAccount);
-      mocHelper.assertBigRBTC(balance, mintAmount, 'userAccount RiskPro balance was not mintAmount');
+      mocHelper.assertBigRBTC(
+        balance,
+        mintAmount,
+        'userAccount RiskPro balance was not mintAmount'
+      );
     });
     it('WHEN a user tries to redeem RiskPros, THEN operation is successful', async function() {
       const redeemAmount = 100;

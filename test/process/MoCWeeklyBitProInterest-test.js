@@ -63,7 +63,10 @@ contract('MoC: RiskPro holder interests payment', function([
     let beforeTargetAddressBalance = 0;
     describe('GIVEN there are 2 ReserveTokens in the C0 nReserveToken Bucket', function() {
       beforeEach(async function() {
-        await mocHelper.mintRiskPro(account, toContractBN(s.riskProMintReserveToken, vendorAccount));
+        await mocHelper.mintRiskPro(
+          account,
+          toContractBN(s.riskProMintReserveToken, vendorAccount)
+        );
         await this.mockMocInrateChanger.setRiskProRate(toContractBN(s.riskProHolderRate));
         await this.mockMocInrateChanger.setRiskProInterestAddress(s.riskProInterestTargetAddress);
         await this.mockMocInrateChanger.setRiskProInterestBlockSpan(s.blockSpan);

@@ -89,7 +89,11 @@ contract('MoC', function([owner, userAccount, userAccount2, vendorAccount]) {
     describe('WHEN the user redeems all his stableTokens', function() {
       let redeemTx;
       beforeEach(async function() {
-        redeemTx = await mocHelper.redeemFreeStableToken({ userAccount, stableTokenAmount: 10000, vendorAccount });
+        redeemTx = await mocHelper.redeemFreeStableToken({
+          userAccount,
+          stableTokenAmount: 10000,
+          vendorAccount
+        });
       });
 
       it(`THEN the ReserveTokens interests are ${expectedInRate} ReserveTokens`, function() {

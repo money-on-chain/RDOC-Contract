@@ -103,7 +103,10 @@ contract('MoC Paused', function([owner, userAccount, vendorAccount, ...accounts]
         assert(paused, 'MoC contract must be paused');
       });
       it('THEN mintStableToken and redeemStableTokenRequest must revert', async function() {
-        await expectRevert(mocHelper.mintStableToken(from, toMint, vendorAccount), CONTRACT_IS_PAUSED);
+        await expectRevert(
+          mocHelper.mintStableToken(from, toMint, vendorAccount),
+          CONTRACT_IS_PAUSED
+        );
         await expectRevert(
           this.moc.redeemStableTokenRequest(toContractBN(200, 'USD'), {
             from

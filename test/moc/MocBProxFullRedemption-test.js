@@ -4,7 +4,11 @@ let mocHelper;
 let BUCKET_X2;
 contract('MoC: RedeemRiskProx', function([owner, vendorAccount, ...accounts]) {
   before(async function() {
-    mocHelper = await testHelperBuilder({ owner, accounts: [owner, vendorAccount, ...accounts], useMock: true });
+    mocHelper = await testHelperBuilder({
+      owner,
+      accounts: [owner, vendorAccount, ...accounts],
+      useMock: true
+    });
     this.moc = mocHelper.moc;
     this.governor = mocHelper.governor;
     this.mockMoCVendorsChanger = mocHelper.mockMoCVendorsChanger;
@@ -118,7 +122,12 @@ contract('MoC: RedeemRiskProx', function([owner, vendorAccount, ...accounts]) {
 
             await mocHelper.mintRiskProAmount(account, user.nRiskPro, vendorAccount);
             await mocHelper.mintStableTokenAmount(account, user.nStableToken, vendorAccount);
-            await mocHelper.mintRiskProx(account, BUCKET_X2, user.riskProxMint.nReserve, vendorAccount);
+            await mocHelper.mintRiskProx(
+              account,
+              BUCKET_X2,
+              user.riskProxMint.nReserve,
+              vendorAccount
+            );
             if (index === s.users.length - 1) resolve();
           });
         });

@@ -7,7 +7,11 @@ let BUCKET_X2;
 let BUCKET_C0;
 contract('MoC: Daily interests payment paused', function([owner, account, vendorAccount]) {
   before(async function() {
-    mocHelper = await testHelperBuilder({ owner, accounts: [owner, account, vendorAccount], useMock: true });
+    mocHelper = await testHelperBuilder({
+      owner,
+      accounts: [owner, account, vendorAccount],
+      useMock: true
+    });
     ({ BUCKET_C0, BUCKET_X2 } = mocHelper);
     this.moc = mocHelper.moc;
     this.mocState = mocHelper.mocState;

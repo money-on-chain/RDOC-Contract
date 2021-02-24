@@ -253,7 +253,12 @@ contract('MoC: MoCExchange', function([owner, userAccount, vendorAccount]) {
                 beforeEach(async function() {
                   totalWithDiscount = await mocHelper.reserveTokenNeededToMintRiskPro(0.5);
                   const applyPrecision = false;
-                  await mocHelper.mintRiskPro(userAccount, totalWithDiscount, vendorAccount, applyPrecision);
+                  await mocHelper.mintRiskPro(
+                    userAccount,
+                    totalWithDiscount,
+                    vendorAccount,
+                    applyPrecision
+                  );
                 });
                 it('THEN he receives 0.5 RiskPros on his account', async function() {
                   const balance = await mocHelper.getRiskProBalance(userAccount);

@@ -1,5 +1,6 @@
+const { BigNumber } = require('bignumber.js');
 const chai = require('chai');
-const { toContract } = require('../../utils/numberHelper');
+const { toContract, toBigNumber } = require('../../utils/numberHelper');
 const { toContractBNNoPrec } = require('./formatHelper');
 
 // Changers
@@ -133,31 +134,21 @@ const mintRiskProx = moc => async (from, bucket, resTokensToMint, vendorAccount 
   const reservePrecision = await moc.getReservePrecision();
   return vendorAccount !== zeroAddress
     ? moc.mintRiskProxVendors(bucket, toContract(resTokensToMint * reservePrecision), vendorAccount, {
-        from,
-        value: toContract(msgValue * reservePrecision)
+        from
       })
     : moc.mintRiskProx(bucket, toContract(resTokensToMint * reservePrecision), {
-        from,
-        value: toContract(msgValue * reservePrecision)
+        from
       });
 };
 
 const redeemRiskProx = moc => async (bucket, userAccount, riskProxAmount) => {
   const reservePrecision = await moc.getReservePrecision();
-  const formattedAmount = toContract(riskProxAmount * reservePrecision);
-
-  return moc.redeemRiskProx(bucket, formattedAmount, {
-    from: userAccount
-  });
-};
-
-const redeemFreeStableToken = moc => async ({ userAccount, stableTokenAmount }) => {
-  const stableTokenPrecision = await moc.getMocPrecision();
-  const formattedAmount = toContract(stableTokenAmount * stableTokenPrecision);
-
-  return moc.redeemFreeStableToken(formattedAmount, {
-    from: userAccount
-  });
+  const amountWithPrecision = new BN(amount).mul(reservePrecision);
+  return vendorAccount !== zeroAddress
+    ? moc.redeemRiskProxVendors(bucket, toContract(amountWithPrecision), vendorAccount, {
+        from
+      })
+    : moc.redeemRiskProx(bucket, toContract(amountWithPrecision), { from });
 };
 
 const mintRiskProAmount = (moc, mocState) => async (account, riskProAmount) => {
@@ -214,14 +205,6 @@ const reserveTokenNeededToMintRiskPro = (moc, mocState) => async riskProAmount =
   const reserveTotal = toContractBNNoPrec(riskProAmount * finalPrice);
   return reserveTotal;
 };
-
-const redeemRiskPro = moc => async (from, amount, vendorAccount = zeroAddress) => {
-  const reservePrecision = await moc.getReservePrecision();
-  return vendorAccount !== zeroAddress
-    ? moc.redeemRiskProVendors(toContract(amount * reservePrecision), vendorAccount, { from })
-    : moc.rredeemRiskPro(toContract(amount * reservePrecision), { from });
-};
-
 
 const redeemStableTokenRequest = moc => async (from, amount) => {
   const stableTokenPrecision = await moc.getMocPrecision();

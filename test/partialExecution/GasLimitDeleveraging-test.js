@@ -19,7 +19,11 @@ contract.skip('MoC: Gas limit on deleveraging', function([owner, vendorAccount, 
   afterAccounts = accounts.slice(300, 500);
   before(async function() {
     this.timeout(500000);
-    mocHelper = await testHelperBuilder({ owner, accounts: [owner, vendorAccount, ...accounts], useMock: true });
+    mocHelper = await testHelperBuilder({
+      owner,
+      accounts: [owner, vendorAccount, ...accounts],
+      useMock: true
+    });
     ({ BUCKET_X2 } = mocHelper);
     this.mocSettlement = mocHelper.mocSettlement;
     this.riskProx = mocHelper.riskProx;
