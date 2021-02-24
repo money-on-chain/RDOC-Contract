@@ -26,7 +26,7 @@ const assertAllMintReedemMocHelperPausedFunctions = (userAccount, vendorAccount)
   return Promise.all(txs.map(tx => expectRevert(tx, CONTRACT_IS_PAUSED)));
 };
 
-const assertAllMocPausedFunctions = (owner, userAccount) => {
+const assertAllMocPausedFunctions = (owner, userAccount, vendorAccount) => {
   const testFunctions = [
     { name: 'redeemRiskProxVendors', args: [BUCKET_X2, 3, vendorAccount] },
     { name: 'alterRedeemRequestAmount', args: [false, 100] },
@@ -70,12 +70,12 @@ contract('MoC', function([owner, userAccount, vendorAccount]) {
   describe('GIVEN the MoC contract is paused', function() {
     describe('AND a user tries to do mint and reedem operations', function() {
       it('THEN all must revert', async function() {
-        await assertAllMintReedemMocHelperPausedFunctions(userAccount vendorAccount);
+        await assertAllMintReedemMocHelperPausedFunctions(userAccount, vendorAccount);
       });
     });
     describe('AND a user tries to do redeem operations', function() {
       it('THEN redeemRiskProx must revert', async function() {
-        await assertAllMocPausedFunctions(owner, userAccount vendorAccount);
+        await assertAllMocPausedFunctions(owner, userAccount, vendorAccount);
       });
       it('THEN redeemStableTokenRequest must revert', async function() {
         await expectRevert(mocHelper.moc.redeemStableTokenRequest(100), CONTRACT_IS_PAUSED);

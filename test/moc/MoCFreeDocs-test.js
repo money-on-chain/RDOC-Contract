@@ -4,7 +4,7 @@ let mocHelper;
 let toContractBN;
 let BUCKET_X2;
 
-contract.skip('MoC', function([owner, userAccount, otherAccount, vendorAccount]) {
+contract('MoC', function([owner, userAccount, otherAccount, vendorAccount]) {
   before(async function() {
     const accounts = [owner, userAccount, otherAccount, vendorAccount];
     mocHelper = await testHelperBuilder({ owner, accounts, useMock: true });
@@ -399,7 +399,11 @@ contract.skip('MoC', function([owner, userAccount, otherAccount, vendorAccount])
           describe(`GIVEN ${scenario.params.riskProToMint} bitpro is minted and reserveToken price is ${scenario.params.initialReserveTokenPrice} usd`, function() {
             before(async function() {
               await mocHelper.revertState();
-              await mocHelper.mintRiskProAmount(owner, scenario.params.riskProToMint, vendorAccount);
+              await mocHelper.mintRiskProAmount(
+                owner,
+                scenario.params.riskProToMint,
+                vendorAccount
+              );
               await mocHelper.mintStableTokenAmount(
                 userAccount,
                 scenario.params.stableTokensToMint,

@@ -41,7 +41,9 @@ const initializeSettlement = async (vendorAccount, accounts) => {
     stableTokenAccounts.map(account => mocHelper.mintRiskProAmount(account, 10000, vendorAccount))
   );
   await Promise.all(
-    stableTokenAccounts.map(account => mocHelper.mintStableTokenAmount(account, 10000, vendorAccount))
+    stableTokenAccounts.map(account =>
+      mocHelper.mintStableTokenAmount(account, 10000, vendorAccount)
+    )
   );
   await Promise.all(
     stableTokenAccounts.map(account =>

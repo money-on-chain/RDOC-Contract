@@ -6,7 +6,9 @@ let splitterPrecision;
 let toContractBN;
 
 const executeOperations = (user, operations, vendorAccount) => {
-  const promises = operations.map(async op => mocHelper.mintRiskPro(user, op.reserve, vendorAccount));
+  const promises = operations.map(async op =>
+    mocHelper.mintRiskPro(user, op.reserve, vendorAccount)
+  );
 
   return Promise.all(promises);
 };
@@ -15,7 +17,7 @@ const operationsTotal = operations => operations.reduce((last, op) => op.reserve
 
 contract('CommissionSplitter', function([owner, userAccount, commissionsAccount, vendorAccount]) {
   before(async function() {
-    const accounts = [owner, userAccount];
+    const accounts = [owner, userAccount, vendorAccount];
     mocHelper = await testHelperBuilder({ owner, accounts });
     ({ toContractBN, commissionSplitter } = mocHelper);
   });

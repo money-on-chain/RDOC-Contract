@@ -40,7 +40,11 @@ contract('MoC: Protection mode', function([owner, userAccount, otherAccount, ven
     });
     [
       { name: 'mintRiskProVendors', args: [1, vendorAccount], value: 1, event: 'RiskProMint' },
-      { name: 'redeemFreeStableTokenVendors', args: [1, vendorAccount], event: 'FreeStableTokenRedeem' }
+      {
+        name: 'redeemFreeStableTokenVendors',
+        args: [1, vendorAccount],
+        event: 'FreeStableTokenRedeem'
+      }
     ].forEach(fn => {
       describe(`WHEN someone executes ${fn.name}`, function() {
         let tx;

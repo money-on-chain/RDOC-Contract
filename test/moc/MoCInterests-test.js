@@ -162,7 +162,7 @@ contract('MoC : MoCExchange', function([owner, userAccount, vendorAccount]) {
           await mocHelper.mintRiskProxAmount(userAccount, BUCKET_X2, 5, vendorAccount);
           await mocHelper.redeemFreeStableToken({
             userAccount,
-            stableTokenAmount: params.freeStableTokenRedeem.nStableTokens),
+            stableTokenAmount: params.freeStableTokenRedeem.nStableTokens,
             vendorAccount
           });
         });

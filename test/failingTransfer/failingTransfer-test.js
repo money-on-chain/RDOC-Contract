@@ -39,7 +39,11 @@ const shouldRevertBasicFunctions = (userAccount, vendorAccount) => {
   });
   describe('WHEN a blacklisted user tries to redeem StableToken', function() {
     it('THEN the transaction reverts', async function() {
-      const tx = mocHelper.redeemFreeStableToken({ userAccount, stableTokenAmount: 1, vendorAccount });
+      const tx = mocHelper.redeemFreeStableToken({
+        userAccount,
+        stableTokenAmount: 1,
+        vendorAccount
+      });
 
       await expectRevert(tx, WITHDRAWAL_FAILED);
     });
@@ -53,7 +57,7 @@ const shouldRevertBasicFunctions = (userAccount, vendorAccount) => {
   });
 };
 
-const initializeScenario = async userAccount => {
+const initializeScenario = async (userAccount, vendorAccount) => {
   await mocHelper.mintRiskProAmount(userAccount, 100, vendorAccount);
   await mocHelper.mintStableTokenAmount(userAccount, 10000, vendorAccount);
   await mocHelper.mintRiskProxAmount(userAccount, BUCKET_X2, 10, vendorAccount);
@@ -62,7 +66,11 @@ const initializeScenario = async userAccount => {
 /** The goal of this test is to check the behaviour on transfer
  * and transferFrom revert or fail on the RRC20 token
  */
-contract('MoC: Reverting Transfer on basic operations', function([owner, userAccount, vendorAccount]) {
+contract('MoC: Reverting Transfer on basic operations', function([
+  owner,
+  userAccount,
+  vendorAccount
+]) {
   before(async function() {
     const accounts = [owner, userAccount, vendorAccount];
     mocHelper = await testHelperBuilder({ owner, accounts });

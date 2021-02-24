@@ -83,7 +83,7 @@ const baseParams = {
 
   maxMintRiskPro: toContract(10000000 * 10 ** 18),
   stableTmin: toContract(0 * 10 ** 18),
-  stableTmax: toContract(0.0002611578760678 * 10 ** 18)
+  stableTmax: toContract(0.0002611578760678 * 10 ** 18),
   stablePower: toContract(1),
   mocProportion: 0, // toContract(0.01 * 10 ** 18), // mocPrecision
 
@@ -182,7 +182,7 @@ const createContracts = params => async ({ owner, useMock }) => {
     peg,
     maxMintRiskPro,
     stableTmin,
-    stableTmax
+    stableTmax,
     stablePower,
     startStoppable,
     mocProportion = baseParams.mocProportion,
@@ -319,7 +319,7 @@ const createContracts = params => async ({ owner, useMock }) => {
     mocConverter.address,
     mocExchange.address,
     mocInrate.address,
-    mocVendors.address // pass other address as parameter because MoCBurnout is deprecated
+    mocVendors.address, // pass other address as parameter because MoCBurnout is deprecated
     reserveToken.address
   );
   await mocConverter.initialize(mocConnector.address);
@@ -348,7 +348,7 @@ const createContracts = params => async ({ owner, useMock }) => {
   await riskProx.initialize(mocConnector.address, governor.address, c0Cobj, x2Cobj);
   await mocSettlement.initialize(mocConnector.address, governor.address, settlementBlockSpan);
   await governor.initialize(owner);
-  const commissionSplitter.initialize(moc.address, reserveToken.address, owner, mocProportion, governor.address);
+  await commissionSplitter.initialize(moc.address, reserveToken.address, owner, mocProportion, governor.address);
   await upgradeDelegator.initialize(governor.address, proxyAdmin.address);
   await mocVendors.initialize(mocConnector.address, governor.address);
 

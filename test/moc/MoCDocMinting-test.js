@@ -100,7 +100,11 @@ contract('MoC', function([owner, userAccount, vendorAccount]) {
                   this.mocState.getBucketNReserve(BUCKET_C0)
                 ]);
 
-                await mocHelper.mintStableTokenAmount(userAccount, stableTokenAmount, vendorAccount);
+                await mocHelper.mintStableTokenAmount(
+                  userAccount,
+                  stableTokenAmount,
+                  vendorAccount
+                );
                 payAmount = new BN(stableTokenAmount)
                   .mul(mocHelper.MOC_PRECISION)
                   .div(new BN(reservePrice));

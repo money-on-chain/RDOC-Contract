@@ -10,6 +10,7 @@ const isDay = (precision, big, _expected) => {
   return big.gte(expected.mul(precision)) && big.lt(expected.add(ONE).mul(precision));
 };
 
+// TODO: Fix this tests
 contract.skip('MoC', function([owner, userAccount]) {
   const dayBlockSpan = 4 * 60 * 24;
   const twoDays = 2 * dayBlockSpan + 20;

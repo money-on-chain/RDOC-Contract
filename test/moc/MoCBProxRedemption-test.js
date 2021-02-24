@@ -157,7 +157,12 @@ contract('MoC : MoCExchange', function([owner, userAccount, vendorAccount]) {
           ({ params } = await mocHelper.getContractReadyState(s));
           await mocHelper.setReserveTokenPrice(params.reservePrice);
 
-          tx = await mocHelper.redeemBProx(userAccount, BUCKET_X2, s.params.nRiskProx, vendorAccount);
+          tx = await mocHelper.redeemBProx(
+            userAccount,
+            BUCKET_X2,
+            s.params.nRiskProx,
+            vendorAccount
+          );
 
           finalReserveTokenBalance = toContractBN(await mocHelper.getReserveBalance(userAccount));
           c0FinalState = await mocHelper.getBucketState(BUCKET_C0);

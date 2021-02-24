@@ -21,7 +21,7 @@ contract('MoC: Reserves control', function([owner, userAccount, vendorAccount]) 
     await this.mockMoCVendorsChanger.setVendorsToRegister(
       await mocHelper.getVendorToRegisterAsArray(vendorAccount, 0)
     );
-    await this.governor.executeChange(this.mockMoCVendorsChanger.address)
+    await this.governor.executeChange(this.mockMoCVendorsChanger.address);
   });
 
   describe('GIVEN there are RiskPros and StableTokens minted', function() {

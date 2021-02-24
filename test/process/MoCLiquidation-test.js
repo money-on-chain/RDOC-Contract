@@ -63,11 +63,20 @@ contract('MoC: Liquidation', function([
       mocHelper.assertBig(state, 3, 'State should be AboveCobj');
     });
     [
-      { name: 'mintStableTokenVendors', args: [1, vendorAccount], value: 0, event: 'StableTokenMint' },
+      {
+        name: 'mintStableTokenVendors',
+        args: [1, vendorAccount],
+        value: 0,
+        event: 'StableTokenMint'
+      },
       { name: 'mintRiskProVendors', args: [1, vendorAccount], value: 0, event: 'RiskProMint' },
       { name: 'redeemRiskProVendors', args: [1, vendorAccount], event: 'RiskProxRedeem' },
       { name: 'mintRiskProxVendors', args: [BUCKET_X2, 0, vendorAccount], event: 'RiskProxMint' },
-      { name: 'redeemRiskProxVendors', args: [BUCKET_X2, 1, vendorAccount], event: 'RiskProxRedeem' },
+      {
+        name: 'redeemRiskProxVendors',
+        args: [BUCKET_X2, 1, vendorAccount],
+        event: 'RiskProxRedeem'
+      },
       { name: 'evalLiquidation', args: [100] },
       { name: 'runSettlement', args: [100] }
     ].forEach(fn => {

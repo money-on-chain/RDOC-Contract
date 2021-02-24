@@ -125,7 +125,9 @@ contract('MoC: MoCExchange', function([
 
         beforeEach(async function() {
           // Set Reserve price
-          await mocHelper.setReserveTokenPrice(scenario.params.reservePrice * mocHelper.MOC_PRECISION);
+          await mocHelper.setReserveTokenPrice(
+            scenario.params.reservePrice * mocHelper.MOC_PRECISION
+          );
 
           // Set MoC price
           await mocHelper.setMoCPrice(scenario.params.mocPrice * mocHelper.MOC_PRECISION);
@@ -142,7 +144,9 @@ contract('MoC: MoCExchange', function([
 
           const params = {
             account: userAccount,
-            amount: toContractBN(scenario.params.reserveAmount * mocHelper.MOC_PRECISION).toString(),
+            amount: toContractBN(
+              scenario.params.reserveAmount * mocHelper.MOC_PRECISION
+            ).toString(),
             txTypeFeesMOC: txTypeFeesMOC.toString(),
             txTypeFeesReserve: txTypeFeesReserve.toString(),
             vendorAccount: vendorAccount1
