@@ -78,7 +78,7 @@ const baseParams = {
   riskProxPower: toContract(1),
   riskProRate: toContract(0.000047945 * 10 ** 18), // mocPrecision -- weekly 0.0025 / 365 * 7
   emaBlockSpan: toContract(40),
-  //commissionRate: toContract(0 * 10 ** 18), // mocPrecision
+  // commissionRate: toContract(0 * 10 ** 18), // mocPrecision
   peg: toContract(1),
 
   maxMintRiskPro: toContract(10000000 * 10 ** 18),
@@ -292,12 +292,12 @@ const createContracts = params => async ({ owner, useMock }) => {
   const mocStateInitializeParams = {
     connectorAddress: mocConnector.address,
     governor: governor.address,
-    btcPriceProvider: btcPriceProvider.address,
+    priceProvider: priceProvider.address,
     liq, // mocPrecision
     utpdu, // mocPrecision
     maxDiscRate: maxDiscountRate, // mocPrecision
     dayBlockSpan, // no Precision
-    ema: btcPrice,
+    ema: reservePrice,
     smoothFactor: smoothingFactor,
     emaBlockSpan,
     maxMintRiskPro,
@@ -348,7 +348,13 @@ const createContracts = params => async ({ owner, useMock }) => {
   await riskProx.initialize(mocConnector.address, governor.address, c0Cobj, x2Cobj);
   await mocSettlement.initialize(mocConnector.address, governor.address, settlementBlockSpan);
   await governor.initialize(owner);
-  await commissionSplitter.initialize(moc.address, reserveToken.address, owner, mocProportion, governor.address);
+  await commissionSplitter.initialize(
+    moc.address,
+    reserveToken.address,
+    owner,
+    mocProportion,
+    governor.address
+  );
   await upgradeDelegator.initialize(governor.address, proxyAdmin.address);
   await mocVendors.initialize(mocConnector.address, governor.address);
 
@@ -377,11 +383,6 @@ const createContracts = params => async ({ owner, useMock }) => {
   await project.changeProxyAdmin(commissionSplitter.address, proxyAdmin.address);
   await project.changeProxyAdmin(mocVendorsProxy.address, proxyAdmin.address);
 
-  // Contract that reverts when receiving RBTC on fallback function
-  const revertingContract = await RevertingOnSend.new(moc.address, {
-    from: owner
-  });
-
   // Contract for testing MoCVendorsChanger register/unregister vendors functions
   const mocVendorsChangerHarness = await MoCVendorsChangerHarness.new(mocVendors.address, {
     from: owner
@@ -398,7 +399,7 @@ const createContracts = params => async ({ owner, useMock }) => {
     stableToken,
     mocSettlement,
     priceProvider,
-mockMocStateChanger,
+    mockMocStateChanger,
     governor,
     stopper,
     mockMocInrateChanger,
