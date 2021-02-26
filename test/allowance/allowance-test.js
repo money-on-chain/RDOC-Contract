@@ -98,7 +98,7 @@ contract('MoC: MoCExchange', function([owner, userAccount, vendorAccount]) {
           mocHelper.assertBigReserve(allowedBalance, 400, 'Reserves balance is incorrect');
         });
       });
-      describe('AND WHEN he tries to mint DOC for 100 reserve tokens', function() {
+      describe('AND WHEN he tries to mint StableTokens for 100 reserve tokens', function() {
         it('THEN he will mint successfully', async function() {
           await mocHelper.mintStableToken(userAccount, 100, vendorAccount);
           const balances = await mocHelper.getUserBalances(userAccount);

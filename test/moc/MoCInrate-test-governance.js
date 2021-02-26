@@ -167,13 +167,13 @@ contract('MoCInrate Governed', function([owner, account2, vendorAccount]) {
           const commissionRate = await this.mockMocInrateChanger.commissionRates(i);
 
           const newCommisionRateValidTxType = await this.mocInrate.calcCommissionValue(
-            (scenario.rbtcAmount * mocHelper.MOC_PRECISION).toString(),
+            (scenario.reserveAmount * mocHelper.MOC_PRECISION).toString(),
             commissionRate.txType
           );
 
           /* eslint-enable no-await-in-loop */
           // The fee from the commissionRatesArray is already converted to wei
-          const testCommissionValue = scenario.rbtcAmount * commissionRate.fee;
+          const testCommissionValue = scenario.reserveAmount * commissionRate.fee;
 
           mocHelper.assertBig(
             newCommisionRateValidTxType.toString(),
@@ -198,7 +198,7 @@ contract('MoCInrate Governed', function([owner, account2, vendorAccount]) {
         );
         await this.governor.executeChange(this.mockMocInrateChanger.address);
         const newCommissionRate = await this.mocInrate.commissionRatesByTxType(
-          await mocHelper.mocInrate.MINT_BPRO_FEES_RBTC()
+          await mocHelper.mocInrate.MINT_RISKPRO_FEES_RESERVE()
         );
         const expectedValue = '2000000000000000000';
         mocHelper.assertBig(

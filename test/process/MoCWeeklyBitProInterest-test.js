@@ -82,11 +82,11 @@ contract('MoC: RiskPro holder interests payment', function([
           'Weekly RiskPro holders is deferent'
         );
       });
-      it('THEN bitpro blockSpan is correct', async function() {
+      it('THEN RiskPro blockSpan is correct', async function() {
         const riskProBlockSpan = await mocHelper.getRiskProInterestBlockSpan();
         assert(riskProBlockSpan, s.blockSpan, 'RiskPro holders blockSpan is deferent');
       });
-      it('THEN bitpro weekly rate is correct', async function() {
+      it('THEN RiskPro weekly rate is correct', async function() {
         const riskProRate = await mocHelper.getRiskProRate();
         assert(riskProRate, s.riskProHolderRate, 'RiskPro holders rate is deferent');
       });

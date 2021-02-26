@@ -27,7 +27,7 @@ contract('MoC', function([owner, userAccount, otherAccount, vendorAccount]) {
       );
       await this.governor.executeChange(this.mockMoCVendorsChanger.address);
 
-      // This makes doc redemption interests zero
+      // This makes StableToken redemption interests zero
       await this.mocState.setDaysToSettlement(0);
     });
     describe('Redeem free stableTokens locking some of them', function() {
@@ -185,9 +185,9 @@ contract('MoC', function([owner, userAccount, otherAccount, vendorAccount]) {
               });
 
               describe(`AND the user drops ${scenario.params.stableTokensToDrop} stableToken`, function() {
-                let usereserveTokenBalance;
+                let userReserveTokenBalance;
                 let redeemTx;
-                let usedGas;
+
                 beforeEach(async function() {
                   await mocHelper.stableToken.transfer(
                     otherAccount,
@@ -208,28 +208,26 @@ contract('MoC', function([owner, userAccount, otherAccount, vendorAccount]) {
                 });
                 describe(`AND ${scenario.params.stableTokensToRedeem} stableTokens are redeemed`, function() {
                   beforeEach(async function() {
-                    usereserveTokenBalance = await mocHelper.getReserveBalance(userAccount);
+                    userReserveTokenBalance = await mocHelper.getReserveBalance(userAccount);
                     redeemTx = await this.moc.redeemFreeStableToken(
                       toContractBN(scenario.params.stableTokensToRedeem * mocHelper.MOC_PRECISION),
                       {
                         from: userAccount
                       }
                     );
-                    usedGas = toContractBN(await mocHelper.getTxCost(redeemTx));
                   });
                   it(`THEN the redeemers ReserveTokens balance is increased by redeeming only ${scenario.expect.stableTokensToRedeem} stableTokens`, async function() {
                     const currentBalance = toContractBN(
                       await mocHelper.getReserveBalance(userAccount)
                     );
                     mocHelper.assertBig(
-                      usereserveTokenBalance,
+                      userReserveTokenBalance,
                       currentBalance
                         .sub(
                           mocHelper.RESERVE_PRECISION.mul(
                             toContractBN(scenario.expect.stableTokensToRedeem)
                           ).div(toContractBN(scenario.params.initialReserveTokenPrice))
-                        )
-                        .add(usedGas),
+                        ),
                       'incorrect amount of ReserveTokens sent to user'
                     );
                   });
@@ -393,10 +391,10 @@ contract('MoC', function([owner, userAccount, otherAccount, vendorAccount]) {
 
       scenarios.forEach(async scenario => {
         describe(scenario.description, function() {
-          let usereserveTokenBalance;
+          let userReserveTokenBalance;
           let redeemTx;
-          let usedGas;
-          describe(`GIVEN ${scenario.params.riskProToMint} bitpro is minted and reserveToken price is ${scenario.params.initialReserveTokenPrice} usd`, function() {
+
+          describe(`GIVEN ${scenario.params.riskProToMint} RiskPro is minted and reserveToken price is ${scenario.params.initialReserveTokenPrice} usd`, function() {
             before(async function() {
               await mocHelper.revertState();
               await mocHelper.mintRiskProAmount(
@@ -449,7 +447,7 @@ contract('MoC', function([owner, userAccount, otherAccount, vendorAccount]) {
               });
               describe(`AND ${scenario.params.stableTokensToRedeem} stableTokens are redeemed`, function() {
                 beforeEach(async function() {
-                  usereserveTokenBalance = toContractBN(
+                  userReserveTokenBalance = toContractBN(
                     await mocHelper.getReserveBalance(userAccount)
                   );
                   redeemTx = await this.moc.redeemFreeStableToken(
@@ -460,21 +458,19 @@ contract('MoC', function([owner, userAccount, otherAccount, vendorAccount]) {
                       from: userAccount
                     }
                   );
-                  usedGas = await mocHelper.getTxCost(redeemTx);
                 });
                 it(`THEN the redeemers ReserveTokens balance is increased by redeeming only ${scenario.expect.stableTokensToRedeem} stableTokens`, async function() {
                   const currentBalance = toContractBN(
                     await mocHelper.getReserveBalance(userAccount)
                   );
                   mocHelper.assertBig(
-                    usereserveTokenBalance,
+                    userReserveTokenBalance,
                     currentBalance
                       .sub(
                         mocHelper.RESERVE_PRECISION.mul(
                           toContractBN(scenario.expect.stableTokensToRedeem)
                         ).div(toContractBN(scenario.params.initialReserveTokenPrice))
-                      )
-                      .add(usedGas),
+                      ),
                     'incorrect amount of ReserveTokens sent to user',
                     { significantDigits: -14 }
                   );

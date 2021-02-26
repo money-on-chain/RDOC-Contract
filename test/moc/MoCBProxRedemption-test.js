@@ -157,7 +157,7 @@ contract('MoC : MoCExchange', function([owner, userAccount, vendorAccount]) {
           ({ params } = await mocHelper.getContractReadyState(s));
           await mocHelper.setReserveTokenPrice(params.reservePrice);
 
-          tx = await mocHelper.redeemBProx(
+          tx = await mocHelper.redeemRiskProx(
             userAccount,
             BUCKET_X2,
             s.params.nRiskProx,

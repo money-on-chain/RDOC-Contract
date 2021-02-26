@@ -132,7 +132,7 @@ contract('MoC: Delever X', function([owner, blacklisted, vendorAccount, ...allAc
         // Verify that the positions are placed
         await Promise.all(
           riskProx2Positions.map(async (position, i) =>
-            mocHelper.assertBigRBTC(
+            mocHelper.assertBigReserve(
               await mocHelper.getRiskProxBalance(BUCKET_X2, accounts[i + 1]),
               position
             )
@@ -150,7 +150,7 @@ contract('MoC: Delever X', function([owner, blacklisted, vendorAccount, ...allAc
         it('THEN all users RiskProx are burnt', async function() {
           await Promise.all(
             riskProx2Positions.map(async (position, i) => {
-              mocHelper.assertBigRBTC(
+              mocHelper.assertBigReserve(
                 await mocHelper.getRiskProxBalance(BUCKET_X2, accounts[i + 1]),
                 0
               );

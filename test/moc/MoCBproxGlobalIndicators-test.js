@@ -60,7 +60,7 @@ contract('MoC : RiskProx operations does not modify global indicators', function
       [1, 3, 5].forEach(redValue => {
         describe(`AND user redeems ${redValue}`, function() {
           beforeEach(async function() {
-            await mocHelper.redeemBProx(userAccount, BUCKET_X2, redValue, vendorAccount);
+            await mocHelper.redeemRiskProx(userAccount, BUCKET_X2, redValue, vendorAccount);
           });
           it('THEN global indicators should not change', async function() {
             const finalCoverage = await this.mocState.globalCoverage();

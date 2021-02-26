@@ -52,7 +52,7 @@ contract('MoCBucketContainer', function([owner, account2, vendorAccount]) {
       });
       it('THEN redeemRiskProx must revert', async function() {
         await expectRevert(
-          mocHelper.redeemBProx(account2, bucketC0, 0.5, vendorAccount),
+          mocHelper.redeemRiskProx(account2, bucketC0, 0.5, vendorAccount),
           NOT_BUCKET_BASE
         );
       });
@@ -69,7 +69,7 @@ contract('MoCBucketContainer', function([owner, account2, vendorAccount]) {
       });
       it('THEN redeemRiskProx must revert', async function() {
         await expectRevert(
-          mocHelper.redeemBProx(account2, bucketH8, 0.5, vendorAccount),
+          mocHelper.redeemRiskProx(account2, bucketH8, 0.5, vendorAccount),
           BUCKET_NOT_AVAILABLE
         );
       });

@@ -4,7 +4,7 @@ const { executeBatched } = require('../testHelpers/networkHelper');
 let mocHelper;
 let toContractBN;
 let BUCKET_X2;
-const BTCX_OWNERS_QUANTITY = 9;
+const RISKPROX_OWNERS_QUANTITY = 9;
 
 const initializeSettlement = async (owner, vendorAccount, riskProxOwners) => {
   mocHelper.revertState();
@@ -25,7 +25,7 @@ const initializeSettlement = async (owner, vendorAccount, riskProxOwners) => {
 };
 
 contract('MoC: Gas limit on settlement', function([owner, vendorAccount, ...riskProxOwners]) {
-  const riskProxAccounts = riskProxOwners.slice(0, BTCX_OWNERS_QUANTITY);
+  const riskProxAccounts = riskProxOwners.slice(0, RISKPROX_OWNERS_QUANTITY);
   before(async function() {
     mocHelper = await testHelperBuilder({
       owner,
@@ -45,7 +45,7 @@ contract('MoC: Gas limit on settlement', function([owner, vendorAccount, ...risk
     await this.governor.executeChange(this.mockMoCVendorsChanger.address);
   });
 
-  describe(`GIVEN there are 100 redeemRequests and ${BTCX_OWNERS_QUANTITY} riskProx owners`, function() {
+  describe(`GIVEN there are 100 redeemRequests and ${RISKPROX_OWNERS_QUANTITY} riskProx owners`, function() {
     before(async function() {
       await initializeSettlement(owner, vendorAccount, riskProxAccounts);
     });

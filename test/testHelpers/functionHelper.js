@@ -157,7 +157,7 @@ const redeemRiskProx = moc => async (from, bucket, amount, vendorAccount = zeroA
 };
 
 const reserveTokenNeededToMintRiskPro = (moc, mocState) => async riskProAmount => {
-  // TODO: manage max Bitpro with discount
+  // TODO: manage max RiskPro with discount
   const mocPrecision = await moc.getMocPrecision();
   const riskProTecPrice = await mocState.riskProTecPrice();
   // Check discount rate

@@ -74,7 +74,7 @@ contract.skip('MoC: Gas limit on deleveraging', function([owner, vendorAccount, 
         );
       });
     });
-    describe('WHEN BTC price changes to 5000 USD', function() {
+    describe('WHEN ReserveToken price changes to 5000 USD', function() {
       beforeEach(async function() {
         await mocHelper.setReserveTokenPrice(5000 * mocHelper.MOC_PRECISION);
       });
@@ -128,7 +128,7 @@ contract.skip('MoC: Gas limit on deleveraging', function([owner, vendorAccount, 
       });
     });
 
-    describe('WHEN BTC price changes to 2500', function() {
+    describe('WHEN ReserveToken price changes to 2500', function() {
       beforeEach(async function() {
         await mocHelper.setReserveTokenPrice(2500 * mocHelper.MOC_PRECISION);
       });
