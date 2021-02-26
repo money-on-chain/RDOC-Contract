@@ -16,6 +16,7 @@ module.exports = async (deployer, currentNetwork, [owner]) => {
     owner,
     deployer
   );
+
   if (utils.isDevelopment(currentNetwork)) await createInstances(MoCSettlementMock, MoCStateMock);
   else await createInstances(MoCSettlement, MoCState);
   console.log(`Initialize contracts - network: ${currentNetwork}`);
