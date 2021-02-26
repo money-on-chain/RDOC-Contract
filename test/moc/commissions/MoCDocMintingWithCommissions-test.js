@@ -9,7 +9,8 @@ const NOT_ENOUGH_FUNDS_ERROR = "sender doesn't have enough funds to send tx";
 
 contract('MoC', function([owner, userAccount, commissionsAccount, vendorAccount, otherAddress]) {
   before(async function() {
-    mocHelper = await testHelperBuilder({ owner });
+    const accounts = [owner, userAccount, commissionsAccount, vendorAccount, otherAddress];
+    mocHelper = await testHelperBuilder({ owner, accounts });
     ({ toContractBN } = mocHelper);
     this.moc = mocHelper.moc;
     this.mockMocInrateChanger = mocHelper.mockMocInrateChanger;

@@ -22,7 +22,19 @@ contract('MoC: MoCVendors', function([
   vendorAccount5
 ]) {
   before(async function() {
-    mocHelper = await testHelperBuilder({ owner });
+    const accounts = [
+      owner,
+      userAccount,
+      commissionsAccount,
+      unauthorizedAccount,
+      inexistentVendorAccount,
+      vendorAccount1,
+      vendorAccount2,
+      vendorAccount3,
+      vendorAccount4,
+      vendorAccount5
+    ];
+    mocHelper = await testHelperBuilder({ owner, accounts });
     ({ toContractBN } = mocHelper);
     this.moc = mocHelper.moc;
     this.governor = mocHelper.governor;

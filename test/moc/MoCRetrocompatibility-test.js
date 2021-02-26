@@ -7,13 +7,13 @@ let BUCKET_X2;
 
 contract('MoC: Retrocompatibility', function([owner, userAccount]) {
   before(async function() {
-    mocHelper = await testHelperBuilder({ owner });
+    mocHelper = await testHelperBuilder({ owner, accounts: [owner, userAccount] });
     ({ BUCKET_X2 } = mocHelper);
     this.moc = mocHelper.moc;
     this.mockMocInrateChanger = mocHelper.mockMocInrateChanger;
     this.governor = mocHelper.governor;
     this.mocState = mocHelper.mocState;
-    this.reservePrice = await this.mocState.getBitcoinPrice();
+    this.reservePrice = await mocHelper.getReserveTokenPrice();
     this.riskProx2Price = await this.mocState.bucketRiskProTecPrice(BUCKET_X2);
   });
 
