@@ -33,7 +33,7 @@ contract('MoC', function([owner, vendorAccount]) {
       nStableTokens: 0,
       reservePrice: { from: 10000, to: 10000 },
       nStableTokenReserveAmount: 0,
-      riskProBtcAmount: 0
+      riskProReserveTokenAmount: 0
     };
 
     const states = [

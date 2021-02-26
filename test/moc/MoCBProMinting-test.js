@@ -304,20 +304,20 @@ contract('MoC: MoCExchange', function([owner, userAccount, vendorAccount]) {
     });
   });
 
-  describe('BPro tec price', function() {
-    describe('GIVEN the user have 18 BPro and 80000 DOCs and Bitcoin price falls to 2000 and liquidation is not enabled', function() {
+  describe('RiskPro tec price', function() {
+    describe('GIVEN the user have 18 RiskPro and 80000 StableTokens and ReserveToken price falls to 2000 and liquidation is not enabled', function() {
       beforeEach(async function() {
         await mocHelper.mintRiskProAmount(userAccount, 18, vendorAccount);
         await mocHelper.mintStableAmount(userAccount, 80000, vendorAccount);
-        // Move price to change BProx price and make it different
-        // from BPro price
-        const btcPrice = toContractBN(2000 * mocHelper.MOC_PRECISION);
-        await mocHelper.setBitcoinPrice(btcPrice);
+        // Move price to change RiskProx price and make it different
+        // from RiskPro price
+        const reserveTokenPrice = toContractBN(2000 * mocHelper.MOC_PRECISION);
+        await mocHelper.setReserveTokenPrice(reserveTokenPrice);
       });
-      it('THEN the BProx price in RBTC should be 0 RBTC', async function() {
-        const bproTecPrice = await this.mocState.bproTecPrice();
+      it('THEN the RiskProx price in ReserveToken should be 0 ReserveToken', async function() {
+        const riskProTecPrice = await this.mocState.riskProTecPrice();
 
-        mocHelper.assertBigRBTC(bproTecPrice, 0, 'BPro tec price price is incorrect');
+        mocHelper.assertBigReserve(riskProTecPrice, 0, 'RiskPro tec price price is incorrect');
       });
     });
   });

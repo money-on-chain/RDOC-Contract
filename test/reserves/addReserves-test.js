@@ -30,12 +30,12 @@ contract('MoC: Reserves control', function([owner, userAccount, vendorAccount]) 
       await mocHelper.mintStableToken(owner, 10000, vendorAccount);
     });
 
-    it('THEN there are no Docs or BitPro available', async function() {
+    it('THEN there are no StableTokens or RiskPro available', async function() {
       const maxStableToken = await mocHelper.maxStableToken();
       const maxRiskPro = await mocHelper.maxRiskPro();
 
-      mocHelper.assertBigReserve(maxStableToken, 0, 'Max doc to mint is not zero.');
-      mocHelper.assertBigReserve(maxRiskPro, 0, 'Max Bpro to redeem is not zero.');
+      mocHelper.assertBigReserve(maxStableToken, 0, 'Max StableToken to mint is not zero.');
+      mocHelper.assertBigReserve(maxRiskPro, 0, 'Max RiskPro to redeem is not zero.');
     });
 
     describe('WHEN a user adds 100 tokens to the reserve', function() {
@@ -46,12 +46,12 @@ contract('MoC: Reserves control', function([owner, userAccount, vendorAccount]) 
       it('THEN there are StableTokens available to mint', async function() {
         const maxStableToken = await mocHelper.maxStableToken();
 
-        assert(maxStableToken > 0, 'There are no Docs available to mint');
+        assert(maxStableToken > 0, 'There are no StableTokens available to mint');
       });
-      it('THEN there are BPros available to redeem', async function() {
+      it('THEN there are RiskPros available to redeem', async function() {
         const maxRiskPro = await mocHelper.maxRiskPro();
 
-        assert(maxRiskPro > 0, 'There are no BPros available to mint');
+        assert(maxRiskPro > 0, 'There are no RiskPros available to mint');
       });
     });
   });
@@ -82,10 +82,10 @@ contract('MoC: Reserves control', function([owner, userAccount, vendorAccount]) 
 
         mocHelper.assertBigReserve(x2State.nReserve, 0, 'Bucket C0 reserves is incorrect');
       });
-      it('AND there are Docs available to mint', async function() {
+      it('AND there are StableTokens available to mint', async function() {
         const maxStableToken = await mocHelper.maxStableToken();
 
-        assert(maxStableToken > 0, 'There are no Docs available to mint');
+        assert(maxStableToken > 0, 'There are no StableTokens available to mint');
       });
     });
   });

@@ -387,10 +387,10 @@ contract('MoC', function([owner, userAccount, blacklisted, vendorAccount, ...all
           });
         });
         describe('WHEN he cancels 400', function() {
-          it('THEN he redeem 100 DOCs', alterExecAssert(400, 900));
+          it('THEN he redeem 100 StableTokens', alterExecAssert(400, 900));
         });
         describe('WHEN he cancels 10000 (more than what he has)', function() {
-          it('THEN does not redeem any DOCs', alterExecAssert(10000, 1000));
+          it('THEN does not redeem any StableTokens', alterExecAssert(10000, 1000));
           it('AND RedeemRequestAlter change delta is just 500', async function() {
             // Assert RedeemRequestAlter Event
             const expect = { redeemer: from, isAddition: false };

@@ -41,7 +41,7 @@ contract('MoC: MoCVendors', function([
         params: {
           account: vendorAccount1,
           markup: 0.01,
-          staking: 1, // (btcPrice * (mintAmount * markup) / mocPrice)
+          staking: 1, // (reserveTokenPrice * (mintAmount * markup) / mocPrice)
           mocAmount: 10000,
           mintAmount: 10,
           addStakeMessage:
@@ -52,7 +52,7 @@ contract('MoC: MoCVendors', function([
         expect: {
           totalPaidInMoC: 0.1,
           paidMoC: 0,
-          paidRBTC: 0.1,
+          paidReserveToken: 0.1,
           staking: 1
         }
       },
@@ -71,7 +71,7 @@ contract('MoC: MoCVendors', function([
         expect: {
           totalPaidInMoC: 0,
           paidMoC: 0,
-          paidRBTC: 0,
+          paidReserveToken: 0,
           staking: 0.5
         }
       },
@@ -89,7 +89,7 @@ contract('MoC: MoCVendors', function([
         expect: {
           totalPaidInMoC: 0,
           paidMoC: 0,
-          paidRBTC: 0,
+          paidReserveToken: 0,
           staking: 0
         }
       }
@@ -160,7 +160,7 @@ contract('MoC: MoCVendors', function([
               vendorStakeAddedEvent.account === scenario.params.account,
               'Vendor account is incorrect'
             );
-            mocHelper.assertBigRBTC(
+            mocHelper.assertBigReserve(
               vendorStakeAddedEvent.staking,
               scenario.expect.staking,
               'Should increase by staking'
@@ -180,9 +180,9 @@ contract('MoC: MoCVendors', function([
           }
         }
       );
-      it(`WHEN a user mints ${scenario.params.mintAmount} BPRO THEN the vendor receives his corresponding fee`, async function() {
+      it(`WHEN a user mints ${scenario.params.mintAmount} RISKPRO THEN the vendor receives his corresponding fee`, async function() {
         // Make a transaction so that the vendor has something to remove from staking
-        await mocHelper.mintBProAmount(
+        await mocHelper.mintRiskProAmount(
           userAccount,
           scenario.params.mintAmount,
           scenario.params.account
@@ -190,15 +190,15 @@ contract('MoC: MoCVendors', function([
 
         const totalPaidInMoC = await this.mocVendors.getTotalPaidInMoC(scenario.params.account);
         const paidMoC = await this.mocVendors.getPaidMoC(scenario.params.account);
-        const paidRBTC = await this.mocVendors.getPaidRBTC(scenario.params.account);
+        const paidReserveToken = await this.mocVendors.getpaidReserveToken(scenario.params.account);
 
-        mocHelper.assertBigRBTC(
+        mocHelper.assertBigReserve(
           totalPaidInMoC,
           scenario.expect.totalPaidInMoC,
           'totalPaidInMoC is incorrect'
         );
-        mocHelper.assertBigRBTC(paidMoC, scenario.expect.paidMoC, 'paidMoC is incorrect');
-        mocHelper.assertBigRBTC(paidRBTC, scenario.expect.paidRBTC, 'paidRBTC is incorrect');
+        mocHelper.assertBigReserve(paidMoC, scenario.expect.paidMoC, 'paidMoC is incorrect');
+        mocHelper.assertBigReserve(paidReserveToken, scenario.expect.paidReserveToken, 'paidReserveToken is incorrect');
       });
       it('WHEN retrieving vendor from getters, THEN it matches the information from mapping', async function() {
         vendorInMapping = await this.mocVendors.vendors(scenario.params.account);
@@ -208,7 +208,7 @@ contract('MoC: MoCVendors', function([
         const totalPaidInMoC = await this.mocVendors.getTotalPaidInMoC(scenario.params.account);
         const staking = await this.mocVendors.getStaking(scenario.params.account);
         const paidMoC = await this.mocVendors.getPaidMoC(scenario.params.account);
-        const paidRBTC = await this.mocVendors.getPaidRBTC(scenario.params.account);
+        const paidReserveToken = await this.mocVendors.getpaidReserveToken(scenario.params.account);
 
         assert(vendorInMapping.isActive === isActive, 'isActive is incorrect');
         mocHelper.assertBig(vendorInMapping.markup, markup, 'markup is incorrect');
@@ -219,7 +219,7 @@ contract('MoC: MoCVendors', function([
         );
         mocHelper.assertBig(vendorInMapping.staking, staking, 'staking is incorrect');
         mocHelper.assertBig(vendorInMapping.paidMoC, paidMoC, 'paidMoC is incorrect');
-        mocHelper.assertBig(vendorInMapping.paidRBTC, paidRBTC, 'paidRBTC is incorrect');
+        mocHelper.assertBig(vendorInMapping.paidReserveToken, paidReserveToken, 'paidReserveToken is incorrect');
       });
       it(
         scenario.params.removeStakeMessage.replace('$STAKING$', scenario.params.staking),
@@ -240,7 +240,7 @@ contract('MoC: MoCVendors', function([
               vendorStakeRemovedEvent.account === scenario.params.account,
               'Vendor account is incorrect'
             );
-            mocHelper.assertBigRBTC(
+            mocHelper.assertBigReserve(
               vendorStakeRemovedEvent.staking,
               scenario.expect.staking,
               'Should decrease by staking'
@@ -510,12 +510,12 @@ contract('MoC: MoCVendors', function([
           from: vendorAccount5
         });
 
-        // Mint BPRO
-        await mocHelper.mintBProAmount(
+        // Mint RISKPRO
+        await mocHelper.mintRiskProAmount(
           userAccount,
           1000,
           vendorAccount5,
-          await mocHelper.mocInrate.MINT_BPRO_FEES_RBTC()
+          await mocHelper.mocInrate.MINT_RISKPRO_FEES_RESERVE()
         );
 
         // Enabling Settlement
@@ -551,7 +551,7 @@ contract('MoC: MoCVendors', function([
         const [vendorUpdatedEvent] = await mocHelper.findEvents(updateVendorTx, 'VendorUpdated');
 
         assert(vendorUpdatedEvent, 'Event was not emitted');
-        mocHelper.assertBigRBTC(
+        mocHelper.assertBigReserve(
           vendorUpdatedEvent.markup,
           newMarkup,
           'Vendor new markup is incorrect'

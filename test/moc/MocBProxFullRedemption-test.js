@@ -145,7 +145,7 @@ contract('MoC: RedeemRiskProx', function([owner, vendorAccount, ...accounts]) {
                 await mocHelper.setReserveTokenPrice(user.reservePrice * mocHelper.MOC_PRECISION);
               }
 
-              await mocHelper.redeemBProx(
+              await mocHelper.redeemRiskProx(
                 accounts[index + 1],
                 BUCKET_X2,
                 userRiskProxBalance,

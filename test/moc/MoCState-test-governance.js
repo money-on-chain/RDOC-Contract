@@ -10,7 +10,7 @@ const scenario = {
   riskProMaxDiscountRate: 250,
   emaCalculationBlockSpan: 20,
   smoothingFactor: 2,
-  maxMintBPro: 2,
+  maxMintRiskPro: 2,
   liquidationEnabled: true,
   protected: 2
 };
@@ -357,27 +357,27 @@ contract('MoCState Governed', function([owner, account2]) {
       });
     });
 
-    describe('GIVEN the maxMintBPro value', function() {
-      it(`THEN an unauthorized account ${account2} tries to change maxMintBPro to ${scenario.maxMintBPro}`, async function() {
+    describe('GIVEN the maxMintRiskPro value', function() {
+      it(`THEN an unauthorized account ${account2} tries to change maxMintRiskPro to ${scenario.maxMintRiskPro}`, async function() {
         try {
-          await this.mocState.setMaxMintBPro(scenario.maxMintBPro, { from: account2 });
+          await this.mocState.setmaxMintRiskPro(scenario.maxMintRiskPro, { from: account2 });
         } catch (err) {
           assert(
             NOT_AUTORIZED_CHANGER === err.reason,
-            `${account2} Should not be authorized to set maxMintBPro`
+            `${account2} Should not be authorized to set maxMintRiskPro`
           );
         }
       });
-      it(`THEN an authorized contract tries to change maxMintBPro to ${scenario.maxMintBPro}`, async function() {
-        const oldMaxMintBPro = await this.mocState.getMaxMintBPro();
-        assert(oldMaxMintBPro > 0, 'maxMintBPro should be greater than 0');
-        await this.mockMocStateChanger.setMaxMintBPro(scenario.maxMintBPro);
+      it(`THEN an authorized contract tries to change maxMintRiskPro to ${scenario.maxMintRiskPro}`, async function() {
+        const oldmaxMintRiskPro = await this.mocState.getmaxMintRiskPro();
+        assert(oldmaxMintRiskPro > 0, 'maxMintRiskPro should be greater than 0');
+        await this.mockMocStateChanger.setmaxMintRiskPro(scenario.maxMintRiskPro);
         await this.governor.executeChange(this.mockMocStateChanger.address);
-        const newMaxMintBPro = await this.mocState.getMaxMintBPro();
+        const newmaxMintRiskPro = await this.mocState.getmaxMintRiskPro();
         mocHelper.assertBig(
-          newMaxMintBPro,
-          scenario.maxMintBPro,
-          `maxMintBPro should be ${scenario.maxMintBPro}`
+          newmaxMintRiskPro,
+          scenario.maxMintRiskPro,
+          `maxMintRiskPro should be ${scenario.maxMintRiskPro}`
         );
       });
     });

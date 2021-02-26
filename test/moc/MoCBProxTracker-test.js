@@ -58,7 +58,7 @@ contract('MoCRiskProxManager: RiskProx Address tracking ', function([
       });
       describe('WHEN account 1 liquidates his entire position', function() {
         beforeEach(async function() {
-          await mocHelper.redeemBProx(account1, BUCKET_X2, 1, vendorAccount);
+          await mocHelper.redeemRiskProx(account1, BUCKET_X2, 1, vendorAccount);
         });
         it('THEN tracker shrinks', async function() {
           const activeAddress = await this.riskProx.getActiveAddresses(BUCKET_X2);

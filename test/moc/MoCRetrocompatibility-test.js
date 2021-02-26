@@ -30,14 +30,14 @@ contract('MoC: Retrocompatibility', function([owner, userAccount]) {
     // await mocHelper.governor.executeChange(mocHelper.mockMocInrateChanger.address);
   });
 
-  describe('GIVEN since the user wants to mint and redeem BPro with the retrocompatible functions', function() {
-    it('WHEN a user tries to mint BPros, THEN operation is successful', async function() {
+  describe('GIVEN since the user wants to mint and redeem RiskPro with the retrocompatible functions', function() {
+    it('WHEN a user tries to mint RiskPros, THEN operation is successful', async function() {
       const mintAmount = 100;
 
       // Mint
       await mocHelper.mintRiskPro(userAccount, mintAmount);
       const balance = await mocHelper.getRiskProBalance(userAccount);
-      mocHelper.assertBigRBTC(
+      mocHelper.assertBigReserve(
         balance,
         mintAmount,
         'userAccount RiskPro balance was not mintAmount'
@@ -49,12 +49,12 @@ contract('MoC: Retrocompatibility', function([owner, userAccount]) {
       // Redeem
       await mocHelper.redeemRiskPro(userAccount, redeemAmount);
       const balance = await mocHelper.getRiskProBalance(userAccount);
-      mocHelper.assertBigRBTC(balance, 0, 'userAccount Risk balance was not 0');
+      mocHelper.assertBigReserve(balance, 0, 'userAccount Risk balance was not 0');
     });
   });
   describe('GIVEN since the user wants to mint and redeem StableToken with the retrocompatible functions', function() {
     it('WHEN a user tries to mint StableToken, THEN operation is successful', async function() {
-      // Mint BPros to be able to mint StableToken
+      // Mint RiskPros to be able to mint StableToken
       await mocHelper.mintRiskPro(userAccount, 100);
 
       const mintAmount = 1;
@@ -65,7 +65,7 @@ contract('MoC: Retrocompatibility', function([owner, userAccount]) {
       const mintAmountInStableToken = new BN(mintAmount)
         .mul(this.reservePrice)
         .div(mocHelper.RESERVE_PRECISION);
-      mocHelper.assertBigRBTC(
+      mocHelper.assertBigReserve(
         balance,
         mintAmountInStableToken,
         'userAccount StableToken balance was not mintAmountInStableToken'
@@ -77,17 +77,17 @@ contract('MoC: Retrocompatibility', function([owner, userAccount]) {
       // Redeem
       await mocHelper.redeemFreeStableToken({
         userAccount,
-        docAmount: redeemAmount
+        stableTokenAmount: redeemAmount
       });
       const balance = await mocHelper.getStableTokenBalance(userAccount);
-      mocHelper.assertBigRBTC(balance, 0, 'userAccount StableToken balance was not 0');
+      mocHelper.assertBigReserve(balance, 0, 'userAccount StableToken balance was not 0');
     });
   });
   describe('GIVEN since the user wants to mint and redeem RiskProx with the retrocompatible functions', function() {
     it('WHEN a user tries to mint RiskProxs, THEN operation is successful', async function() {
-      // Mint RiskPros to be able to mint DoC
+      // Mint RiskPros to be able to mint StableToken
       await mocHelper.mintRiskPro(userAccount, 100);
-      // Mint StableToken to be able to mint BTCX
+      // Mint StableToken to be able to mint RiskProx
       await mocHelper.mintStableToken(userAccount, 100);
 
       const mintAmount = 1;
@@ -95,13 +95,13 @@ contract('MoC: Retrocompatibility', function([owner, userAccount]) {
       // Mint
       await mocHelper.mintRiskProx(userAccount, BUCKET_X2, mintAmount);
       const balance = await mocHelper.getRiskProxBalance(BUCKET_X2, userAccount);
-      const mintAmountInBTCX = new BN(mintAmount)
+      const mintAmountInRiskProx = new BN(mintAmount)
         .mul(mocHelper.MOC_PRECISION)
         .div(this.riskProx2Price);
-      mocHelper.assertBigRBTC(
+      mocHelper.assertBigReserve(
         balance,
-        mintAmountInBTCX,
-        'userAccount RiskProx balance was not mintAmountInBTCX'
+        mintAmountInRiskProx,
+        'userAccount RiskProx balance was not mintAmountInRiskProx'
       );
     });
     it('WHEN a user tries to redeem RiskProxs, THEN operation is successful', async function() {
@@ -110,7 +110,7 @@ contract('MoC: Retrocompatibility', function([owner, userAccount]) {
       // Redeem
       await mocHelper.redeemRiskProx(userAccount, BUCKET_X2, redeemAmount);
       const balance = await mocHelper.getRiskProxBalance(BUCKET_X2, userAccount);
-      mocHelper.assertBigRBTC(balance, 0, 'userAccount RiskProx balance was not 0');
+      mocHelper.assertBigReserve(balance, 0, 'userAccount RiskProx balance was not 0');
     });
   });
 });

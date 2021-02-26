@@ -14,7 +14,7 @@ contract('MoCBucketContainer', function([owner]) {
     this.mocState = mocHelper.mocState;
     this.governor = mocHelper.governor;
     this.moc = mocHelper.moc;
-    this.bprox = mocHelper.bprox;
+    this.riskProx = mocHelper.riskProx;
     this.mockMoCBucketContainerChanger = mocHelper.mockMoCBucketContainerChanger;
     ({ BUCKET_C0, BUCKET_X2 } = mocHelper);
   });
