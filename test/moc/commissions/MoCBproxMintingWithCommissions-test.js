@@ -64,12 +64,12 @@ contract('MoC : MoCExchange', function([owner, userAccount, commissionsAccount])
       scenarios.forEach(async s => {
         describe(`WHEN a user sends ReserveTokens to mint ${s.params.nRiskProx} RiskProx`, function() {
           let initialCommissionAccountBalance;
-          let prevUsereserveTokenBalance;
+          let prevUserReserveTokenBalance;
           beforeEach(async function() {
             initialCommissionAccountBalance = toContractBN(
               await mocHelper.getReserveBalance(commissionsAccount)
             );
-            prevUsereserveTokenBalance = toContractBN(await mocHelper.getReserveBalance(owner));
+            prevUserReserveTokenBalance = toContractBN(await mocHelper.getReserveBalance(owner));
             initialCommissionAccountBalance = toContractBN(
               await mocHelper.getReserveBalance(commissionsAccount)
             );
@@ -86,7 +86,7 @@ contract('MoC : MoCExchange', function([owner, userAccount, commissionsAccount])
           });
           it(`THEN the user reserveToken balance has decrease by ${s.expect.nReserveToken} ReserveTokens by Mint + ${s.expect.commission.nReserveToken} ReserveTokens by commissions`, async function() {
             const usereserveTokenBalance = toContractBN(await mocHelper.getReserveBalance(owner));
-            const diff = prevUsereserveTokenBalance.sub(usereserveTokenBalance);
+            const diff = prevUserReserveTokenBalance.sub(usereserveTokenBalance);
             mocHelper.assertBigReserve(
               diff,
               s.expect.totalCostOnReserveToken,

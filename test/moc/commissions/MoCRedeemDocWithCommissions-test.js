@@ -20,7 +20,7 @@ contract('MoC: StableToken Redeem on Settlement with commissions', function([
   });
   describe('GIVEN there are commisions of 0.002 set and there are 3 users with stableToken redeem requests', function() {
     let prevCommissionsAccountReserveTokenBalance;
-    let prevUsereserveTokenBalance;
+    let prevUserReserveTokenBalance;
 
     before(async function() {
       // set commissions rate
@@ -45,7 +45,7 @@ contract('MoC: StableToken Redeem on Settlement with commissions', function([
         await mocHelper.getReserveBalance(commissionsAccount)
       );
 
-      prevUsereserveTokenBalance = toContractBN(await mocHelper.getReserveBalance(accounts[0]));
+      prevUserReserveTokenBalance = toContractBN(await mocHelper.getReserveBalance(accounts[0]));
     });
     describe('WHEN the settlement is executed', function() {
       before(async function() {
@@ -67,7 +67,7 @@ contract('MoC: StableToken Redeem on Settlement with commissions', function([
       });
       it('THEN user account increase balance by 0.000998 ReserveTokens ', async function() {
         const usereserveTokenBalance = toContractBN(await mocHelper.getReserveBalance(accounts[0]));
-        const diff = usereserveTokenBalance.sub(prevUsereserveTokenBalance);
+        const diff = usereserveTokenBalance.sub(prevUserReserveTokenBalance);
         mocHelper.assertBigReserve(
           diff,
           '0.000998',
