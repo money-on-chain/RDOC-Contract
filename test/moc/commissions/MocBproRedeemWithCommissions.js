@@ -162,18 +162,28 @@ contract('MoC: MoCExchange', function([
           prevCommissionAccountBalance = toContractBN(
             await mocHelper.getReserveBalance(commissionsAccount)
           );
-          prevUserReserveTokenBalance = toContractBN(await mocHelper.getReserveBalance(userAccount));
+          prevUserReserveTokenBalance = toContractBN(
+            await mocHelper.getReserveBalance(userAccount)
+          );
           prevUserMoCBalance = await mocHelper.getMoCBalance(userAccount);
           prevCommissionsAccountMoCBalance = await mocHelper.getMoCBalance(commissionsAccount);
-          prevvendorAccountReserveTokenBalance = toContractBN(await mocHelper.getReserveBalance(vendorAccount));
+          prevvendorAccountReserveTokenBalance = toContractBN(
+            await mocHelper.getReserveBalance(vendorAccount)
+          );
           prevVendorAccountMoCBalance = await mocHelper.getMoCBalance(vendorAccount);
 
-          tx = await mocHelper.redeemRiskPro(userAccount, scenario.params.riskProToRedeem, vendorAccount);
+          tx = await mocHelper.redeemRiskPro(
+            userAccount,
+            scenario.params.riskProToRedeem,
+            vendorAccount
+          );
         });
 
         it(`THEN the user has ${scenario.expect.riskProToRedeemOnReserveToken} more ReserveToken`, async function() {
-          const userReserveTokenBalance = toContractBN(await mocHelper.getReserveBalance(userAccount));
-          const diff = userReserveTokenBalance.sub(prevUserReserveTokenBalance).add(txCost);
+          const userReserveTokenBalance = toContractBN(
+            await mocHelper.getReserveBalance(userAccount)
+          );
+          const diff = userReserveTokenBalance.sub(prevUserReserveTokenBalance);
 
           mocHelper.assertBigReserve(
             diff,
@@ -192,7 +202,9 @@ contract('MoC: MoCExchange', function([
           );
         });
         it(`THEN commission account balance increase by ${scenario.expect.commissionAmountReserveToken} ReserveTokens`, async function() {
-          const reserveTokenBalance = toContractBN(await mocHelper.getReserveBalance(commissionsAccount));
+          const reserveTokenBalance = toContractBN(
+            await mocHelper.getReserveBalance(commissionsAccount)
+          );
           const balanceDiff = reserveTokenBalance.sub(prevCommissionAccountBalance);
 
           mocHelper.assertBigReserve(
@@ -202,7 +214,9 @@ contract('MoC: MoCExchange', function([
           );
         });
         it(`THEN the vendor account ReserveToken balance has increase by ${scenario.expect.vendorAmountReserveToken} ReserveTokens`, async function() {
-          const vendorAccountReserveTokenBalance = toContractBN(await mocHelper.getReserveBalance(vendorAccount));
+          const vendorAccountReserveTokenBalance = toContractBN(
+            await mocHelper.getReserveBalance(vendorAccount)
+          );
           const diff = vendorAccountReserveTokenBalance.sub(prevvendorAccountReserveTokenBalance);
 
           mocHelper.assertBigReserve(
@@ -260,17 +274,25 @@ contract('MoC: MoCExchange', function([
           await mocHelper.mintMoCToken(userAccount, mocAmountToMint, owner);
           await mocHelper.approveMoCToken(mocHelper.moc.address, mocAmountToApprove, userAccount);
           const prevUserMoCBalance = await mocHelper.getMoCBalance(userAccount);
-          const prevUserReserveTokenBalance = toContractBN(await mocHelper.getReserveBalance(userAccount));
+          const prevUserReserveTokenBalance = toContractBN(
+            await mocHelper.getReserveBalance(userAccount)
+          );
           const tx = await mocHelper.redeemRiskPro(userAccount, 10, vendorAccount);
           const userMoCBalance = await mocHelper.getMoCBalance(userAccount);
           const diffMoC = prevUserMoCBalance.sub(userMoCBalance);
-          const userReserveTokenBalance = toContractBN(await mocHelper.getReserveBalance(userAccount));
+          const userReserveTokenBalance = toContractBN(
+            await mocHelper.getReserveBalance(userAccount)
+          );
           const diffReserveToken = prevUserReserveTokenBalance.sub(userReserveTokenBalance);
 
           // Check that the used paid in ReserveToken because MoC allowance is 0
           mocHelper.assertBigReserve(diffMoC, mocAmountToApprove, 'user MoC balance is incorrect');
 
-          mocHelper.assertBigReserve(diffReserveToken, reserveTokenExpectedBalance, 'user ReserveToken balance is incorrect');
+          mocHelper.assertBigReserve(
+            diffReserveToken,
+            reserveTokenExpectedBalance,
+            'user ReserveToken balance is incorrect'
+          );
         });
       });
       describe('GIVEN since the user does not have MoC, but there is MoC allowance AND ReserveToken balance', function() {
@@ -306,11 +328,17 @@ contract('MoC: MoCExchange', function([
           const userMoCBalance = await mocHelper.getMoCBalance(otherAddress);
           const diffMoCFees = prevUserMoCBalance.sub(userMoCBalance);
 
-          const commissionsBalance = toContractBN(await mocHelper.getReserveBalance(commissionsAccount));
+          const commissionsBalance = toContractBN(
+            await mocHelper.getReserveBalance(commissionsAccount)
+          );
           const diffReserveTokenCommission = commissionsBalance.sub(prevCommissionAccountBalance);
 
-          const vendorAccountReserveTokenBalance = toContractBN(await mocHelper.getReserveBalance(vendorAccount));
-          const diffReserveTokenVendorFee = vendorAccountReserveTokenBalance.sub(prevvendorAccountReserveTokenBalance);
+          const vendorAccountReserveTokenBalance = toContractBN(
+            await mocHelper.getReserveBalance(vendorAccount)
+          );
+          const diffReserveTokenVendorFee = vendorAccountReserveTokenBalance.sub(
+            prevvendorAccountReserveTokenBalance
+          );
 
           mocHelper.assertBigReserve(diffMoCFees, expectedMoCFees, 'MoC fees are incorrect');
           mocHelper.assertBigReserve(
@@ -383,11 +411,17 @@ contract('MoC: MoCExchange', function([
           const userMoCBalance = await mocHelper.getMoCBalance(otherAddress);
           const diffMoCFees = prevUserMoCBalance.sub(userMoCBalance);
 
-          const commissionsBalance = toContractBN(await mocHelper.getReserveBalance(commissionsAccount));
+          const commissionsBalance = toContractBN(
+            await mocHelper.getReserveBalance(commissionsAccount)
+          );
           const diffReserveTokenCommission = commissionsBalance.sub(prevCommissionAccountBalance);
 
-          const vendorAccountReserveTokenBalance = toContractBN(await mocHelper.getReserveBalance(vendorAccount));
-          const diffReserveTokenVendorFee = vendorAccountReserveTokenBalance.sub(prevvendorAccountReserveTokenBalance);
+          const vendorAccountReserveTokenBalance = toContractBN(
+            await mocHelper.getReserveBalance(vendorAccount)
+          );
+          const diffReserveTokenVendorFee = vendorAccountReserveTokenBalance.sub(
+            prevvendorAccountReserveTokenBalance
+          );
 
           // Set MoCToken address back to its original address
           await this.mockMocStateChanger.setMoCToken(mocTokenAddress);
@@ -436,26 +470,42 @@ contract('MoC: MoCExchange', function([
           await mocHelper.mintRiskProAmount(userAccount, riskProToMint, vendorAccount, txTypeMint);
 
           // Calculate balances before redeeming
-          prevUserReserveTokenBalance = toContractBN(await mocHelper.getReserveBalance(userAccount));
+          prevUserReserveTokenBalance = toContractBN(
+            await mocHelper.getReserveBalance(userAccount)
+          );
           prevCommissionAccountBalance = toContractBN(
             await mocHelper.getReserveBalance(commissionsAccount)
           );
-          prevvendorAccountReserveTokenBalance = toContractBN(await mocHelper.getReserveBalance(vendorAccount));
+          prevvendorAccountReserveTokenBalance = toContractBN(
+            await mocHelper.getReserveBalance(vendorAccount)
+          );
           prevUserMoCBalance = await mocHelper.getMoCBalance(userAccount);
           prevCommissionsAccountMoCBalance = await mocHelper.getMoCBalance(commissionsAccount);
           prevVendorAccountMoCBalance = await mocHelper.getMoCBalance(vendorAccount);
 
-          const redeemTx = await mocHelper.redeemRiskPro(userAccount, riskProToRedeem, vendorAccount);
+          const redeemTx = await mocHelper.redeemRiskPro(
+            userAccount,
+            riskProToRedeem,
+            vendorAccount
+          );
         });
         describe('WHEN user tries to redeem ReserveTokens and fees are paid in MoC', function() {
           it(`THEN the user has ${riskProToRedeemOnReserveToken} more ReserveToken`, async function() {
-            const userReserveTokenBalance = toContractBN(await mocHelper.getReserveBalance(userAccount));
+            const userReserveTokenBalance = toContractBN(
+              await mocHelper.getReserveBalance(userAccount)
+            );
             const diff = userReserveTokenBalance.sub(prevUserReserveTokenBalance);
 
-            mocHelper.assertBigReserve(diff, riskProToRedeemOnReserveToken, 'user ReserveToken balance is incorrect');
+            mocHelper.assertBigReserve(
+              diff,
+              riskProToRedeemOnReserveToken,
+              'user ReserveToken balance is incorrect'
+            );
           });
           it(`THEN commission account balance increase by ${commissionAmountReserveToken} ReserveTokens`, async function() {
-            const reserveTokenBalance = toContractBN(await mocHelper.getReserveBalance(commissionsAccount));
+            const reserveTokenBalance = toContractBN(
+              await mocHelper.getReserveBalance(commissionsAccount)
+            );
             const balanceDiff = reserveTokenBalance.sub(prevCommissionAccountBalance);
 
             mocHelper.assertBigReserve(
@@ -465,10 +515,16 @@ contract('MoC: MoCExchange', function([
             );
           });
           it(`THEN the vendor account ReserveToken balance has increase by ${vendorAmountReserveToken} ReserveTokens`, async function() {
-            const vendorAccountReserveTokenBalance = toContractBN(await mocHelper.getReserveBalance(vendorAccount));
+            const vendorAccountReserveTokenBalance = toContractBN(
+              await mocHelper.getReserveBalance(vendorAccount)
+            );
             const diff = vendorAccountReserveTokenBalance.sub(prevvendorAccountReserveTokenBalance);
 
-            mocHelper.assertBigReserve(diff, vendorAmountReserveToken, 'vendor account balance is incorrect');
+            mocHelper.assertBigReserve(
+              diff,
+              vendorAmountReserveToken,
+              'vendor account balance is incorrect'
+            );
           });
           it(`THEN the user MoC balance has decreased by ${commissionAmountMoC} MoCs by commissions + ${vendorAmountMoC} MoCs by vendor markup`, async function() {
             const userMoCBalance = await mocHelper.getMoCBalance(userAccount);

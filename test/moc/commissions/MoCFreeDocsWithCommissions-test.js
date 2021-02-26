@@ -51,7 +51,7 @@ contract('MoC', function([owner, userAccount, commissionsAccount]) {
 
       scenarios.forEach(async scenario => {
         describe(`GIVEN ${scenario.params.riskProToMint} RiskPro is minted and reserveToken price is ${scenario.params.initialReserveTokenPrice} usd`, function() {
-          let prevUsereserveTokenBalance;
+          let prevUserReserveTokenBalance;
           let prevUserStableTokenBalance;
           let prevCommissionsAccountReserveTokenBalance;
           beforeEach(async function() {
@@ -67,7 +67,7 @@ contract('MoC', function([owner, userAccount, commissionsAccount]) {
 
             await mocHelper.mintRiskProAmount(owner, scenario.params.riskProToMint);
             await mocHelper.mintStableTokenAmount(userAccount, scenario.params.stableTokensToMint);
-            prevUsereserveTokenBalance = toContractBN(
+            prevUserReserveTokenBalance = toContractBN(
               await mocHelper.getReserveBalance(userAccount)
             );
             prevUserStableTokenBalance = toContractBN(
@@ -88,7 +88,7 @@ contract('MoC', function([owner, userAccount, commissionsAccount]) {
               const usereserveTokenBalance = toContractBN(
                 await mocHelper.getReserveBalance(userAccount)
               );
-              const diff = usereserveTokenBalance.sub(prevUsereserveTokenBalance);
+              const diff = usereserveTokenBalance.sub(prevUserReserveTokenBalance);
               mocHelper.assertBigReserve(
                 diff,
                 scenario.expect.stableTokensToRedeemOnReserveToken,
