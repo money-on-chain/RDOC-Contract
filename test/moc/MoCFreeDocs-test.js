@@ -222,12 +222,11 @@ contract('MoC', function([owner, userAccount, otherAccount, vendorAccount]) {
                     );
                     mocHelper.assertBig(
                       userReserveTokenBalance,
-                      currentBalance
-                        .sub(
-                          mocHelper.RESERVE_PRECISION.mul(
-                            toContractBN(scenario.expect.stableTokensToRedeem)
-                          ).div(toContractBN(scenario.params.initialReserveTokenPrice))
-                        ),
+                      currentBalance.sub(
+                        mocHelper.RESERVE_PRECISION.mul(
+                          toContractBN(scenario.expect.stableTokensToRedeem)
+                        ).div(toContractBN(scenario.params.initialReserveTokenPrice))
+                      ),
                       'incorrect amount of ReserveTokens sent to user'
                     );
                   });
@@ -465,12 +464,11 @@ contract('MoC', function([owner, userAccount, otherAccount, vendorAccount]) {
                   );
                   mocHelper.assertBig(
                     userReserveTokenBalance,
-                    currentBalance
-                      .sub(
-                        mocHelper.RESERVE_PRECISION.mul(
-                          toContractBN(scenario.expect.stableTokensToRedeem)
-                        ).div(toContractBN(scenario.params.initialReserveTokenPrice))
-                      ),
+                    currentBalance.sub(
+                      mocHelper.RESERVE_PRECISION.mul(
+                        toContractBN(scenario.expect.stableTokensToRedeem)
+                      ).div(toContractBN(scenario.params.initialReserveTokenPrice))
+                    ),
                     'incorrect amount of ReserveTokens sent to user',
                     { significantDigits: -14 }
                   );
