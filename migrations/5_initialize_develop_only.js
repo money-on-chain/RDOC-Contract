@@ -9,7 +9,6 @@ const allConfigs = require('./configs/config');
 module.exports = async (deployer, currentNetwork, [owner]) => {
   const {
     createInstances,
-    deployCommissionSplitter,
     transferStableTokenRoles,
     transferRiskProRoles,
     transferRiskProPausingRole,
@@ -26,8 +25,6 @@ module.exports = async (deployer, currentNetwork, [owner]) => {
       await transferRiskProRoles();
       console.log('Init Dev only transferRiskProPausingRole');
       await transferRiskProPausingRole();
-      console.log('Deploying CommissionSplitter');
-      await deployCommissionSplitter();
       console.log('Init Dev only initializeContracts');
       return initializeContracts();
     });

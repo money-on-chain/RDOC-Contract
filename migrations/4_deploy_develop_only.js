@@ -16,13 +16,20 @@ module.exports = async (deployer, currentNetwork, [owner]) => {
     deployGovernorContract,
     deployProxyAdminContract,
     deployStopperContract,
-    deployUpgradeDelegatorContract
+    deployUpgradeDelegatorContract,
+    deployMoCOracleMock,
+    deployMoCHelperLibHarness
   } = await makeUtils(artifacts, currentNetwork, allConfigs[currentNetwork], owner, deployer);
   // Workaround to get the link working on tests
   if (currentNetwork === 'development' || currentNetwork === 'coverage') {
     return deployer.then(async () => {
       console.log('Deploying Dev only 1');
-      await Promise.all([deployMocLibMock(), deployOracleMock(), deployGovernorContract()]);
+      await Promise.all([
+        deployMocLibMock(),
+        deployOracleMock(),
+        deployGovernorContract(),
+        deployMoCOracleMock()
+      ]);
       console.log('Deploying Dev only Proxy Admin');
       await deployProxyAdminContract();
       console.log('Deploying Dev only Stopper and delegator');
@@ -33,6 +40,8 @@ module.exports = async (deployer, currentNetwork, [owner]) => {
       await Promise.all([deployer.deploy(StableToken), deployer.deploy(RiskProToken)]);
       console.log('Deploying Dev only MoCLib');
       deployer.deploy(MoCLib);
+      console.log('Deploying Dev only MoCHelperLibHarness');
+      await deployMoCHelperLibHarness();
 
       console.log('Deploying Dev only deployUpgradable');
       // eslint-disable-next-line promise/always-return
