@@ -198,7 +198,11 @@ contract('MoC: MoCVendors', function([
           'totalPaidInMoC is incorrect'
         );
         mocHelper.assertBigReserve(paidMoC, scenario.expect.paidMoC, 'paidMoC is incorrect');
-        mocHelper.assertBigReserve(paidReserveToken, scenario.expect.paidReserveToken, 'paidReserveToken is incorrect');
+        mocHelper.assertBigReserve(
+          paidReserveToken,
+          scenario.expect.paidReserveToken,
+          'paidReserveToken is incorrect'
+        );
       });
       it('WHEN retrieving vendor from getters, THEN it matches the information from mapping', async function() {
         vendorInMapping = await this.mocVendors.vendors(scenario.params.account);
@@ -219,7 +223,11 @@ contract('MoC: MoCVendors', function([
         );
         mocHelper.assertBig(vendorInMapping.staking, staking, 'staking is incorrect');
         mocHelper.assertBig(vendorInMapping.paidMoC, paidMoC, 'paidMoC is incorrect');
-        mocHelper.assertBig(vendorInMapping.paidReserveToken, paidReserveToken, 'paidReserveToken is incorrect');
+        mocHelper.assertBig(
+          vendorInMapping.paidReserveToken,
+          paidReserveToken,
+          'paidReserveToken is incorrect'
+        );
       });
       it(
         scenario.params.removeStakeMessage.replace('$STAKING$', scenario.params.staking),
