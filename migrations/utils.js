@@ -321,7 +321,7 @@ const makeUtils = async (artifacts, networkName, config, owner, deployer) => {
     const mocStateInitializeParams = {
       connectorAddress: mocConnector.address,
       governor: governorAddress,
-      btcPriceProvider: oracleAddress,
+      priceProvider: oracleAddress,
       liq: toContract(config.liq * 10 ** 18),
       utpdu: toContract(config.utpdu * 10 ** 18),
       maxDiscRate: toContract(config.maxDiscRate * 10 ** 18),
@@ -329,7 +329,7 @@ const makeUtils = async (artifacts, networkName, config, owner, deployer) => {
       ema: toContract(config.initialEma * 10 ** 18),
       smoothFactor: toContract(config.smoothFactor * 10 ** 18),
       emaBlockSpan: config.dayBlockSpan,
-      maxMintBPro: toContract(config.maxMintBPro * 10 ** 18),
+      maxMintRiskPro: toContract(config.maxMintRiskPro * 10 ** 18),
       mocPriceProvider: mocOracleAddress,
       mocTokenAddress: mocToken.address,
       mocVendorsAddress: mocVendors.address,
@@ -389,7 +389,7 @@ const makeUtils = async (artifacts, networkName, config, owner, deployer) => {
       config.dayBlockSpan * config.daysRiskProHolderExecutePayment,
       targetAddressRiskPro, // Target address of RiskPro interest
       commissionSplitter.address, // Target address of commission payment
-      toContract(config.commissionRate * 10 ** 18), // commissionRate [mocPrecision]
+      //toContract(config.commissionRate * 10 ** 18), // commissionRate [mocPrecision]
       toContract(config.stableTmin * 10 ** 18), // stableTmin [using mocPrecision]
       toContract(config.stablePower), // stablePower [no precision]
       toContract(config.stableTmax * 10 ** 18) // stableTmax [using mocPrecision]
@@ -425,7 +425,8 @@ const makeUtils = async (artifacts, networkName, config, owner, deployer) => {
       moc.address,
       targetAddressCommission,
       toContract(config.mocProportion),
-      governorAddress
+      governorAddress,
+      reserveToken.address
     );
     console.log('CommissionSplitter Initialized');
   };
