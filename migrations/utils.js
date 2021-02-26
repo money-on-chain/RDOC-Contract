@@ -326,7 +326,7 @@ const makeUtils = async (artifacts, networkName, config, owner, deployer) => {
       utpdu: toContract(config.utpdu * 10 ** 18),
       maxDiscRate: toContract(config.maxDiscRate * 10 ** 18),
       dayBlockSpan: config.dayBlockSpan,
-      ema: toContract(config.reservePrice * 10 ** 18),
+      ema: toContract(config.initialEma * 10 ** 18),
       smoothFactor: toContract(config.smoothFactor * 10 ** 18),
       emaBlockSpan: config.dayBlockSpan,
       maxMintBPro: toContract(config.maxMintBPro * 10 ** 18),
@@ -520,4 +520,7 @@ const makeUtils = async (artifacts, networkName, config, owner, deployer) => {
   };
 };
 
-module.exports = makeUtils;
+const isDevelopment = currentNetwork =>
+  currentNetwork === 'development' || currentNetwork === 'coverage' || currentNetwork === 'regtest';
+
+module.exports = { makeUtils, isDevelopment };
