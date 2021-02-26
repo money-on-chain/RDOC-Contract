@@ -1,10 +1,18 @@
-/* eslint-disable no-console */
 const MoCLib = artifacts.require('./MoCHelperLib.sol');
 
-module.exports = async deployer =>
-  // Workaround to get the link working on tests
-  deployer.then(async () => {
-    const deployPromise = deployer.deploy(MoCLib);
-    console.log('Deploying MoCLib');
-    return deployPromise;
-  });
+const utils = require('./utils');
+const allConfigs = require('./configs/config');
+
+module.exports = async (deployer, currentNetwork, [owner]) => {
+  await deployer.deploy(MoCLib);
+  if (utils.isDevelopment(currentNetwork)) {
+    const { deployMocLibMock } = await utils.makeUtils(
+      artifacts,
+      currentNetwork,
+      allConfigs[currentNetwork],
+      owner,
+      deployer
+    );
+    deployMocLibMock();
+  }
+};

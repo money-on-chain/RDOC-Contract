@@ -1,5 +1,6 @@
 const utils = require('./utils');
 
+const MoCStateMock = artifacts.require('./mocks/MoCStateMock.sol');
 const MoCState = artifacts.require('./MoCState.sol');
 const allConfigs = require('./configs/config');
 
@@ -11,5 +12,6 @@ module.exports = async (deployer, currentNetwork, [owner]) => {
     owner,
     deployer
   );
-  return deployer.then(async () => linkMocLib(MoCState));
+  if (utils.isDevelopment(currentNetwork)) await linkMocLib(MoCStateMock);
+  else await linkMocLib(MoCState);
 };
