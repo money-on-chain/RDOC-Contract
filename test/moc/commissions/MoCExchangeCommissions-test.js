@@ -11,7 +11,8 @@ contract('MoC: MoCExchange', function([
   vendorAccount2
 ]) {
   before(async function() {
-    mocHelper = await testHelperBuilder({ owner });
+    const accounts = [owner, userAccount, commissionsAccount, vendorAccount1, vendorAccount2];
+    mocHelper = await testHelperBuilder({ owner, accounts });
     ({ toContractBN } = mocHelper);
     this.moc = mocHelper.moc;
     this.mockMocInrateChanger = mocHelper.mockMocInrateChanger;
