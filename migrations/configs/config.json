@@ -16,13 +16,14 @@
     "daysRiskProHolderExecutePayment": 7,
     "targetAddressRiskProInterest": "",
     "targetAddressCommissionPayment": "",
-    "commissionRate": 0.002,
     "c0Cobj": 4,
     "x2Cobj": 2,
     "liq": 1.04,
     "utpdu": 2,
     "maxDiscRate": 0.5,
-    "smoothFactor": 0.01653
+    "smoothFactor": 0.01653,
+    "liquidationEnabled": false,
+    "protected": 1.5
   },
   "development": {
     "commissionSplitter": "",
@@ -44,13 +45,14 @@
     "daysRiskProHolderExecutePayment": 7,
     "targetAddressRiskProInterest": "",
     "targetAddressCommissionPayment": "",
-    "commissionRate": 0.002,
     "c0Cobj": 4,
     "x2Cobj": 2,
     "liq": 1.04,
     "utpdu": 2,
     "maxDiscRate": 0.5,
-    "smoothFactor": 0.01653
+    "smoothFactor": 0.01653,
+    "liquidationEnabled": false,
+    "protected": 1.5
   },
   "mocTestnet": {
     "commissionSplitter": "",
@@ -77,13 +79,14 @@
     "daysRiskProHolderExecutePayment": 7,
     "targetAddressRiskProInterest": "0xf69287F5Ca3cC3C6d3981f2412109110cB8af076",
     "targetAddressCommissionPayment": "0xf69287F5Ca3cC3C6d3981f2412109110cB8af076",
-    "commissionRate": 0.001,
     "c0Cobj": 7,
     "x2Cobj": 2,
     "liq": 1.04,
     "utpdu": 2,
     "maxDiscRate": 0.0,
-    "smoothFactor": 0.011049724
+    "smoothFactor": 0.011049724,
+    "liquidationEnabled": false,
+    "protected": 1.5
   },
   "mocMainnet": {
     "commissionSplitter": "",
@@ -110,12 +113,13 @@
     "daysRiskProHolderExecutePayment": 7,
     "targetAddressRiskProInterest": "0xC61820bFB8F87391d62Cd3976dDc1d35e0cf7128",
     "targetAddressCommissionPayment": "0xC61820bFB8F87391d62Cd3976dDc1d35e0cf7128",
-    "commissionRate": 0.001,
     "c0Cobj": 7,
     "x2Cobj": 2,
     "liq": 1.04,
     "utpdu": 2,
     "maxDiscRate": 0.0,
-    "smoothFactor": 0.011049724
+    "smoothFactor": 0.011049724,
+    "liquidationEnabled": false,
+    "protected": 1.5
   }
 }

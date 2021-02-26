@@ -1,12 +1,14 @@
 /* eslint-disable no-console */
-const makeUtils = require('./utils');
+const utils = require('./utils');
 const allConfigs = require('./configs/config');
 
+const MoCStateMock = artifacts.require('./mocks/MoCStateMock.sol');
+const MoCSettlementMock = artifacts.require('./mocks/MoCSettlementMock.sol');
 const MoCSettlement = artifacts.require('./MoCSettlement.sol');
 const MoCState = artifacts.require('./MoCState.sol');
 
 module.exports = async (deployer, currentNetwork, [owner]) => {
-  const { transferStableTokenRoles, createInstances } = await makeUtils(
+  const { transferStableTokenRoles, createInstances } = await utils.makeUtils(
     artifacts,
     currentNetwork,
     allConfigs[currentNetwork],
@@ -14,8 +16,7 @@ module.exports = async (deployer, currentNetwork, [owner]) => {
     deployer
   );
   // Workaround to get the link working on tests
-  return deployer.then(async () => {
-    await createInstances(MoCSettlement, MoCState);
-    return transferStableTokenRoles();
-  });
+  if (utils.isDevelopment(currentNetwork)) await createInstances(MoCSettlementMock, MoCStateMock);
+  else await createInstances(MoCSettlement, MoCState);
+  return transferStableTokenRoles();
 };
