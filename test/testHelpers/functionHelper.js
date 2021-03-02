@@ -169,17 +169,27 @@ const reserveTokenNeededToMintRiskPro = (moc, mocState) => async riskProAmount =
   return reserveTotal;
 };
 
-const mintRiskProAmount = (moc, mocState) => async (account, riskProAmount) => {
+const mintRiskProAmount = (moc, mocState, mocVendors) => async (
+  account,
+  riskProAmount,
+  vendorAccount,
+  txType = comissionsTxType.MINT_RISKPRO_FEES_RESERVE
+) => {
   if (!riskProAmount) {
     return;
   }
 
   const reserveTotal = await reserveTokenNeededToMintRiskPro(moc, mocState)(riskProAmount);
   // User should have more than this balance to pay commissions
-  return moc.mintRiskProVendors(toContract(reserveTotal), { from: account });
+  return moc.mintRiskProVendors(toContract(reserveTotal), vendorAccount, { from: account });
 };
 
-const mintStableTokenAmount = (moc, priceProvider) => async (account, stableTokensToMint) => {
+const mintStableTokenAmount = (moc, priceProvider, mocVendors) => async (
+  account,
+  stableTokensToMint,
+  vendorAccount,
+  txType = comissionsTxType.MINT_STABLETOKEN_FEES_RESERVE
+) => {
   if (!stableTokensToMint) {
     return;
   }
@@ -190,10 +200,16 @@ const mintStableTokenAmount = (moc, priceProvider) => async (account, stableToke
   const reservePrice = await getReserveTokenPrice(priceProvider)();
   const reserveTotal = (formattedAmount / reservePrice) * reservePrecision;
   // Account should have enough allowance to pay commissions
-  return moc.mintStableTokenVendors(toContract(reserveTotal), { from: account });
+  return moc.mintStableTokenVendors(toContract(reserveTotal), vendorAccount, { from: account });
 };
 
-const mintRiskProxAmount = (moc, mocState) => async (account, bucket, riskProxAmount) => {
+const mintRiskProxAmount = (moc, mocState, mocVendors) => async (
+  account,
+  bucket,
+  riskProxAmount,
+  vendorAccount,
+  txType = comissionsTxType.MINT_RISKPROX_FEES_RESERVE
+) => {
   if (!riskProxAmount) {
     return;
   }
@@ -201,7 +217,7 @@ const mintRiskProxAmount = (moc, mocState) => async (account, bucket, riskProxAm
   const riskProxTecPrice = await mocState.bucketRiskProTecPrice(BUCKET_X2);
   const reserveTotal = toContractBNNoPrec(riskProxAmount * riskProxTecPrice);
 
-  return moc.mintRiskProxVendors(bucket, reserveTotal, { from: account });
+  return moc.mintRiskProxVendors(bucket, reserveTotal, vendorAccount, { from: account });
 };
 
 const redeemRiskPro = moc => async (from, amount, vendorAccount = zeroAddress) => {
