@@ -16,6 +16,23 @@
       "outFiles": [
         "${workspaceRoot}/test/**/*"
       ]
-    }
+    },
+    {
+      "name": "Run Truffle tests (Node 8)",
+      "type": "node",
+      "runtimeVersion": "8.17.0", // Node version
+      "request": "launch",
+      "runtimeExecutable": "/Users/shanshi/.nvm/versions/node/v8.17.0/bin/node",   // Node installation absolute path (get via command line: which node)
+      "program": "${workspaceRoot}/node_modules/truffle/build/cli.bundled.js",   // use Truffle from project dependencies
+      "args": [
+        "test",
+        "--verbose-rpc",   // Log communication between Truffle and the Ethereum client.
+        //"--stacktrace"     // Allows for mixed Javascript-and-Solidity stacktraces when a Truffle Contract transaction or deployment reverts.
+      ],
+      "cwd": "${workspaceRoot}",
+      "outFiles": [
+        "${workspaceRoot}/test/**/*"   // tests path
+      ],
+    },
   ]
 }
