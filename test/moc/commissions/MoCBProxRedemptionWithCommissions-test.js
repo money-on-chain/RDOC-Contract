@@ -10,7 +10,8 @@ const NOT_ENOUGH_FUNDS_ERROR = "sender doesn't have enough funds to send tx";
 // TODO: test RiskProx redeems with interests
 contract('MoC', function([owner, userAccount, commissionsAccount, vendorAccount, otherAddress]) {
   before(async function() {
-    mocHelper = await testHelperBuilder({ owner, useMock: true });
+    const accounts = [owner, userAccount, commissionsAccount, vendorAccount, otherAddress];
+    mocHelper = await testHelperBuilder({ owner, accounts, useMock: true });
     ({ toContractBN } = mocHelper);
     this.moc = mocHelper.moc;
     this.mocState = mocHelper.mocState;

@@ -9,8 +9,8 @@ contract('MoC : RiskProx operations does not modify global indicators', function
   vendorAccount
 ]) {
   before(async function() {
-    const accounts = [owner, userAccount];
-    mocHelper = await testHelperBuilder({ owner, accounts, vendorAccount, useMock: true });
+    const accounts = [owner, userAccount, vendorAccount];
+    mocHelper = await testHelperBuilder({ owner, accounts, useMock: true });
     this.moc = mocHelper.moc;
     this.mocState = mocHelper.mocState;
     this.governor = mocHelper.governor;

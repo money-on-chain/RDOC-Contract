@@ -148,7 +148,7 @@ const makeUtils = async (artifacts, networkName, config, owner, deployer) => {
   const deployGovernorContract = async () => {
     await deployer.deploy(Governor);
     const governor = await Governor.deployed();
-    return governor.initialize(owner);
+    governor.initialize(owner);
   };
 
   const deployStopperContract = async () => {
@@ -389,7 +389,7 @@ const makeUtils = async (artifacts, networkName, config, owner, deployer) => {
       config.dayBlockSpan * config.daysRiskProHolderExecutePayment,
       targetAddressRiskPro, // Target address of RiskPro interest
       commissionSplitter.address, // Target address of commission payment
-      //toContract(config.commissionRate * 10 ** 18), // commissionRate [mocPrecision]
+      // toContract(config.commissionRate * 10 ** 18), // commissionRate [mocPrecision]
       toContract(config.stableTmin * 10 ** 18), // stableTmin [using mocPrecision]
       toContract(config.stablePower), // stablePower [no precision]
       toContract(config.stableTmax * 10 ** 18) // stableTmax [using mocPrecision]
