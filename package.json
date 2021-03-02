@@ -10,11 +10,11 @@
   },
   "scripts": {
     "test": "rm zos.dev-*.json; rm -r build/contracts; npm run truffle-compile && scripts/test.sh",
-    "truffle-test": "./node_modules/truffle/build/cli.bundled.js test",
+    "truffle-test": "npx truffle test",
     "coverage": "rm zos.dev-*.json; rm -r build/contracts; SOLIDITY_COVERAGE=true scripts/test.sh",
     "ganache-cli": "scripts/run_ganache.sh",
     "block-utils": "scripts/mine_blocks.sh",
-    "truffle-compile": "truffle compile --all",
+    "truffle-compile": "npx truffle compile --all",
     "solium": "node ./node_modules/ethlint/bin/solium -d contracts/",
     "eslint": "npx truffle compile --all; npx eslint 'test/**/*.js' 'scripts/**/*.js'",
     "migrate-development": "truffle migrate --network development",
