@@ -40,14 +40,11 @@ const executeSettlementRound = async round => {
   return mocHelper.moc.runSettlement(round.step);
 };
 
-const initializeSettlement = async (vendorAccount, accounts) => {
-  mocHelper.revertState();
+const initializeSettlement = async (vendorAccount, owner, accounts) => {
+  await mocHelper.revertState();
 
   // Register vendor for test
-  await mocHelper.mockMoCVendorsChanger.setVendorsToRegister(
-    await mocHelper.getVendorToRegisterAsArray(vendorAccount, 0)
-  );
-  await mocHelper.governor.executeChange(mocHelper.mockMoCVendorsChanger.address);
+  await mocHelper.registerVendor(vendorAccount, 0, owner);
 
   // Avoid interests
   await mocHelper.mocState.setDaysToSettlement(0);

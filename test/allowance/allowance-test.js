@@ -10,8 +10,11 @@ contract('MoC: MoCExchange', function([owner, userAccount, vendorAccount]) {
     ({ toContractBN } = mocHelper);
   });
 
-  beforeEach(function() {
-    return mocHelper.revertState();
+  beforeEach(async function() {
+    await mocHelper.revertState();
+
+    // Register vendor for test
+    await mocHelper.registerVendor(vendorAccount, 0, owner);
   });
 
   describe('GIVEN a user have a balance of 100000 reserve tokens and there are StableTokens and RiskPro available', function() {

@@ -50,7 +50,13 @@ const shouldRevertBasicFunctions = (userAccount, vendorAccount) => {
   });
   describe('WHEN a blacklisted user tries to redeem RiskProx', function() {
     it('THEN the transaction reverts', async function() {
-      const tx = mocHelper.redeemRiskProx(BUCKET_X2, userAccount, 1, vendorAccount);
+      const tx = mocHelper.redeemRiskProx(
+        userAccount,
+        BUCKET_X2,
+        userAccount,
+        1,
+        vendorAccount
+      );
 
       await expectRevert(tx, WITHDRAWAL_FAILED);
     });
@@ -75,6 +81,9 @@ contract('MoC: Reverting Transfer on basic operations', function([
     const accounts = [owner, userAccount, vendorAccount];
     mocHelper = await testHelperBuilder({ owner, accounts });
     ({ BUCKET_X2, reserveToken } = mocHelper);
+
+    // Register vendor for test
+    await mocHelper.registerVendor(vendorAccount, 0, owner);
   });
 
   describe('GIVEN all tokens can be minted and redeemed by the user', function() {

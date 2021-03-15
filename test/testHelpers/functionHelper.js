@@ -50,7 +50,7 @@ const getReserveTokenPrice = priceProvider => async () => {
 
 // Mock MoC price provider doesn't use second and third parameter
 const setMoCPrice = mocPriceProvider => async mocPrice =>
-  mocPriceProvider.setPrice(toContract(mocPrice));
+  mocPriceProvider.post(toContract(mocPrice), 0, mocPriceProvider.address);
 
 const getMoCPrice = mocPriceProvider => async () => {
   const priceValue = await mocPriceProvider.peek();
@@ -496,20 +496,23 @@ const getCommissionsArrayChangingTest = async () => {
   return ret;
 };
 
-const getVendorToRegisterAsArray = moc => async (account, markup) => {
-  const ret = [];
-
+const registerVendor = (moc, mocToken, mocVendors) => async (vendorAccount, markup, owner) => {
   let mocPrecision = 10 ** 18;
   if (typeof moc !== 'undefined') {
     mocPrecision = await moc.getMocPrecision();
   }
 
-  ret.push({
-    account,
-    markup: toContractBNNoPrec(markup * mocPrecision).toString()
-  });
+  // Amount is converted to wei in mint and approve functions
+  const vendorRequiredMoCs = 1000;
 
-  return ret;
+  // Add initial MoC token balance and allowance for vendor to register
+  await mintMoCToken(mocToken)(vendorAccount, vendorRequiredMoCs, owner);
+  await approveMoCToken(mocToken)(mocVendors.address, vendorRequiredMoCs, vendorAccount);
+
+  // Register vendor
+  return mocVendors.registerVendor(toContractBNNoPrec(markup * mocPrecision).toString(), {
+    from: vendorAccount
+  });
 };
 
 const consolePrintTestVariables = obj => {
@@ -590,7 +593,7 @@ module.exports = async contracts => {
     BUCKET_X2,
     setMoCPrice: setMoCPrice(mocPriceProvider),
     getMoCPrice: getMoCPrice(mocPriceProvider),
-    getVendorToRegisterAsArray: getVendorToRegisterAsArray(moc),
+    registerVendor: registerVendor(moc, mocToken, mocVendors),
     consolePrintTestVariables
   };
 };

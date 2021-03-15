@@ -12,8 +12,6 @@ contract('MoC', function([owner, userAccount, otherAccount, vendorAccount]) {
     this.moc = mocHelper.moc;
     this.mocState = mocHelper.mocState;
     this.mocConnector = mocHelper.mocConnector;
-    this.governor = mocHelper.governor;
-    this.mockMoCVendorsChanger = mocHelper.mockMoCVendorsChanger;
     ({ BUCKET_X2 } = mocHelper);
   });
 
@@ -22,10 +20,7 @@ contract('MoC', function([owner, userAccount, otherAccount, vendorAccount]) {
       await mocHelper.revertState();
 
       // Register vendor for test
-      await this.mockMoCVendorsChanger.setVendorsToRegister(
-        await mocHelper.getVendorToRegisterAsArray(vendorAccount, 0)
-      );
-      await this.governor.executeChange(this.mockMoCVendorsChanger.address);
+      await mocHelper.registerVendor(vendorAccount, 0, owner);
 
       // This makes StableToken redemption interests zero
       await this.mocState.setDaysToSettlement(0);

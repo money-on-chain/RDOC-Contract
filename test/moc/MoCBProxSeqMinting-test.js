@@ -11,18 +11,13 @@ contract('MoC', function([owner, vendorAccount]) {
     mocHelper = await testHelperBuilder({ owner, accounts: [owner, vendorAccount], useMock: true });
     this.moc = mocHelper.moc;
     this.mocState = mocHelper.mocState;
-    this.governor = mocHelper.governor;
-    this.mockMoCVendorsChanger = mocHelper.mockMoCVendorsChanger;
     ({ BUCKET_X2, toContractBN } = mocHelper);
   });
 
   describe('GIVEN the user have 100 RiskPro and 100000 StableTokens', function() {
     before(async function() {
       // Register vendor for test
-      await this.mockMoCVendorsChanger.setVendorsToRegister(
-        await mocHelper.getVendorToRegisterAsArray(vendorAccount, 0)
-      );
-      await this.governor.executeChange(this.mockMoCVendorsChanger.address);
+      await mocHelper.registerVendor(vendorAccount, 0, owner);
 
       await this.mocState.setDaysToSettlement(0);
       await mocHelper.mintRiskProAmount(userAccount, 100, vendorAccount);

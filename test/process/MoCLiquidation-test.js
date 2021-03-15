@@ -33,7 +33,6 @@ contract('MoC: Liquidation', function([
     this.riskProx = mocHelper.riskProx;
     this.governor = mocHelper.governor;
     this.mockMoCBucketContainerChanger = mocHelper.mockMoCBucketContainerChanger;
-    this.mockMoCVendorsChanger = mocHelper.mockMoCVendorsChanger;
     this.mockMocStateChanger = mocHelper.mockMocStateChanger;
   });
 
@@ -41,10 +40,7 @@ contract('MoC: Liquidation', function([
     await mocHelper.revertState();
 
     // Register vendor for test
-    await this.mockMoCVendorsChanger.setVendorsToRegister(
-      await mocHelper.getVendorToRegisterAsArray(vendorAccount, 0)
-    );
-    await this.governor.executeChange(this.mockMoCVendorsChanger.address);
+    await mocHelper.registerVendor(vendorAccount, 0, owner);
   });
 
   describe('GIVEN there are RiskPros and StableTokens for a target coverage AND ReserveTokens price drops to 3400', function() {

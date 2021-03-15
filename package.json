@@ -16,7 +16,7 @@
     "block-utils": "scripts/mine_blocks.sh",
     "truffle-compile": "npx truffle compile --all",
     "solium": "node ./node_modules/ethlint/bin/solium -d contracts/",
-    "eslint": "eslint 'test/**/*.js' 'scripts/**/*.js' 'migrations/**/*.js'",
+    "eslint": "npx truffle compile --all; eslint 'test/**/*.js' 'scripts/**/*.js' 'migrations/**/*.js'",
     "migrate-development": "npx truffle migrate --network development",
     "migrate-qaTestnet": "npx truffle migrate --network qaTestnet",
     "migrate-qaPrivate": "npx truffle migrate --network qaPrivate",
@@ -31,7 +31,8 @@
     "deploy-reset-mocMainnet": "cp zos-bck.json zos.json; rm zos.dev-*.json; rm -r build/contracts; npx truffle migrate --network mocMainnet --reset",
     "pretty-sc": "prettier --write **/*.sol",
     "contract-size": "npx truffle compile; node calcSize.js",
-    "docgen": "npx solidoc"
+    "docgen": "npx solidoc",
+    "copy-abis": "npx truffle compile; node copyAbis.js"
   },
   "repository": {
     "type": "git",
