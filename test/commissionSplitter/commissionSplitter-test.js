@@ -7,7 +7,12 @@ let toContractBN;
 
 const executeOperations = (user, operations, vendorAccount) => {
   const promises = operations.map(async op =>
-    mocHelper.mintRiskPro(user, op.reserve, vendorAccount)
+    mocHelper.mintRiskProAmount(
+      user,
+      op.reserve,
+      vendorAccount,
+      await mocHelper.mocInrate.MINT_RISKPRO_FEES_RESERVE()
+    )
   );
 
   return Promise.all(promises);
@@ -20,6 +25,7 @@ contract('CommissionSplitter', function([owner, userAccount, commissionsAccount,
     const accounts = [owner, userAccount, vendorAccount];
     mocHelper = await testHelperBuilder({ owner, accounts });
     ({ toContractBN, commissionSplitter } = mocHelper);
+    await mocHelper.saveState();
   });
 
   describe('GIVEN commissions are being sent to a CommissionSplitter contract AND MOC Proportion is 0', function() {
@@ -68,8 +74,12 @@ contract('CommissionSplitter', function([owner, userAccount, commissionsAccount,
     scenarios.forEach(s => {
       describe(`WHEN proportion is set to ${s.proportion}`, function() {
         before(async function() {
+          await mocHelper.revertState();
           // deploying Commission splitter
           splitterPrecision = await commissionSplitter.PRECISION();
+
+          // Register vendor for test
+          await mocHelper.registerVendor(vendorAccount, 0, owner);
 
           // Commission rates for test are set in functionHelper.js
           await mocHelper.mockMocInrateChanger.setCommissionRates(
@@ -91,7 +101,10 @@ contract('CommissionSplitter', function([owner, userAccount, commissionsAccount,
           s.mintOperations
         )} Reserve tokens to mint RiskPros paying commissions`, function() {
           before(async function() {
-            await executeOperations(userAccount, s.mintOperations);
+            // Empty commission splitter just to have a more robust test
+            await commissionSplitter.split();
+
+            await executeOperations(userAccount, s.mintOperations, vendorAccount);
           });
           it(`THEN CommissionSplitter Reserve Token balance should be ${s.commissionAmount +
             s.mocAmount}`, async function() {
@@ -100,7 +113,7 @@ contract('CommissionSplitter', function([owner, userAccount, commissionsAccount,
             mocHelper.assertBigReserve(
               splitterBalance,
               s.commissionAmount + s.mocAmount,
-              'user reserveToken balance is incorrect'
+              'Commission splitters reserveToken balance is incorrect'
             );
           });
 

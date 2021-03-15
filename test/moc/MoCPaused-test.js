@@ -46,8 +46,6 @@ contract('MoC', function([owner, userAccount, vendorAccount]) {
     this.moc = mocHelper.moc;
     this.governor = mocHelper.governor;
     this.stopper = mocHelper.stopper;
-    this.governor = mocHelper.governor;
-    this.mockMoCVendorsChanger = mocHelper.mockMoCVendorsChanger;
     ({ BUCKET_X2 } = mocHelper);
   });
 
@@ -55,10 +53,7 @@ contract('MoC', function([owner, userAccount, vendorAccount]) {
     await mocHelper.revertState();
 
     // Register vendor for test
-    await this.mockMoCVendorsChanger.setVendorsToRegister(
-      await mocHelper.getVendorToRegisterAsArray(vendorAccount, 0)
-    );
-    await this.governor.executeChange(this.mockMoCVendorsChanger.address);
+    await mocHelper.registerVendor(vendorAccount, 0, owner);
 
     await mocHelper.mintRiskPro(owner, 10);
     await mocHelper.mintStableToken(userAccount, 10000);

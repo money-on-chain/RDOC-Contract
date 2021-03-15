@@ -22,7 +22,6 @@ const MoCConnector = artifacts.require('./contracts/base/MoCConnector.sol');
 const Governor = artifacts.require('moc-governance/contracts/Governance/Governor.sol');
 const ProxyAdmin = artifacts.require('ProxyAdmin');
 const UpgradeDelegator = artifacts.require('UpgradeDelegator');
-const UpgraderTemplate = artifacts.require('UpgraderTemplate');
 const Stopper = artifacts.require('moc-governance/contracts/Stopper/Stopper.sol');
 const MocStateChanger = artifacts.require('./contracts/MocStateChanger.sol');
 const MocInrateChanger = artifacts.require('./contracts/MocInrateChanger.sol');
@@ -49,9 +48,6 @@ const GovernorProxy = Contracts.getFromLocal('Governor');
 const StopperProxy = Contracts.getFromLocal('Stopper');
 const ReserveToken = artifacts.require('./contracts/test-contracts/ReserveToken.sol');
 const CommissionSplitterProxy = Contracts.getFromLocal('CommissionSplitter');
-const MoCVendorsChangerHarness = artifacts.require(
-  './contracts/test-contracts/MoCVendorsChangerHarness.sol'
-);
 
 const MoCToken = artifacts.require('./contracts/MoCToken.sol');
 
@@ -90,7 +86,9 @@ const baseParams = {
   liquidationEnabled: false,
   _protected: toContract(1.5 * 10 ** 18), // mocPrecision
 
-  startStoppable: true
+  startStoppable: true,
+
+  vendorRequiredMoCs: toContract(1000 * 10 ** 18) // mocPrecision
 };
 
 const transferOwnershipAndMinting = async (token, address) => {
@@ -187,7 +185,8 @@ const createContracts = params => async ({ owner, useMock }) => {
     startStoppable,
     mocProportion = baseParams.mocProportion,
     liquidationEnabled,
-    _protected
+    _protected,
+    vendorRequiredMoCs
   } = params;
 
   const settlementContract = useMock ? MoCSettlementMock : MoCSettlement;
@@ -283,9 +282,14 @@ const createContracts = params => async ({ owner, useMock }) => {
       from: owner
     }
   );
-  const mockMoCVendorsChanger = await MoCVendorsChanger.new(mocVendors.address, [], [], {
-    from: owner
-  });
+  const mockMoCVendorsChanger = await MoCVendorsChanger.new(
+    mocVendors.address,
+    owner, //  vendorMoCDepositAddress
+    vendorRequiredMoCs,
+    {
+      from: owner
+    }
+  );
   const mockMocChanger = await MocChanger.new(moc.address, governor.address, stopper.address, {
     from: owner
   });
@@ -356,8 +360,12 @@ const createContracts = params => async ({ owner, useMock }) => {
     reserveToken.address
   );
   await upgradeDelegator.initialize(governor.address, proxyAdmin.address);
-  await mocVendors.initialize(mocConnector.address, governor.address);
-
+  await mocVendors.initialize(
+    mocConnector.address,
+    governor.address,
+    owner, //  vendorMoCDepositAddress
+    vendorRequiredMoCs
+  );
   // Execute changes in MoCInrate
   await governor.executeChange(mockMocInrateChanger.address);
   // Execute changes in MoCVendors
@@ -382,11 +390,6 @@ const createContracts = params => async ({ owner, useMock }) => {
   await project.changeProxyAdmin(stopperProxy.address, proxyAdmin.address);
   await project.changeProxyAdmin(commissionSplitter.address, proxyAdmin.address);
   await project.changeProxyAdmin(mocVendorsProxy.address, proxyAdmin.address);
-
-  // Contract for testing MoCVendorsChanger register/unregister vendors functions
-  const mocVendorsChangerHarness = await MoCVendorsChangerHarness.new(mocVendors.address, {
-    from: owner
-  });
 
   return {
     commissionSplitter,
@@ -414,8 +417,7 @@ const createContracts = params => async ({ owner, useMock }) => {
     mocExchange,
     mocVendors,
     mockMoCVendorsChanger,
-    mocConverter,
-    mocVendorsChangerHarness
+    mocConverter
   };
 };
 

@@ -259,16 +259,25 @@ const makeUtils = async (artifacts, networkName, config, owner, deployer) => {
       moc = await create({ contractAlias: contract.alias, ...options });
     }
     if (index++ === step) {
-      mocConnector = await create({ contractAlias: contract.alias, ...options });
+      mocConnector = await create({
+        contractAlias: contract.alias,
+        ...options
+      });
     }
     if (index++ === step) {
       riskProx = await await create({ contractAlias: contract.alias, ...options });
     }
     if (index++ === step) {
-      mocSettlement = await create({ contractAlias: contract.alias, ...options });
+      mocSettlement = await create({
+        contractAlias: contract.alias,
+        ...options
+      });
     }
     if (index++ === step) {
-      mocConverter = await create({ contractAlias: contract.alias, ...options });
+      mocConverter = await create({
+        contractAlias: contract.alias,
+        ...options
+      });
     }
     if (index++ === step) {
       mocState = await create({ contractAlias: contract.alias, ...options });
@@ -412,7 +421,17 @@ const makeUtils = async (artifacts, networkName, config, owner, deployer) => {
     );
     console.log('Settlement Initialized');
 
-    await mocVendors.initialize(mocConnector.address, governorAddress);
+    let vendorMoCDepositAddress = owner;
+    if (config.vendorMoCDepositAddress !== '') {
+      ({ vendorMoCDepositAddress } = config.vendorMoCDepositAddress);
+    }
+
+    await mocVendors.initialize(
+      mocConnector.address,
+      governorAddress,
+      vendorMoCDepositAddress,
+      config.vendorRequiredMoCs
+    );
     console.log('Vendors Initialized');
 
     // Making sure to call the correct initialize function

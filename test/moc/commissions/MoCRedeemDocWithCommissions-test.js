@@ -19,7 +19,6 @@ contract('MoC: StableToken Redeem on Settlement with commissions', function([
     this.moc = mocHelper.moc;
     this.mocSettlement = mocHelper.mocSettlement;
     this.governor = mocHelper.governor;
-    this.mockMoCVendorsChanger = mocHelper.mockMoCVendorsChanger;
     this.mocVendors = mocHelper.mocVendors;
   });
   describe('GIVEN there are commisions of 0.002 set and there are 3 users with stableToken redeem requests', function() {
@@ -28,20 +27,17 @@ contract('MoC: StableToken Redeem on Settlement with commissions', function([
 
     before(async function() {
       // Register vendor for test
-      await this.mockMoCVendorsChanger.setVendorsToRegister(
-        await mocHelper.getVendorToRegisterAsArray(vendorAccount, 0.01)
-      );
-      await this.governor.executeChange(this.mockMoCVendorsChanger.address);
+      await mocHelper.registerVendor(vendorAccount, 0.01, owner);
 
       // Commission rates for test are set in functionHelper.js
-      await mocHelper.mockMocInrateChanger.setCommissionRates(
+      await this.mockMocInrateChanger.setCommissionRates(
         await mocHelper.getCommissionsArrayNonZero()
       );
 
       // set commissions address
-      await mocHelper.mockMocInrateChanger.setCommissionsAddress(commissionsAccount);
+      await this.mockMocInrateChanger.setCommissionsAddress(commissionsAccount);
       // update params
-      await mocHelper.governor.executeChange(mocHelper.mockMocInrateChanger.address);
+      await this.governor.executeChange(this.mockMocInrateChanger.address);
 
       const txTypeMintRiskPro = await mocHelper.mocInrate.MINT_RISKPRO_FEES_RESERVE();
       const txTypeMintStableToken = await mocHelper.mocInrate.MINT_STABLETOKEN_FEES_RESERVE();

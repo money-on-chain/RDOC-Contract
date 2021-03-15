@@ -9,8 +9,11 @@ contract('MoC: MoCExchange', function([owner, vendorAccount]) {
     this.mocState = mocHelper.mocState;
   });
 
-  beforeEach(function() {
-    return mocHelper.revertState();
+  beforeEach(async function() {
+    await mocHelper.revertState();
+
+    // Register vendor for test
+    await mocHelper.registerVendor(vendorAccount, 0, owner);
   });
 
   describe('RiskPro limit minting test... With 10.000.000 limit', function() {

@@ -22,7 +22,6 @@ contract('MoC: MoCExchange', function([
     this.governor = mocHelper.governor;
     this.mocToken = mocHelper.mocToken;
     this.mockMocStateChanger = mocHelper.mockMocStateChanger;
-    this.mockMoCVendorsChanger = mocHelper.mockMoCVendorsChanger;
     this.mocVendors = mocHelper.mocVendors;
   });
 
@@ -30,20 +29,17 @@ contract('MoC: MoCExchange', function([
     await mocHelper.revertState();
 
     // Register vendor for test
-    await this.mockMoCVendorsChanger.setVendorsToRegister(
-      await mocHelper.getVendorToRegisterAsArray(vendorAccount, 0.01)
-    );
-    await this.governor.executeChange(this.mockMoCVendorsChanger.address);
+    await mocHelper.registerVendor(vendorAccount, 0.01, owner);
 
     // Commission rates for test are set in functionHelper.js
-    await mocHelper.mockMocInrateChanger.setCommissionRates(
+    await this.mockMocInrateChanger.setCommissionRates(
       await mocHelper.getCommissionsArrayNonZero()
     );
 
     // set commissions address
-    await mocHelper.mockMocInrateChanger.setCommissionsAddress(commissionsAccount);
+    await this.mockMocInrateChanger.setCommissionsAddress(commissionsAccount);
     // update params
-    await mocHelper.governor.executeChange(mocHelper.mockMocInrateChanger.address);
+    await this.governor.executeChange(this.mockMocInrateChanger.address);
   });
 
   describe('RiskPro redeeming with commissions', function() {
@@ -277,7 +273,7 @@ contract('MoC: MoCExchange', function([
           const prevUserReserveTokenBalance = toContractBN(
             await mocHelper.getReserveBalance(userAccount)
           );
-          const tx = await mocHelper.redeemRiskPro(userAccount, 10, vendorAccount);
+          await mocHelper.redeemRiskPro(userAccount, 10, vendorAccount);
           const userMoCBalance = await mocHelper.getMoCBalance(userAccount);
           const diffMoC = prevUserMoCBalance.sub(userMoCBalance);
           const userReserveTokenBalance = toContractBN(
@@ -380,7 +376,7 @@ contract('MoC: MoCExchange', function([
           // Set MoCToken address to 0
           const zeroAddress = '0x0000000000000000000000000000000000000000';
           await this.mockMocStateChanger.setMoCToken(zeroAddress);
-          await mocHelper.governor.executeChange(mocHelper.mockMocStateChanger.address);
+          await this.governor.executeChange(mocHelper.mockMocStateChanger.address);
 
           const expectedMoCFees = 0; // commission + markup
           const mintAmount = 100;
@@ -425,7 +421,7 @@ contract('MoC: MoCExchange', function([
 
           // Set MoCToken address back to its original address
           await this.mockMocStateChanger.setMoCToken(mocTokenAddress);
-          await mocHelper.governor.executeChange(mocHelper.mockMocStateChanger.address);
+          await this.governor.executeChange(mocHelper.mockMocStateChanger.address);
 
           mocHelper.assertBigReserve(diffMoCFees, expectedMoCFees, 'MoC fees are incorrect');
           mocHelper.assertBigReserve(
@@ -483,11 +479,7 @@ contract('MoC: MoCExchange', function([
           prevCommissionsAccountMoCBalance = await mocHelper.getMoCBalance(commissionsAccount);
           prevVendorAccountMoCBalance = await mocHelper.getMoCBalance(vendorAccount);
 
-          const redeemTx = await mocHelper.redeemRiskPro(
-            userAccount,
-            riskProToRedeem,
-            vendorAccount
-          );
+          await mocHelper.redeemRiskPro(userAccount, riskProToRedeem, vendorAccount);
         });
         describe('WHEN user tries to redeem ReserveTokens and fees are paid in MoC', function() {
           it(`THEN the user has ${riskProToRedeemOnReserveToken} more ReserveToken`, async function() {
