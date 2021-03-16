@@ -235,8 +235,6 @@ const redeemStableTokenRequest = moc => async (from, amount) => {
   });
 };
 
-const getMoCBalance = mocToken => async address => mocToken.balanceOf(address);
-
 const getMoCAllowance = mocToken => async (owner, spender) => mocToken.allowance(owner, spender);
 
 const getTokenBalance = token => async address => token.balanceOf(address);
@@ -549,7 +547,7 @@ module.exports = async contracts => {
     getRiskProBalance: getTokenBalance(riskPro),
     getReserveBalance: getTokenBalance(reserveToken),
     getRiskProxBalance: getRiskProxBalance(riskProx),
-    getUserBalances: getUserBalances(riskPro, stableToken, riskProx, reserveToken),
+    getUserBalances: getUserBalances(riskPro, stableToken, riskProx, reserveToken, mocToken),
     setSmoothingFactor: setSmoothingFactor(governor, mockMocStateChanger),
     mintRiskPro: mintRiskPro(moc),
     mintStableToken: mintStableToken(moc),
@@ -582,7 +580,7 @@ module.exports = async contracts => {
     setFinalCommissionAddress: setFinalCommissionAddress(commissionSplitter, governor),
     setMocCommissionProportion: setMocCommissionProportion(commissionSplitter, governor),
     mintMoCToken: mintMoCToken(mocToken),
-    getMoCBalance: getMoCBalance(mocToken),
+    getMoCBalance: getTokenBalance(mocToken),
     approveMoCToken: approveMoCToken(mocToken),
     getMoCAllowance: getMoCAllowance(mocToken),
     comissionsTxType,
