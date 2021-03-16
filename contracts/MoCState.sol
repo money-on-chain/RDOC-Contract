@@ -207,7 +207,7 @@ contract MoCState is MoCLibConnection, MoCBase, MoCEMACalculator {
    RiskProx values and interests holdings
   */
   function collateralReserves() public view returns (uint256) {
-    uint256 resTokensInRiskProx = mocConverter.riskProxToResToken(riskProxManager.getBucketNRiskPro(BUCKET_X2), BUCKET_X2);
+    uint256 resTokensInRiskProx = mocConverter.riskProxToResTokenHelper(riskProxManager.getBucketNRiskPro(BUCKET_X2), BUCKET_X2);
     uint256 resTokensInBag = riskProxManager.getInrateBag(BUCKET_C0);
 
     return reserves.sub(resTokensInRiskProx).sub(resTokensInBag);
