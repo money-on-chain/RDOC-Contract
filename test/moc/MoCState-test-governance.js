@@ -360,7 +360,7 @@ contract('MoCState Governed', function([owner, account2]) {
     describe('GIVEN the maxMintRiskPro value', function() {
       it(`THEN an unauthorized account ${account2} tries to change maxMintRiskPro to ${scenario.maxMintRiskPro}`, async function() {
         try {
-          await this.mocState.setmaxMintRiskPro(scenario.maxMintRiskPro, { from: account2 });
+          await this.mocState.setMaxMintRiskPro(scenario.maxMintRiskPro, { from: account2 });
         } catch (err) {
           assert(
             NOT_AUTORIZED_CHANGER === err.reason,
@@ -369,13 +369,13 @@ contract('MoCState Governed', function([owner, account2]) {
         }
       });
       it(`THEN an authorized contract tries to change maxMintRiskPro to ${scenario.maxMintRiskPro}`, async function() {
-        const oldmaxMintRiskPro = await this.mocState.getmaxMintRiskPro();
-        assert(oldmaxMintRiskPro > 0, 'maxMintRiskPro should be greater than 0');
-        await this.mockMocStateChanger.setmaxMintRiskPro(scenario.maxMintRiskPro);
+        const oldMaxMintRiskPro = await this.mocState.getMaxMintRiskPro();
+        assert(oldMaxMintRiskPro > 0, 'maxMintRiskPro should be greater than 0');
+        await this.mockMocStateChanger.setMaxMintRiskPro(scenario.maxMintRiskPro);
         await this.governor.executeChange(this.mockMocStateChanger.address);
-        const newmaxMintRiskPro = await this.mocState.getmaxMintRiskPro();
+        const newMaxMintRiskPro = await this.mocState.getMaxMintRiskPro();
         mocHelper.assertBig(
-          newmaxMintRiskPro,
+          newMaxMintRiskPro,
           scenario.maxMintRiskPro,
           `maxMintRiskPro should be ${scenario.maxMintRiskPro}`
         );

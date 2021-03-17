@@ -18,10 +18,11 @@ contract('MoC: StableToken Redeem on Settlement with commissions', function([
     ({ toContractBN } = mocHelper);
     this.moc = mocHelper.moc;
     this.mocSettlement = mocHelper.mocSettlement;
+    this.mockMocInrateChanger = mocHelper.mockMocInrateChanger;
     this.governor = mocHelper.governor;
     this.mocVendors = mocHelper.mocVendors;
   });
-  describe('GIVEN there are commisions of 0.002 set and there are 3 users with stableToken redeem requests', function() {
+  describe('GIVEN there are commisions set and there are 3 users with stableToken redeem requests', function() {
     let prevCommissionsAccountReserveTokenBalance;
     let prevUserReserveTokenBalance;
 
@@ -74,23 +75,23 @@ contract('MoC: StableToken Redeem on Settlement with commissions', function([
         await mocHelper.executeSettlement();
       });
 
-      it('THEN commissions account increase balance by 0.000006 ReserveTokens', async function() {
+      it('THEN commissions account increase balance by 0.000012 ReserveTokens', async function() {
         const reserveTokenBalance = toContractBN(
           await mocHelper.getReserveBalance(commissionsAccount)
         );
         const diff = reserveTokenBalance.sub(prevCommissionsAccountReserveTokenBalance);
         mocHelper.assertBigReserve(
           diff,
-          '0.000006',
+          '0.000012',
           'commissions account reserveToken balance is incorrect'
         );
       });
-      it('THEN user account increase balance by 0.000998 ReserveTokens ', async function() {
+      it('THEN user account increase balance by 0.000996 ReserveTokens ', async function() {
         const usereserveTokenBalance = toContractBN(await mocHelper.getReserveBalance(accounts[0]));
         const diff = usereserveTokenBalance.sub(prevUserReserveTokenBalance);
         mocHelper.assertBigReserve(
           diff,
-          '0.000998',
+          '0.000996',
           'commissions account reserveToken balance is incorrect'
         );
       });

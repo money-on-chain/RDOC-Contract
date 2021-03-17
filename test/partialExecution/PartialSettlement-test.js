@@ -124,7 +124,7 @@ contract('MoC: Partial Settlement execution', function([owner, vendorAccount, ..
         let txs = [];
         describe(scenario.description, function() {
           before(async function() {
-            await initializeSettlement(accounts);
+            await initializeSettlement(vendorAccount, owner, accounts);
             txs = await runScenario(scenario);
           });
 
@@ -191,7 +191,7 @@ contract('MoC: Partial Settlement execution', function([owner, vendorAccount, ..
   describe('Consecutive Settlements', function() {
     describe('GIVEN first settlement is executed', function() {
       before(async function() {
-        await initializeSettlement(vendorAccount, accounts);
+        await initializeSettlement(vendorAccount, owner, accounts);
         await mocHelper.moc.runSettlement(4);
         await mocHelper.setReserveTokenPrice(toContractBN(8000, 'USD'));
         await mocHelper.moc.runSettlement(4);

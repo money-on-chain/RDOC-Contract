@@ -37,7 +37,7 @@ contract('CommissionSplitter', function([owner, userAccount, commissionsAccount,
           }
         ],
         proportion: 0,
-        commissionAmount: 2,
+        commissionAmount: 1,
         mocAmount: 0
       },
       {
@@ -51,7 +51,7 @@ contract('CommissionSplitter', function([owner, userAccount, commissionsAccount,
         ],
         proportion: 1,
         commissionAmount: 0,
-        mocAmount: 6.666
+        mocAmount: 3.333
       },
       {
         mintOperations: [
@@ -66,8 +66,8 @@ contract('CommissionSplitter', function([owner, userAccount, commissionsAccount,
           }
         ],
         proportion: 0.5,
-        commissionAmount: 1.5,
-        mocAmount: 1.5
+        commissionAmount: 0.75,
+        mocAmount: 0.75
       }
     ];
 
