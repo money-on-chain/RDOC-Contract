@@ -224,7 +224,7 @@ const redeemRiskPro = moc => async (from, amount, vendorAccount = zeroAddress) =
   const reservePrecision = await moc.getReservePrecision();
   return vendorAccount !== zeroAddress
     ? moc.redeemRiskProVendors(toContract(amount * reservePrecision), vendorAccount, { from })
-    : moc.rredeemRiskPro(toContract(amount * reservePrecision), { from });
+    : moc.redeemRiskPro(toContract(amount * reservePrecision), { from });
 };
 
 const redeemStableTokenRequest = moc => async (from, amount) => {

@@ -53,7 +53,6 @@ const shouldRevertBasicFunctions = (userAccount, vendorAccount) => {
       const tx = mocHelper.redeemRiskProx(
         userAccount,
         BUCKET_X2,
-        userAccount,
         1,
         vendorAccount
       );

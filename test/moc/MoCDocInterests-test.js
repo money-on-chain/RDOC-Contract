@@ -133,7 +133,7 @@ contract('MoC', function([owner, userAccount, userAccount2, vendorAccount]) {
 
     describe('AND another user buys 0.5 RiskProx', function() {
       beforeEach(async function() {
-        await mocHelper.mintRiskProxAmount(userAccount2, BUCKET_X2, '0.5');
+        await mocHelper.mintRiskProxAmount(userAccount2, BUCKET_X2, '0.5', vendorAccount);
       });
 
       it('THEN the interest rate for redeem the full redemption is 0.00005223157521356', async function() {

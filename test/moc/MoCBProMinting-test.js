@@ -303,7 +303,7 @@ contract('MoC: MoCExchange', function([owner, userAccount, vendorAccount]) {
     describe('GIVEN the user have 18 RiskPro and 80000 StableTokens and ReserveToken price falls to 2000 and liquidation is not enabled', function() {
       beforeEach(async function() {
         await mocHelper.mintRiskProAmount(userAccount, 18, vendorAccount);
-        await mocHelper.mintStableAmount(userAccount, 80000, vendorAccount);
+        await mocHelper.mintStableTokenAmount(userAccount, 80000, vendorAccount);
         // Move price to change RiskProx price and make it different
         // from RiskPro price
         const reserveTokenPrice = toContractBN(2000 * mocHelper.MOC_PRECISION);
