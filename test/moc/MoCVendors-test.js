@@ -36,7 +36,7 @@ contract('MoC: MoCVendors', function([
       vendorAccount5,
       ...accounts
     ];
-    mocHelper = await testHelperBuilder({ owner, testAccounts });
+    mocHelper = await testHelperBuilder({ owner, accounts: testAccounts });
     ({ toContractBN } = mocHelper);
     this.moc = mocHelper.moc;
     this.governor = mocHelper.governor;
@@ -202,7 +202,7 @@ contract('MoC: MoCVendors', function([
 
         const totalPaidInMoC = await this.mocVendors.getTotalPaidInMoC(scenario.params.account);
         const paidMoC = await this.mocVendors.getPaidMoC(scenario.params.account);
-        const paidReserveToken = await this.mocVendors.getpaidReserveToken(scenario.params.account);
+        const paidReserveToken = await this.mocVendors.getPaidReserveToken(scenario.params.account);
 
         mocHelper.assertBigReserve(
           totalPaidInMoC,
@@ -224,7 +224,7 @@ contract('MoC: MoCVendors', function([
         const totalPaidInMoC = await this.mocVendors.getTotalPaidInMoC(scenario.params.account);
         const staking = await this.mocVendors.getStaking(scenario.params.account);
         const paidMoC = await this.mocVendors.getPaidMoC(scenario.params.account);
-        const paidReserveToken = await this.mocVendors.getpaidReserveToken(scenario.params.account);
+        const paidReserveToken = await this.mocVendors.getPaidReserveToken(scenario.params.account);
 
         assert(vendorInMapping.isActive === isActive, 'isActive is incorrect');
         mocHelper.assertBig(vendorInMapping.markup, markup, 'markup is incorrect');
@@ -281,8 +281,7 @@ contract('MoC: MoCVendors', function([
         }
       );
       it('WHEN a vendor is unregistered THEN VendorUnregistered event is emitted', async function() {
-        await this.mockMoCVendorsChanger.setVendorsToUnregister([scenario.params.account]);
-        unregisterVendorTx = await this.governor.executeChange(this.mockMoCVendorsChanger.address);
+        unregisterVendorTx = await this.mocVendors.unregisterVendor({ from: scenario.params.account});
 
         const [vendorUnregisteredEvent] = await mocHelper.findEvents(
           unregisterVendorTx,
@@ -503,12 +502,12 @@ contract('MoC: MoCVendors', function([
               from: account
             });
 
-            // Mint BPRO
-            await mocHelper.mintBProAmount(
+            // Mint RISKPRO
+            await mocHelper.mintRiskProAmount(
               userAccount,
               1000,
               account,
-              await mocHelper.mocInrate.MINT_BPRO_FEES_RBTC()
+              await mocHelper.mocInrate.MINT_RISKPRO_FEES_RESERVE()
             );
           }
         }

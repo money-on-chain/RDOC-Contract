@@ -33,7 +33,7 @@ contract('MoC: Protection mode', function([owner, userAccount, otherAccount, ven
       mocHelper.assertBig(state, 3, 'State should be AboveCobj');
     });
     [
-      { name: 'mintRiskProVendors', args: [1, vendorAccount], value: 1, event: 'RiskProMint' },
+      { name: 'mintRiskProVendors', args: [1, vendorAccount], value: 0, event: 'RiskProMint' },
       {
         name: 'redeemFreeStableTokenVendors',
         args: [1, vendorAccount],

@@ -13,7 +13,7 @@ contract('MoC: Retrocompatibility', function([owner, userAccount]) {
     this.mockMocInrateChanger = mocHelper.mockMocInrateChanger;
     this.governor = mocHelper.governor;
     this.mocState = mocHelper.mocState;
-    this.reservePrice = await mocHelper.getReserveTokenPrice();
+    this.reservePrice = await this.mocState.getReserveTokenPrice();
     this.riskProx2Price = await this.mocState.bucketRiskProTecPrice(BUCKET_X2);
   });
 
