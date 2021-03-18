@@ -73,7 +73,7 @@ contract('MoC: Liquidation', function([
         args: [BUCKET_X2, 1, vendorAccount],
         event: 'RiskProxRedeem'
       },
-      { name: 'evalLiquidation', args: [100] },
+      { name: 'evalLiquidation', args: [] },
       { name: 'runSettlement', args: [100] }
     ].forEach(fn => {
       describe(`WHEN someone executes ${fn.name}`, function() {

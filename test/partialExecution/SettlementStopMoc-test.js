@@ -32,8 +32,12 @@ const assertAllStoppedFunctions = vendorAccount => {
   );
 };
 
-const initializeSettlement = async (vendorAccount, accounts) => {
+const initializeSettlement = async (vendorAccount, owner, accounts) => {
   await mocHelper.revertState();
+
+  // Register vendor for test
+  await mocHelper.registerVendor(vendorAccount, 0, owner);
+
   // Avoid interests
   await mocHelper.mocState.setDaysToSettlement(0);
   const stableTokenAccounts = accounts.slice(0, 5);
@@ -70,17 +74,19 @@ contract('MoC: Partial Settlement execution', function([owner, vendorAccount, ..
       accounts: [owner, vendorAccount, ...testAccounts],
       useMock: true
     });
-    ({ toContractBN, BUCKET_X2 } = mocHelper);
+    ({ toContractBN } = mocHelper);
+    ({ BUCKET_X2 } = mocHelper);
+    this.governor = mocHelper.governor;
   });
 
   describe('WHEN the settlement is only partially executed', function() {
     let tx;
     before(async function() {
-      await initializeSettlement(testAccounts);
+      await initializeSettlement(vendorAccount, owner, testAccounts);
       tx = await mocHelper.moc.runSettlement(2);
     });
     after(function() {
-      mocHelper.revertState();
+      return mocHelper.revertState();
     });
 
     it('THEN only 2 StableToken redemption events are emitted', function() {
@@ -99,17 +105,17 @@ contract('MoC: Partial Settlement execution', function([owner, vendorAccount, ..
       assert(enabled, 'Settlement is not enabled');
     });
     it('THEN RiskProx and StableToken Redeem Request transactions should revert', async function() {
-      await assertAllStoppedFunctions();
+      await assertAllStoppedFunctions(vendorAccount);
     });
   });
   describe('WHEN the settlement is set to stall AND executed with 100 steps', function() {
     before(async function() {
-      await initializeSettlement(testAccounts);
+      await initializeSettlement(vendorAccount, owner, testAccounts);
       await setToStall();
       await mocHelper.moc.runSettlement(100);
     });
     after(function() {
-      mocHelper.revertState();
+      return mocHelper.revertState();
     });
 
     it('THEN Settlement is not running state', async function() {
@@ -123,7 +129,7 @@ contract('MoC: Partial Settlement execution', function([owner, vendorAccount, ..
       assert(!ready, 'Settlement is in ready state');
     });
     it('AND RiskProx and StableToken Redeem Request transactions should revert', async function() {
-      await assertAllStoppedFunctions();
+      await assertAllStoppedFunctions(vendorAccount);
     });
     describe('WHEN settlement is set to restart', function() {
       before(function() {
@@ -135,7 +141,7 @@ contract('MoC: Partial Settlement execution', function([owner, vendorAccount, ..
         assert(ready, 'Settlement is in ready state');
       });
       it('AND all operations are again available', async function() {
-        await assertNonStoppedFunctions();
+        await assertNonStoppedFunctions(vendorAccount);
       });
     });
   });
