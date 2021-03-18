@@ -281,7 +281,9 @@ contract('MoC: MoCVendors', function([
         }
       );
       it('WHEN a vendor is unregistered THEN VendorUnregistered event is emitted', async function() {
-        unregisterVendorTx = await this.mocVendors.unregisterVendor({ from: scenario.params.account});
+        unregisterVendorTx = await this.mocVendors.unregisterVendor({
+          from: scenario.params.account
+        });
 
         const [vendorUnregisteredEvent] = await mocHelper.findEvents(
           unregisterVendorTx,
