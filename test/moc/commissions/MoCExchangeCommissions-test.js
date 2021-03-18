@@ -114,9 +114,9 @@ contract('MoC: MoCExchange', function([
 
     scenarios.forEach(async scenario => {
       describe(`GIVEN Reserve price is ${scenario.params.reservePrice}, MoC price is ${scenario.params.mocPrice} and MoC allowance is ${scenario.params.mocAmount}`, function() {
-        let reserveCommission;
+        let reserveTokenCommission;
         let mocCommission;
-        let reserveMarkup;
+        let reserveTokenMarkup;
         let mocMarkup;
 
         beforeEach(async function() {
@@ -135,7 +135,7 @@ contract('MoC: MoCExchange', function([
             userAccount
           );
           // Set transaction types
-          const txTypeFeesReserve = await mocHelper.mocInrate.MINT_RISKPRO_FEES_RESERVE();
+          const txTypeFeesReserveToken = await mocHelper.mocInrate.MINT_RISKPRO_FEES_RESERVE();
           const txTypeFeesMOC = await mocHelper.mocInrate.MINT_RISKPRO_FEES_MOC();
 
           const params = {
@@ -144,20 +144,20 @@ contract('MoC: MoCExchange', function([
               scenario.params.reserveAmount * mocHelper.MOC_PRECISION
             ).toString(),
             txTypeFeesMOC: txTypeFeesMOC.toString(),
-            txTypeFeesReserve: txTypeFeesReserve.toString(),
+            txTypeFeesReserveToken: txTypeFeesReserveToken.toString(),
             vendorAccount: vendorAccount1
           };
 
           ({
-            reserveCommission,
+            reserveTokenCommission,
             mocCommission,
-            reserveMarkup,
+            reserveTokenMarkup,
             mocMarkup
           } = await mocHelper.mocExchange.calculateCommissionsWithPrices(params, { from: owner }));
         });
         it(`THEN the commission amount in Reserve of ${scenario.expect.commissionAmountReserve} is correct`, async function() {
           mocHelper.assertBigReserve(
-            reserveCommission,
+            reserveTokenCommission,
             scenario.expect.commissionAmountReserve,
             'Commission amount in Reserve is incorrect'
           );
@@ -171,7 +171,7 @@ contract('MoC: MoCExchange', function([
         });
         it(`THEN the markup amount in Reserve of ${scenario.expect.markupAmountReserve} is correct`, async function() {
           mocHelper.assertBigReserve(
-            reserveMarkup,
+            reserveTokenMarkup,
             scenario.expect.markupAmountReserve,
             'Markup amount in Reserve is incorrect'
           );

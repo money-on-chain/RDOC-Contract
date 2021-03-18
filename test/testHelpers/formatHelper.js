@@ -8,7 +8,7 @@ const toContractBN = unitsPrecision => (number, precision = 'NONE') => {
   }
 
   if (!unitsPrecision[precision]) {
-    throw Error('Precision does not exists');
+    throw Error('Precision does not exist');
   }
   // This is a workaround to be able to create BN from strings
   const bigNumber = new BigNumber(number);

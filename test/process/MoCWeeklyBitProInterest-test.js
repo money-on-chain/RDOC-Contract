@@ -61,7 +61,8 @@ contract('MoC: RiskPro holder interests payment', function([
       beforeEach(async function() {
         await mocHelper.mintRiskPro(
           account,
-          toContractBN(s.riskProMintReserveToken, vendorAccount)
+          toContractBN(s.riskProMintReserveToken),
+          vendorAccount
         );
         await this.mockMocInrateChanger.setRiskProRate(toContractBN(s.riskProHolderRate));
         await this.mockMocInrateChanger.setRiskProInterestAddress(s.riskProInterestTargetAddress);
