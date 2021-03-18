@@ -50,12 +50,7 @@ const shouldRevertBasicFunctions = (userAccount, vendorAccount) => {
   });
   describe('WHEN a blacklisted user tries to redeem RiskProx', function() {
     it('THEN the transaction reverts', async function() {
-      const tx = mocHelper.redeemRiskProx(
-        userAccount,
-        BUCKET_X2,
-        1,
-        vendorAccount
-      );
+      const tx = mocHelper.redeemRiskProx(userAccount, BUCKET_X2, 1, vendorAccount);
 
       await expectRevert(tx, WITHDRAWAL_FAILED);
     });
