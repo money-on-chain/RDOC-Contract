@@ -1,5 +1,6 @@
 const { assert } = require('chai');
 const { expectRevert } = require('openzeppelin-test-helpers');
+const { BigNumber } = require('bignumber.js');
 const testHelperBuilder = require('../../mocHelper.js');
 
 let mocHelper;
@@ -18,7 +19,7 @@ contract('MoC: MoCExchange', function([
   otherAddress
 ]) {
   before(async function() {
-    const accounts = [owner, userAccount, commissionsAccount, vendorAccount];
+    const accounts = [owner, userAccount, commissionsAccount, vendorAccount, otherAddress];
     mocHelper = await testHelperBuilder({ owner, accounts });
     ({ toContractBN } = mocHelper);
     this.moc = mocHelper.moc;
@@ -150,7 +151,7 @@ contract('MoC: MoCExchange', function([
             'user riskPro balance is incorrect'
           );
         });
-        it(`THEN the user ReserveTokens balance has decrease by ${scenario.expect.riskProToMintOnReserveToken} ReserveTokens by Mint + ${scenario.expect.commissionAmountReserveTokenToken} ReserveTokens by commissions`, async function() {
+        it(`THEN the user ReserveTokens balance has decrease by ${scenario.expect.riskProToMintOnReserveToken} ReserveTokens by Mint + ${scenario.expect.commissionAmountReserveToken} ReserveTokens by commissions`, async function() {
           const usereserveTokenBalance = toContractBN(
             await mocHelper.getReserveBalance(userAccount)
           );
@@ -171,7 +172,7 @@ contract('MoC: MoCExchange', function([
             'Should increase sale total amount'
           );
         });
-        it(`THEN the commissions account reserveToken balance has increase by ${scenario.expect.commissionAmountReserveTokenToken} ReserveTokens`, async function() {
+        it(`THEN the commissions account reserveToken balance has increase by ${scenario.expect.commissionAmountReserveToken} ReserveTokens`, async function() {
           const commissionsAccountReserveTokenBalance = toContractBN(
             await mocHelper.getReserveBalance(commissionsAccount)
           );
@@ -180,7 +181,7 @@ contract('MoC: MoCExchange', function([
           );
           mocHelper.assertBigReserve(
             diff,
-            scenario.expect.commissionAmountReserveTokenToken,
+            scenario.expect.commissionAmountReserveToken,
             'commissions account balance is incorrect'
           );
         });
@@ -228,6 +229,21 @@ contract('MoC: MoCExchange', function([
 
     describe('Non-scenario tests', function() {
       beforeEach(async function() {
+        await mocHelper.revertState();
+
+        // Register vendor for test
+        await mocHelper.registerVendor(vendorAccount, 0.01, owner);
+
+        // Commission rates for test are set in functionHelper.js
+        await this.mockMocInrateChanger.setCommissionRates(
+          await mocHelper.getCommissionsArrayNonZero()
+        );
+
+        // set commissions address
+        await this.mockMocInrateChanger.setCommissionsAddress(commissionsAccount);
+        // update params
+        await this.governor.executeChange(this.mockMocInrateChanger.address);
+
         // MoC token for vendor
         const vendorStaking = 100;
         await mocHelper.mintMoCToken(vendorAccount, vendorStaking, owner);
@@ -236,17 +252,24 @@ contract('MoC: MoCExchange', function([
           from: vendorAccount
         });
       });
-      describe('GIVEN since the user sends not enough amount to pay fees in Reserve', function() {
-        it('WHEN a user tries to mint RiskPros with 10 Reserves and does not send to pay fees, THEN expect revert', async function() {
-          const mintRiskPro = mocHelper.mintRiskPro(userAccount, 10, vendorAccount);
+      describe('GIVEN since the user wants to mint more tokens than allowed', function() {
+        it('WHEN a user tries to mint more tokens than allowed, THEN expect revert', async function() {
+          // Get userAccount allowance
+          const allowance = await mocHelper.getMoCSystemAllowance(userAccount);
+          // Add arbitrary number to the allowance
+          const mintAmount = BigNumber(allowance).plus(10);
+          const mintRiskPro = mocHelper.mintRiskPro(userAccount, mintAmount, vendorAccount, false);
           await expectRevert(mintRiskPro, 'amount is not enough');
         });
       });
       describe('GIVEN since there is no allowance to pay fees in MoC', function() {
-        it('WHEN a user tries to mint RiskPros with no MoC allowance, THEN expect revert', async function() {
-          await mocHelper.mintMoCToken(userAccount, 1000, owner);
+        it('WHEN a user tries to mint their new allowance in RiskPros with no MoC allowance, THEN expect revert', async function() {
+          const mintAmount = 100;
+          // Change user allowance to mintAmount
+          await mocHelper.allowReserve(userAccount, toContractBN(mintAmount, 'RES'));
+          await mocHelper.mintMoCToken(userAccount, mintAmount, owner);
           // DO NOT approve MoC token on purpose
-          const mintRiskPro = mocHelper.mintRiskPro(userAccount, 10, vendorAccount);
+          const mintRiskPro = mocHelper.mintRiskPro(userAccount, mintAmount, vendorAccount);
           await expectRevert(mintRiskPro, 'amount is not enough');
         });
       });
