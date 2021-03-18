@@ -56,8 +56,8 @@ contract.skip('MoC: Gas limit on deleveraging', function([owner, vendorAccount, 
     });
     describe(`AND ${afterAccounts.length} accounts also minted BProx`, function() {
       beforeEach(async function() {
-        await initializeDeleveraging(owner, afterAccounts.slice(0, 100));
-        await initializeDeleveraging(owner, afterAccounts.slice(100, 200));
+        await initializeDeleveraging(owner, vendorAccount, afterAccounts.slice(0, 100));
+        await initializeDeleveraging(owner, vendorAccount, afterAccounts.slice(100, 200));
       });
       it(`THEN must be ${initialAccounts.length +
         afterAccounts.length} active addresses`, async function() {
@@ -105,7 +105,7 @@ contract.skip('MoC: Gas limit on deleveraging', function([owner, vendorAccount, 
     describe(`WHEN ${accoutsNewLiquidation.length} minted BProx`, function() {
       it(`THEN must be ${accoutsNewLiquidation.length} active addresses`, async function() {
         await mocHelper.setReserveTokenPrice(10000 * mocHelper.MOC_PRECISION);
-        await initializeDeleveraging(owner, accoutsNewLiquidation);
+        await initializeDeleveraging(owner, vendorAccount, accoutsNewLiquidation);
         const activeAddressLength = await this.riskProx.getActiveAddressesCount(BUCKET_X2);
         mocHelper.assertBig(
           activeAddressLength,
