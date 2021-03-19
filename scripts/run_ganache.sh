@@ -28,7 +28,7 @@ start_ganache() {
 if ganache_running; then
   echo "Using existing ganache instance"
 else
-  echo "Starting our own ganache instance!!!"
+  echo "Starting our own ganache instance"
   start_ganache
 fi
 

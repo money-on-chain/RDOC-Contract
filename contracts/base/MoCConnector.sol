@@ -18,9 +18,8 @@ contract MoCConnector is MoCWhitelist, Initializable {
   address public mocSettlement;
   address public mocExchange;
   address public mocInrate;
-  /** DEPRECATED **/
-  // solium-disable-next-line mixedcase
-  address public DEPRECATED_mocBurnout;
+  /** DEPRECATED mocBurnout **/
+  address public mocBurnout;
   address public reserveToken;
 
   bool internal initialized;
@@ -61,7 +60,7 @@ contract MoCConnector is MoCWhitelist, Initializable {
     mocConverter = converterAddress;
     mocExchange = exchangeAddress;
     mocInrate = inrateAddress;
-    DEPRECATED_mocBurnout = burnoutBookAddress;
+    mocBurnout = burnoutBookAddress;
     reserveToken = reserveTokenAddress;
 
     // Add to Whitelist
