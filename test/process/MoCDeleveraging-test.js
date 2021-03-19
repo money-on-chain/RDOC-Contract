@@ -98,7 +98,7 @@ contract('MoC: Delever X', function([owner, blacklisted, vendorAccount, ...allAc
         beforeEach(async function() {
           // Run only a few deleveraging step
           await this.moc.runSettlement(3);
-
+          await mocHelper.waitNBlocks(100);
           expect(await this.mocSettlement.isSettlementRunning()).to.be.true;
         });
         it(`THEN bucket liquidation should not be enabled ${BUCKET_X2} until the settlement finishes`, async function() {

@@ -123,7 +123,6 @@ contract('MoC: MoCExchange', function([
         let prevCommissionsAccountMoCBalance;
         let prevvendorAccountReserveTokenBalance;
         let prevVendorAccountMoCBalance;
-        let tx;
 
         beforeEach(async function() {
           await mocHelper.mintMoCToken(userAccount, scenario.params.mocAmount, owner);
@@ -168,7 +167,7 @@ contract('MoC: MoCExchange', function([
           );
           prevVendorAccountMoCBalance = await mocHelper.getMoCBalance(vendorAccount);
 
-          tx = await mocHelper.redeemRiskPro(
+          await mocHelper.redeemRiskPro(
             userAccount,
             scenario.params.riskProToRedeem,
             vendorAccount
