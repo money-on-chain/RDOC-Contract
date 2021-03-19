@@ -1,4 +1,5 @@
 const { expectRevert } = require('openzeppelin-test-helpers');
+const { BigNumber } = require('bignumber.js');
 const testHelperBuilder = require('../../mocHelper.js');
 
 let mocHelper;
@@ -18,6 +19,7 @@ contract('MoC', function([owner, userAccount, commissionsAccount, vendorAccount,
     this.mocToken = mocHelper.mocToken;
     this.mockMocStateChanger = mocHelper.mockMocStateChanger;
     this.mocVendors = mocHelper.mocVendors;
+    this.mocState = mocHelper.mocState;
   });
 
   describe('StableToken minting paying Commissions', function() {
@@ -61,14 +63,12 @@ contract('MoC', function([owner, userAccount, commissionsAccount, vendorAccount,
         let prevVendorAccountReserveTokenBalance;
 
         beforeEach(async function() {
-          prevReserveTokenBalance = toContractBN(
-            await mocHelper.getReserveTokenBalance(userAccount)
-          );
+          prevReserveTokenBalance = toContractBN(await mocHelper.getReserveBalance(userAccount));
           prevCommissionsAccountReserveTokenBalance = toContractBN(
-            await mocHelper.getReserveTokenBalance(commissionsAccount)
+            await mocHelper.getReserveBalance(commissionsAccount)
           );
           prevVendorAccountReserveTokenBalance = toContractBN(
-            await mocHelper.getReserveTokenBalance(vendorAccount)
+            await mocHelper.getReserveBalance(vendorAccount)
           );
 
           await mocHelper.mintStableTokenAmount(
@@ -80,9 +80,7 @@ contract('MoC', function([owner, userAccount, commissionsAccount, vendorAccount,
         });
         it('AND only spent 0.5 ReserveTokens + 0.0015 ReserveTokens commission + 0.005 ReserveTokens markup', async function() {
           // commission = 5000 * 0.003; markup = 5000 * 0.01
-          const reserveTokenBalance = toContractBN(
-            await mocHelper.getReserveTokenBalance(userAccount)
-          );
+          const reserveTokenBalance = toContractBN(await mocHelper.getReserveBalance(userAccount));
           const diff = prevReserveTokenBalance.sub(toContractBN(reserveTokenBalance));
 
           mocHelper.assertBig(
@@ -92,9 +90,7 @@ contract('MoC', function([owner, userAccount, commissionsAccount, vendorAccount,
           );
         });
         it('AND User only spent on fees for 0.0015 ReserveTokens commission + 0.005 ReserveTokens markup', async function() {
-          const reserveTokenBalance = toContractBN(
-            await mocHelper.getReserveTokenBalance(userAccount)
-          );
+          const reserveTokenBalance = toContractBN(await mocHelper.getReserveBalance(userAccount));
           const diff = prevReserveTokenBalance
             .sub(toContractBN(reserveTokenBalance))
             .sub(toContractBN(500000000000000000));
@@ -107,7 +103,7 @@ contract('MoC', function([owner, userAccount, commissionsAccount, vendorAccount,
         });
         it('AND commissions account increase balance by 0.0015 ReserveTokens', async function() {
           const reserveTokenBalance = toContractBN(
-            await mocHelper.getReserveTokenBalance(commissionsAccount)
+            await mocHelper.getReserveBalance(commissionsAccount)
           );
           const diff = reserveTokenBalance.sub(
             toContractBN(prevCommissionsAccountReserveTokenBalance)
@@ -120,7 +116,7 @@ contract('MoC', function([owner, userAccount, commissionsAccount, vendorAccount,
         });
         it('AND vendors account increase balance by 0.005 ReserveTokens', async function() {
           const reserveTokenBalance = toContractBN(
-            await mocHelper.getReserveTokenBalance(vendorAccount)
+            await mocHelper.getReserveBalance(vendorAccount)
           );
           const diff = reserveTokenBalance.sub(toContractBN(prevVendorAccountReserveTokenBalance));
           mocHelper.assertBig(
@@ -171,10 +167,10 @@ contract('MoC', function([owner, userAccount, commissionsAccount, vendorAccount,
                   prev.mocBalance,
                   prev.vendorAccountBalance
                 ] = await Promise.all([
-                  mocHelper.getReserveTokenBalance(userAccount),
-                  mocHelper.getReserveTokenBalance(commissionsAccount),
-                  mocHelper.getReserveTokenBalance(this.moc.address),
-                  mocHelper.getReserveTokenBalance(vendorAccount)
+                  mocHelper.getReserveBalance(userAccount),
+                  mocHelper.getReserveBalance(commissionsAccount),
+                  mocHelper.getReserveBalance(this.moc.address),
+                  mocHelper.getReserveBalance(vendorAccount)
                 ]);
 
                 await mocHelper.mintStableTokenAmount(
@@ -206,16 +202,14 @@ contract('MoC', function([owner, userAccount, commissionsAccount, vendorAccount,
               });
 
               it('THEN global balance increases by the correct amount of ReserveTokens', async function() {
-                const mocReserveTokenBalance = await mocHelper.getReserveTokenBalance(
-                  this.moc.address
-                );
+                const mocReserveTokenBalance = await mocHelper.getReserveBalance(this.moc.address);
                 const diff = new BN(mocReserveTokenBalance).sub(new BN(prev.mocBalance));
 
                 mocHelper.assertBig(diff, payAmount, 'Should increase sale total amount');
               });
 
               it('AND User Balance decreases by the correct amount of ReserveTokens, commission and markup', async function() {
-                const userBalance = await mocHelper.getReserveTokenBalance(userAccount);
+                const userBalance = await mocHelper.getReserveBalance(userAccount);
                 const diff = new BN(prev.userBalance).sub(new BN(userBalance));
                 const totalSpent = payAmount.add(payComissionAmount).add(payMarkupAmount);
 
@@ -226,7 +220,7 @@ contract('MoC', function([owner, userAccount, commissionsAccount, vendorAccount,
                 );
               });
               it('AND Commissions Account Balance increase by the correct amount of commissions', async function() {
-                const commissionsAccountBalance = await mocHelper.getReserveTokenBalance(
+                const commissionsAccountBalance = await mocHelper.getReserveBalance(
                   commissionsAccount
                 );
                 const diff = new BN(commissionsAccountBalance).sub(
@@ -239,7 +233,7 @@ contract('MoC', function([owner, userAccount, commissionsAccount, vendorAccount,
                 );
               });
               it('AND Vendor Account Balance increase by the correct amount of markup', async function() {
-                const vendorAccountBalance = await mocHelper.getReserveTokenBalance(vendorAccount);
+                const vendorAccountBalance = await mocHelper.getReserveBalance(vendorAccount);
                 const diff = new BN(vendorAccountBalance).sub(new BN(prev.vendorAccountBalance));
                 mocHelper.assertBig(
                   diff,
@@ -279,9 +273,7 @@ contract('MoC', function([owner, userAccount, commissionsAccount, vendorAccount,
         let prevCommissionsAccountMoCBalance;
         let prevVendorAccountMoCBalance;
         beforeEach(async function() {
-          prevReserveTokenBalance = toContractBN(
-            await mocHelper.getReserveTokenBalance(userAccount)
-          );
+          prevReserveTokenBalance = toContractBN(await mocHelper.getReserveBalance(userAccount));
           prevUserMoCBalance = await mocHelper.getMoCBalance(userAccount);
           prevCommissionsAccountMoCBalance = await mocHelper.getMoCBalance(commissionsAccount);
           prevVendorAccountMoCBalance = await mocHelper.getMoCBalance(vendorAccount);
@@ -295,9 +287,7 @@ contract('MoC', function([owner, userAccount, commissionsAccount, vendorAccount,
         });
         it('AND only spent 0.5 ReserveTokens + 0.0045 MoC commission + 0.005 MoC markup', async function() {
           // commission = 5000 * 0.009, markup = 5000 * 0.01
-          const reserveTokenBalance = toContractBN(
-            await mocHelper.getReserveTokenBalance(userAccount)
-          );
+          const reserveTokenBalance = toContractBN(await mocHelper.getReserveBalance(userAccount));
           const diff = prevReserveTokenBalance.sub(toContractBN(reserveTokenBalance));
           // const expectedMoCCommission = '4500000000000000';
           // const expectedMoCMarkup = '5000000000000000';
@@ -317,7 +307,7 @@ contract('MoC', function([owner, userAccount, commissionsAccount, vendorAccount,
           // );
         });
         it('AND User only spent on comissions and markup for 0.0045 MoC + 0.005 MoC', async function() {
-          const reserveTokenBalance = await mocHelper.getReserveTokenBalance(userAccount);
+          const reserveTokenBalance = await mocHelper.getReserveBalance(userAccount);
           const userMoCBalance = await mocHelper.getMoCBalance(userAccount);
           const diff = prevReserveTokenBalance
             .sub(toContractBN(reserveTokenBalance))
@@ -363,24 +353,30 @@ contract('MoC', function([owner, userAccount, commissionsAccount, vendorAccount,
         });
       });
     });
-    describe('GIVEN since the user sends not enough amount to pay comission', function() {
-      it('WHEN a user tries to mint StableTokens with 1 ReserveTokens and does not send to pay fees, THEN expect revert', async function() {
+    describe('GIVEN since the user wants to mint exactly their allowance', function() {
+      it('WHEN a user tries to mint exactly their allowance, THEN expect revert because of fees on ReserveToken', async function() {
         await mocHelper.mintRiskProAmount(
           userAccount,
           10,
           vendorAccount,
           await mocHelper.mocInrate.MINT_RISKPRO_FEES_RESERVE()
         );
-        const mintStableToken = mocHelper.mintStableToken(
+
+        const mintAmount = 1;
+        // Change user allowance to mintAmount
+        await mocHelper.allowReserve(userAccount, toContractBN(mintAmount, 'RES'));
+
+        const mintStableToken = mocHelper.mintStableTokenAmount(
           userAccount,
-          1,
+          mintAmount,
           vendorAccount,
           await mocHelper.mocInrate.MINT_STABLETOKEN_FEES_RESERVE()
         );
+
         await expectRevert(mintStableToken, 'amount is not enough');
       });
     });
-    describe('GIVEN since there is no allowance to pay comission in MoC', function() {
+    describe('GIVEN since there is no allowance to pay fees in MoC', function() {
       it('WHEN a user tries to mint StableToken with no MoC allowance, THEN expect revert', async function() {
         await mocHelper.mintMoCToken(userAccount, 1000, owner);
         // DO NOT approve MoC token on purpose
@@ -390,9 +386,14 @@ contract('MoC', function([owner, userAccount, commissionsAccount, vendorAccount,
           vendorAccount,
           await mocHelper.mocInrate.MINT_RISKPRO_FEES_RESERVE()
         );
+
+        const mintAmount = 1;
+        // Change user allowance to mintAmount
+        await mocHelper.allowReserve(userAccount, toContractBN(mintAmount, 'RES'));
+
         const mintStableToken = mocHelper.mintStableToken(
           userAccount,
-          1,
+          mintAmount,
           vendorAccount,
           await mocHelper.mocInrate.MINT_STABLETOKEN_FEES_RESERVE()
         );
@@ -425,10 +426,10 @@ contract('MoC', function([owner, userAccount, commissionsAccount, vendorAccount,
 
         // Calculate balances before minting
         const prevCommissionAccountBalance = toContractBN(
-          await mocHelper.getReserveTokenBalance(commissionsAccount)
+          await mocHelper.getReserveBalance(commissionsAccount)
         );
         const prevVendorAccountReserveTokenBalance = toContractBN(
-          await mocHelper.getReserveTokenBalance(vendorAccount)
+          await mocHelper.getReserveBalance(vendorAccount)
         );
         const prevUserMoCBalance = await mocHelper.getMoCBalance(otherAddress);
 
@@ -444,12 +445,12 @@ contract('MoC', function([owner, userAccount, commissionsAccount, vendorAccount,
         const diffMoCFees = prevUserMoCBalance.sub(userMoCBalance);
 
         const commissionsBalance = toContractBN(
-          await mocHelper.getReserveTokenBalance(commissionsAccount)
+          await mocHelper.getReserveBalance(commissionsAccount)
         );
         const diffReserveTokenCommission = commissionsBalance.sub(prevCommissionAccountBalance);
 
         const vendorAccountreserveTokenBalance = toContractBN(
-          await mocHelper.getReserveTokenBalance(vendorAccount)
+          await mocHelper.getReserveBalance(vendorAccount)
         );
         const diffReserveTokenVendorFee = vendorAccountreserveTokenBalance.sub(
           prevVendorAccountReserveTokenBalance
@@ -524,10 +525,10 @@ contract('MoC', function([owner, userAccount, commissionsAccount, vendorAccount,
 
         // Calculate balances before minting
         const prevCommissionAccountBalance = toContractBN(
-          await mocHelper.getReserveTokenBalance(commissionsAccount)
+          await mocHelper.getReserveBalance(commissionsAccount)
         );
         const prevVendorAccountReserveTokenBalance = toContractBN(
-          await mocHelper.getReserveTokenBalance(vendorAccount)
+          await mocHelper.getReserveBalance(vendorAccount)
         );
         const prevUserMoCBalance = await mocHelper.getMoCBalance(otherAddress);
 
@@ -543,12 +544,12 @@ contract('MoC', function([owner, userAccount, commissionsAccount, vendorAccount,
         const diffMoCFees = prevUserMoCBalance.sub(userMoCBalance);
 
         const commissionsBalance = toContractBN(
-          await mocHelper.getReserveTokenBalance(commissionsAccount)
+          await mocHelper.getReserveBalance(commissionsAccount)
         );
         const diffReserveTokenCommission = commissionsBalance.sub(prevCommissionAccountBalance);
 
         const vendorAccountreserveTokenBalance = toContractBN(
-          await mocHelper.getReserveTokenBalance(vendorAccount)
+          await mocHelper.getReserveBalance(vendorAccount)
         );
         const diffReserveTokenVendorFee = vendorAccountreserveTokenBalance.sub(
           prevVendorAccountReserveTokenBalance
@@ -619,9 +620,9 @@ contract('MoC', function([owner, userAccount, commissionsAccount, vendorAccount,
                   prev.commissionsAccountMoCBalance,
                   prev.vendorAccountBalance
                 ] = await Promise.all([
-                  mocHelper.getReserveTokenBalance(userAccount),
-                  mocHelper.getReserveTokenBalance(commissionsAccount),
-                  mocHelper.getReserveTokenBalance(this.moc.address),
+                  mocHelper.getReserveBalance(userAccount),
+                  mocHelper.getReserveBalance(commissionsAccount),
+                  mocHelper.getReserveBalance(this.moc.address),
                   mocHelper.getMoCBalance(userAccount),
                   mocHelper.getMoCBalance(commissionsAccount),
                   mocHelper.getMoCBalance(vendorAccount)
@@ -656,16 +657,14 @@ contract('MoC', function([owner, userAccount, commissionsAccount, vendorAccount,
               });
 
               it('THEN global balance increases by the correct amount of ReserveTokens', async function() {
-                const mocReserveTokenBalance = await mocHelper.getReserveTokenBalance(
-                  this.moc.address
-                );
+                const mocReserveTokenBalance = await mocHelper.getReserveBalance(this.moc.address);
                 const diff = new BN(mocReserveTokenBalance).sub(new BN(prev.mocBalance));
 
                 mocHelper.assertBig(diff, payAmount, 'Should increase sale total amount');
               });
 
               it('AND User Balance decreases by the correct amount of ReserveTokens', async function() {
-                const userBalance = await mocHelper.getReserveTokenBalance(userAccount);
+                const userBalance = await mocHelper.getReserveBalance(userAccount);
                 const diff = new BN(prev.userBalance).sub(new BN(userBalance));
                 const totalSpent = payAmount;
 
@@ -677,7 +676,7 @@ contract('MoC', function([owner, userAccount, commissionsAccount, vendorAccount,
               });
 
               it('AND Commissions Account Balance does not change because fees are paid in MoC', async function() {
-                const commissionsAccountBalance = await mocHelper.getReserveTokenBalance(
+                const commissionsAccountBalance = await mocHelper.getReserveBalance(
                   commissionsAccount
                 );
                 const diff = new BN(commissionsAccountBalance).sub(
@@ -776,9 +775,9 @@ contract('MoC', function([owner, userAccount, commissionsAccount, vendorAccount,
                   prev.commissionsAccountMoCBalance,
                   prev.vendorAccountBalance
                 ] = await Promise.all([
-                  mocHelper.getReserveTokenBalance(userAccount),
-                  mocHelper.getReserveTokenBalance(commissionsAccount),
-                  mocHelper.getReserveTokenBalance(this.moc.address),
+                  mocHelper.getReserveBalance(userAccount),
+                  mocHelper.getReserveBalance(commissionsAccount),
+                  mocHelper.getReserveBalance(this.moc.address),
                   mocHelper.getMoCBalance(userAccount),
                   mocHelper.getMoCBalance(commissionsAccount),
                   mocHelper.getMoCBalance(vendorAccount)
@@ -812,16 +811,14 @@ contract('MoC', function([owner, userAccount, commissionsAccount, vendorAccount,
               });
 
               it('THEN global balance increases by the correct amount of ReserveTokens', async function() {
-                const mocReserveTokenBalance = await mocHelper.getReserveTokenBalance(
-                  this.moc.address
-                );
+                const mocReserveTokenBalance = await mocHelper.getReserveBalance(this.moc.address);
                 const diff = new BN(mocReserveTokenBalance).sub(new BN(prev.mocBalance));
 
                 mocHelper.assertBig(diff, payAmount, 'Should increase sale total amount');
               });
 
               it('AND User Balance decreases by the correct amount of ReserveTokens', async function() {
-                const userBalance = await mocHelper.getReserveTokenBalance(userAccount);
+                const userBalance = await mocHelper.getReserveBalance(userAccount);
                 const diff = new BN(prev.userBalance).sub(new BN(userBalance));
                 const totalSpent = payAmount;
 
@@ -833,7 +830,7 @@ contract('MoC', function([owner, userAccount, commissionsAccount, vendorAccount,
               });
 
               it('AND Commissions Account Balance does not change because fees are paid in MoC', async function() {
-                const commissionsAccountBalance = await mocHelper.getReserveTokenBalance(
+                const commissionsAccountBalance = await mocHelper.getReserveBalance(
                   commissionsAccount
                 );
                 const diff = new BN(commissionsAccountBalance).sub(
