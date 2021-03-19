@@ -24,6 +24,7 @@ contract('MoC : MoCExchange', function([
     ({ BUCKET_X2 } = mocHelper);
     this.mocToken = mocHelper.mocToken;
     this.mockMocStateChanger = mocHelper.mockMocStateChanger;
+    this.mockMocInrateChanger = mocHelper.mockMocInrateChanger;
     this.governor = mocHelper.governor;
     this.mocVendors = mocHelper.mocVendors;
   });
@@ -198,7 +199,7 @@ contract('MoC : MoCExchange', function([
           });
           it(`THEN he receives ${s.expect.nRiskProx} RiskProx`, async function() {
             const balance = await mocHelper.getRiskProxBalance(BUCKET_X2, userAccount);
-            mocHelper.assertBigReserveToken(
+            mocHelper.assertBigReserve(
               balance,
               s.expect.nRiskProx,
               'RiskProx balance is incorrect'
@@ -210,7 +211,7 @@ contract('MoC : MoCExchange', function([
             );
             const diff = prevUserReserveTokenBalance.sub(userReserveTokenBalance);
 
-            mocHelper.assertBigReserveToken(
+            mocHelper.assertBigReserve(
               diff,
               s.expect.totalCostOnReserveToken,
               'user ReserveToken balance is incorrect'
@@ -228,7 +229,7 @@ contract('MoC : MoCExchange', function([
             );
             const diff = vendorAccountReserveTokenBalance.sub(prevVendorAccountReserveTokenBalance);
 
-            mocHelper.assertBigReserveToken(
+            mocHelper.assertBigReserve(
               diff,
               s.expect.vendorAmountReserveToken,
               'vendor account balance is incorrect'
@@ -246,7 +247,7 @@ contract('MoC : MoCExchange', function([
           it(`THEN the commissions account MoC balance has increased by ${s.expect.commissionAmountMoC} MoCs`, async function() {
             const commissionsAccountMoCBalance = await mocHelper.getMoCBalance(commissionsAccount);
             const diff = commissionsAccountMoCBalance.sub(prevCommissionsAccountMoCBalance);
-            mocHelper.assertBigReserveToken(
+            mocHelper.assertBigReserve(
               diff,
               s.expect.commissionAmountMoC,
               'commissions account MoC balance is incorrect'
@@ -255,7 +256,7 @@ contract('MoC : MoCExchange', function([
           it(`THEN the vendor account MoC balance has increased by ${s.expect.vendorAmountMoC} MoCs`, async function() {
             const vendorAccountMoCBalance = await mocHelper.getMoCBalance(vendorAccount);
             const diff = vendorAccountMoCBalance.sub(prevVendorAccountMoCBalance);
-            mocHelper.assertBigReserveToken(
+            mocHelper.assertBigReserve(
               diff,
               s.expect.vendorAmountMoC,
               'vendor account MoC balance is incorrect'
@@ -274,8 +275,8 @@ contract('MoC : MoCExchange', function([
           from: vendorAccount
         });
       });
-      describe('GIVEN since the user sends not enough amount to pay fees in ReserveToken', function() {
-        it('WHEN a user tries to mint RiskProx with 10 ReserveTokens and does not send to pay fees, THEN expect revert', async function() {
+      describe('GIVEN since the user wants to mint exactly their allowance', function() {
+        it('WHEN a user tries to mint exactly their allowance, THEN expect revert because of fees on ReserveToken', async function() {
           await mocHelper.mintRiskProAmount(
             userAccount,
             18,
@@ -283,12 +284,18 @@ contract('MoC : MoCExchange', function([
             await mocHelper.mocInrate.MINT_RISKPRO_FEES_RESERVE()
           );
           await mocHelper.mintStableToken(userAccount, 1000, vendorAccount);
-          const mint = mocHelper.mintRiskProx(userAccount, BUCKET_X2, 8, vendorAccount, 8);
+
+          const mintAmount = 8;
+          // Change user allowance to mintAmount
+          await mocHelper.allowReserve(userAccount, toContractBN(mintAmount, 'RES'));
+
+          const mint = mocHelper.mintRiskProx(userAccount, BUCKET_X2, mintAmount, vendorAccount);
+
           await expectRevert(mint, 'amount is not enough');
         });
       });
       describe('GIVEN since there is no allowance to pay fees in MoC', function() {
-        it('WHEN a user tries to mint RiskProx with no MoC allowance, THEN expect revert', async function() {
+        it('WHEN a user tries to mint their new allowance in RiskProx with no MoC allowance, THEN expect revert', async function() {
           await mocHelper.mintMoCToken(userAccount, 1000, owner);
           // DO NOT approve MoC token on purpose
           await mocHelper.mintRiskProAmount(
@@ -298,7 +305,12 @@ contract('MoC : MoCExchange', function([
             await mocHelper.mocInrate.MINT_RISKPRO_FEES_RESERVE()
           );
           await mocHelper.mintStableToken(userAccount, 1000, vendorAccount);
-          const mint = mocHelper.mintRiskProx(userAccount, BUCKET_X2, 8, vendorAccount, 8);
+
+          const mintAmount = 8;
+          // Change user allowance to mintAmount
+          await mocHelper.allowReserve(userAccount, toContractBN(mintAmount, 'RES'));
+
+          const mint = mocHelper.mintRiskProx(userAccount, BUCKET_X2, mintAmount, vendorAccount);
           await expectRevert(mint, 'amount is not enough');
         });
       });
@@ -361,13 +373,13 @@ contract('MoC : MoCExchange', function([
             prevVendorAccountReserveTokenBalance
           );
 
-          mocHelper.assertBigReserveToken(diffMoCFees, expectedMoCFees, 'MoC fees are incorrect');
-          mocHelper.assertBigReserveToken(
+          mocHelper.assertBigReserve(diffMoCFees, expectedMoCFees, 'MoC fees are incorrect');
+          mocHelper.assertBigReserve(
             diffReserveTokenCommission,
             expectedReserveTokenCommission,
             'commissions account balance is incorrect'
           );
-          mocHelper.assertBigReserveToken(
+          mocHelper.assertBigReserve(
             diffReserveTokenVendorFee,
             expectedReserveTokenVendorFee,
             'vendor account ReserveToken balance is incorrect'
@@ -472,13 +484,13 @@ contract('MoC : MoCExchange', function([
           await this.mockMocStateChanger.setMoCToken(mocTokenAddress);
           await this.governor.executeChange(this.mockMocStateChanger.address);
 
-          mocHelper.assertBigReserveToken(diffMoCFees, expectedMoCFees, 'MoC fees are incorrect');
-          mocHelper.assertBigReserveToken(
+          mocHelper.assertBigReserve(diffMoCFees, expectedMoCFees, 'MoC fees are incorrect');
+          mocHelper.assertBigReserve(
             diffReserveTokenCommission,
             expectedReserveTokenCommission,
             'commissions account balance is incorrect'
           );
-          mocHelper.assertBigReserveToken(
+          mocHelper.assertBigReserve(
             diffReserveTokenVendorFee,
             expectedReserveTokenVendorFee,
             'vendor account ReserveToken balance is incorrect'
@@ -558,7 +570,7 @@ contract('MoC : MoCExchange', function([
         });
         it(`THEN he receives ${nRiskProx} RiskProx`, async function() {
           const balance = await mocHelper.getRiskProxBalance(BUCKET_X2, userAccount);
-          mocHelper.assertBigReserveToken(balance, nRiskProx, 'RiskProx balance is incorrect');
+          mocHelper.assertBigReserve(balance, nRiskProx, 'RiskProx balance is incorrect');
         });
         it(`THEN the user ReserveToken balance has decrease by ${nReserveToken} ReserveTokens by Mint + ${commissionReserveToken} ReserveTokens by commissions + ${vendorAmountReserveToken} ReserveTokens by vendor markup`, async function() {
           const userReserveTokenBalance = toContractBN(
@@ -566,7 +578,7 @@ contract('MoC : MoCExchange', function([
           );
           const diff = prevUserReserveTokenBalance.sub(userReserveTokenBalance);
 
-          mocHelper.assertBigReserveToken(
+          mocHelper.assertBigReserve(
             diff,
             totalCostOnReserveToken,
             'user ReserveToken balance is incorrect'
@@ -584,7 +596,7 @@ contract('MoC : MoCExchange', function([
           );
           const diff = vendorAccountReserveTokenBalance.sub(prevVendorAccountReserveTokenBalance);
 
-          mocHelper.assertBigReserveToken(
+          mocHelper.assertBigReserve(
             diff,
             vendorAmountReserveToken,
             'vendor account balance is incorrect'
@@ -602,7 +614,7 @@ contract('MoC : MoCExchange', function([
         it(`THEN the commissions account MoC balance has increased by ${commissionAmountMoC} MoCs`, async function() {
           const commissionsAccountMoCBalance = await mocHelper.getMoCBalance(commissionsAccount);
           const diff = commissionsAccountMoCBalance.sub(prevCommissionsAccountMoCBalance);
-          mocHelper.assertBigReserveToken(
+          mocHelper.assertBigReserve(
             diff,
             commissionAmountMoC,
             'commissions account MoC balance is incorrect'
@@ -611,7 +623,7 @@ contract('MoC : MoCExchange', function([
         it(`THEN the vendor account MoC balance has increased by ${vendorAmountMoC} MoCs`, async function() {
           const vendorAccountMoCBalance = await mocHelper.getMoCBalance(vendorAccount);
           const diff = vendorAccountMoCBalance.sub(prevVendorAccountMoCBalance);
-          mocHelper.assertBigReserveToken(
+          mocHelper.assertBigReserve(
             diff,
             vendorAmountMoC,
             'vendor account MoC balance is incorrect'
