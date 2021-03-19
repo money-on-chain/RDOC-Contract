@@ -5,6 +5,8 @@ const { scripts, ConfigVariablesInitializer } = require('zos');
 const { add, push, create, setAdmin } = scripts;
 const forceDeploy = true;
 
+const fs = require('fs');
+
 const makeUtils = async (artifacts, networkName, config, owner, deployer) => {
   const ReserveToken = artifacts.require('./test-contracts/ReserveToken.sol');
   const MoC = artifacts.require('./MoC.sol');
@@ -203,6 +205,12 @@ const makeUtils = async (artifacts, networkName, config, owner, deployer) => {
     return proxiesOfInterest[proxiesOfInterest.length - 1].address;
   };
 
+  const getImplementationAddress = (proxies, contractName) => {
+    const projectPrefix = 'money-on-chain';
+    const proxiesOfInterest = proxies[`${projectPrefix}/${contractName}`];
+    return proxiesOfInterest[proxiesOfInterest.length - 1].implementation;
+  };
+
   const createInstances = async (MoCSettlementContract, MoCStateContract) => {
     const proxies = getProxies();
     stableToken = await StableToken.deployed();
@@ -317,7 +325,38 @@ const makeUtils = async (artifacts, networkName, config, owner, deployer) => {
       proxyAdmin: proxyAdmin.address,
       upgradeDelegator: await proxyAdmin.owner(),
       mocOracle: mocPriceFeedAddress,
-      mocVendors: getProxyAddress(proxies, 'MoCVendors')
+      mocVendors: getProxyAddress(proxies, 'MoCVendors'),
+      mocExchange: getProxyAddress(proxies, 'MoCExchange'),
+      mocSettlement: getProxyAddress(proxies, 'MoCSettlement'),
+      mocConverter: getProxyAddress(proxies, 'MoCConverter'),
+      mocConnector: getProxyAddress(proxies, 'MoCConnector')
+    };
+  };
+
+  const getImplementationAddresses = async () => {
+    const proxies = getProxies();
+    const proxyAdmin = await ProxyAdmin.at(await proxyAdminContractAddress());
+    const priceFeedAddress = await oracle();
+    const mocPriceFeedAddress = await mocOracle();
+    return {
+      moc: getImplementationAddress(proxies, 'MoC'),
+      oracle: priceFeedAddress,
+      mocRiskProxManager: getImplementationAddress(proxies, 'MoCRiskProxManager'),
+      mocState: getImplementationAddress(proxies, 'MoCState'),
+      mocInrate: getImplementationAddress(proxies, 'MoCInrate'),
+      commissionSplitter: getImplementationAddress(proxies, 'CommissionSplitter'),
+      governor: await governorContractAddress(),
+      stopper: await stopperContractAddress(),
+      proxyAdmin: proxyAdmin.address,
+      upgradeDelegator: await proxyAdmin.owner(),
+      mocOracle: mocPriceFeedAddress,
+      mocVendors: getImplementationAddress(proxies, 'MoCVendors'),
+      mocExchange: getImplementationAddress(proxies, 'MoCExchange'),
+      mocSettlement: getImplementationAddress(proxies, 'MoCSettlement'),
+      mocConverter: getImplementationAddress(proxies, 'MoCConverter'),
+      mocConnector: getImplementationAddress(proxies, 'MoCConnector'),
+      mocToken: (await MoCToken.deployed()).address,
+      mocHelperLib: (await MoCLib.deployed()).address
     };
   };
 
@@ -518,6 +557,63 @@ const makeUtils = async (artifacts, networkName, config, owner, deployer) => {
 
   const settlementBlockSpan = () => toContract(config.dayBlockSpan * config.settlementDays);
 
+  const saveConfig = async (path, networkConfig) => {
+    const contractAddresses = await getContractAddresses();
+    const implementationAddr = await getImplementationAddresses();
+
+    const proxyAddresses = {
+      MoC: contractAddresses.moc,
+      MoCConnector: contractAddresses.mocConnector,
+      MoCExchange: contractAddresses.mocExchange,
+      MoCSettlement: contractAddresses.mocSettlement,
+      MoCInrate: contractAddresses.mocInrate,
+      MoCConverter: contractAddresses.mocConverter,
+      MoCState: contractAddresses.mocState,
+      MoCVendors: contractAddresses.mocVendors
+    };
+
+    const implementationAddresses = {
+      MoC: implementationAddr.moc,
+      MoCConnector: implementationAddr.mocConnector,
+      MoCExchange: implementationAddr.mocExchange,
+      MoCSettlement: implementationAddr.mocSettlement,
+      MoCInrate: implementationAddr.mocInrate,
+      MoCConverter: implementationAddr.mocConverter,
+      MoCState: implementationAddr.mocState,
+      ProxyAdmin: implementationAddr.proxyAdmin,
+      UpgradeDelegator: implementationAddr.upgradeDelegator,
+      Governor: implementationAddr.governor,
+      MoCToken: implementationAddr.mocToken,
+      MoCPriceProvider: implementationAddr.mocOracle,
+      MoCVendors: implementationAddr.mocVendors,
+      MoCHelperLib: implementationAddr.mocHelperLib
+    };
+
+    let vendorMoCDepositAddress = owner;
+    if (networkConfig.vendorMoCDepositAddress !== '') {
+      ({ vendorMoCDepositAddress } = networkConfig.vendorMoCDepositAddress);
+    }
+
+    const valuesToAssign = {
+      commissionRates: networkConfig.commissionRates,
+      liquidationEnabled: networkConfig.liquidationEnabled,
+      protected: networkConfig.protected,
+      vendorMoCDepositAddress,
+      vendorRequiredMoCs: networkConfig.vendorRequiredMoCs
+    };
+
+    const changerAddresses = {};
+
+    const configValues = {
+      proxyAddresses,
+      implementationAddresses,
+      valuesToAssign,
+      changerAddresses
+    };
+
+    fs.writeFileSync(path, JSON.stringify(configValues, null, 2));
+  };
+
   return {
     initializeContracts,
     linkMocLib,
@@ -536,7 +632,8 @@ const makeUtils = async (artifacts, networkName, config, owner, deployer) => {
     createInstances,
     getContractAddresses,
     deployMoCOracleMock,
-    deployMoCHelperLibHarness
+    deployMoCHelperLibHarness,
+    saveConfig
   };
 };
 
