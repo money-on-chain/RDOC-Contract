@@ -16,7 +16,6 @@ module.exports = async callback => {
     // Getting the keys we want to compare
     const comparisonKeys = [
       'MoC',
-      'MoCConnector',
       'MoCExchange',
       'MoCSettlement',
       'MoCInrate',
@@ -34,7 +33,14 @@ module.exports = async callback => {
       const newValue = await proxyAdmin.getProxyImplementation(newConfig.proxyAddresses[key]);
       console.log(`Comparing: ${key}:`);
       console.log(`Original value: ${originalConfig.implementationAddresses[key]}`);
-      console.log(`New value: ${newValue}`);
+      console.log(`New value from ProxyAdmin: ${newValue}`);
+      console.log(`New value from configuration: ${newConfig.implementationAddresses[key]}`);
+
+      if (newConfig.implementationAddresses[key] === newValue) {
+        console.log('\x1b[32m%s\x1b[0m', 'Implementation addresses match');
+      } else {
+        console.log('\x1b[31m%s\x1b[0m', 'Implementation addresses do not match');
+      }
       if (newConfig.implementationAddresses[key] !== originalConfig.implementationAddresses[key]) {
         console.log('\x1b[32m%s\x1b[0m', 'Value updated');
       } else {
@@ -45,16 +51,16 @@ module.exports = async callback => {
 
     // Testing if some values have been updated
     const mocPrecision = 10 ** 18;
-    const newFee = BigNumber(newConfig.valuesToAssign.commissionRates.MINT_BPRO_FEES_RBTC).times(
-      mocPrecision
-    );
+    const newFee = BigNumber(
+      newConfig.valuesToAssign.commissionRates.MINT_RISKPRO_FEES_RESERVE
+    ).times(mocPrecision);
 
     // Get value from contract
     const mocInrate = await MoCInrate.at(newConfig.proxyAddresses.MoCInrate);
     const valueFromContract = await mocInrate.commissionRatesByTxType(
-      await mocInrate.MINT_BPRO_FEES_RBTC()
+      await mocInrate.MINT_RISKPRO_FEES_RESERVE()
     );
-    console.log('Obtaining: MINT_BPRO_FEES_RBTC:');
+    console.log('Obtaining: MINT_RISKPRO_FEES_RESERVE:');
     console.log(`New fee: ${newFee.toString()}`);
     console.log(`Value from contract: ${valueFromContract.toString()}`);
     if (newFee.eq(valueFromContract)) {
