@@ -13,74 +13,74 @@ const getCommissionsArray = mocInrate => async config => {
 
   const ret = [
     {
-      txType: (await mocInrate.MINT_BPRO_FEES_RBTC()).toString(),
-      fee: BigNumber(config.valuesToAssign.commissionRates.MINT_BPRO_FEES_RBTC)
+      txType: (await mocInrate.MINT_RISKPRO_FEES_RESERVE()).toString(),
+      fee: BigNumber(config.valuesToAssign.commissionRates.MINT_RISKPRO_FEES_RESERVE)
         .times(mocPrecision)
         .toString()
     },
     {
-      txType: (await mocInrate.REDEEM_BPRO_FEES_RBTC()).toString(),
-      fee: BigNumber(config.valuesToAssign.commissionRates.REDEEM_BPRO_FEES_RBTC)
+      txType: (await mocInrate.REDEEM_RISKPRO_FEES_RESERVE()).toString(),
+      fee: BigNumber(config.valuesToAssign.commissionRates.REDEEM_RISKPRO_FEES_RESERVE)
         .times(mocPrecision)
         .toString()
     },
     {
-      txType: (await mocInrate.MINT_DOC_FEES_RBTC()).toString(),
-      fee: BigNumber(config.valuesToAssign.commissionRates.MINT_DOC_FEES_RBTC)
+      txType: (await mocInrate.MINT_STABLETOKEN_FEES_RESERVE()).toString(),
+      fee: BigNumber(config.valuesToAssign.commissionRates.MINT_STABLETOKEN_FEES_RESERVE)
         .times(mocPrecision)
         .toString()
     },
     {
-      txType: (await mocInrate.REDEEM_DOC_FEES_RBTC()).toString(),
-      fee: BigNumber(config.valuesToAssign.commissionRates.REDEEM_DOC_FEES_RBTC)
+      txType: (await mocInrate.REDEEM_STABLETOKEN_FEES_RESERVE()).toString(),
+      fee: BigNumber(config.valuesToAssign.commissionRates.REDEEM_STABLETOKEN_FEES_RESERVE)
         .times(mocPrecision)
         .toString()
     },
     {
-      txType: (await mocInrate.MINT_BTCX_FEES_RBTC()).toString(),
-      fee: BigNumber(config.valuesToAssign.commissionRates.MINT_BTCX_FEES_RBTC)
+      txType: (await mocInrate.MINT_RISKPROX_FEES_RESERVE()).toString(),
+      fee: BigNumber(config.valuesToAssign.commissionRates.MINT_RISKPROX_FEES_RESERVE)
         .times(mocPrecision)
         .toString()
     },
     {
-      txType: (await mocInrate.REDEEM_BTCX_FEES_RBTC()).toString(),
-      fee: BigNumber(config.valuesToAssign.commissionRates.REDEEM_BTCX_FEES_RBTC)
+      txType: (await mocInrate.REDEEM_RISKPROX_FEES_RESERVE()).toString(),
+      fee: BigNumber(config.valuesToAssign.commissionRates.REDEEM_RISKPROX_FEES_RESERVE)
         .times(mocPrecision)
         .toString()
     },
     {
-      txType: (await mocInrate.MINT_BPRO_FEES_MOC()).toString(),
-      fee: BigNumber(config.valuesToAssign.commissionRates.MINT_BPRO_FEES_MOC)
+      txType: (await mocInrate.MINT_RISKPRO_FEES_MOC()).toString(),
+      fee: BigNumber(config.valuesToAssign.commissionRates.MINT_RISKPRO_FEES_MOC)
         .times(mocPrecision)
         .toString()
     },
     {
-      txType: (await mocInrate.REDEEM_BPRO_FEES_MOC()).toString(),
-      fee: BigNumber(config.valuesToAssign.commissionRates.REDEEM_BPRO_FEES_MOC)
+      txType: (await mocInrate.REDEEM_RISKPRO_FEES_MOC()).toString(),
+      fee: BigNumber(config.valuesToAssign.commissionRates.REDEEM_RISKPRO_FEES_MOC)
         .times(mocPrecision)
         .toString()
     },
     {
-      txType: (await mocInrate.MINT_DOC_FEES_MOC()).toString(),
-      fee: BigNumber(config.valuesToAssign.commissionRates.MINT_DOC_FEES_MOC)
+      txType: (await mocInrate.MINT_STABLETOKEN_FEES_MOC()).toString(),
+      fee: BigNumber(config.valuesToAssign.commissionRates.MINT_STABLETOKEN_FEES_MOC)
         .times(mocPrecision)
         .toString()
     },
     {
-      txType: (await mocInrate.REDEEM_DOC_FEES_MOC()).toString(),
-      fee: BigNumber(config.valuesToAssign.commissionRates.REDEEM_DOC_FEES_MOC)
+      txType: (await mocInrate.REDEEM_STABLETOKEN_FEES_MOC()).toString(),
+      fee: BigNumber(config.valuesToAssign.commissionRates.REDEEM_STABLETOKEN_FEES_MOC)
         .times(mocPrecision)
         .toString()
     },
     {
-      txType: (await mocInrate.MINT_BTCX_FEES_MOC()).toString(),
-      fee: BigNumber(config.valuesToAssign.commissionRates.MINT_BTCX_FEES_MOC)
+      txType: (await mocInrate.MINT_RISKPROX_FEES_MOC()).toString(),
+      fee: BigNumber(config.valuesToAssign.commissionRates.MINT_RISKPROX_FEES_MOC)
         .times(mocPrecision)
         .toString()
     },
     {
-      txType: (await mocInrate.REDEEM_BTCX_FEES_MOC()).toString(),
-      fee: BigNumber(config.valuesToAssign.commissionRates.REDEEM_BTCX_FEES_MOC)
+      txType: (await mocInrate.REDEEM_RISKPROX_FEES_MOC()).toString(),
+      fee: BigNumber(config.valuesToAssign.commissionRates.REDEEM_RISKPROX_FEES_MOC)
         .times(mocPrecision)
         .toString()
     }
@@ -109,7 +109,7 @@ module.exports = async callback => {
     // Save implementation address and changer address to config file
     config.implementationAddresses.MoCInrate = mocInrate.address;
     config.changerAddresses['6_MoCInrate'] = upgradeMocInrate.address;
-    saveConfig(network, config);
+    saveConfig(config, configPath);
 
     let governor;
     if (shouldExecuteChanges(network)) {
@@ -130,7 +130,7 @@ module.exports = async callback => {
 
     // Save changer address to config file
     config.changerAddresses['6_MoCInrateChangerDeploy'] = mocInrateChangerDeploy.address;
-    saveConfig(network, config);
+    saveConfig(config, configPath);
 
     if (shouldExecuteChanges(network)) {
       // Execute changes in MoCInrate

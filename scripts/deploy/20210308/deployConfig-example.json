@@ -27,23 +27,22 @@
   },
   "valuesToAssign": {
     "commissionRates": {
-      "MINT_BPRO_FEES_RBTC": "",
-      "REDEEM_BPRO_FEES_RBTC": "",
-      "MINT_DOC_FEES_RBTC": "",
-      "REDEEM_DOC_FEES_RBTC": "",
-      "MINT_BTCX_FEES_RBTC": "",
-      "REDEEM_BTCX_FEES_RBTC": "",
-      "MINT_BPRO_FEES_MOC": "",
-      "REDEEM_BPRO_FEES_MOC": "",
-      "MINT_DOC_FEES_MOC": "",
-      "REDEEM_DOC_FEES_MOC": "",
-      "MINT_BTCX_FEES_MOC": "",
-      "REDEEM_BTCX_FEES_MOC": ""
+      "MINT_RISKPRO_FEES_RESERVE": "",
+      "REDEEM_RISKPRO_FEES_RESERVE": "",
+      "MINT_STABLETOKEN_FEES_RESERVE": "",
+      "REDEEM_STABLETOKEN_FEES_RESERVE": "",
+      "MINT_RISKPROX_FEES_RESERVE": "",
+      "REDEEM_RISKPROX_FEES_RESERVE": "",
+      "MINT_RISKPRO_FEES_MOC": "",
+      "REDEEM_RISKPRO_FEES_MOC": "",
+      "MINT_STABLETOKEN_FEES_MOC": "",
+      "REDEEM_STABLETOKEN_FEES_MOC": "",
+      "MINT_RISKPROX_FEES_MOC": "",
+      "REDEEM_RISKPROX_FEES_MOC": ""
     },
     "liquidationEnabled": "",
     "protected": "",
-    "vendorMoCDepositAddress": "",
-    "vendorRequiredMoCs": ""
+    "vendorGuardianAddress": ""
   },
   "changerAddresses": { }
 }
