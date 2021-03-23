@@ -86,9 +86,7 @@ const baseParams = {
   liquidationEnabled: false,
   _protected: toContract(1.5 * 10 ** 18), // mocPrecision
 
-  startStoppable: true,
-
-  vendorRequiredMoCs: toContract(1000 * 10 ** 18) // mocPrecision
+  startStoppable: true
 };
 
 const transferOwnershipAndMinting = async (token, address) => {
@@ -185,8 +183,7 @@ const createContracts = params => async ({ owner, useMock }) => {
     startStoppable,
     mocProportion = baseParams.mocProportion,
     liquidationEnabled,
-    _protected,
-    vendorRequiredMoCs
+    _protected
   } = params;
 
   const settlementContract = useMock ? MoCSettlementMock : MoCSettlement;
@@ -284,8 +281,7 @@ const createContracts = params => async ({ owner, useMock }) => {
   );
   const mockMoCVendorsChanger = await MoCVendorsChanger.new(
     mocVendors.address,
-    owner, //  vendorMoCDepositAddress
-    vendorRequiredMoCs,
+    owner, //  vendorGuardianAddress
     {
       from: owner
     }
@@ -363,9 +359,9 @@ const createContracts = params => async ({ owner, useMock }) => {
   await mocVendors.initialize(
     mocConnector.address,
     governor.address,
-    owner, //  vendorMoCDepositAddress
-    vendorRequiredMoCs
+    owner //  vendorGuardianAddress
   );
+
   // Execute changes in MoCInrate
   await governor.executeChange(mockMocInrateChanger.address);
   // Execute changes in MoCVendors

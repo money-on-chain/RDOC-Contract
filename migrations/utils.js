@@ -460,17 +460,12 @@ const makeUtils = async (artifacts, networkName, config, owner, deployer) => {
     );
     console.log('Settlement Initialized');
 
-    let vendorMoCDepositAddress = owner;
-    if (config.vendorMoCDepositAddress !== '') {
-      ({ vendorMoCDepositAddress } = config.vendorMoCDepositAddress);
+    let vendorGuardianAddress = owner;
+    if (config.vendorGuardianAddress !== '') {
+      ({ vendorGuardianAddress } = config.vendorGuardianAddress);
     }
 
-    await mocVendors.initialize(
-      mocConnector.address,
-      governorAddress,
-      vendorMoCDepositAddress,
-      config.vendorRequiredMoCs
-    );
+    await mocVendors.initialize(mocConnector.address, governorAddress, vendorGuardianAddress);
     console.log('Vendors Initialized');
 
     // Making sure to call the correct initialize function
@@ -589,17 +584,16 @@ const makeUtils = async (artifacts, networkName, config, owner, deployer) => {
       MoCHelperLib: implementationAddr.mocHelperLib
     };
 
-    let vendorMoCDepositAddress = owner;
-    if (networkConfig.vendorMoCDepositAddress !== '') {
-      ({ vendorMoCDepositAddress } = networkConfig.vendorMoCDepositAddress);
+    let vendorGuardianAddress = owner;
+    if (networkConfig.vendorGuardianAddress !== '') {
+      ({ vendorGuardianAddress } = networkConfig.vendorGuardianAddress);
     }
 
     const valuesToAssign = {
       commissionRates: networkConfig.commissionRates,
       liquidationEnabled: networkConfig.liquidationEnabled,
       protected: networkConfig.protected,
-      vendorMoCDepositAddress,
-      vendorRequiredMoCs: networkConfig.vendorRequiredMoCs
+      vendorGuardianAddress
     };
 
     const changerAddresses = {};
