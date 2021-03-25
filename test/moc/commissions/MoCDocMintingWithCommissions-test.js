@@ -1,5 +1,4 @@
 const { expectRevert } = require('openzeppelin-test-helpers');
-const { BigNumber } = require('bignumber.js');
 const testHelperBuilder = require('../../mocHelper.js');
 
 let mocHelper;
@@ -19,7 +18,6 @@ contract('MoC', function([owner, userAccount, commissionsAccount, vendorAccount,
     this.mocToken = mocHelper.mocToken;
     this.mockMocStateChanger = mocHelper.mockMocStateChanger;
     this.mocVendors = mocHelper.mocVendors;
-    this.mocState = mocHelper.mocState;
   });
 
   describe('StableToken minting paying Commissions', function() {
@@ -366,13 +364,7 @@ contract('MoC', function([owner, userAccount, commissionsAccount, vendorAccount,
         // Change user allowance to mintAmount
         await mocHelper.allowReserve(userAccount, toContractBN(mintAmount, 'RES'));
 
-        const mintStableToken = mocHelper.mintStableTokenAmount(
-          userAccount,
-          mintAmount,
-          vendorAccount,
-          await mocHelper.mocInrate.MINT_STABLETOKEN_FEES_RESERVE()
-        );
-
+        const mintStableToken = mocHelper.mintStableToken(userAccount, mintAmount, vendorAccount);
         await expectRevert(mintStableToken, 'amount is not enough');
       });
     });
