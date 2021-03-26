@@ -1,8 +1,8 @@
 const Web3 = require('web3');
-//You must compile the smart contracts or use the official ABIs of the //repository
-const Moc = require('../../build/contracts/MoC.json');
-const MoCState = require('../../build/contracts/MoCState.json');
-const RiskProToken = require('../../build/contracts/RiskProToken.json');
+//You must compile the smart contracts or use the official ABIs of the repository
+const MocAbi = require('../../build/contracts/MoC.json');
+const MoCStateAbi = require('../../build/contracts/MoCState.json');
+const RiskProTokenAbi = require('../../build/contracts/RiskProToken.json');
 const truffleConfig = require('../../truffle');
 
 /**
@@ -33,6 +33,7 @@ const gasPrice = getGasPrice('mocTestnet');
 
 //Contract addresses on testnet
 const mocContractAddress = '<contract-address>';
+const mocInrateAddress = '<contract-address>';
 const mocStateAddress = '<contract-address>';
 const riskProTokenAddress = '<contract-address>';
 
@@ -47,30 +48,31 @@ const execute = async () => {
   const getContract = async (abi, contractAddress) => new web3.eth.Contract(abi, contractAddress);
 
   // Loading moc contract
-  const moc = await getContract(Moc.abi, mocContractAddress);
+  const moc = await getContract(MocAbi.abi, mocContractAddress);
   if (!moc) {
     throw Error('Can not find MoC contract.');
   }
 
-  // Loading mocState contract. It is necessary to compute absolute max RPRO
-  const mocState = await getContract(MoCState.abi, mocStateAddress);
+  // Loading mocState contract. It is necessary to compute absolute max RIFPros
+  const mocState = await getContract(MoCStateAbi.abi, mocStateAddress);
   if (!mocState) {
     throw Error('Can not find MoCState contract.');
   }
 
   // Loading RiskProToken contract. It is necessary to compute user balance
-  const riskProToken = await getContract(RiskProToken.abi, riskProTokenAddress);
+  const riskProToken = await getContract(RiskProTokenAbi.abi, riskProTokenAddress);
   if (!riskProToken) {
     throw Error('Can not find RiskProToken contract.');
   }
 
   const [from] = await web3.eth.getAccounts();
 
-  const redeemRPro = async rproAmount => {
-    const weiAmount = web3.utils.toWei(rproAmount, 'ether');
-    console.log(`Calling redeem RPro with account: ${from} and amount: ${weiAmount}.`);
+  const redeemRiskPro = async (riskProAmount, vendorAccount) => {
+    const weiAmount = web3.utils.toWei(riskProAmount, 'ether');
+
+    console.log(`Calling redeem RIFPro with account: ${from} and amount: ${weiAmount}.`);
     moc.methods
-      .redeemRiskPro(weiAmount)
+      .redeemRiskProVendors(weiAmount, vendorAccount)
       .send({ from, gasPrice }, function(error, transactionHash) {
         if (error) console.log(error);
         if (transactionHash) console.log('txHash: '.concat(transactionHash));
@@ -84,16 +86,17 @@ const execute = async () => {
       .on('error', console.error);
   };
 
-  const getAbsoluteMaxRpro = await mocState.methods.absoluteMaxRiskPro().call();
+  const getAbsoluteMaxRiskPro = await mocState.methods.absoluteMaxRiskPro().call();
   const userAmount = await riskProToken.methods.balanceOf(from).call();
 
-  console.log('=== Max amount of RPro to redeem: ', getAbsoluteMaxRpro.toString());
-  console.log('=== User RPro Balance: ', userAmount.toString());
+  console.log('=== Max amount of RIFPro to redeem: ', getAbsoluteMaxRiskPro.toString());
+  console.log('=== User RIFPro Balance: ', userAmount.toString());
 
-  const rproAmount = '0.00001';
+  const riskProAmount = '0.00001';
+  const vendorAccount = '<vendor-address>';
 
   // Call redeem
-  await redeemRPro(rproAmount);
+  await redeemRiskPro(riskProAmount, vendorAccount);
 };
 
 execute()

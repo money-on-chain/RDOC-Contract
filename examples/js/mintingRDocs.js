@@ -1,6 +1,9 @@
+const BigNumber = require('bignumber.js');
 const Web3 = require('web3');
-//You must compile the smart contracts or use the official ABIs of the //repository
+//You must compile the smart contracts or use the official ABIs of the repository
 const MocAbi = require('../../build/contracts/MoC.json');
+const MoCInrateAbi = require('../../build/contracts/MoCInrate.json');
+const MoCExchangeAbi = require('../../build/contracts/MoCExchange.json');
 const MoCStateAbi = require('../../build/contracts/MoCState.json');
 const ReserveToken = require('../../build/contracts/ReserveToken.json');
 const truffleConfig = require('../../truffle');
@@ -33,6 +36,8 @@ const gasPrice = getGasPrice('mocTestnet');
 
 //Contract addresses on testnet
 const mocContractAddress = '<contract-address>';
+const mocInrateAddress = '<contract-address>';
+const mocExchangeAddress = '<contract-address>';
 const mocStateAddress = '<contract-address>';
 const reserveTokenAddress = '<contract-address>';
 
@@ -47,6 +52,11 @@ const execute = async () => {
    */
   const getContract = async (abi, contractAddress) => new web3.eth.Contract(abi, contractAddress);
 
+  /**
+   * Transforms BigNumbers into
+   * @param {BigNumber} number
+   */
+  const toContract = number => new BigNumber(number).toFixed(0);
 
   // Loading moc contract
   const moc = await getContract(MocAbi.abi, mocContractAddress);
@@ -54,7 +64,19 @@ const execute = async () => {
     throw Error('Can not find MoC contract.');
   }
 
-  // Loading mocState contract. It is necessary to compute max RDoc available to mint
+  // Loading mocInrate contract. It is necessary to get fees for transaction types
+  const mocInrate = await getContract(MoCInrateAbi.abi, mocInrateAddress);
+  if (!mocInrate) {
+    throw Error('Can not find MoC Inrate contract.');
+  }
+
+  // Loading mocExchange contract. It is necessary to compute commissions and vendor markup
+  const mocExchange = await getContract(MoCExchangeAbi.abi, mocExchangeAddress);
+  if (!mocExchange) {
+    throw Error('Can not find MoC Exchange contract.');
+  }
+
+  // Loading mocState contract. It is necessary to compute max RDOC available to mint
   const mocState = await getContract(MoCStateAbi.abi, mocStateAddress);
   if (!mocState) {
     throw Error('Can not find MoCState contract.');
@@ -76,12 +98,36 @@ const execute = async () => {
     console.log(`Spendable balance for account ${from} is: ${spendableBalance}`);
   }
 
-  const mintDoc = async (rifAmount, allowanceAmount)=> {
+  const mintRDoc = async (rifAmount, allowanceAmount, vendorAccount) => {
     const weiAmount = web3.utils.toWei(rifAmount, 'ether');
     await setAllowance(allowanceAmount);
+    let reserveTokenCommission;
+    let mocCommission;
+    let reserveTokenMarkup;
+    let mocMarkup;
+    // Set transaction types
+    const txTypeFeesReserveToken = await mocInrate.methods.MINT_STABLETOKEN_FEES_RESERVE();
+    const txTypeFeesMOC = await mocInrate.methods.MINT_STABLETOKEN_FEES_MOC();
+    // Compute fees
+    const params = {
+      account: from,
+      amount: toContractBN(weiAmount).toString(),
+      txTypeFeesMOC: txTypeFeesMOC.toString(),
+      txTypeFeesReserveToken: txTypeFeesReserveToken.toString(),
+      vendorAccount
+    };
+
+    ({
+      reserveTokenCommission,
+      mocCommission,
+      reserveTokenMarkup,
+      mocMarkup
+    } = await mocExchange.methods.calculateCommissionsWithPrices(params, { from }));
+    // Computes totalReserveTokenAmount to call mintStableTokenVendors
+    const totalReserveTokenAmount = toContract(reserveTokenCommission.plus(reserveTokenMarkup).plus(weiAmount));
     console.log(`Calling RDoc minting, account: ${from}, amount: ${weiAmount}.`);
     moc.methods
-      .mintStableToken(weiAmount)
+      .mintStableTokenVendors(weiAmount, vendorAccount)
       .send({ from, gasPrice }, function(error, transactionHash) {
         if (error) console.log(error);
         if (transactionHash) console.log('txHash: '.concat(transactionHash));
@@ -95,16 +141,18 @@ const execute = async () => {
       .on('error', console.error);
   };
 
-  // Gets max BPRO available to mint
+  // Gets max RDOC available to mint
   const getAbsoluteMaxRDoc = await mocState.methods.absoluteMaxStableToken().call();
   const rifAmount = '0.00001';
-  //// before start minting RDoc we need to set the allowance of RIF available to spend.
+  const vendorAccount = '<vendor-address>';
+  // Before start minting RDoc we need to set the allowance of RIF available to spend.
   const allowanceAmount = '0.001';
 
-  console.log('=== Max RDoc amount available to mint: ', getAbsoluteMaxRDoc.toString());
+  console.log('=== Max doc amount available to mint: ', getAbsoluteMaxRDoc.toString());
+  console.log('=== RIFs that are gonna be minted:  ', rifAmount);
 
   // Call mint
-  await mintDoc(rifAmount, allowanceAmount);
+  await mintRDoc(rifAmount, allowanceAmount, vendorAccount);
 };
 
 execute()

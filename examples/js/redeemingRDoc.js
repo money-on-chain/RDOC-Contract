@@ -1,5 +1,5 @@
 const Web3 = require('web3');
-//You must compile the smart contracts or use the official ABIs of the //repository
+//You must compile the smart contracts or use the official ABIs of the repository
 const MoC = require('../../build/contracts/MoC.json');
 const truffleConfig = require('../../truffle');
 /**
@@ -47,11 +47,11 @@ const execute = async () => {
     throw Error('Can not find MoC contract.');
   }
 
-  const redeemRDocRequest = async rDocAmount => {
+  const redeemStableTokenRequest = async docAmount => {
     const [from] = await web3.eth.getAccounts();
-    const weiAmount = web3.utils.toWei(rDocAmount, 'ether');
+    const weiAmount = web3.utils.toWei(docAmount, 'ether');
 
-    console.log(`Calling redeem RDoc request, account: ${from}, amount: ${weiAmount}.`);
+    console.log(`Calling redeem Doc request, account: ${from}, amount: ${weiAmount}.`);
     moc.methods
       .redeemStableTokenRequest(weiAmount)
       .send({ from, gasPrice }, function(error, transactionHash) {
@@ -67,10 +67,10 @@ const execute = async () => {
       .on('error', console.error);
   };
 
-  const rDocAmount = '10000';
+  const docAmount = '10000';
 
   // Call redeem
-  await redeemRDocRequest(rDocAmount);
+  await redeemStableTokenRequest(docAmount);
 };
 
 execute()

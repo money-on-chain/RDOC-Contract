@@ -76,6 +76,9 @@ const execute = async () => {
 
   // Loading RiskProToken contract. It is necessary to compute user balance
   const riskProToken = await getContract(RiskProTokenAbi.abi, riskProTokenAddress);
+  if (!riskProToken) {
+    throw Error('Can not find RiskProToken contract.');
+  }
 
   const [from] = await web3.eth.getAccounts();
 

@@ -1,5 +1,5 @@
 const Web3 = require('web3');
-//You must compile the smart contracts or use the official ABIs of the //repository
+//You must compile the smart contracts or use the official ABIs of the repository
 const MoC = require('../../build/contracts/MoC.json');
 const truffleConfig = require('../../truffle');
 /**
@@ -48,12 +48,12 @@ const execute = async () => {
   }
 
 
-  const redeemAllRDoc = async () => {
+  const redeemAllDoc = async () => {
     const [from] = await web3.eth.getAccounts();
 
-    console.log(`Calling redeem all RDoc.`);
+    console.log(`Calling redeem all Doc.`);
     moc.methods
-      .redeemAllStableToken()
+      .redeemAllDoc()
       .send({ from, gasPrice }, function(error, transactionHash) {
         if (error) console.log(error);
         if (transactionHash) console.log('txHash: '.concat(transactionHash));
@@ -68,7 +68,7 @@ const execute = async () => {
   };
 
   // Call redeem
-  await redeemAllRDoc();
+  await redeemAllDoc();
 };
 
 execute()

@@ -49,8 +49,8 @@ const getWeb3 = network => {
   });
 };
 
-const web3 = getWeb3('rskTestnet');
-const gasPrice = getGasPrice('rskTestnet');
+const web3 = getWeb3('mocTestnet');
+const gasPrice = getGasPrice('mocTestnet');
 
 //Loading MoC address on testnet
 const mocAddress = '<contract-address>';

@@ -1,5 +1,5 @@
 const Web3 = require('web3');
-//You must compile the smart contracts or use the official ABIs of the //repository
+//You must compile the smart contracts or use the official ABIs of the repository
 const MoC = require('../../build/contracts/MoC.json');
 const MoCRiskProxManager = require('../../build/contracts/MoCRiskProxManager.json');
 const truffleConfig = require('../../truffle');
@@ -60,12 +60,12 @@ const execute = async () => {
 
   const [from] = await web3.eth.getAccounts();
 
-  const redeemRif2x = async rif2xAmount => {
+  const redeemRif2x = async (rif2xAmount, vendorAccount) => {
     const weiAmount = web3.utils.toWei(rif2xAmount, 'ether');
 
     console.log(`Calling redeem RIF2X with account: ${from}, amount: ${weiAmount}.`);
     moc.methods
-      .redeemRiskProx(strToBytes32(bucketX2), weiAmount)
+      .redeemRiskProxVendors(strToBytes32(bucketX2), weiAmount, vendorAccount)
       .send({ from, gasPrice }, function(error, transactionHash) {
         if (error) console.log(error);
         if (transactionHash) console.log('txHash: '.concat(transactionHash));
@@ -85,9 +85,10 @@ const execute = async () => {
   console.log('=== User RIF2X Balance: '.concat(userBalance.toString()));
 
   const rif2xAmount = '0.00001';
+  const vendorAccount = '<vendor-address>';
 
   // Call redeem
-  await redeemRif2x(rif2xAmount);
+  await redeemRif2x(rif2xAmount, vendorAccount);
 };
 
 execute()

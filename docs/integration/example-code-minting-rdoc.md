@@ -31,6 +31,7 @@ const MocAbi = require('../../build/contracts/MoC.json');
 const MoCInrateAbi = require('../../build/contracts/MoCInrate.json');
 const MoCExchangeAbi = require('../../build/contracts/MoCExchange.json');
 const MoCStateAbi = require('../../build/contracts/MoCState.json');
+const ReserveToken = require('../../build/contracts/ReserveToken.json');
 const truffleConfig = require('../../truffle');
 
 /**
@@ -56,14 +57,16 @@ const getWeb3 = network => {
   });
 };
 
-const web3 = getWeb3('rskTestnet');
-const gasPrice = getGasPrice('rskTestnet');
+const web3 = getWeb3('mocTestnet');
+const gasPrice = getGasPrice('mocTestnet');
 
 //Contract addresses on testnet
 const mocContractAddress = '<contract-address>';
 const mocInrateAddress = '<contract-address>';
 const mocExchangeAddress = '<contract-address>';
 const mocStateAddress = '<contract-address>';
+const reserveTokenAddress = '<contract-address>';
+
 
 const execute = async () => {
   web3.eth.defaultGas = 2000000;
@@ -99,16 +102,31 @@ const execute = async () => {
     throw Error('Can not find MoC Exchange contract.');
   }
 
-
   // Loading mocState contract. It is necessary to compute max RDOC available to mint
   const mocState = await getContract(MoCStateAbi.abi, mocStateAddress);
   if (!mocState) {
     throw Error('Can not find MoCState contract.');
   }
 
-  const mintRDoc = async (rifAmount, vendorAccount) => {
-    const [from] = await web3.eth.getAccounts();
+  // Loading ReserveToken contract. It is necessary to set max available RIF to spend
+  const reserveToken = await getContract(ReserveToken.abi, reserveTokenAddress);
+  if (!reserveToken) {
+    throw Error('Can not find ReserveToken contract.');
+  }
+
+  const [from] = await web3.eth.getAccounts();
+
+  const setAllowance = async allowanceAmount =>{
+    const weiAmount = web3.utils.toWei(allowanceAmount, 'ether');
+    console.log(`Calling approve: ${weiAmount}, for address account: ${from}.`);
+    await reserveToken.methods.approve(mocContractAddress, weiAmount).send({ from, gasPrice });
+    const spendableBalance = await moc.methods.getAllowance(from).call();
+    console.log(`Spendable balance for account ${from} is: ${spendableBalance}`);
+  }
+
+  const mintRDoc = async (rifAmount, allowanceAmount, vendorAccount) => {
     const weiAmount = web3.utils.toWei(rifAmount, 'ether');
+    await setAllowance(allowanceAmount);
     let reserveTokenCommission;
     let mocCommission;
     let reserveTokenMarkup;
@@ -153,12 +171,14 @@ const execute = async () => {
   const getAbsoluteMaxRDoc = await mocState.methods.absoluteMaxStableToken().call();
   const rifAmount = '0.00001';
   const vendorAccount = '<vendor-address>';
+  // Before start minting RDoc we need to set the allowance of RIF available to spend.
+  const allowanceAmount = '0.001';
 
   console.log('=== Max doc amount available to mint: ', getAbsoluteMaxRDoc.toString());
   console.log('=== RIFs that are gonna be minted:  ', rifAmount);
 
   // Call mint
-  await mintRDoc(rifAmount, vendorAccount);
+  await mintRDoc(rifAmount, allowanceAmount, vendorAccount);
 };
 
 execute()
