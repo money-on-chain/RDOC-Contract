@@ -36,6 +36,7 @@ const MocAbi = require('./contracts/moc/MoC.json');
 const MoCInrateAbi = require('./contracts/moc/MoCInrate.json');
 const MoCExchangeAbi = require('./contracts/moc/MoCExchange.json');
 const MoCStateAbi = require('./contracts/moc/MoCState.json');
+const ReserveToken = require('../../build/contracts/ReserveToken.json');
 
 //Config params to TestNet
 const endpoint = 'https://public-node.testnet.rsk.co';
@@ -49,6 +50,7 @@ const mocContractAddress = '<contract-address>';
 const mocInrateAddress = '<contract-address>';
 const mocExchangeAddress = '<contract-address>';
 const mocStateAddress = '<contract-address>';
+const reserveTokenAddress = '<contract-address>';
 const gasPrice = 60000000;
 
 const execute = async () => {
@@ -89,10 +91,26 @@ const execute = async () => {
     throw Error('Can not find MoCState contract.');
   }
 
-  const mintRiskPro = async (rifAmount, vendorAccount) => {
+  // Loading ReserveToken contract. It is necessary to set max available RIF to spend
+  const reserveToken = await getContract(ReserveToken.abi, reserveTokenAddress);
+  if (!reserveToken) {
+    throw Error('Can not find ReserveToken contract.');
+  }
+
+  const from = '0x088f4B1313D161D83B4D8A5EB90905C263ce0DbD';
+
+  const setAllowance = async allowanceAmount =>{
+    const weiAmount = web3.utils.toWei(allowanceAmount, 'ether');
+    console.log(`Calling approve: ${weiAmount}, for address account: ${from}.`);
+    await reserveToken.methods.approve(mocContractAddress, weiAmount).send({ from, gasPrice });
+    const spendableBalance = await moc.methods.getAllowance(from).call();
+    console.log(`Spendable balance for account ${from} is ${spendableBalance}`);
+  }
+
+  const mintRiskPro = async (rifAmount, allowanceAmount, vendorAccount) => {
     web3.eth.getAccounts().then(console.log);
-    const from = '0x088f4B1313D161D83B4D8A5EB90905C263ce0DbD';
     const weiAmount = web3.utils.toWei(rifAmount, 'ether');
+    await setAllowance(allowanceAmount);
     let reserveTokenCommission;
     let mocCommission;
     let reserveTokenMarkup;
@@ -136,9 +154,11 @@ const execute = async () => {
   console.log('=== RIFPRO in RIF: '.concat(riskProPriceInReserveToken.toString()));
   const rifAmount = '0.00001';
   const vendorAccount = '<vendor-address>';
+  // before start minting RPro we need to set the allowance of RIF available to spend.
+  const allowanceAmount = '0.001';
 
   // Call mint
-  await mintRiskPro(rifAmount, vendorAccount, logEnd);
+  await mintRiskPro(rifAmount, allowanceAmount, vendorAccount, logEnd);
 };
 
 execute()

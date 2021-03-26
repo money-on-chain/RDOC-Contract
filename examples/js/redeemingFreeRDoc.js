@@ -1,5 +1,5 @@
 const Web3 = require('web3');
-//You must compile the smart contracts or use the official ABIs of the //repository
+//You must compile the smart contracts or use the official ABIs of the repository
 const MoC = require('../../build/contracts/MoC.json');
 const MocState = require('../../build/contracts/MoCState.json');
 const StableToken = require('../../build/contracts/StableToken.json');
@@ -51,13 +51,13 @@ const execute = async () => {
     throw Error('Can not find MoC contract.');
   }
 
-  // Loading mocState contract. It is necessary to compute freeRDoc
+  // Loading mocState contract. It is necessary to compute free RDoc
   const mocState = await getContract(MocState.abi, mocStateAddress);
   if (!mocState) {
     throw Error('Can not find MoCState contract.');
   }
 
-  // Loading DocToken contract. It is necessary to compute user balance
+  // Loading StableToken contract. It is necessary to compute user balance
   const stableToken = await getContract(StableToken.abi, stableTokenAddress);
   if (!stableToken) {
     throw Error('Can not find StableToken contract.');
@@ -65,12 +65,12 @@ const execute = async () => {
 
   const [from] = await web3.eth.getAccounts();
 
-  const redeemFreeRDoc = async rDocAmount => {
-    const weiAmount = web3.utils.toWei(rDocAmount, 'ether');
+  const redeemFreeStableToken = async (stableTokenAmount, vendorAccount) => {
+    const weiAmount = web3.utils.toWei(stableTokenAmount, 'ether');
 
-    console.log(`Calling redeem free RDoc, account: ${from}, amount: ${weiAmount}.`);
+    console.log(`Calling redeem RDOC request, account: ${from}, amount: ${weiAmount}.`);
     moc.methods
-      .redeemFreeStableToken(weiAmount)
+      .redeemFreeStableTokenVendors(weiAmount, vendorAccount)
       .send({ from, gasPrice }, function(error, transactionHash) {
         if (error) console.log(error);
         if (transactionHash) console.log('txHash: '.concat(transactionHash));
@@ -82,19 +82,19 @@ const execute = async () => {
         console.log(receipt);
       })
       .on('error', console.error);
-
   };
 
-  const rDocAmount = '10000';
-  const freeRDoc = await mocState.methods.freeStableToken().call();
-  const userRDocBalance = await stableToken.methods.balanceOf(from).call();
-  const finalDocAmount = Math.min(freeRDoc, userRDocBalance);
-  console.log('=== User RDOC balance: ', userRDocBalance.toString());
-  console.log('=== Free RDOC: ',freeRDoc.toString());
-  console.log('=== Max Available RDOC to redeem: ', finalDocAmount.toString());
+  const stableTokenAmount = '10000';
+  const freeStableToken = await mocState.methods.freeStableToken().call();
+  const userStableTokenBalance = await stableTokenToken.methods.balanceOf(from).call();
+  const finalStableTokenAmount = Math.min(freeStableToken, userStableTokenBalance);
+  const vendorAccount = '<vendor-address>';
+
+  console.log('User RDOC balance: ', userStableTokenBalance.toString());
+  console.log('=== Max Available RDOC to redeem: ', finalStableTokenAmount);
 
   // Call redeem
-  await redeemFreeRDoc(rDocAmount);
+  await redeemFreeStableToken(stableTokenAmount, vendorAccount);
 };
 
 execute()

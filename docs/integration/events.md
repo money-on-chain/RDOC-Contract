@@ -30,7 +30,7 @@ const getWeb3 = network => {
   });
 };
 
-const web3 = getWeb3('rskTestnet');
+const web3 = getWeb3('mocTestnet');
 
 //Contract address on testnet
 const mocExchangeAddress = '<contract-address>';
