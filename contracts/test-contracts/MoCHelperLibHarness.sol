@@ -37,7 +37,6 @@ contract MoCHelperLibHarness is MoCLibConnection, Initializable {
     @param power power to use in the formula [using NoPrecision]
     @param tMax max interest rate [using mocPrecision]
     @param abRatio bucket C0  abundance Ratio [using mocPrecision]
-
    */
   function spotInrate(uint256 tMax, uint256 power, uint256 tMin, uint256 abRatio) public view returns(uint256) {
     return mocLibConfig.spotInrate(tMax, power, tMin, abRatio);
@@ -55,7 +54,7 @@ contract MoCHelperLibHarness is MoCLibConnection, Initializable {
     return mocLibConfig.potential(a, b, c, value);
   }
 
-    /**
+  /**
     @dev Calculates average of the integral function:
      T = (
               (c * xf + ((a * (xf ** (b + 1))) / (b + 1))) -
@@ -67,7 +66,7 @@ contract MoCHelperLibHarness is MoCLibConnection, Initializable {
     @param value1 value to put in the function [using mocPrecision]
     @param value2 value to put in the function [using mocPrecision]
     @return average interest rate [using mocPrecision]
-   */
+  */
   function avgInt(uint256 a, uint256 b, uint256 c, uint256 value1, uint256 value2)
   public view returns(uint256) {
     return mocLibConfig.avgInt(a, b, c, value1, value2);
@@ -80,8 +79,7 @@ contract MoCHelperLibHarness is MoCLibConnection, Initializable {
     @param c minInterestRate C0 stableToken amount [using mocPrecision]
     @param value value to put in the function [using mocPrecision]
     @return integration result [using mocPrecision]
-
-   */
+  */
   function integral(uint256 a, uint256 b, uint256 c, uint256 value)
   public view returns(uint256) {
     return mocLibConfig.integral(a, b, c, value);
@@ -139,8 +137,7 @@ contract MoCHelperLibHarness is MoCLibConnection, Initializable {
     @return Locked ReserveTokens [using reservePrecision]
   */
   function lockedReserveTokens(uint256 reservePrice, uint256 nStableToken, uint256 peg)
-  public view returns (uint256)
-  {
+  public view returns(uint256) {
     return mocLibConfig.lockedReserveTokens(reservePrice, nStableToken, peg);
   }
 
@@ -164,7 +161,7 @@ contract MoCHelperLibHarness is MoCLibConnection, Initializable {
     @return RiskPro ReserveTokens price [using reservePrecision]
   */
   function riskProTecPrice(uint256 nReserve, uint256 lb, uint256 nTP)
-  public view returns (uint256) {
+  public view returns(uint256) {
     return mocLibConfig.riskProTecPrice(nReserve, lb, nTP);
   }
 
@@ -175,7 +172,7 @@ contract MoCHelperLibHarness is MoCLibConnection, Initializable {
     @return RiskProx price in RiskPro [using mocPrecision]
   */
   function riskProxRiskProPrice(uint256 riskProxTecPrice, uint256 riskProPrice)
-  public view returns (uint256) {
+  public view returns(uint256) {
     return mocLibConfig.riskProxRiskProPrice(riskProxTecPrice, riskProPrice);
   }
 
@@ -240,18 +237,18 @@ contract MoCHelperLibHarness is MoCLibConnection, Initializable {
     @return Total value [using reservePrecision]
   */
   function stableTokensResTokensValue(uint256 amount, uint256 peg, uint256 reservePrice)
-  public view returns (uint256) {
+  public view returns(uint256) {
     return mocLibConfig.stableTokensResTokensValue(amount, peg, reservePrice);
   }
 
-  /**
+ /**
     @dev Price in ReserveTokens of the amount of RiskPros
     @param riskProAmount amount of RiskPro [using mocPrecision]
     @param riskProResTokenPrice RiskPro price in ReserveTokens [using reservePrecision]
     @return Total value [using reservePrecision]
   */
   function riskProResTokensValuet(uint256 riskProAmount, uint256 riskProResTokenPrice)
-  public view returns (uint256) {
+  public view returns(uint256) {
     return mocLibConfig.riskProResTokensValuet(riskProAmount, riskProResTokenPrice);
   }
 
