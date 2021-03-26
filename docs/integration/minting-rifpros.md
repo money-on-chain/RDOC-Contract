@@ -169,7 +169,7 @@ contract YourMintingRiskProContract {
         // You could have more variables to initialize here
     }
 ​
-    function doTask(uint256 _resTokensToMint) public payable {
+    function doTask(uint256 _resTokensToMint) public {
       // Calculate operation fees
       CommissionParamsStruct memory params;
       params.account = address(this); // address of minter
