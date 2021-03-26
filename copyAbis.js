@@ -5,6 +5,7 @@ const contractNames = [
   'RiskProToken',
   'CommissionSplitter',
   'StableToken',
+  'ReserveToken',
   'MoC',
   'MoCRiskProxManager',
   'MoCConnector',
