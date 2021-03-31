@@ -47,7 +47,7 @@ contract MoCVendors is MoCVendorsEvents, MoCBase, MoCLibConnection, Governed {
     bool isActive;
     uint256 markup;
     uint256 totalPaidInMoC;
-    uint256 staking;
+    uint256 staking; // temporarily retained
     uint256 paidMoC;
     uint256 paidReserveToken;
   }
