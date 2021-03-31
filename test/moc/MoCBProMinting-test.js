@@ -301,6 +301,13 @@ contract('MoC: MoCExchange', function([owner, userAccount, vendorAccount]) {
 
   describe('RiskPro tec price', function() {
     describe('GIVEN the user have 18 RiskPro and 80000 StableTokens and ReserveToken price falls to 2000 and liquidation is not enabled', function() {
+      const expectedReserveTokenPrice = 2000;
+      const expectedExponentialMovingAverage = 10000;
+      const expectedGlobalCoverage = '0.65';
+      const expectedRiskProDiscountRate = 70;
+      const expectedRiskProTecPrice = 1;
+      const expectedMaxRiskProWithDiscount = '54027013506753376688344172086043021510';
+
       beforeEach(async function() {
         await mocHelper.mintRiskProAmount(userAccount, 18, vendorAccount);
         await mocHelper.mintStableTokenAmount(userAccount, 80000, vendorAccount);
@@ -309,10 +316,56 @@ contract('MoC: MoCExchange', function([owner, userAccount, vendorAccount]) {
         const reserveTokenPrice = toContractBN(2000 * mocHelper.MOC_PRECISION);
         await mocHelper.setReserveTokenPrice(reserveTokenPrice);
       });
-      it('THEN the RiskProx price in ReserveToken should be 0 ReserveToken', async function() {
+      it(`THEN the ReserveToken price in USD should be ${expectedReserveTokenPrice}`, async function() {
+        const reserveTokenPrice = await this.mocState.getReserveTokenPrice();
+
+        mocHelper.assertBigReserve(
+          reserveTokenPrice,
+          expectedReserveTokenPrice,
+          'ReserveToken Price in USD is incorrect'
+        );
+      });
+      it(`THEN the Exponential Moving Average in USD should be ${expectedExponentialMovingAverage}`, async function() {
+        const ema = await this.mocState.getExponentalMovingAverage();
+
+        mocHelper.assertBigDollar(
+          ema,
+          expectedExponentialMovingAverage,
+          'Exponential Moving Average in USD is incorrect'
+        );
+      });
+      it(`THEN the global coverage should be ${expectedGlobalCoverage}`, async function() {
+        const coverage = await this.mocState.globalCoverage();
+
+        mocHelper.assertBigReserve(
+          coverage,
+          expectedGlobalCoverage,
+          'Global coverage is incorrect'
+        );
+      });
+      it(`THEN the RiskPro spot discount rate should be ${expectedRiskProDiscountRate}`, async function() {
+        const riskProSpotDiscount = await this.mocState.riskProSpotDiscountRate();
+
+        assert(
+          riskProSpotDiscount.toNumber() === expectedRiskProDiscountRate,
+          'RiskPro spot discount rate is incorrect'
+        );
+      });
+      it(`THEN the RiskProx price in ReserveToken should be ${expectedRiskProTecPrice} wei`, async function() {
         const riskProTecPrice = await this.mocState.riskProTecPrice();
 
-        mocHelper.assertBigReserve(riskProTecPrice, 0, 'RiskPro tec price price is incorrect');
+        assert(
+          riskProTecPrice.toNumber() === expectedRiskProTecPrice,
+          'RiskPro tec price is incorrect'
+        );
+      });
+      it(`THEN Max RiskPro With Discount should be ${expectedMaxRiskProWithDiscount}`, async function() {
+        const riskProsWithDiscount = await this.mocState.maxRiskProWithDiscount();
+
+        assert(
+          riskProsWithDiscount.toString() === expectedMaxRiskProWithDiscount,
+          'Max RiskPro With Discount is incorrect'
+        );
       });
     });
   });
