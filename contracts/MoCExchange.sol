@@ -645,8 +645,11 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
     // Get redeemable value
     details.riskProxToRedeem = Math.min(riskProxAmount, riskProxManager.riskProxBalanceOf(bucket, account));
     details.resTokenToRedeem = mocConverter.riskProxToResToken(details.riskProxToRedeem, bucket);
-    // //Pay interests
-    details.resTokenInterests = recoverInterests(bucket, details.resTokenToRedeem);
+    // Pay interests
+    // Update 2020-03-31
+    // No recover interest in BTCX Redemption
+    // details.resTokenInterests = recoverInterests(bucket, details.resTokenToRedeem);
+    details.resTokenInterests = 0;
 
     // Burn RiskProx
     burnRiskProxFor(
