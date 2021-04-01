@@ -73,6 +73,20 @@ module.exports = {
       network_id: '30',
       gas: 6700000,
       gasPrice: 60000000,
+      kipDryRun: true
+    },
+    prueba: {
+      // host: '127.0.0.1',
+      // port: 8545,
+      // endpoint: 'http://127.0.0.1:8545',
+      // network_id: '*',
+      // gas: 6721975,
+      // gasPrice: 20000000000
+      host: 'https://public-node.testnet.rsk.co',
+      provider: new HDWalletProvider(mnemonic, 'https://public-node.testnet.rsk.co'),
+      network_id: '31',
+      gas: 6700000,
+      gasPrice: 69000000,
       skipDryRun: true
     }
   },
