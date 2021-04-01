@@ -27,7 +27,6 @@ contract MoCHelperLibMock {
     uint256 nReserve, uint256 nStableToken, uint256 utpdu, uint256 peg,
     uint256 reservePrice, uint256 riskProUsdPrice, uint256 spotDiscount
   )
-
   public view returns(uint256) {
     return mocLibConfig.maxRiskProWithDiscount(
       nReserve, nStableToken, utpdu, peg, reservePrice, riskProUsdPrice, spotDiscount
