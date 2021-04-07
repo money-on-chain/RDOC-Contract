@@ -863,7 +863,7 @@ function initializeValues(address _governor, uint256 riskProxMin, uint256 riskPr
 | commissionsAddressTarget | address payable |  | 
 | blockSpanRiskPro | uint256 | RiskPro blockspan to configure payments periods[using mocPrecision] | 
 | riskProInterestsTarget | address payable | Target address to transfer the weekly RiskPro holders interest | 
-| _stableTmin | uint256 |  | 
-| _stablePower | uint256 |  | 
-| _stableTmax | uint256 |  | 
+| _stableTmin | uint256 | Upgrade to support red stable inrate parameter | 
+| _stablePower | uint256 | Upgrade to support red stable inrate parameter | 
+| _stableTmax | uint256 | Upgrade to support red stable inrate parameter | 
 
