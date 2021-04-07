@@ -197,9 +197,9 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable {
     uint256 reserveTokenMarkup,
     uint256 mocMarkup) = mocExchange.redeemRiskPro(msg.sender, riskProAmount, vendorAccount);
 
-    safeWithdrawFromReserve(msg.sender, resTokensAmount);
-
     redeemWithMoCFees(msg.sender, reserveTokenCommission, mocCommission, vendorAccount, reserveTokenMarkup, mocMarkup);
+
+    safeWithdrawFromReserve(msg.sender, resTokensAmount);
     /** END UPDATE V0110: 24/09/2020 - Upgrade to support multiple commission rates **/
   }
 
@@ -266,9 +266,9 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable {
     uint256 reserveTokenMarkup,
     uint256 mocMarkup) = mocExchange.redeemRiskProx(msg.sender, bucket, riskProxAmount, vendorAccount);
 
-    safeWithdrawFromReserve(msg.sender, totalResTokensRedeemed);
-
     redeemWithMoCFees(msg.sender, reserveTokenCommission, mocCommission, vendorAccount, reserveTokenMarkup, mocMarkup);
+
+    safeWithdrawFromReserve(msg.sender, totalResTokensRedeemed);
     /** END UPDATE V0110: 24/09/2020 - Upgrade to support multiple commission rates **/
   }
 
@@ -335,9 +335,9 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable {
     uint256 reserveTokenMarkup,
     uint256 mocMarkup) = mocExchange.redeemFreeStableToken(msg.sender, stableTokenAmount, vendorAccount);
 
-    safeWithdrawFromReserve(msg.sender, resTokensAmount);
-
     redeemWithMoCFees(msg.sender, reserveTokenCommission, mocCommission, vendorAccount, reserveTokenMarkup, mocMarkup);
+
+    safeWithdrawFromReserve(msg.sender, resTokensAmount);
     /** END UPDATE V0110: 24/09/2020 - Upgrade to support multiple commission rates **/
   }
 
