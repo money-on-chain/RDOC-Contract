@@ -5,6 +5,7 @@ let toContractBN;
 
 // eslint-disable-next-line quotes
 const NOT_ENOUGH_FUNDS_ERROR = "sender doesn't have enough funds to send tx";
+const zeroAddress = '0x0000000000000000000000000000000000000000';
 
 // TODO: test free StableTokens redeems with interests
 contract('MoC', function([owner, userAccount, commissionsAccount, vendorAccount, otherAddress]) {
@@ -34,7 +35,8 @@ contract('MoC', function([owner, userAccount, commissionsAccount, vendorAccount,
             riskProToMint: 1,
             initialReserveTokenPrice: 10000,
             mocAmount: 0,
-            vendorStaking: 100
+            vendorStaking: 100,
+            vendorAccount
           },
           expect: {
             stableTokensToRedeem: 100,
@@ -55,7 +57,8 @@ contract('MoC', function([owner, userAccount, commissionsAccount, vendorAccount,
             riskProToMint: 1,
             initialReserveTokenPrice: 10000,
             mocAmount: 0,
-            vendorStaking: 100
+            vendorStaking: 100,
+            vendorAccount
           },
           expect: {
             stableTokensToRedeem: 500,
@@ -77,7 +80,8 @@ contract('MoC', function([owner, userAccount, commissionsAccount, vendorAccount,
             riskProToMint: 1,
             initialReserveTokenPrice: 10000,
             mocAmount: 1000,
-            vendorStaking: 100
+            vendorStaking: 100,
+            vendorAccount
           },
           expect: {
             stableTokensToRedeem: 100,
@@ -98,7 +102,8 @@ contract('MoC', function([owner, userAccount, commissionsAccount, vendorAccount,
             riskProToMint: 1,
             initialReserveTokenPrice: 10000,
             mocAmount: 1000,
-            vendorStaking: 100
+            vendorStaking: 100,
+            vendorAccount
           },
           expect: {
             stableTokensToRedeem: 500,
@@ -108,6 +113,51 @@ contract('MoC', function([owner, userAccount, commissionsAccount, vendorAccount,
             commissionAmountMoC: 0.0005, // (reserveTokenPrice * stableTokensToRedeemOnReserveToken / mocPrice) * REDEEM_STABLETOKENS_FEES_MOC = 0.01
             vendorAmountReserveToken: 0,
             vendorAmountMoC: 0.0005 // (reserveTokenPrice * stableTokensToRedeemOnReserveToken / mocPrice) * markup = 0.01
+          }
+        },
+        // MoC commission NO VENDOR
+        {
+          // redeem 100 Docs when has 1000 free Docs
+          params: {
+            stableTokensToMint: 1000,
+            stableTokensToRedeem: 100,
+            // commissionsRate: 0,
+            riskProToMint: 1,
+            initialReserveTokenPrice: 10000,
+            mocAmount: 1000,
+            vendorStaking: 100,
+            vendorAccount: zeroAddress
+          },
+          expect: {
+            stableTokensToRedeem: 100,
+            stableTokensToRedeemOnReserveToken: 0.01,
+            commissionAddressBalance: 0,
+            // eslint-disable-next-line max-len
+            commissionAmountMoC: 0.0001, // (reserveTokenPrice * stableTokensToRedeemOnReserveToken / mocPrice) * REDEEM_STABLETOKENS_FEES_MOC = 0.01
+            vendorAmountReserveToken: 0,
+            vendorAmountMoC: 0
+          }
+        },
+        {
+          // Redeeming limited by free doc amount and user doc balance.
+          params: {
+            stableTokensToMint: 500,
+            stableTokensToRedeem: 600,
+            // commissionsRate: 0,
+            riskProToMint: 1,
+            initialReserveTokenPrice: 10000,
+            mocAmount: 1000,
+            vendorStaking: 100,
+            vendorAccount: zeroAddress
+          },
+          expect: {
+            stableTokensToRedeem: 500,
+            stableTokensToRedeemOnReserveToken: 0.05,
+            commissionAddressBalance: 0,
+            // eslint-disable-next-line max-len
+            commissionAmountMoC: 0.0005, // (reserveTokenPrice * stableTokensToRedeemOnReserveToken / mocPrice) * REDEEM_STABLETOKENS_FEES_MOC = 0.01
+            vendorAmountReserveToken: 0,
+            vendorAmountMoC: 0
           }
         }
       ];
@@ -147,16 +197,22 @@ contract('MoC', function([owner, userAccount, commissionsAccount, vendorAccount,
               scenario.params.mocAmount,
               userAccount
             );
-            await mocHelper.mintMoCToken(vendorAccount, scenario.params.vendorStaking, owner);
-            await mocHelper.approveMoCToken(
-              this.mocVendors.address,
-              scenario.params.vendorStaking,
-              vendorAccount
-            );
-            await this.mocVendors.addStake(
-              toContractBN(scenario.params.vendorStaking * mocHelper.MOC_PRECISION),
-              { from: vendorAccount }
-            );
+            if (scenario.params.vendorAccount !== zeroAddress) {
+              await mocHelper.mintMoCToken(
+                scenario.params.vendorAccount,
+                scenario.params.vendorStaking,
+                owner
+              );
+              await mocHelper.approveMoCToken(
+                this.mocVendors.address,
+                scenario.params.vendorStaking,
+                scenario.params.vendorAccount
+              );
+              await this.mocVendors.addStake(
+                toContractBN(scenario.params.vendorStaking * mocHelper.MOC_PRECISION),
+                { from: scenario.params.vendorAccount }
+              );
+            }
 
             // Mint according to scenario
             const txTypeMintRiskPro =
@@ -170,13 +226,13 @@ contract('MoC', function([owner, userAccount, commissionsAccount, vendorAccount,
             await mocHelper.mintRiskProAmount(
               userAccount,
               scenario.params.riskProToMint,
-              vendorAccount,
+              scenario.params.vendorAccount,
               txTypeMintRiskPro
             );
             await mocHelper.mintStableTokenAmount(
               userAccount,
               scenario.params.stableTokensToMint,
-              vendorAccount,
+              scenario.params.vendorAccount,
               txTypeMintStableToken
             );
             // Calculate balances before redeeming
@@ -192,14 +248,16 @@ contract('MoC', function([owner, userAccount, commissionsAccount, vendorAccount,
             prevUserMoCBalance = await mocHelper.getMoCBalance(userAccount);
             prevCommissionsAccountMoCBalance = await mocHelper.getMoCBalance(commissionsAccount);
             prevVendorAccountReserveTokenBalance = toContractBN(
-              await mocHelper.getReserveBalance(vendorAccount)
+              await mocHelper.getReserveBalance(scenario.params.vendorAccount)
             );
-            prevVendorAccountMoCBalance = await mocHelper.getMoCBalance(vendorAccount);
+            prevVendorAccountMoCBalance = await mocHelper.getMoCBalance(
+              scenario.params.vendorAccount
+            );
 
             await mocHelper.redeemFreeStableToken({
               userAccount,
               stableTokenAmount: scenario.params.stableTokensToRedeem,
-              vendorAccount
+              vendorAccount: scenario.params.vendorAccount
             });
           });
           describe(`WHEN ${scenario.params.stableTokensToRedeem} StableToken are redeeming`, function() {
@@ -238,7 +296,7 @@ contract('MoC', function([owner, userAccount, commissionsAccount, vendorAccount,
             });
             it(`THEN the vendor account ReserveToken balance has increase by ${scenario.expect.vendorAmountReserveToken} StableTokens`, async function() {
               const vendorAccountReserveTokenBalance = toContractBN(
-                await mocHelper.getReserveBalance(vendorAccount)
+                await mocHelper.getReserveBalance(scenario.params.vendorAccount)
               );
               const diff = vendorAccountReserveTokenBalance.sub(
                 prevVendorAccountReserveTokenBalance
@@ -444,7 +502,6 @@ contract('MoC', function([owner, userAccount, commissionsAccount, vendorAccount,
           const mocTokenAddress = this.mocToken.address;
 
           // Set MoCToken address to 0
-          const zeroAddress = '0x0000000000000000000000000000000000000000';
           await this.mockMocStateChanger.setMoCToken(zeroAddress);
           await this.governor.executeChange(mocHelper.mockMocStateChanger.address);
 
