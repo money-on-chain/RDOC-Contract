@@ -10,6 +10,7 @@ const { BN } = web3.utils;
 
 // eslint-disable-next-line quotes
 const NOT_ENOUGH_FUNDS_ERROR = "sender doesn't have enough funds to send tx";
+const zeroAddress = '0x0000000000000000000000000000000000000000';
 
 contract('MoC: MoCExchange', function([
   owner,
@@ -54,7 +55,8 @@ contract('MoC: MoCExchange', function([
         params: {
           riskProToMint: 1000,
           mocAmount: 0,
-          vendorStaking: 100
+          vendorStaking: 100,
+          vendorAccount
         },
         expect: {
           riskProToMint: 1000,
@@ -71,7 +73,8 @@ contract('MoC: MoCExchange', function([
         params: {
           riskProToMint: 1000,
           mocAmount: 1000,
-          vendorStaking: 100
+          vendorStaking: 100,
+          vendorAccount
         },
         expect: {
           riskProToMint: 1000,
@@ -81,6 +84,24 @@ contract('MoC: MoCExchange', function([
           commissionAmountMoC: 7, // (riskProToMint * MINT_RISKPRO_FEES_MOC = 0.007)
           vendorAmountReserveToken: 0,
           vendorAmountMoC: 10 // (riskProToMint * markup = 0.01)
+        }
+      },
+      // MoC fees NO VENDOR
+      {
+        params: {
+          riskProToMint: 1000,
+          mocAmount: 1000,
+          vendorStaking: 100,
+          vendorAccount: zeroAddress
+        },
+        expect: {
+          riskProToMint: 1000,
+          riskProToMintOnReserveToken: 1000,
+          commissionAmountReserveToken: 0,
+          totalCostOnReserveToken: 1000,
+          commissionAmountMoC: 7, // (riskProToMint * MINT_RISKPRO_FEES_MOC = 0.007)
+          vendorAmountReserveToken: 0,
+          vendorAmountMoC: 0
         }
       }
     ];
@@ -102,16 +123,22 @@ contract('MoC: MoCExchange', function([
             scenario.params.mocAmount,
             userAccount
           );
-          await mocHelper.mintMoCToken(vendorAccount, scenario.params.vendorStaking, owner);
-          await mocHelper.approveMoCToken(
-            this.mocVendors.address,
-            scenario.params.vendorStaking,
-            vendorAccount
-          );
-          await this.mocVendors.addStake(
-            toContractBN(scenario.params.vendorStaking * mocHelper.MOC_PRECISION),
-            { from: vendorAccount }
-          );
+          if (scenario.params.vendorAccount !== zeroAddress) {
+            await mocHelper.mintMoCToken(
+              scenario.params.vendorAccount,
+              scenario.params.vendorStaking,
+              owner
+            );
+            await mocHelper.approveMoCToken(
+              this.mocVendors.address,
+              scenario.params.vendorStaking,
+              scenario.params.vendorAccount
+            );
+            await this.mocVendors.addStake(
+              toContractBN(scenario.params.vendorStaking * mocHelper.MOC_PRECISION),
+              { from: scenario.params.vendorAccount }
+            );
+          }
           // Set transaction type according to scenario
           const txType =
             scenario.params.mocAmount === 0
@@ -131,14 +158,16 @@ contract('MoC: MoCExchange', function([
           prevUserMoCBalance = await mocHelper.getMoCBalance(userAccount);
           prevCommissionsAccountMoCBalance = await mocHelper.getMoCBalance(commissionsAccount);
           prevVendorAccountReserveTokenBalance = toContractBN(
-            await mocHelper.getReserveBalance(vendorAccount)
+            await mocHelper.getReserveBalance(scenario.params.vendorAccount)
           );
-          prevVendorAccountMoCBalance = await mocHelper.getMoCBalance(vendorAccount);
+          prevVendorAccountMoCBalance = await mocHelper.getMoCBalance(
+            scenario.params.vendorAccount
+          );
 
           await mocHelper.mintRiskProAmount(
             userAccount,
             scenario.params.riskProToMint,
-            vendorAccount,
+            scenario.params.vendorAccount,
             txType
           );
         });
@@ -187,7 +216,7 @@ contract('MoC: MoCExchange', function([
         });
         it(`THEN the vendor account Reserve balance has increase by ${scenario.expect.vendorAmountReserveToken} Reserves`, async function() {
           const vendorAccountReserveTokenBalance = toContractBN(
-            await mocHelper.getReserveBalance(vendorAccount)
+            await mocHelper.getReserveBalance(scenario.params.vendorAccount)
           );
           const diff = vendorAccountReserveTokenBalance.sub(prevVendorAccountReserveTokenBalance);
 
@@ -354,7 +383,6 @@ contract('MoC: MoCExchange', function([
           const mocTokenAddress = this.mocToken.address;
 
           // Set MoCToken address to 0
-          const zeroAddress = '0x0000000000000000000000000000000000000000';
           await this.mockMocStateChanger.setMoCToken(zeroAddress);
           await this.governor.executeChange(mocHelper.mockMocStateChanger.address);
 

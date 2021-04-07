@@ -507,12 +507,10 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable {
     uint256 mocMarkup
   )
   internal {
-    uint256 totalMoCFee;
+    uint256 totalMoCFee = mocCommission.add(mocMarkup);
     uint256 allowedBalance = getAllowance(sender);
 
-    if (mocCommission > 0 && mocMarkup > 0) {
-      totalMoCFee = mocCommission.add(mocMarkup);
-    } else {
+    if (totalMoCFee == 0) {
       totalResTokensSpent = totalResTokensSpent.add(reserveTokenCommission).add(reserveTokenMarkup);
       require(totalResTokensSpent <= allowedBalance, "amount is not enough");
     }
@@ -583,14 +581,11 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable {
     uint256 mocMarkup
   )
    internal {
-    uint256 totalMoCFee;
+    uint256 totalMoCFee = mocCommission.add(mocMarkup);
 
-    if (mocCommission > 0 && mocMarkup > 0) {
-      totalMoCFee = mocCommission.add(mocMarkup);
-      transferMocCommission(sender, mocCommission, vendorAccount, mocMarkup, totalMoCFee);
-    } else {
-      transferReserveTokenCommission(vendorAccount, reserveTokenCommission, reserveTokenMarkup);
-    }
+    transferMocCommission(sender, mocCommission, vendorAccount, mocMarkup, totalMoCFee);
+
+    transferReserveTokenCommission(vendorAccount, reserveTokenCommission, reserveTokenMarkup);
   }
 
   /**
@@ -605,18 +600,20 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable {
     uint256 totalResTokenFee = reserveTokenCommission.add(reserveTokenMarkup);
     (uint256 reserveTokenMarkupInMoC, , ) = mocExchange.convertToMoCPrice(reserveTokenMarkup);
 
-    // Transfer vendor markup in MoC
-    if (mocVendors.getIsActive(vendorAccount) &&
-        mocVendors.getTotalPaidInMoC(vendorAccount).add(reserveTokenMarkupInMoC) <= mocVendors.getStaking(vendorAccount)) {
-      // Update vendor's markup
-      mocVendors.updatePaidMarkup(vendorAccount, 0, reserveTokenMarkup, reserveTokenMarkupInMoC);
-      // Transfer ReserveToken to vendor address
-      safeWithdrawFromReserve(vendorAccount, reserveTokenMarkup);
-      // Transfer ReserveToken to commissions address
-      safeWithdrawFromReserve(mocInrate.commissionsAddress(), reserveTokenCommission);
-    } else {
-      // Transfer ReserveToken to commissions address
-      safeWithdrawFromReserve(mocInrate.commissionsAddress(), totalResTokenFee);
+    if (totalResTokenFee > 0) {
+      // Transfer vendor markup in MoC
+      if (mocVendors.getIsActive(vendorAccount) &&
+          mocVendors.getTotalPaidInMoC(vendorAccount).add(reserveTokenMarkupInMoC) <= mocVendors.getStaking(vendorAccount)) {
+        // Update vendor's markup
+        mocVendors.updatePaidMarkup(vendorAccount, 0, reserveTokenMarkup, reserveTokenMarkupInMoC);
+        // Transfer ReserveToken to vendor address
+        safeWithdrawFromReserve(vendorAccount, reserveTokenMarkup);
+        // Transfer ReserveToken to commissions address
+        safeWithdrawFromReserve(mocInrate.commissionsAddress(), reserveTokenCommission);
+      } else {
+        // Transfer ReserveToken to commissions address
+        safeWithdrawFromReserve(mocInrate.commissionsAddress(), totalResTokenFee);
+      }
     }
   }
 
