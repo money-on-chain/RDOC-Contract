@@ -599,6 +599,9 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
    * @param _riskProRate RiskPro holder interest rate [using mocPrecision]
    * @param blockSpanRiskPro RiskPro blockspan to configure payments periods[using mocPrecision]
    * @param riskProInterestsTarget Target address to transfer the weekly RiskPro holders interest
+   * @param _stableTmin Upgrade to support red stable inrate parameter
+   * @param _stablePower Upgrade to support red stable inrate parameter
+   * @param _stableTmax Upgrade to support red stable inrate parameter
    */
   function initializeValues(
     address _governor,
