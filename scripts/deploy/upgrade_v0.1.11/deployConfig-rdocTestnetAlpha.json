@@ -3,11 +3,13 @@
     "MoCExchange": "0x9608F72B879CfbF6c6B9eD4EE768d339140B8074"
   },
   "implementationAddresses": {
-    "MoCExchange": "",
+    "MoCExchange": "0x0faE4700530dF9020536268470f37F5EcE19B49D",
     "ProxyAdmin": "0xffb65F6E24806B7e1A988EeD1Ad07BB2654fF695",
     "UpgradeDelegator": "0xCDAbFbF334A5F6BCe900D2f73470D1e6722365d8",
     "Governor": "0x4eAC4518e81B3A5198aADAb998D2610B46aAA609",
     "MoCHelperLib": "0xabe1A7b54CF489eCD3fD5844F8aBFdF7e4DF5c74"
   },
-  "changerAddresses": {}
+  "changerAddresses": {
+    "1_MoCExchange": "0x5cF5A6bFd68a808E0C26074ccda55066bC48a528"
+  }
 }
