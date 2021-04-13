@@ -345,7 +345,7 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
     uint256 riskProxToRedeem = Math.min(riskProxAmount, userBalance);
     uint256 resTokenToRedeem = mocConverter.riskProxToResToken(riskProxToRedeem, bucket);
     // //Pay interests
-    uint256 resTokenInterests = recoverInterests(bucket, resTokenToRedeem);
+    uint256 resTokenInterests = 0;
 
     // Burn RiskProx
     burnRiskProxFor(bucket, account, riskProxToRedeem, mocState.bucketRiskProTecPrice(bucket));

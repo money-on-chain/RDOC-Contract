@@ -1,9 +1,9 @@
 {
-  "name": "RDOC-Contract",
-  "version": "0.1.5",
+  "name": "rdoc-contract",
+  "version": "0.1.11",
   "private": true,
   "homepage": "https://github.com/money-on-chain/RDOC-Contract",
-  "description": "RDOC collateralized stablecoin using decentralized three-token system",
+  "description": "RIF collateralized stablecoin using decentralized three-token system",
   "main": "truffle-config.js",
   "directories": {
     "test": "test"
@@ -16,7 +16,7 @@
     "block-utils": "scripts/mine_blocks.sh",
     "truffle-compile": "truffle compile --all",
     "solium": "node ./node_modules/ethlint/bin/solium -d contracts/",
-    "eslint": "eslint 'test/**/*.js' 'scripts/**/*.js' 'migrations/**/*.js'",
+    "eslint": "npx truffle compile --all; npx eslint 'test/**/*.js' 'scripts/**/*.js'",
     "migrate-development": "truffle migrate --network development",
     "migrate-qaTestnet": "truffle migrate --network qaTestnet",
     "migrate-qaPrivate": "truffle migrate --network qaPrivate",
@@ -74,5 +74,8 @@
     "truffle": "5.0.26",
     "truffle-hdwallet-provider": "1.0.13",
     "web3": "1.0.0-beta.55"
+  },
+  "engines": {
+    "node": "=8.17.0"
   }
 }
