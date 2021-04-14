@@ -41,19 +41,32 @@ module.exports = {
       port: 4444,
       network_id: '*'
     },
-    mocTestnet: {
-      // 0xC67D9eE30d2119A384E02de568BE80FE785074Ba
+    rdocTestnetAlpha: {
       host: 'https://public-node.testnet.rsk.co',
       provider: new HDWalletProvider(mnemonic, 'https://public-node.testnet.rsk.co'),
       network_id: '*',
-      gasPrice: 60000000
+      gas: 6700000,
+      gasPrice: 69000000,
+      skipDryRun: true,
+      confirmations: 1
     },
-    mocMainnet: {
-      // 0x27A3074Db95EC5F6A0e73dC41a4859f48990E841
+    rdocTestnet: {
+      host: 'https://public-node.testnet.rsk.co',
+      provider: new HDWalletProvider(mnemonic, 'https://public-node.testnet.rsk.co'),
+      network_id: '*',
+      gas: 6700000,
+      gasPrice: 69000000,
+      skipDryRun: true,
+      confirmations: 1
+    },
+    rdocMainnet: {
       host: 'https://public-node.rsk.co',
       provider: new HDWalletProvider(mnemonic, 'https://public-node.rsk.co'),
       network_id: '*',
-      gasPrice: 60000000
+      gas: 6700000,
+      gasPrice: 60000000,
+      skipDryRun: true,
+      confirmations: 1
     }
   },
   mocha: {
