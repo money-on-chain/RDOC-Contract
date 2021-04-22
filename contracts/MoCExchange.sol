@@ -4,10 +4,14 @@ pragma experimental ABIEncoderV2;
 import "./MoCLibConnection.sol";
 import "./token/RiskProToken.sol";
 import "./token/StableToken.sol";
-import "./MoCInrate.sol";
+import "./interface/IMoCInrate.sol";
 import "./base/MoCBase.sol";
-import "./MoC.sol";
 import "./token/MoCToken.sol";
+import "./MoCConverter.sol";
+import "openzeppelin-solidity/contracts/math/Math.sol";
+import "./interface/IMoC.sol";
+import "./interface/IMoCExchange.sol";
+import "./interface/IMoCState.sol";
 
 contract MoCExchangeEvents {
   event RiskProMint(
@@ -116,13 +120,13 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
   using SafeMath for uint256;
 
   // Contracts
-  MoCState internal mocState;
+  IMoCState internal mocState;
   MoCConverter internal mocConverter;
   MoCRiskProxManager internal riskProxManager;
   RiskProToken internal riskProToken;
   StableToken internal stableToken;
-  MoCInrate internal mocInrate;
-  MoC internal moc;
+  IMoCInrate internal mocInrate;
+  IMoC internal moc;
 
   /**
     @dev Initializes the contract
@@ -237,7 +241,7 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
     details.finalRiskProAmount = 0;
     details.reserveTokenValue = 0;
 
-    if (mocState.state() == MoCState.States.RiskProDiscount) {
+    if (mocState.state() == IMoCState.States.RiskProDiscount) {
       details.discountPrice = mocState.riskProDiscountPrice();
       details.riskProDiscountAmount = mocConverter.resTokenToRiskProDisc(reserveTokenAmount);
 
@@ -956,13 +960,13 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
   }
 
   function initializeContracts() internal {
-    moc = MoC(connector.moc());
+    moc = IMoC(connector.moc());
     stableToken = StableToken(connector.stableToken());
     riskProToken = RiskProToken(connector.riskProToken());
     riskProxManager = MoCRiskProxManager(connector.riskProxManager());
-    mocState = MoCState(connector.mocState());
+    mocState = IMoCState(connector.mocState());
     mocConverter = MoCConverter(connector.mocConverter());
-    mocInrate = MoCInrate(connector.mocInrate());
+    mocInrate = IMoCInrate(connector.mocInrate());
   }
 
 
