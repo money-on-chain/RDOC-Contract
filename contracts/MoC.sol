@@ -2,37 +2,38 @@ pragma solidity 0.5.8;
 
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "./MoCLibConnection.sol";
-import "./token/StableToken.sol";
 import "./token/RiskProToken.sol";
 import "./MoCRiskProxManager.sol";
-import "./MoCState.sol";
+import "./interface/IMoCState.sol";
 import "./MoCConverter.sol";
-import "./MoCSettlement.sol";
-import "./MoCExchange.sol";
+import "./interface/IMoCSettlement.sol";
+import "./interface/IMoCExchange.sol";
 import "./base/MoCBase.sol";
 import "./base/MoCReserve.sol";
 import "moc-governance/contracts/Stopper/Stoppable.sol";
 import "moc-governance/contracts/Governance/IGovernor.sol";
-import "./token/MoCToken.sol";
-import "./MoCVendors.sol";
+import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
+import "./interface/IMoCVendors.sol";
+import "./interface/IMoCInrate.sol";
+import "./interface/IMoC.sol";
 
 contract MoCEvents {
   event BucketLiquidation(bytes32 bucket);
   event ContractLiquidated(address mocAddress);
 }
 
-contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable {
+contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMoC {
   using SafeMath for uint256;
 
   /// @dev Contracts.
-  StableToken internal stableToken;
+  address internal stableToken;
   RiskProToken internal riskProToken;
   MoCRiskProxManager internal riskProxManager;
-  MoCState internal mocState;
+  IMoCState internal mocState;
   MoCConverter internal mocConverter;
-  MoCSettlement internal settlement;
-  MoCExchange internal mocExchange;
-  MoCInrate internal mocInrate;
+  IMoCSettlement internal settlement;
+  IMoCExchange internal mocExchange;
+  IMoCInrate internal mocInrate;
   /// @dev 'MoCBurnout' is deprecated. DO NOT use this variable.
   /** DEPRECATED **/
   // solium-disable-next-line mixedcase
@@ -57,14 +58,14 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable {
     initializePrecisions();
     initializeBase(connectorAddress);
     //initializeContracts
-    stableToken = StableToken(connector.stableToken());
+    stableToken = connector.stableToken();
     riskProToken = RiskProToken(connector.riskProToken());
     riskProxManager = MoCRiskProxManager(connector.riskProxManager());
-    mocState = MoCState(connector.mocState());
-    settlement = MoCSettlement(connector.mocSettlement());
+    mocState = IMoCState(connector.mocState());
+    settlement = IMoCSettlement(connector.mocSettlement());
     mocConverter = MoCConverter(connector.mocConverter());
-    mocExchange = MoCExchange(connector.mocExchange());
-    mocInrate = MoCInrate(connector.mocInrate());
+    mocExchange = IMoCExchange(connector.mocExchange());
+    mocInrate = IMoCInrate(connector.mocInrate());
     setReserveToken(connector.reserveToken());
     //initializeGovernanceContracts
     Stoppable.initialize(stopperAddress, IGovernor(governorAddress), startStoppable);
@@ -189,7 +190,7 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable {
   */
   function redeemRiskProVendors(uint256 riskProAmount, address vendorAccount)
   public
-  whenNotPaused() transitionState() atLeastState(MoCState.States.AboveCobj) {
+  whenNotPaused() transitionState() atLeastState(IMoCState.States.AboveCobj) {
     /** UPDATE V0110: 24/09/2020 - Upgrade to support multiple commission rates **/
     (uint256 resTokensAmount,
     uint256 reserveTokenCommission,
@@ -220,7 +221,7 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable {
   */
   function mintStableTokenVendors(uint256 resTokensToMint, address vendorAccount)
   public
-  whenNotPaused() transitionState() atLeastState(MoCState.States.AboveCobj) {
+  whenNotPaused() transitionState() atLeastState(IMoCState.States.AboveCobj) {
     /** UPDATE V0110: 24/09/2020 - Upgrade to support multiple commission rates **/
     (uint256 totalResTokensSpent,
     uint256 reserveTokenCommission,
@@ -345,7 +346,7 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable {
    * @dev Allow redeem on liquidation state, user StableTokens get burned and he receives
    * the equivalent ReserveTokens if can be covered, or the maximum available
    **/
-  function redeemAllStableToken() public atState(MoCState.States.Liquidated) {
+  function redeemAllStableToken() public atState(IMoCState.States.Liquidated) {
     mocExchange.redeemAllStableToken(msg.sender, msg.sender);
   }
 
@@ -539,12 +540,12 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable {
     uint256 mocMarkup,
     uint256 totalMoCFee
   ) internal {
-    MoCVendors mocVendors = MoCVendors(mocState.getMoCVendors());
+    IMoCVendors mocVendors = IMoCVendors(mocState.getMoCVendors());
 
     // If commission and markup are paid in MoC
     if (totalMoCFee > 0) {
       // Transfer MoC from sender to this contract
-      MoCToken mocToken = MoCToken(mocState.getMoCToken());
+      IERC20 mocToken = IERC20(mocState.getMoCToken());
       mocToken.transferFrom(sender, address(this), totalMoCFee);
 
       // Transfer vendor markup in MoC
@@ -595,7 +596,7 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable {
     @param reserveTokenMarkup vendor markup in ReserveToken
   */
   function transferReserveTokenCommission(address vendorAccount, uint256 reserveTokenCommission, uint256 reserveTokenMarkup) internal {
-    MoCVendors mocVendors = MoCVendors(mocState.getMoCVendors());
+    IMoCVendors mocVendors = IMoCVendors(mocState.getMoCVendors());
 
     uint256 totalResTokenFee = reserveTokenCommission.add(reserveTokenMarkup);
     (uint256 reserveTokenMarkupInMoC, , ) = mocExchange.convertToMoCPrice(reserveTokenMarkup);
@@ -661,17 +662,17 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable {
     _;
   }
 
-  modifier atState(MoCState.States _state) {
+  modifier atState(IMoCState.States _state) {
     require(mocState.state() == _state, "Function cannot be called at this state.");
     _;
   }
 
-  modifier atLeastState(MoCState.States _state) {
+  modifier atLeastState(IMoCState.States _state) {
     require(mocState.state() >= _state, "Function cannot be called at this state.");
     _;
   }
 
-  modifier atMostState(MoCState.States _state) {
+  modifier atMostState(IMoCState.States _state) {
     require(mocState.state() <= _state, "Function cannot be called at this state.");
     _;
   }
@@ -699,7 +700,7 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable {
   modifier transitionState()
   {
     mocState.nextState();
-    if (mocState.state() == MoCState.States.Liquidated) {
+    if (mocState.state() == IMoCState.States.Liquidated) {
       liquidate();
     }
     else

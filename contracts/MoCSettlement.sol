@@ -4,13 +4,14 @@ import "openzeppelin-solidity/contracts/math/Math.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "./base/MoCBase.sol";
 import "./token/StableToken.sol";
-import "./MoCState.sol";
-import "./MoCExchange.sol";
+import "./interface/IMoCState.sol";
+import "./interface/IMoCExchange.sol";
 import "./MoCRiskProxManager.sol";
 import "./PartialExecution.sol";
 import "moc-governance/contracts/Governance/Governed.sol";
 import "moc-governance/contracts/Governance/IGovernor.sol";
-import "./MoCVendors.sol";
+import "./interface/IMoCVendors.sol";
+import "./interface/IMoCSettlement.sol";
 
 contract MoCSettlementEvents {
   event RedeemRequestAlter(address indexed redeemer, bool isAddition, uint256 delta);
@@ -30,7 +31,8 @@ contract MoCSettlement is
 MoCSettlementEvents,
 MoCBase,
 PartialExecution,
-Governed
+Governed,
+IMoCSettlement
 {
   using Math for uint256;
   using SafeMath for uint256;
@@ -64,8 +66,8 @@ Governed
   }
 
   // Contracts
-  MoCState internal mocState;
-  MoCExchange internal mocExchange;
+  IMoCState internal mocState;
+  IMoCExchange internal mocExchange;
   StableToken internal stableToken;
   MoCRiskProxManager internal riskProxManager;
 
@@ -320,8 +322,8 @@ Governed
   function initializeContracts() internal {
     stableToken = StableToken(connector.stableToken());
     riskProxManager = MoCRiskProxManager(connector.riskProxManager());
-    mocState = MoCState(connector.mocState());
-    mocExchange = MoCExchange(connector.mocExchange());
+    mocState = IMoCState(connector.mocState());
+    mocExchange = IMoCExchange(connector.mocExchange());
   }
 
   function initializeValues(address _governor, uint256 _blockSpan) internal {
@@ -385,7 +387,7 @@ Governed
     settlementInfo.startBlockNumber = block.number;
 
     // Reset total paid in MoC for every vendor
-    MoCVendors mocVendors = MoCVendors(mocState.getMoCVendors());
+    IMoCVendors mocVendors = IMoCVendors(mocState.getMoCVendors());
     mocVendors.resetTotalPaidInMoC();
 
     emit SettlementStarted(

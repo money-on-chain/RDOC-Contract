@@ -3,7 +3,6 @@ pragma solidity 0.5.8;
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "openzeppelin-solidity/contracts/math/Math.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
-import "../base/MoCBase.sol";
 
 contract MoCReserve {
   event CallRevert();
