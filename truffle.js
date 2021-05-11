@@ -73,7 +73,7 @@ module.exports = {
       network_id: '30',
       gas: 6700000,
       gasPrice: 60000000,
-      kipDryRun: true
+      skipDryRun: true
     },
     prueba: {
       // host: '127.0.0.1',
