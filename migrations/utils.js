@@ -117,6 +117,14 @@ const makeUtils = async (artifacts, networkName, config, owner, deployer) => {
     return ReserveToken.deployed();
   };
 
+  const getMoCToken = () => {
+    if (config.mocToken) {
+      return MoCToken.at(config.mocToken);
+    }
+
+    return MoCToken.deployed();
+  };
+
   const deployReserveToken = () => {
     // If ReserveToken is not configured, then deploy it
     if (!config.reserveToken) {
@@ -125,10 +133,18 @@ const makeUtils = async (artifacts, networkName, config, owner, deployer) => {
     }
   };
 
+  const deployMoCToken = () => {
+    // If MoCToken is not configured, then deploy it
+    if (!config.mocToken) {
+      console.log('Deploying MoCToken');
+      return deployer.deploy(MoCToken);
+    }
+  };
+
   const deployMocLibMock = async () => {
     await deployer.link(MoCLib, MoCLibMock);
     await deployer.deploy(MoCLibMock);
-    await deployer.deploy(ReserveToken);
+    // await deployer.deploy(ReserveToken);
   };
 
   const deployMoCHelperLibHarness = async () => {
@@ -144,7 +160,11 @@ const makeUtils = async (artifacts, networkName, config, owner, deployer) => {
   };
 
   const deployMoCOracleMock = async () => {
-    await deployer.deploy(MoCPriceProviderMock, toContract(config.initialPrice * 10 ** 18));
+    // If mocOracle is not configured, then deploy it
+    if (!config.mocOracle) {
+      console.log('Deploying MoCPriceProviderMock');
+      return deployer.deploy(MoCPriceProviderMock, toContract(config.initialPrice * 10 ** 18));
+    }
   };
 
   const deployGovernorContract = async () => {
@@ -216,7 +236,7 @@ const makeUtils = async (artifacts, networkName, config, owner, deployer) => {
     stableToken = await StableToken.deployed();
     riskPro = await RiskProToken.deployed();
     reserveToken = await getReserveToken();
-    mocToken = await MoCToken.deployed();
+    mocToken = await getMoCToken();
 
     riskProx = await RiskProxManager.at(getProxyAddress(proxies, 'MoCRiskProxManager'));
     mocSettlement = await MoCSettlementContract.at(getProxyAddress(proxies, 'MoCSettlement'));
@@ -355,7 +375,7 @@ const makeUtils = async (artifacts, networkName, config, owner, deployer) => {
       mocSettlement: getImplementationAddress(proxies, 'MoCSettlement'),
       mocConverter: getImplementationAddress(proxies, 'MoCConverter'),
       mocConnector: getImplementationAddress(proxies, 'MoCConnector'),
-      mocToken: (await MoCToken.deployed()).address,
+      mocToken: (await getMoCToken()).address,
       mocHelperLib: (await MoCLib.deployed()).address
     };
   };
@@ -627,7 +647,10 @@ const makeUtils = async (artifacts, networkName, config, owner, deployer) => {
     getContractAddresses,
     deployMoCOracleMock,
     deployMoCHelperLibHarness,
-    saveConfig
+    saveConfig,
+    getProxies,
+    getProxyAddress,
+    deployMoCToken
   };
 };
 

@@ -1,5 +1,13 @@
-const MoCToken = artifacts.require('./token/MoCToken.sol');
+const utils = require('./utils');
+const allConfigs = require('./configs/config');
 
-module.exports = async deployer => {
-  await deployer.deploy(MoCToken);
+module.exports = async (deployer, currentNetwork, [owner]) => {
+  const { deployMoCToken } = await utils.makeUtils(
+    artifacts,
+    currentNetwork,
+    allConfigs[currentNetwork],
+    owner,
+    deployer
+  );
+  return deployer.then(async () => deployMoCToken());
 };
