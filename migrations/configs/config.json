@@ -192,6 +192,7 @@
     "reserveToken": "0x19F64674D8A5B4E652319F5e239eFd3bc969A1fE",
     "mocToken": "0x1dc4bec7ce1ca27ba16f419c514b62c88b9cb567",
     "mocOracle": "0xeeae0b52ac1f0d7d139898997b8367dd67e3527c",
+    "oracle": "0x9d4b2c05818A0086e641437fcb64ab6098c7BbEc",
     "initialPrice": 7800,
     "initialEma": 7800,
     "dayBlockSpan": 2880,
