@@ -8,6 +8,7 @@ import "./interface/IMoCInrate.sol";
 import "./base/MoCBase.sol";
 import "./token/MoCToken.sol";
 import "./MoCConverter.sol";
+import "./MoCRiskProxManager.sol";
 import "openzeppelin-solidity/contracts/math/Math.sol";
 import "./interface/IMoC.sol";
 import "./interface/IMoCExchange.sol";
