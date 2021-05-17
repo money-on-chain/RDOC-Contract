@@ -110,19 +110,9 @@ contract('CommissionSplitter', function([
           s.mintOperations
         )} Reserve tokens to mint RiskPros paying commissions`, function() {
           before(async function() {
-            console.log('----- before split ------');
-            console.log('commissionSplitter', commissionSplitter.address);
-            console.log('mocProportion', await commissionSplitter.mocProportion());
-            console.log('moc', await commissionSplitter.moc());
-            console.log('reserveToken', await commissionSplitter.reserveToken());
-            console.log('mocToken', await commissionSplitter.mocToken());
-            console.log(
-              'mocTokenCommissionsAddress',
-              await commissionSplitter.mocTokenCommissionsAddress()
-            );
             // Empty commission splitter just to have a more robust test
             await commissionSplitter.split();
-            console.log('----- before split ------');
+
             await executeOperations(userAccount, s.mintOperations, vendorAccount);
           });
           it(`THEN CommissionSplitter Reserve Token balance should be ${s.commissionAmount +

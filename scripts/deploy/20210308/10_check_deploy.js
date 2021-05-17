@@ -21,7 +21,8 @@ module.exports = async callback => {
       'MoCInrate',
       'MoCConverter',
       'MoCState',
-      'MoCVendors'
+      'MoCVendors',
+      'CommissionSplitter'
     ];
 
     const proxyAdmin = await ProxyAdmin.at(originalConfig.implementationAddresses.ProxyAdmin);

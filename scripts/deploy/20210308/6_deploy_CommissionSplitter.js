@@ -27,7 +27,7 @@ module.exports = async callback => {
 
     // Save implementation address and changer address to config file
     config.implementationAddresses.CommissionSplitter = commissionSplitter.address;
-    config.changerAddresses['7_CommissionSplitter'] = upgradeCommissionSplitter.address;
+    config.changerAddresses['6_CommissionSplitter'] = upgradeCommissionSplitter.address;
     saveConfig(config, configPath);
 
     let governor;
@@ -46,7 +46,7 @@ module.exports = async callback => {
     );
 
     // Save changer address to config file
-    config.changerAddresses['7_commissionSplitterChangerDeploy'] =
+    config.changerAddresses['6_commissionSplitterChangerDeploy'] =
       commissionSplitterChangerDeploy.address;
     saveConfig(config, configPath);
 

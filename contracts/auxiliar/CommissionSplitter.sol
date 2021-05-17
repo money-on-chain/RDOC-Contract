@@ -69,12 +69,12 @@ contract CommissionSplitter is Governed, ReentrancyGuard {
     uint256 commissionAmount = currentBalance.sub(mocAmount);
 
     _sendReservesToMoC(mocAmount);
-    if(commissionAmount > 0) {
+    if (commissionAmount > 0) {
       reserveToken.transfer(commissionsAddress, commissionAmount);
     }
 
     uint256 mocTokenAmount = mocToken.balanceOf(address(this));
-    if(mocTokenAmount > 0) {
+    if (mocTokenAmount > 0) {
       mocToken.transfer(mocTokenCommissionsAddress, mocTokenAmount);
     }
     emit SplitExecuted(commissionAmount, mocAmount, mocTokenAmount);
@@ -109,7 +109,7 @@ contract CommissionSplitter is Governed, ReentrancyGuard {
     @dev Sends tokens to Money on chain reserves
    */
   function _sendReservesToMoC(uint256 amount) internal {
-    if(amount > 0) {
+    if (amount > 0) {
       reserveToken.approve(address(moc), amount);
       moc.addReserves(amount);
     }
