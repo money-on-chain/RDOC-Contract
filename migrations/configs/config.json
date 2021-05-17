@@ -220,6 +220,7 @@
     "liquidationEnabled": false,
     "protected": 1.5,
     "vendorGuardianAddress": "",
+    "mocTokenCommissionsAddress": "",
     "commissionRates": {
       "MINT_RISKPRO_FEES_RESERVE": 0.001,
       "REDEEM_RISKPRO_FEES_RESERVE": 0.002,
