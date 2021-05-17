@@ -7,7 +7,8 @@
     "MoCInrate": "0x26b169BbB33580A50F0017877cA8C5a069E68C3d",
     "MoCConverter": "0x5fb17cBfAAA3826C8964dBA51b027E0c9F00f81f",
     "MoCState": "0xB1e94B2168E1C3A9486e1377ed7a672784b9e6bF",
-    "MoCVendors": "0x671D6f0c97513b4fF6a71A72eD7a28698261b999"
+    "MoCVendors": "0x671D6f0c97513b4fF6a71A72eD7a28698261b999",
+    "CommissionSplitter": "0x79f34e04E7D4a46165f1C509BA1AdD324eE54C9f"
   },
   "implementationAddresses": {
     "MoC": "0x556ba610743677eA1Ee6a922A89d6d352743215F",
@@ -23,7 +24,8 @@
     "MoCToken": "0x1dc4Bec7ce1ca27bA16F419c514b62c88B9Cb567",
     "MoCPriceProvider": "0xeeae0b52ac1f0d7d139898997b8367dd67e3527c",
     "MoCVendors": "0x2faec2640BcbD46747F70BDFc7E59A646C9AcE48",
-    "MoCHelperLib": "0x56FE8d6E9064521dE747AE1a3ca876eC51e74a3d"
+    "MoCHelperLib": "0x56FE8d6E9064521dE747AE1a3ca876eC51e74a3d",
+    "CommissionSplitter": "0x8274Ba746C100CDA223D9359C6131F25096B508e"
   },
   "valuesToAssign": {
     "commissionRates": {
@@ -42,7 +44,8 @@
     },
     "liquidationEnabled": false,
     "protected": 1.5,
-    "vendorGuardianAddress": "0x5833dD7e679156879736928d66AC6763aFDAaa61"
+    "vendorGuardianAddress": "0x5833dD7e679156879736928d66AC6763aFDAaa61",
+    "mocTokenCommissionsAddress": "0x5833dD7e679156879736928d66AC6763aFDAaa61"
   },
   "changerAddresses": {}
 }
