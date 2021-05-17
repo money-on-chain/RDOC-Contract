@@ -289,6 +289,7 @@ const createContracts = params => async ({ owner, useMock }) => {
   const mockMocChanger = await MocChanger.new(moc.address, governor.address, stopper.address, {
     from: owner
   });
+
   const mocStateInitializeParams = {
     connectorAddress: mocConnector.address,
     governor: governor.address,
@@ -353,7 +354,9 @@ const createContracts = params => async ({ owner, useMock }) => {
     owner,
     mocProportion,
     governor.address,
-    reserveToken.address
+    reserveToken.address,
+    mocToken.address,
+    owner
   );
   await upgradeDelegator.initialize(governor.address, proxyAdmin.address);
   await mocVendors.initialize(

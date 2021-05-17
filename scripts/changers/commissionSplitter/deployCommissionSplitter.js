@@ -8,7 +8,10 @@ const { deployContract, getConfig } = require('../changerHelper');
 const input = {
   network: 'qaTestnet',
   commissionAddress: '',
-  mocProportion: '500000000000000000'
+  mocProportion: '500000000000000000',
+  reserveTokenAddress: '',
+  mocTokenAddress: '',
+  mocTokenCommissionAddress: ''
 };
 
 const execute = async () => {
@@ -17,7 +20,10 @@ const execute = async () => {
     config.moc,
     input.commissionAddress,
     input.mocProportion,
-    config.governor
+    config.governor,
+    input.reserveTokenAddress,
+    input.mocTokenAddress,
+    input.mocTokenCommissionAddress
   ]);
 };
 

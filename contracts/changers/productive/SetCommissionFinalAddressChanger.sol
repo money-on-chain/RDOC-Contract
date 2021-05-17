@@ -9,9 +9,9 @@ import "../../auxiliar/CommissionSplitter.sol";
  */
 contract SetCommissionFinalAddressChanger is ChangeContract {
   CommissionSplitter public commissionSplitter;
-  address public commissionAddress;
+  address payable public commissionAddress;
 
-  constructor(CommissionSplitter _commissionSplitter, address _commissionAddress) public {
+  constructor(CommissionSplitter _commissionSplitter, address payable _commissionAddress) public {
     commissionSplitter = _commissionSplitter;
     commissionAddress = _commissionAddress;
   }
