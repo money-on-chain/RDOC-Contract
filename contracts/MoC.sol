@@ -546,7 +546,6 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMo
     if (totalMoCFee > 0) {
       // Transfer MoC from sender to this contract
       IERC20 mocToken = IERC20(mocState.getMoCToken());
-      mocToken.transferFrom(sender, address(this), totalMoCFee);
 
       // Transfer vendor markup in MoC
       if (mocVendors.getIsActive(vendorAccount) &&
@@ -554,12 +553,12 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMo
         // Update vendor's markup
         mocVendors.updatePaidMarkup(vendorAccount, mocMarkup, 0, mocMarkup);
         // Transfer MoC to vendor address
-        mocToken.transfer(vendorAccount, mocMarkup);
+        mocToken.transferFrom(sender, vendorAccount, mocMarkup);
         // Transfer MoC to commissions address
-        mocToken.transfer(mocInrate.commissionsAddress(), mocCommission);
+        mocToken.transferFrom(sender, mocInrate.commissionsAddress(), mocCommission);
       } else {
         // Transfer MoC to commissions address
-        mocToken.transfer(mocInrate.commissionsAddress(), totalMoCFee);
+        mocToken.transferFrom(sender, mocInrate.commissionsAddress(), totalMoCFee);
       }
     }
   }
