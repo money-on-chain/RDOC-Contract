@@ -540,18 +540,15 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMo
     uint256 mocMarkup,
     uint256 totalMoCFee
   ) internal {
-    IMoCVendors mocVendors = IMoCVendors(mocState.getMoCVendors());
 
     // If commission and markup are paid in MoC
     if (totalMoCFee > 0) {
+      IMoCVendors mocVendors = IMoCVendors(mocState.getMoCVendors());
       // Transfer MoC from sender to this contract
       IERC20 mocToken = IERC20(mocState.getMoCToken());
 
       // Transfer vendor markup in MoC
-      if (mocVendors.getIsActive(vendorAccount) &&
-          mocVendors.getTotalPaidInMoC(vendorAccount).add(mocMarkup) <= mocVendors.getStaking(vendorAccount)) {
-        // Update vendor's markup
-        mocVendors.updatePaidMarkup(vendorAccount, mocMarkup, 0, mocMarkup);
+      if (mocVendors.updatePaidMarkup(vendorAccount, mocMarkup, 0)) {
         // Transfer MoC to vendor address
         mocToken.transferFrom(sender, vendorAccount, mocMarkup);
         // Transfer MoC to commissions address
@@ -595,17 +592,14 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMo
     @param reserveTokenMarkup vendor markup in ReserveToken
   */
   function transferReserveTokenCommission(address vendorAccount, uint256 reserveTokenCommission, uint256 reserveTokenMarkup) internal {
-    IMoCVendors mocVendors = IMoCVendors(mocState.getMoCVendors());
 
     uint256 totalResTokenFee = reserveTokenCommission.add(reserveTokenMarkup);
-    (uint256 reserveTokenMarkupInMoC, , ) = mocExchange.convertToMoCPrice(reserveTokenMarkup);
+    //(uint256 reserveTokenMarkupInMoC, , ) = mocExchange.convertToMoCPrice(reserveTokenMarkup);
 
     if (totalResTokenFee > 0) {
+      IMoCVendors mocVendors = IMoCVendors(mocState.getMoCVendors());
       // Transfer vendor markup in MoC
-      if (mocVendors.getIsActive(vendorAccount) &&
-          mocVendors.getTotalPaidInMoC(vendorAccount).add(reserveTokenMarkupInMoC) <= mocVendors.getStaking(vendorAccount)) {
-        // Update vendor's markup
-        mocVendors.updatePaidMarkup(vendorAccount, 0, reserveTokenMarkup, reserveTokenMarkupInMoC);
+      if (mocVendors.updatePaidMarkup(vendorAccount, 0, btcMarkup)) {
         // Transfer ReserveToken to vendor address
         safeWithdrawFromReserve(vendorAccount, reserveTokenMarkup);
         // Transfer ReserveToken to commissions address
