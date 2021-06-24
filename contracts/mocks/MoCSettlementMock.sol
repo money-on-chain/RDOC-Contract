@@ -9,7 +9,7 @@ contract MoCSettlementMock is MoCSettlement {
   /**
     @dev Constructor
   */
-  constructor() MoCSettlementMock () public { }
+  constructor() MoCSettlement () public { }
 
   function() external {
     require(false, "fallback function is not enabled");

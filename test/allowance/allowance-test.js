@@ -26,14 +26,14 @@ contract('MoC: MoCExchange', function([owner, userAccount, vendorAccount]) {
     describe('WHEN he tries to mint RiskPro for 100 reserve tokens', function() {
       it('THEN transaction reverts for not having enough allowance', async function() {
         const tx = mocHelper.mintRiskPro(userAccount, 100, vendorAccount);
-        await expectRevert(tx, 'amount is not enough');
+        await expectRevert(tx, 'Not enough allowance to make the operation.');
       });
     });
 
     describe('WHEN he tries to mint StableTokens for 100 reserve tokens', function() {
       it('THEN transaction reverts for not having enough allowance', async function() {
         const tx = mocHelper.mintStableToken(userAccount, 100, vendorAccount);
-        await expectRevert(tx, 'amount is not enough');
+        await expectRevert(tx, 'Not enough allowance to make the operation.');
       });
     });
 
@@ -63,13 +63,13 @@ contract('MoC: MoCExchange', function([owner, userAccount, vendorAccount]) {
       describe('THEN WHEN the user tries to mint RiskPro for 1500 reserve tokens', function() {
         it('THEN transaction reverts for not having enough allowance', async function() {
           const tx = mocHelper.mintRiskPro(userAccount, 1500, vendorAccount);
-          await expectRevert(tx, 'amount is not enough');
+          await expectRevert(tx, 'Not enough allowance to make the operation.');
         });
       });
       describe('THEN WHEN the user tries to mint Stable token for 1500 reserve tokens', function() {
         it('THEN transaction reverts for not having enough allowance', async function() {
           const tx = mocHelper.mintStableToken(userAccount, 1500, vendorAccount);
-          await expectRevert(tx, 'amount is not enough');
+          await expectRevert(tx, 'Not enough allowance to make the operation.');
         });
       });
     });
@@ -119,13 +119,13 @@ contract('MoC: MoCExchange', function([owner, userAccount, vendorAccount]) {
       describe('THEN WHEN the user tries to mint RiskPro for 600 reserve tokens', function() {
         it('THEN transaction reverts for not having enough allowance', async function() {
           const tx = mocHelper.mintRiskPro(userAccount, 600, vendorAccount);
-          await expectRevert(tx, 'amount is not enough');
+          await expectRevert(tx, 'Not enough allowance to make the operation.');
         });
       });
       describe('THEN WHEN the user tries to mint StableToken for 600 reserve tokens', function() {
         it('THEN transaction reverts for not having enough allowance', async function() {
           const tx = mocHelper.mintStableToken(userAccount, 600, vendorAccount);
-          await expectRevert(tx, 'amount is not enough');
+          await expectRevert(tx, 'Not enough allowance to make the operation.');
         });
       });
     });

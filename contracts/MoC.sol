@@ -265,7 +265,7 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMo
     uint256 reserveTokenMarkup,
     uint256 mocMarkup) = mocExchange.redeemRiskProx(msg.sender, bucket, riskProxAmount, vendorAccount);
 
-    redeemWithMoCFees(msg.sender, reserveTokenCommission, mocCommission, vendorAccount, reserveTokenMarkup, mocMarkup, resTokensAmount);
+    redeemWithMoCFees(msg.sender, reserveTokenCommission, mocCommission, vendorAccount, reserveTokenMarkup, mocMarkup, totalResTokensRedeemed);
     /** END UPDATE V0110: 24/09/2020 - Upgrade to support multiple commission rates **/
   }
 
@@ -357,7 +357,8 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMo
   */
   function payRiskProHoldersInterestPayment() public whenNotPaused() {
     uint256 toPay = mocInrate.payRiskProHoldersInterestPayment();
-    if (withdrawFromReserve(mocInrate.getRiskProInterestAddress(), toPay)) {
+    if (withdraw(toPay, mocInrate.getRiskProInterestAddress())) {
+      mocState.substractFromReserves(toPay);
       riskProxManager.substractValuesFromBucket(BUCKET_C0, toPay, 0, 0);
     }
   }
@@ -456,7 +457,11 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMo
     if (tokenAmount == 0) {
       return true;
     }
-    return withdrawFromReserve(receiver, tokenAmount);
+    if(withdraw(tokenAmount, receiver)) {
+      mocState.substractFromReserves(tokenAmount);
+      return true;
+    }
+    return false;
   }
 
   function liquidate() internal {
@@ -504,12 +509,12 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMo
   internal {
     // Need to update general State
     mocState.addToReserves(totalResTokensSpent);
+    require(deposit(totalResTokensSpent.add(reserveTokenCommission).add(reserveTokenMarkup), sender), "Token deposit failed");
 
     transferMocCommission(sender, mocCommission, vendorAccount, mocMarkup);
 
     transferReserveTokenCommission(vendorAccount, reserveTokenCommission, reserveTokenMarkup);
 
-    require(deposit(totalResTokensSpent.add(reserveTokenCommission).add(reserveTokenMarkup), sender), "Token deposit failed on RRC20 Reserve token transfer");
   }
 
   /**
@@ -565,13 +570,13 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMo
     uint256 reserveTokenAmount
   )
    internal {
-    require(withdraw(reserveTokenAmount, receiver), "Token withdrawal failed on RRC20 Reserve token transfer");
+    safeWithdraw(sender, reserveTokenAmount);
+    mocState.substractFromReserves(reserveTokenAmount.add(reserveTokenCommission).add(reserveTokenMarkup));
 
     transferMocCommission(sender, mocCommission, vendorAccount, mocMarkup);
 
     transferReserveTokenCommission(vendorAccount, reserveTokenCommission, reserveTokenMarkup);
 
-    mocState.substractFromReserves(reserveTokenAmount.add(reserveTokenCommission).add(reserveTokenMarkup));
   }
 
   /**
@@ -588,14 +593,14 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMo
     if (totalResTokenFee > 0) {
       IMoCVendors mocVendors = IMoCVendors(mocState.getMoCVendors());
       // Transfer vendor markup in MoC
-      if (mocVendors.updatePaidMarkup(vendorAccount, 0, btcMarkup)) {
+      if (mocVendors.updatePaidMarkup(vendorAccount, 0, reserveTokenMarkup)) {
         // Transfer ReserveToken to vendor address
-        require(withdraw(vendorAccount, reserveTokenMarkup), "Token withdrawal failed on RRC20 Reserve token transfer");
+        safeWithdraw(vendorAccount, reserveTokenMarkup);
         // Transfer ReserveToken to commissions address
-        require(withdraw(mocInrate.commissionsAddress(), reserveTokenCommission), "Token withdrawal failed on RRC20 Reserve token transfer");
+        safeWithdraw(mocInrate.commissionsAddress(), reserveTokenCommission);
       } else {
         // Transfer ReserveToken to commissions address
-        require(withdraw(mocInrate.commissionsAddress(), totalResTokenFee), "Token withdrawal failed on RRC20 Reserve token transfer");
+        safeWithdraw(mocInrate.commissionsAddress(), totalResTokenFee);
       }
     }
   }
@@ -603,29 +608,21 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMo
   /** END UPDATE V0110: 24/09/2020 **/
 
   /**
-    @dev Extracts tokens from the reserve and update mocState
-    @param receiver Account to which the tokens will be send
-    @param tokenAmount Amount to extract from reserve
-    @return False if RRC20 transfer fails or revert and true if succeeds
-  */
-  function withdrawFromReserve(address receiver, uint256 tokenAmount) internal returns (bool) {
-    bool result = withdraw(tokenAmount, receiver);
-
-    if (result) {
-      mocState.substractFromReserves(tokenAmount);
-    }
-
-    return result;
-  }
-
-  /**
     @dev Extracts tokens from the reserve and update mocState but reverts if token transfer fails
     @param receiver Account to which the tokens will be send
     @param tokenAmount Amount to extract from reserve
    */
   function safeWithdrawFromReserve(address receiver, uint256 tokenAmount) internal {
-    require(withdraw(tokenAmount, receiver), "Token withdrawal failed on RRC20 Reserve token transfer");
+    safeWithdraw(receiver, tokenAmount);
     mocState.substractFromReserves(tokenAmount);
+  }
+  /**
+    @dev Extracts tokens from the reserve
+    @param receiver Account from which the tokens will be taken
+    @param tokenAmount Amount to deposit
+   */
+  function safeWithdraw(address receiver, uint256 tokenAmount) internal {
+    require(withdraw(tokenAmount, receiver), "Token withdrawal failed");
   }
 
   /**
@@ -634,9 +631,11 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMo
     @param tokenAmount Amount to deposit
    */
   function safeDepositInReserve(address receiver, uint256 tokenAmount) private {
-    require(deposit(tokenAmount, receiver), "Token deposit failed on RRC20 Reserve token transfer");
+    require(deposit(tokenAmount, receiver), "Token deposit failed");
     mocState.addToReserves(tokenAmount);
   }
+
+
 
   /***** STATE MODIFIERS *****/
   modifier whenSettlementReady() {
