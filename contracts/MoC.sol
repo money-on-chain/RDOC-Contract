@@ -457,7 +457,7 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMo
     if (tokenAmount == 0) {
       return true;
     }
-    if(withdraw(tokenAmount, receiver)) {
+    if (withdraw(tokenAmount, receiver)) {
       mocState.substractFromReserves(tokenAmount);
       return true;
     }

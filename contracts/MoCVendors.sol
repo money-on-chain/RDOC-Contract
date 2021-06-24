@@ -193,10 +193,10 @@ contract MoCVendors is MoCVendorsEvents, MoCBase, MoCLibConnection, Governed, IM
   onlyWhitelisted(msg.sender)
   returns(bool) {
     VendorDetails memory vendorDetails = vendors[account];
-    if( vendorDetails.isActive &&
+    if (vendorDetails.isActive &&
           vendorDetails.totalPaidInMoC.add(mocAmount) <= vendorDetails.staking) {
       uint256 totalMoCAmount = mocAmount;
-      if(resTokenAmount > 0){
+      if (resTokenAmount > 0){
         (uint256 resTokenAmountInMoC, , ) = mocExchange.convertToMoCPrice(resTokenAmount);
         totalMoCAmount = totalMoCAmount.add(resTokenAmountInMoC);
       }
