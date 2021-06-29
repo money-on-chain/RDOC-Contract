@@ -186,7 +186,7 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
 
     // Get balance and allowance from sender
     (uint256 mocBalance, uint256 mocAllowance) = getMoCTokenBalance(params.account, address(moc));
-    if(mocAllowance == 0 || mocBalance == 0) {
+    if (mocAllowance == 0 || mocBalance == 0) {
       // Check commission rate in Reserve Token according to transaction type
       ret.reserveTokenCommission = mocInrate.calcCommissionValue(params.amount, params.txTypeFeesReserveToken);
       ret.reserveTokenMarkup = reserveTokenMarkup;
