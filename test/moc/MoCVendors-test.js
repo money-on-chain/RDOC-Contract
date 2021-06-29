@@ -9,7 +9,7 @@ let toContractBN;
 const NOT_AUTHORIZED_CHANGER = 'not_authorized_changer';
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 
-contract('MoC: MoCVendors', function([
+contract.only('MoC: MoCVendors', function([
   owner,
   userAccount,
   commissionsAccount,
@@ -198,26 +198,32 @@ contract('MoC: MoCVendors', function([
       );
       it(`WHEN a user mints ${scenario.params.mintAmount} RISKPRO THEN the vendor receives his corresponding fee`, async function() {
         // Make a transaction so that the vendor has something to remove from staking
-        await mocHelper.mintRiskProAmount(
+        const tx = await mocHelper.mintRiskProAmount(
           userAccount,
           scenario.params.mintAmount,
           scenario.params.account
         );
 
         const totalPaidInMoC = await this.mocVendors.getTotalPaidInMoC(scenario.params.account);
-        const paidMoC = await this.mocVendors.getPaidMoC(scenario.params.account);
-        const paidReserveToken = await this.mocVendors.getPaidReserveToken(scenario.params.account);
+        if(scenario.params.mintAmount > 0) {
+          const [vendorReceivedMarkupEvent] = await mocHelper.findEvents(tx, 'VendorReceivedMarkup');
+          const {paidReserveToken, paidMoC} = vendorReceivedMarkupEvent;
+          mocHelper.assertBigRBTC(
+            paidMoC,
+            scenario.expect.paidMoC,
+            'paidMoC is incorrect'
+          );
+          mocHelper.assertBigRBTC(
+            paidReserveToken,
+            scenario.expect.paidReserveToken,
+            'paidReserveToken is incorrect'
+          );
+        }
 
         mocHelper.assertBigReserve(
           totalPaidInMoC,
           scenario.expect.totalPaidInMoC,
           'totalPaidInMoC is incorrect'
-        );
-        mocHelper.assertBigReserve(paidMoC, scenario.expect.paidMoC, 'paidMoC is incorrect');
-        mocHelper.assertBigReserve(
-          paidReserveToken,
-          scenario.expect.paidReserveToken,
-          'paidReserveToken is incorrect'
         );
       });
       it('WHEN retrieving vendor from getters, THEN it matches the information from mapping', async function() {
@@ -227,8 +233,6 @@ contract('MoC: MoCVendors', function([
         const markup = await this.mocVendors.getMarkup(scenario.params.account);
         const totalPaidInMoC = await this.mocVendors.getTotalPaidInMoC(scenario.params.account);
         const staking = await this.mocVendors.getStaking(scenario.params.account);
-        const paidMoC = await this.mocVendors.getPaidMoC(scenario.params.account);
-        const paidReserveToken = await this.mocVendors.getPaidReserveToken(scenario.params.account);
 
         assert(vendorInMapping.isActive === isActive, 'isActive is incorrect');
         mocHelper.assertBig(vendorInMapping.markup, markup, 'markup is incorrect');
@@ -238,12 +242,6 @@ contract('MoC: MoCVendors', function([
           'totalPaidInMoC is incorrect'
         );
         mocHelper.assertBig(vendorInMapping.staking, staking, 'staking is incorrect');
-        mocHelper.assertBig(vendorInMapping.paidMoC, paidMoC, 'paidMoC is incorrect');
-        mocHelper.assertBig(
-          vendorInMapping.paidReserveToken,
-          paidReserveToken,
-          'paidReserveToken is incorrect'
-        );
       });
       it(
         scenario.params.removeStakeMessage.replace('$STAKING$', scenario.params.staking),
@@ -540,7 +538,7 @@ contract('MoC: MoCVendors', function([
         );
       });
     });
-    describe('GIVEN settlement runs', function() {
+    describe.skip('GIVEN settlement runs', function() {
       it('WHEN iterating over 100 active vendors THEN amount paid in MoC is reset for each vendor', async function() {
         let account;
         let index = 0;
