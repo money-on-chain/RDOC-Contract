@@ -127,13 +127,13 @@ struct StableTokenRedeemStruct {
 
 ```js
 //internal members
-contract MoCState internal mocState;
+contract IMoCState internal mocState;
 contract MoCConverter internal mocConverter;
 contract MoCRiskProxManager internal riskProxManager;
 contract RiskProToken internal riskProToken;
 contract StableToken internal stableToken;
-contract MoCInrate internal mocInrate;
-contract MoC internal moc;
+contract IMoCInrate internal mocInrate;
+contract IMoC internal moc;
 
 //private members
 uint256[50] private upgradeGap;
@@ -156,7 +156,6 @@ event RiskProxRedeem(bytes32  bucket, address indexed account, uint256  commissi
 ## Functions
 
 - [initialize(address connectorAddress)](#initialize)
-- [convertToMoCPrice(uint256 reserveTokenAmount)](#converttomocprice)
 - [getMoCTokenBalance(address owner, address spender)](#getmoctokenbalance)
 - [calculateCommissionsWithPrices(struct MoCExchange.CommissionParamsStruct params)](#calculatecommissionswithprices)
 - [mintRiskPro(address account, uint256 reserveTokenAmount, address vendorAccount)](#mintriskpro)
@@ -195,25 +194,6 @@ function initialize(address connectorAddress) public nonpayable initializer
 | Name        | Type           | Description  |
 | ------------- |------------- | -----|
 | connectorAddress | address | MoCConnector contract address | 
-
-### convertToMoCPrice
-
-Converts MoC commission from ReserveToken to MoC price
-
-```js
-function convertToMoCPrice(uint256 reserveTokenAmount) public view
-returns(uint256, uint256, uint256)
-```
-
-**Returns**
-
-Amount converted to MoC Price, ReserveToken price and MoC price
-
-**Arguments**
-
-| Name        | Type           | Description  |
-| ------------- |------------- | -----|
-| reserveTokenAmount | uint256 | Amount to be converted to MoC price | 
 
 ### getMoCTokenBalance
 

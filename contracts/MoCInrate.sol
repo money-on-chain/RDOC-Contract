@@ -380,7 +380,7 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
   function calcCommissionValue(uint256 reserveTokenAmount, uint8 txType)
   public view returns(uint256) {
     // Validate txType
-    require (txType > 0, "Invalid transaction type 'txType'");
+    require (txType > 0, "Invalid txType");
 
     uint256 finalCommissionAmount = reserveTokenAmount.mul(commissionRatesByTxType[txType]).div(mocLibConfig.mocPrecision);
     return finalCommissionAmount;

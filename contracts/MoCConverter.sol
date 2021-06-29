@@ -89,14 +89,6 @@ contract MoCConverter is MoCBase, MoCLibConnection {
     return mocLibConfig.maxMoCWithReserveToken(resTokensAmount, mocState.getReserveTokenPrice(), mocState.getMoCPrice());
   }
 
-  function mocToResTokenWithPrice(uint256 mocAmount, uint256 reservePrice, uint256 mocPrice) public view returns(uint256) {
-    return mocLibConfig.mocReserveTokenValue(mocAmount, reservePrice, mocPrice);
-  }
-
-  function resTokenToMoCWithPrice(uint256 resTokensAmount, uint256 reservePrice, uint256 mocPrice) public view returns(uint256) {
-    return mocLibConfig.maxMoCWithReserveToken(resTokensAmount, reservePrice, mocPrice);
-  }
-
   // Leave a gap betweeen inherited contracts variables in order to be
   // able to add more variables in them later
   uint256[50] private upgradeGap;

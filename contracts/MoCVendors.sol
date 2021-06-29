@@ -197,8 +197,9 @@ contract MoCVendors is MoCVendorsEvents, MoCBase, MoCLibConnection, Governed, IM
           vendorDetails.totalPaidInMoC.add(mocAmount) <= vendorDetails.staking) {
       uint256 totalMoCAmount = mocAmount;
       if (resTokenAmount > 0){
-        (uint256 resTokenAmountInMoC, , ) = mocExchange.convertToMoCPrice(resTokenAmount);
-        totalMoCAmount = totalMoCAmount.add(resTokenAmountInMoC);
+        uint256 reserveTokenPrice = mocState.getReserveTokenPrice();
+        uint256 mocPrice = mocState.getMoCPrice();
+        totalMoCAmount = reserveTokenPrice.mul(resTokenAmount).div(mocPrice);
       }
       vendors[account].totalPaidInMoC = vendorDetails.totalPaidInMoC.add(totalMoCAmount);
       emit VendorReceivedMarkup(account, mocAmount, resTokenAmount);

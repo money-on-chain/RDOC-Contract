@@ -17,7 +17,7 @@ View Source: [contracts/MoCConverter.sol](../../contracts/MoCConverter.sol)
 
 ```js
 //internal members
-contract MoCState internal mocState;
+contract IMoCState internal mocState;
 
 //private members
 uint256[50] private upgradeGap;
@@ -41,8 +41,6 @@ uint256[50] private upgradeGap;
 - [riskProToResTokenWithPrice(uint256 riskProAmount, uint256 riskProPrice)](#riskprotorestokenwithprice)
 - [mocToResToken(uint256 mocAmount)](#moctorestoken)
 - [resTokenToMoC(uint256 resTokensAmount)](#restokentomoc)
-- [mocToResTokenWithPrice(uint256 mocAmount, uint256 reservePrice, uint256 mocPrice)](#moctorestokenwithprice)
-- [resTokenToMoCWithPrice(uint256 resTokensAmount, uint256 reservePrice, uint256 mocPrice)](#restokentomocwithprice)
 
 ### initialize
 
@@ -261,34 +259,4 @@ returns(uint256)
 | Name        | Type           | Description  |
 | ------------- |------------- | -----|
 | resTokensAmount | uint256 |  | 
-
-### mocToResTokenWithPrice
-
-```js
-function mocToResTokenWithPrice(uint256 mocAmount, uint256 reservePrice, uint256 mocPrice) public view
-returns(uint256)
-```
-
-**Arguments**
-
-| Name        | Type           | Description  |
-| ------------- |------------- | -----|
-| mocAmount | uint256 |  | 
-| reservePrice | uint256 |  | 
-| mocPrice | uint256 |  | 
-
-### resTokenToMoCWithPrice
-
-```js
-function resTokenToMoCWithPrice(uint256 resTokensAmount, uint256 reservePrice, uint256 mocPrice) public view
-returns(uint256)
-```
-
-**Arguments**
-
-| Name        | Type           | Description  |
-| ------------- |------------- | -----|
-| resTokensAmount | uint256 |  | 
-| reservePrice | uint256 |  | 
-| mocPrice | uint256 |  | 
 

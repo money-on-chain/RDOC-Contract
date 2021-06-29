@@ -25,8 +25,6 @@ interface IMoCExchange {
     function redeemAllStableToken(address origin, address payable destination) external
     returns (uint256);
 
-    function convertToMoCPrice(uint256 reserveAmount) external view returns (uint256, uint256, uint256);
-
     function forceRedeemRiskProx(bytes32 bucket, address payable account, uint256 riskProxAmount, uint256 riskProxPrice)
     external returns (bool);
 

@@ -8,7 +8,7 @@ original_id: MoCSettlement
 
 View Source: [contracts/MoCSettlement.sol](../../contracts/MoCSettlement.sol)
 
-**↗ Extends: [MoCSettlementEvents](MoCSettlementEvents.md), [MoCBase](MoCBase.md), [PartialExecution](PartialExecution.md), [Governed](Governed.md)**
+**↗ Extends: [MoCSettlementEvents](MoCSettlementEvents.md), [MoCBase](MoCBase.md), [PartialExecution](PartialExecution.md), [Governed](Governed.md), [IMoCSettlement](IMoCSettlement.md)**
 **↘ Derived Contracts: [MoCSettlementMock](MoCSettlementMock.md)**
 
 **MoCSettlement** - version: 0.1.10
@@ -59,8 +59,8 @@ bytes32 public constant DELEVERAGING_TASK;
 bytes32 public constant SETTLEMENT_TASK;
 
 //internal members
-contract MoCState internal mocState;
-contract MoCExchange internal mocExchange;
+contract IMoCState internal mocState;
+contract IMoCExchange internal mocExchange;
 contract StableToken internal stableToken;
 contract MoCRiskProxManager internal riskProxManager;
 uint256 internal lastProcessedBlock;
@@ -134,6 +134,7 @@ modifier isTime() internal
 - [clear()](#clear)
 - [alterRedeemRequestAmount(bool isAddition, uint256 delta, address redeemer)](#alterredeemrequestamount)
 - [runSettlement(uint256 steps)](#runsettlement)
+- [fixTasksPointer()](#fixtaskspointer)
 - [initializeContracts()](#initializecontracts)
 - [initializeValues(address _governor, uint256 _blockSpan)](#initializevalues)
 - [deleveragingStepCount()](#deleveragingstepcount)
@@ -207,6 +208,8 @@ function restartSettlementState() public nonpayable onlyAuthorizedChanger
 
 ### getRedeemRequestAt
 
+⤾ overrides IMoCSettlement.getRedeemRequestAt
+
 Gets the RedeemRequest at the queue index position
 
 ```js
@@ -240,6 +243,8 @@ returns(uint256)
 
 ### redeemQueueSize
 
+⤾ overrides IMoCSettlement.redeemQueueSize
+
 returns current redeem queue size
 
 ```js
@@ -253,6 +258,8 @@ returns(uint256)
 | ------------- |------------- | -----|
 
 ### isSettlementEnabled
+
+⤾ overrides IMoCSettlement.isSettlementEnabled
 
 Returns true if blockSpan number of blocks has pass since last execution
 
@@ -282,6 +289,8 @@ returns(bool)
 
 ### isSettlementReady
 
+⤾ overrides IMoCSettlement.isSettlementReady
+
 Returns true if the settlment is ready
 
 ```js
@@ -296,6 +305,8 @@ returns(bool)
 
 ### nextSettlementBlock
 
+⤾ overrides IMoCSettlement.nextSettlementBlock
+
 Returns the next block from which settlement is possible
 
 ```js
@@ -309,6 +320,8 @@ returns(uint256)
 | ------------- |------------- | -----|
 
 ### stableTokenAmountToRedeem
+
+⤾ overrides IMoCSettlement.stableTokenAmountToRedeem
 
 returns the total amount of StableTokens in the redeem queue for _who
 
@@ -328,6 +341,8 @@ total amount of StableTokens in the redeem queue for _who [using mocPrecision]
 | _who | address | address for which ^ is computed | 
 
 ### addRedeemRequest
+
+⤾ overrides IMoCSettlement.addRedeemRequest
 
 push a new redeem request to the queue for the sender or updates the amount if the user has a redeem request
 
@@ -357,6 +372,8 @@ function clear() public nonpayable onlyWhitelisted
 
 ### alterRedeemRequestAmount
 
+⤾ overrides IMoCSettlement.alterRedeemRequestAmount
+
 Alters the redeem amount position for the redeemer
 
 ```js
@@ -377,6 +394,8 @@ the filled amount [using mocPrecision]
 
 ### runSettlement
 
+⤾ overrides IMoCSettlement.runSettlement
+
 Runs settlement process in steps
 
 ```js
@@ -393,6 +412,19 @@ The commissions collected in the executed steps
 | Name        | Type           | Description  |
 | ------------- |------------- | -----|
 | steps | uint256 | Amount of steps to run | 
+
+### fixTasksPointer
+
+Create Task structures for Settlement execution
+
+```js
+function fixTasksPointer() public nonpayable
+```
+
+**Arguments**
+
+| Name        | Type           | Description  |
+| ------------- |------------- | -----|
 
 ### initializeContracts
 

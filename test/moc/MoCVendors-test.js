@@ -9,7 +9,7 @@ let toContractBN;
 const NOT_AUTHORIZED_CHANGER = 'not_authorized_changer';
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 
-contract.only('MoC: MoCVendors', function([
+contract('MoC: MoCVendors', function([
   owner,
   userAccount,
   commissionsAccount,
@@ -208,12 +208,12 @@ contract.only('MoC: MoCVendors', function([
         if(scenario.params.mintAmount > 0) {
           const [vendorReceivedMarkupEvent] = await mocHelper.findEvents(tx, 'VendorReceivedMarkup');
           const {paidReserveToken, paidMoC} = vendorReceivedMarkupEvent;
-          mocHelper.assertBigRBTC(
+          mocHelper.assertBigReserve(
             paidMoC,
             scenario.expect.paidMoC,
             'paidMoC is incorrect'
           );
-          mocHelper.assertBigRBTC(
+          mocHelper.assertBigReserve(
             paidReserveToken,
             scenario.expect.paidReserveToken,
             'paidReserveToken is incorrect'
@@ -538,7 +538,7 @@ contract.only('MoC: MoCVendors', function([
         );
       });
     });
-    describe.skip('GIVEN settlement runs', function() {
+    describe('GIVEN settlement runs', function() {
       it('WHEN iterating over 100 active vendors THEN amount paid in MoC is reset for each vendor', async function() {
         let account;
         let index = 0;

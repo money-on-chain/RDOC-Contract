@@ -149,21 +149,6 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
 
   /**
    @dev Converts MoC commission from ReserveToken to MoC price
-   @param reserveTokenAmount Amount to be converted to MoC price
-   @return Amount converted to MoC Price, ReserveToken price and MoC price
-  */
-  function convertToMoCPrice(uint256 reserveTokenAmount) public view returns (uint256, uint256, uint256) {
-    uint256 reserveTokenPrice = mocState.getReserveTokenPrice();
-    uint256 mocPrice = mocState.getMoCPrice();
-
-    // Calculate amount in MoC
-    uint256 amountInMoC = mocConverter.resTokenToMoCWithPrice(reserveTokenAmount, reserveTokenPrice, mocPrice);
-
-    return (amountInMoC, reserveTokenPrice, mocPrice);
-  }
-
-  /**
-   @dev Converts MoC commission from ReserveToken to MoC price
    @param owner address of token owner
    @param spender address of token spender
    @return MoC balance of owner and MoC allowance of spender
@@ -192,20 +177,34 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
   function calculateCommissionsWithPrices(CommissionParamsStruct memory params)
   public view
   returns (CommissionReturnStruct memory ret) {
+    ret.reserveTokenPrice = mocState.getReserveTokenPrice();
+    ret.mocPrice = mocState.getMoCPrice();
+    require(ret.reserveTokenPrice > 0, "Reserve Token price zero");
+    require(ret.mocPrice > 0, "MoC price zero");
+    // Calculate vendor markup
+    uint256 reserveTokenMarkup = mocInrate.calculateVendorMarkup(params.vendorAccount, params.amount);
+
     // Get balance and allowance from sender
     (uint256 mocBalance, uint256 mocAllowance) = getMoCTokenBalance(params.account, address(moc));
+    if(mocAllowance == 0 || mocBalance == 0) {
+      // Check commission rate in Reserve Token according to transaction type
+      ret.reserveTokenCommission = mocInrate.calcCommissionValue(params.amount, params.txTypeFeesReserveToken);
+      ret.reserveTokenMarkup = reserveTokenMarkup;
+      // Implicitly mocCommission = 0 and mocMarkup = 0.
+      return ret;
+    }
 
     // Check commission rate in MoC according to transaction type
     uint256 mocCommissionInReserveToken = mocInrate.calcCommissionValue(params.amount, params.txTypeFeesMOC);
 
     // Calculate amount in MoC
-    (ret.mocCommission, ret.reserveTokenPrice, ret.mocPrice) = convertToMoCPrice(mocCommissionInReserveToken);
-    ret.reserveTokenCommission = 0;
+    ret.mocCommission = ret.reserveTokenPrice.mul(mocCommissionInReserveToken).div(ret.mocPrice);
+    // Implicitly reserveTokenCommission = 0
 
     // Calculate vendor markup
-    uint256 reserveTokenMarkup = mocInrate.calculateVendorMarkup(params.vendorAccount, params.amount);
-    (ret.mocMarkup, , ) = convertToMoCPrice(reserveTokenMarkup);
-    ret.reserveTokenMarkup = 0;
+    ret.mocMarkup = ret.reserveTokenPrice.mul(reserveTokenMarkup).div(ret.mocPrice);
+    // Implicitly reserveTokenMarkup = 0
+
     uint256 totalMoCFee = ret.mocCommission.add(ret.mocMarkup);
 
     // Check if there is enough balance of MoC

@@ -8,7 +8,7 @@ original_id: MoCInrate
 
 View Source: [contracts/MoCInrate.sol](../../contracts/MoCInrate.sol)
 
-**↗ Extends: [MoCInrateEvents](MoCInrateEvents.md), [MoCInrateStructs](MoCInrateStructs.md), [MoCBase](MoCBase.md), [MoCLibConnection](MoCLibConnection.md), [Governed](Governed.md)**
+**↗ Extends: [MoCInrateEvents](MoCInrateEvents.md), [MoCInrateStructs](MoCInrateStructs.md), [MoCBase](MoCBase.md), [MoCLibConnection](MoCLibConnection.md), [Governed](Governed.md), [IMoCInrate](IMoCInrate.md)**
 
 **MoCInrate** - version: 0.1.10
 
@@ -29,7 +29,7 @@ struct InrateParams {
 ```js
 //internal members
 struct MoCInrateStructs.InrateParams internal riskProxParams;
-contract MoCState internal mocState;
+contract IMoCState internal mocState;
 contract MoCConverter internal mocConverter;
 contract MoCRiskProxManager internal riskProxManager;
 
@@ -315,6 +315,8 @@ returns power of RiskProx
 
 ### getRiskProInterestBlockSpan
 
+⤾ overrides IMoCInrate.getRiskProInterestBlockSpan
+
 Gets the blockspan of RiskPro that represents the frecuency of RiskPro holders intereset payment
 
 ```js
@@ -375,6 +377,8 @@ function setRiskProxPower(uint256 _btxcPower) public nonpayable onlyAuthorizedCh
 
 ### getRiskProRate
 
+⤾ overrides IMoCInrate.getRiskProRate
+
 Gets the rate for RiskPro Holders
 
 ```js
@@ -407,6 +411,8 @@ function setRiskProRate(uint256 newRiskProRate) public nonpayable onlyAuthorized
 
 ### setRiskProInterestBlockSpan
 
+⤾ overrides IMoCInrate.setRiskProInterestBlockSpan
+
 Sets the blockspan RiskPro Intereset rate payment is enable to be executed
 
 ```js
@@ -420,6 +426,8 @@ function setRiskProInterestBlockSpan(uint256 newRiskProBlockSpan) public nonpaya
 | newRiskProBlockSpan | uint256 | New RiskPro Block span | 
 
 ### getRiskProInterestAddress
+
+⤾ overrides IMoCInrate.getRiskProInterestAddress
 
 Gets the target address to transfer RiskPro Holders rate
 
@@ -520,6 +528,8 @@ returns(uint256)
 
 ### calcMintInterestValues
 
+⤾ overrides IMoCInrate.calcMintInterestValues
+
 Extract the inrate from the passed ReserveTokens value for RiskProx minting operation
 
 ```js
@@ -540,6 +550,8 @@ ReserveTokens to pay in concept of interests [using reservePrecision]
 
 ### calcStableTokenRedInterestValues
 
+⤾ overrides IMoCInrate.calcStableTokenRedInterestValues
+
 Extract the inrate from the passed ReserveTokens value for the StableToken Redeem operation
 
 ```js
@@ -559,6 +571,8 @@ finalInterest
 | reserveTokenAmount | uint256 | Total value from which extract the interest rate [using reservePrecision] | 
 
 ### calcFinalRedeemInterestValue
+
+⤾ overrides IMoCInrate.calcFinalRedeemInterestValue
 
 This function calculates the interest to return to the user
 in a RiskProx redemption. It uses a mechanism to counteract the effect
@@ -583,6 +597,8 @@ Reserves to recover in concept of interests [using reservePrecision]
 
 ### calcCommissionValue
 
+⤾ overrides IMoCInrate.calcCommissionValue
+
 calculates the Commission rate from the passed ReserveTokens amount for mint/redeem operations
 
 ```js
@@ -602,6 +618,8 @@ finalCommissionAmount [using reservePrecision]
 | txType | uint8 | Transaction type according to constant values defined in this contract | 
 
 ### calculateVendorMarkup
+
+⤾ overrides IMoCInrate.calculateVendorMarkup
 
 calculates the vendor markup rate from the passed vendor account and amount
 
@@ -643,6 +661,8 @@ Reserves to recover in concept of interests [using reservePrecision]
 
 ### dailyInratePayment
 
+⤾ overrides IMoCInrate.dailyInratePayment
+
 Moves the daily amount of interest rate to C0 bucket
 
 ```js
@@ -657,6 +677,8 @@ returns(uint256)
 
 ### isDailyEnabled
 
+⤾ overrides IMoCInrate.isDailyEnabled
+
 ```js
 function isDailyEnabled() public view
 returns(bool)
@@ -669,6 +691,8 @@ returns(bool)
 
 ### isRiskProInterestEnabled
 
+⤾ overrides IMoCInrate.isRiskProInterestEnabled
+
 ```js
 function isRiskProInterestEnabled() public view
 returns(bool)
@@ -680,6 +704,8 @@ returns(bool)
 | ------------- |------------- | -----|
 
 ### calculateRiskProHoldersInterest
+
+⤾ overrides IMoCInrate.calculateRiskProHoldersInterest
 
 Calculates RiskPro Holders interest rates
 
@@ -698,6 +724,8 @@ toPay interest in ReserveTokens [using reservePrecsion]
 | ------------- |------------- | -----|
 
 ### payRiskProHoldersInterestPayment
+
+⤾ overrides IMoCInrate.payRiskProHoldersInterestPayment
 
 Pays the RiskPro Holders interest rates
 
