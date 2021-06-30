@@ -205,14 +205,13 @@ contract('MoC: MoCVendors', function([
         );
 
         const totalPaidInMoC = await this.mocVendors.getTotalPaidInMoC(scenario.params.account);
-        if(scenario.params.mintAmount > 0) {
-          const [vendorReceivedMarkupEvent] = await mocHelper.findEvents(tx, 'VendorReceivedMarkup');
-          const {paidReserveToken, paidMoC} = vendorReceivedMarkupEvent;
-          mocHelper.assertBigReserve(
-            paidMoC,
-            scenario.expect.paidMoC,
-            'paidMoC is incorrect'
+        if (scenario.params.mintAmount > 0) {
+          const [vendorReceivedMarkupEvent] = await mocHelper.findEvents(
+            tx,
+            'VendorReceivedMarkup'
           );
+          const { paidReserveToken, paidMoC } = vendorReceivedMarkupEvent;
+          mocHelper.assertBigReserve(paidMoC, scenario.expect.paidMoC, 'paidMoC is incorrect');
           mocHelper.assertBigReserve(
             paidReserveToken,
             scenario.expect.paidReserveToken,
