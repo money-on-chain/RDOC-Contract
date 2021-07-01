@@ -530,41 +530,6 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
   }
 
   /**
-    @dev  Mint the amount of RiskPros
-    @param account Address that will owned the RiskPros
-    @param riskProAmount Amount of RiskPros to mint [using mocPrecision]
-    @param resTokenValue ReserveTokens cost of the [using reservePrecision]
-  */
-  function mintRiskPro(
-    address account,
-    uint256 reserveTokenCommission,
-    uint256 riskProAmount,
-    uint256 resTokenValue,
-    uint256 mocCommission,
-    uint256 reserveTokenPrice,
-    uint256 mocPrice,
-    uint256 reserveTokenMarkup,
-    uint256 mocMarkup,
-    address vendorAccount
-  ) public onlyWhitelisted(msg.sender) {
-    riskProToken.mint(account, riskProAmount);
-    riskProxManager.addValuesToBucket(BUCKET_C0, resTokenValue, 0, riskProAmount);
-
-    emit RiskProMint(
-      account,
-      riskProAmount,
-      resTokenValue,
-      reserveTokenCommission,
-      reserveTokenPrice,
-      mocCommission,
-      mocPrice,
-      reserveTokenMarkup,
-      mocMarkup,
-      vendorAccount
-    );
-  }
-
-  /**
    @dev BUCKET RiskProx minting. Mints RiskProx for the specified bucket
    @param account owner of the new minted RiskProx
    @param bucket bucket name
@@ -789,13 +754,16 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
    @dev Internal function to avoid stack too deep errors
   */
   function mintRiskProInternal(address account, uint256 reserveTokenAmount, RiskProMintStruct memory details, address vendorAccount) internal {
-    mintRiskPro(
+    riskProToken.mint(account, details.finalRiskProAmount);
+    riskProxManager.addValuesToBucket(BUCKET_C0, reserveTokenAmount, 0, details.finalRiskProAmount);
+
+    emit RiskProMint(
       account,
-      details.commission.reserveTokenCommission,
       details.finalRiskProAmount,
       reserveTokenAmount,
-      details.commission.mocCommission,
+      details.commission.reserveTokenCommission,
       details.commission.reserveTokenPrice,
+      details.commission.mocCommission,
       details.commission.mocPrice,
       details.commission.reserveTokenMarkup,
       details.commission.mocMarkup,
