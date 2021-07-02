@@ -119,7 +119,7 @@ contract('MoC: MoCVendors', function([
         expect: {
           totalPaidInMoC: 0.1,
           paidMoC: 0.1,
-          paidRBTC: 0,
+          paidReserveToken: 0,
           stakingAfterAddStake: 1,
           stakingAfterRemoveStake: 0,
           stakingRemoved: 1
@@ -197,7 +197,7 @@ contract('MoC: MoCVendors', function([
           );
         }
       );
-      it(`WHEN a user mints ${scenario.params.mintAmount} RISKPRO THEN the vendor receives his corresponding fee and VendorReceivedMarkup event is emitted`, async function() {
+      it(`On scenario: ${scenario.params.description} WHEN a user mints ${scenario.params.mintAmount} RISKPRO THEN the vendor receives his corresponding fee and VendorReceivedMarkup event is emitted`, async function() {
         await mocHelper.mintMoCToken(userAccount, scenario.params.userAccountMocAmount, owner);
         await mocHelper.approveMoCToken(
           this.moc.address,
@@ -267,13 +267,13 @@ contract('MoC: MoCVendors', function([
             vendorStakeRemovedEvent.account === scenario.params.account,
             'Vendor account is incorrect'
           );
-          mocHelper.assertBigRBTC(
+          mocHelper.assertBigReserve(
             vendorStakeRemovedEvent.staking,
             scenario.expect.stakingRemoved,
             'VendorStakeRemoved event emitted an invalid value'
           );
           const staking = await this.mocVendors.getStaking(scenario.params.account);
-          mocHelper.assertBigRBTC(
+          mocHelper.assertBigReserve(
             staking,
             scenario.expect.stakingAfterRemoveStake,
             'Staking in storage is invalid'

@@ -509,7 +509,7 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMo
   internal {
     // Need to update general State
     mocState.addToReserves(totalResTokensSpent);
-    require(deposit(totalResTokensSpent.add(reserveTokenCommission).add(reserveTokenMarkup), sender), "Token deposit failed");
+    require(deposit(totalResTokensSpent.add(reserveTokenCommission).add(reserveTokenMarkup), sender), "Token deposit failed on RRC20 Reserve token transfer");
 
     transferMocCommission(sender, mocCommission, vendorAccount, mocMarkup);
 
@@ -622,7 +622,7 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMo
     @param tokenAmount Amount to deposit
    */
   function safeWithdraw(address receiver, uint256 tokenAmount) internal {
-    require(withdraw(tokenAmount, receiver), "Token withdrawal failed");
+    require(withdraw(tokenAmount, receiver), "Token withdrawal failed on RRC20 Reserve token transfer");
   }
 
   /**
@@ -631,7 +631,7 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMo
     @param tokenAmount Amount to deposit
    */
   function safeDepositInReserve(address receiver, uint256 tokenAmount) private {
-    require(deposit(tokenAmount, receiver), "Token deposit failed");
+    require(deposit(tokenAmount, receiver), "Token deposit failed on RRC20 Reserve token transfer");
     mocState.addToReserves(tokenAmount);
   }
 
