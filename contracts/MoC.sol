@@ -196,7 +196,7 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMo
     uint256 reserveTokenMarkup,
     uint256 mocMarkup) = mocExchange.redeemRiskPro(msg.sender, riskProAmount, vendorAccount);
 
-    redeemWithMoCFees(msg.sender, reserveTokenCommission, mocCommission, vendorAccount, reserveTokenMarkup, mocMarkup, resTokensAmount);
+    redeemWithCommission(msg.sender, reserveTokenCommission, mocCommission, vendorAccount, reserveTokenMarkup, mocMarkup, resTokensAmount);
     /** END UPDATE V0110: 24/09/2020 - Upgrade to support multiple commission rates **/
   }
 
@@ -263,7 +263,7 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMo
     uint256 reserveTokenMarkup,
     uint256 mocMarkup) = mocExchange.redeemRiskProx(msg.sender, bucket, riskProxAmount, vendorAccount);
 
-    redeemWithMoCFees(msg.sender, reserveTokenCommission, mocCommission, vendorAccount, reserveTokenMarkup, mocMarkup, totalResTokensRedeemed);
+    redeemWithCommission(msg.sender, reserveTokenCommission, mocCommission, vendorAccount, reserveTokenMarkup, mocMarkup, totalResTokensRedeemed);
     /** END UPDATE V0110: 24/09/2020 - Upgrade to support multiple commission rates **/
   }
 
@@ -330,7 +330,7 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMo
     uint256 reserveTokenMarkup,
     uint256 mocMarkup) = mocExchange.redeemFreeStableToken(msg.sender, stableTokenAmount, vendorAccount);
 
-    redeemWithMoCFees(msg.sender, reserveTokenCommission, mocCommission, vendorAccount, reserveTokenMarkup, mocMarkup, resTokensAmount);
+    redeemWithCommission(msg.sender, reserveTokenCommission, mocCommission, vendorAccount, reserveTokenMarkup, mocMarkup, resTokensAmount);
     /** END UPDATE V0110: 24/09/2020 - Upgrade to support multiple commission rates **/
   }
 
@@ -558,7 +558,7 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMo
     @param reserveTokenMarkup vendor markup in ReserveToken
     @param mocMarkup vendor markup in MoC
   */
-  function redeemWithMoCFees(
+  function redeemWithCommission(
     address sender,
     uint256 reserveTokenCommission,
     uint256 mocCommission,
