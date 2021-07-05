@@ -16,7 +16,6 @@ const makeUtils = async (artifacts, networkName, config, owner, deployer) => {
   const RiskProToken = artifacts.require('./token/RiskProToken.sol');
   const MoCToken = artifacts.require('./token/MoCToken.sol');
   const RiskProxManager = artifacts.require('./MoCRiskProxManager.sol');
-  const MoCConverter = artifacts.require('./MoCConverter.sol');
   const Governor = artifacts.require('moc-governance/contracts/Governance/Governor.sol');
   const Stopper = artifacts.require('moc-governance/contracts/Stopper/Stopper.sol');
   const UpgradeDelegator = artifacts.require(
@@ -49,7 +48,6 @@ const makeUtils = async (artifacts, networkName, config, owner, deployer) => {
   let riskProx;
   let mocSettlement;
   let mocState;
-  let mocConverter;
   let mocExchange;
   let mocInrate;
   let moc;
@@ -241,7 +239,6 @@ const makeUtils = async (artifacts, networkName, config, owner, deployer) => {
     riskProx = await RiskProxManager.at(getProxyAddress(proxies, 'MoCRiskProxManager'));
     mocSettlement = await MoCSettlementContract.at(getProxyAddress(proxies, 'MoCSettlement'));
     mocState = await MoCStateContract.at(getProxyAddress(proxies, 'MoCState'));
-    mocConverter = await MoCConverter.at(getProxyAddress(proxies, 'MoCConverter'));
     mocExchange = await MoCExchange.at(getProxyAddress(proxies, 'MoCExchange'));
     moc = await MoC.at(getProxyAddress(proxies, 'MoC'));
     mocInrate = await MoCInrate.at(getProxyAddress(proxies, 'MoCInrate'));
@@ -255,7 +252,6 @@ const makeUtils = async (artifacts, networkName, config, owner, deployer) => {
   const linkMocLib = async MoCStateContract => {
     // Deploy and Link all contracts
     await deployer.link(MoCLib, MoC);
-    await deployer.link(MoCLib, MoCConverter);
     await deployer.link(MoCLib, MoCStateContract);
     await deployer.link(MoCLib, MoCExchange);
     await deployer.link(MoCLib, MoCInrate);
@@ -268,7 +264,7 @@ const makeUtils = async (artifacts, networkName, config, owner, deployer) => {
       { name: 'MoCConnector', alias: 'MoCConnector' },
       { name: 'MoCRiskProxManager', alias: 'MoCRiskProxManager' },
       { name: MoCSettlementContract.contractName, alias: 'MoCSettlement' },
-      { name: 'MoCConverter', alias: 'MoCConverter' },
+      { name: 'MoCConverter', alias: 'MoCConverter' },  // Remove this after fixing the indexes
       { name: MoCStateContract.contractName, alias: 'MoCState' },
       { name: 'MoCExchange', alias: 'MoCExchange' },
       { name: 'MoCInrate', alias: 'MoCInrate' },
@@ -302,10 +298,10 @@ const makeUtils = async (artifacts, networkName, config, owner, deployer) => {
       });
     }
     if (index++ === step) {
-      mocConverter = await create({
-        contractAlias: contract.alias,
-        ...options
-      });
+      // mocConverter = await create({
+      //   contractAlias: contract.alias,
+      //   ...options
+      // });
     }
     if (index++ === step) {
       mocState = await create({ contractAlias: contract.alias, ...options });
@@ -348,7 +344,6 @@ const makeUtils = async (artifacts, networkName, config, owner, deployer) => {
       mocVendors: getProxyAddress(proxies, 'MoCVendors'),
       mocExchange: getProxyAddress(proxies, 'MoCExchange'),
       mocSettlement: getProxyAddress(proxies, 'MoCSettlement'),
-      mocConverter: getProxyAddress(proxies, 'MoCConverter'),
       mocConnector: getProxyAddress(proxies, 'MoCConnector')
     };
   };
@@ -373,7 +368,6 @@ const makeUtils = async (artifacts, networkName, config, owner, deployer) => {
       mocVendors: getImplementationAddress(proxies, 'MoCVendors'),
       mocExchange: getImplementationAddress(proxies, 'MoCExchange'),
       mocSettlement: getImplementationAddress(proxies, 'MoCSettlement'),
-      mocConverter: getImplementationAddress(proxies, 'MoCConverter'),
       mocConnector: getImplementationAddress(proxies, 'MoCConnector'),
       mocToken: (await getMoCToken()).address,
       mocHelperLib: (await MoCLib.deployed()).address
@@ -413,7 +407,6 @@ const makeUtils = async (artifacts, networkName, config, owner, deployer) => {
       riskProx.address,
       mocState.address,
       mocSettlement.address,
-      mocConverter.address,
       mocExchange.address,
       mocInrate.address,
       mocVendors.address, // pass other address as parameter because MoCBurnout is deprecated
@@ -431,9 +424,6 @@ const makeUtils = async (artifacts, networkName, config, owner, deployer) => {
 
     await mocExchange.initialize(mocConnector.address);
     console.log('Exchange Initialized');
-
-    await mocConverter.initialize(mocConnector.address);
-    console.log('Converter Initialized');
 
     let targetAddressRiskPro = owner;
     if (config.targetAddressRiskProInterest !== '') {
@@ -534,11 +524,6 @@ const makeUtils = async (artifacts, networkName, config, owner, deployer) => {
       ...options
     });
     await setAdmin({
-      contractAlias: 'MoCConverter',
-      newAdmin: adminAddress,
-      ...options
-    });
-    await setAdmin({
       contractAlias: 'MoCState',
       newAdmin: adminAddress,
       ...options
@@ -589,7 +574,6 @@ const makeUtils = async (artifacts, networkName, config, owner, deployer) => {
       MoCExchange: contractAddresses.mocExchange,
       MoCSettlement: contractAddresses.mocSettlement,
       MoCInrate: contractAddresses.mocInrate,
-      MoCConverter: contractAddresses.mocConverter,
       MoCState: contractAddresses.mocState,
       MoCVendors: contractAddresses.mocVendors,
       CommissionSplitter: contractAddresses.commissionSplitter
@@ -601,7 +585,6 @@ const makeUtils = async (artifacts, networkName, config, owner, deployer) => {
       MoCExchange: implementationAddr.mocExchange,
       MoCSettlement: implementationAddr.mocSettlement,
       MoCInrate: implementationAddr.mocInrate,
-      MoCConverter: implementationAddr.mocConverter,
       MoCState: implementationAddr.mocState,
       ProxyAdmin: implementationAddr.proxyAdmin,
       UpgradeDelegator: implementationAddr.upgradeDelegator,

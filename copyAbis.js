@@ -9,7 +9,6 @@ const contractNames = [
   'MoC',
   'MoCRiskProxManager',
   'MoCConnector',
-  'MoCConverter',
   'MoCExchange',
   'MoCHelperLib',
   'MoCInrate',

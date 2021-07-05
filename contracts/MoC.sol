@@ -5,7 +5,6 @@ import "./MoCLibConnection.sol";
 import "./token/RiskProToken.sol";
 import "./MoCRiskProxManager.sol";
 import "./interface/IMoCState.sol";
-import "./MoCConverter.sol";
 import "./interface/IMoCSettlement.sol";
 import "./interface/IMoCExchange.sol";
 import "./base/MoCBase.sol";
@@ -30,7 +29,7 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMo
   RiskProToken internal riskProToken;
   MoCRiskProxManager internal riskProxManager;
   IMoCState internal mocState;
-  MoCConverter internal mocConverter;
+  address internal DEPRECATED_mocConverter;
   IMoCSettlement internal settlement;
   IMoCExchange internal mocExchange;
   IMoCInrate internal mocInrate;
@@ -63,7 +62,6 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMo
     riskProxManager = MoCRiskProxManager(connector.riskProxManager());
     mocState = IMoCState(connector.mocState());
     settlement = IMoCSettlement(connector.mocSettlement());
-    mocConverter = MoCConverter(connector.mocConverter());
     mocExchange = IMoCExchange(connector.mocExchange());
     mocInrate = IMoCInrate(connector.mocInrate());
     setReserveToken(connector.reserveToken());

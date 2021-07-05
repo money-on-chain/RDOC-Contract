@@ -7,7 +7,6 @@ import "./token/StableToken.sol";
 import "./interface/IMoCInrate.sol";
 import "./base/MoCBase.sol";
 import "./token/MoCToken.sol";
-import "./MoCConverter.sol";
 import "./MoCRiskProxManager.sol";
 import "openzeppelin-solidity/contracts/math/Math.sol";
 import "./interface/IMoC.sol";
@@ -122,7 +121,9 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
 
   // Contracts
   IMoCState internal mocState;
-  MoCConverter internal mocConverter;
+  /** DEPRECATED **/
+  // solium-disable-next-line mixedcase
+  address internal DEPRECATED_mocConverter;
   MoCRiskProxManager internal riskProxManager;
   RiskProToken internal riskProToken;
   StableToken internal stableToken;
@@ -221,6 +222,18 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
     return ret;
   }
 
+  /**
+  * @dev Reserve token equivalent for the amount of riskPro given applying the spotDiscountRate
+  * @param riskProAmount amount of RiskPro [using mocPrecision]
+  * @param riskProTecPrice price of RiskPro without discounts [using mocPrecision]
+  * @param riskProDiscountRate RiskPro discounts [using mocPrecision]
+  * @return Reserve token amount
+  */
+  function riskProDiscToResToken(uint256 riskProAmount, uint256 riskProTecPrice, uint256 riskProDiscountRate) internal view returns(uint256) {
+    uint256 totalResTokenValue = mocLibConfig.totalRiskProInResTokens(riskProAmount, riskProTecPrice);
+    return mocLibConfig.applyDiscountRate(totalResTokenValue, riskProDiscountRate);
+  }
+
   /** END UPDATE V0110: 24/09/2020 **/
 
   /**
@@ -229,9 +242,8 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
    @param reserveTokenAmount Amount in ReserveToken to mint
    @param vendorAccount Vendor address
   */
-// solium-disable-next-line security/no-assign-params
   function mintRiskPro(address account, uint256 reserveTokenAmount, address vendorAccount)
-    public
+    external
     onlyWhitelisted(msg.sender)
     returns (uint256, uint256, uint256, uint256, uint256)
   {
@@ -243,7 +255,7 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
 
     if (mocState.state() == IMoCState.States.RiskProDiscount) {
       details.discountPrice = mocState.riskProDiscountPrice();
-      details.riskProDiscountAmount = mocConverter.resTokenToRiskProDisc(reserveTokenAmount);
+      details.riskProDiscountAmount = mocLibConfig.maxRiskProWithResTokens(reserveTokenAmount, details.discountPrice);
 
       details.finalRiskProAmount = Math.min(
         details.riskProDiscountAmount,
@@ -251,7 +263,11 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
       );
       details.reserveTokenValue = details.finalRiskProAmount == details.riskProDiscountAmount
         ? reserveTokenAmount
-        : mocConverter.riskProDiscToResToken(details.finalRiskProAmount);
+        : riskProDiscToResToken(
+            details.finalRiskProAmount,
+            details.riskProRegularPrice,
+            mocState.riskProSpotDiscountRate()
+        );
 
       emit RiskProWithDiscountMint(
         details.riskProRegularPrice,
@@ -261,8 +277,9 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
     }
 
     if (reserveTokenAmount != details.reserveTokenValue) {
-      details.regularRiskProAmount = mocConverter.resTokenToRiskPro(
-        reserveTokenAmount.sub(details.reserveTokenValue)
+      details.regularRiskProAmount = mocLibConfig.maxRiskProWithResTokens(
+        reserveTokenAmount.sub(details.reserveTokenValue),
+        details.riskProRegularPrice
       );
       details.finalRiskProAmount = details.finalRiskProAmount.add(details.regularRiskProAmount);
     }
@@ -307,7 +324,7 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
     uint256 userAmount = Math.min(riskProAmount, userBalance);
 
     details.riskProFinalAmount = Math.min(userAmount, mocState.absoluteMaxRiskPro());
-    uint256 totalReserveToken = mocConverter.riskProToResToken(details.riskProFinalAmount);
+    uint256 totalReserveToken = mocLibConfig.totalRiskProInResTokens(details.riskProFinalAmount, mocState.riskProTecPrice());
 
     /** UPDATE V0110: 24/09/2020 - Upgrade to support multiple commission rates **/
     CommissionParamsStruct memory params;
@@ -365,7 +382,7 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
         stableTokenAmount,
         Math.min(mocState.freeStableToken(), stableToken.balanceOf(account))
       );
-      uint256 stableTokensReserveTokenValue = mocConverter.stableTokensToResToken(details.finalStableTokenAmount);
+      uint256 stableTokensReserveTokenValue = mocState.stableTokensToResToken(details.finalStableTokenAmount);
 
       details.reserveTokenInterestAmount = mocInrate.calcStableTokenRedInterestValues(
         details.finalStableTokenAmount,
@@ -410,11 +427,12 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
 
     // StableTokens to issue with tx value amount
     if (resTokensToMint > 0) {
-      details.stableTokens = mocConverter.resTokenToStableToken(resTokensToMint);
+      uint256 resTokenPrice = mocState.getReserveTokenPrice();
+      details.stableTokens = mocLibConfig.maxStableTokensWithResTokens(resTokensToMint, resTokenPrice); //reserve token to stable token
       details.stableTokenAmount = Math.min(details.stableTokens, mocState.absoluteMaxStableToken());
       details.totalCost = details.stableTokenAmount == details.stableTokens
         ? resTokensToMint
-        : mocConverter.stableTokensToResToken(details.stableTokenAmount);
+        : mocLibConfig.stableTokensResTokensValue(details.stableTokenAmount, mocState.peg(), resTokenPrice);
 
       // Mint Token
       stableToken.mint(account, details.stableTokenAmount);
@@ -456,7 +474,7 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
   ) public onlyWhitelisted(msg.sender) returns (bool, uint256) {
     StableTokenRedeemStruct memory details;
 
-    details.totalReserveToken = mocConverter.stableTokensToResTokenWithPrice(amount, reservePrice);
+    details.totalReserveToken = mocLibConfig.stableTokensResTokensValue(amount, mocState.peg(), reservePrice); // stable token to reserve token
 
     /** UPDATE V0110: 24/09/2020 - Upgrade to support multiple commission rates **/
     // Check commission rate in Reserve according to transaction type
@@ -502,11 +520,7 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
 
     uint256 liqPrice = mocState.getLiquidationPrice();
     // [USD * ReserveTokens / USD]
-    uint256 totalResTokens = mocConverter.stableTokensToResTokenWithPrice(
-      userStableTokenBalance,
-      liqPrice
-    );
-
+    uint256 totalResTokens = mocLibConfig.stableTokensResTokensValue(userStableTokenBalance, mocState.peg(), liqPrice); //stable tokens to reserve tokens
     // If send fails we don't burn the tokens
     if (moc.sendToAddress(destination, totalResTokens)) {
       stableToken.burn(origin, userStableTokenBalance);
@@ -561,7 +575,7 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
       // pay interest
       riskProxManager.payInrate(BUCKET_C0, details.reserveTokenInterestAmount);
 
-      details.riskProxToMint = mocConverter.resTokenToRiskProx(details.finalReserveTokenToMint, bucket);
+      details.riskProxToMint = mocState.resTokenToRiskProx(details.finalReserveTokenToMint, bucket);
 
       riskProxManager.assignRiskProx(bucket, account, details.riskProxToMint, details.finalReserveTokenToMint);
       moveExtraFundsToBucket(BUCKET_C0, bucket, details.finalReserveTokenToMint, details.lev);
@@ -609,11 +623,12 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
     }
 
     RiskProxRedeemStruct memory details;
+    details.riskProxPrice = mocState.bucketRiskProTecPrice(bucket);
     // Calculate leverage before the redeem
     details.bucketLev = mocState.leverage(bucket);
     // Get redeemable value
     details.riskProxToRedeem = Math.min(riskProxAmount, riskProxManager.riskProxBalanceOf(bucket, account));
-    details.resTokenToRedeem = mocConverter.riskProxToResToken(details.riskProxToRedeem, bucket);
+    details.resTokenToRedeem = mocLibConfig.riskProResTokensValuet(details.riskProxToRedeem, details.riskProxPrice);
     // Pay interests
     // Update 2020-03-31
     // No recover interest in BTCX Redemption
@@ -625,7 +640,7 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
       bucket,
       account,
       details.riskProxToRedeem,
-      mocState.bucketRiskProTecPrice(bucket)
+      details.riskProxPrice
     );
 
     if (riskProxManager.getBucketNRiskPro(bucket) == 0) {
@@ -706,7 +721,7 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
     uint256 riskProxPrice
   ) public onlyWhitelisted(msg.sender) returns (uint256) {
     // Calculate total ReserveTokens
-    uint256 totalAmount = mocConverter.riskProToResTokenWithPrice(
+    uint256 totalAmount = mocLibConfig.riskProResTokensValuet(
       riskProxAmount,
       riskProxPrice
     );
@@ -883,7 +898,7 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
     uint256 lev
   ) internal {
     uint256 resTokensToMove = mocLibConfig.bucketTransferAmount(totalReserveToken, lev);
-    uint256 stableTokensToMove = mocConverter.resTokenToStableToken(resTokensToMove);
+    uint256 stableTokensToMove = mocState.resTokenToStableToken(resTokensToMove);
 
     uint256 resTokensToMoveFinal = Math.min(
       resTokensToMove,
@@ -933,7 +948,6 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
     riskProToken = RiskProToken(connector.riskProToken());
     riskProxManager = MoCRiskProxManager(connector.riskProxManager());
     mocState = IMoCState(connector.mocState());
-    mocConverter = MoCConverter(connector.mocConverter());
     mocInrate = IMoCInrate(connector.mocInrate());
   }
 
@@ -953,6 +967,7 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
     uint256 bucketLev;
     uint256 riskProxToRedeem;
     uint256 resTokenToRedeem;
+    uint256 riskProxPrice;
     CommissionReturnStruct commission;
   }
 

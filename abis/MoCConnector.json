@@ -2,23 +2,10 @@
   {
     "constant": true,
     "inputs": [],
-    "name": "mocState",
+    "name": "DEPRECATED_mocConverter",
     "outputs": [
       {
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [],
-    "name": "riskProxManager",
-    "outputs": [
-      {
+        "internalType": "address",
         "name": "",
         "type": "address"
       }
@@ -31,6 +18,7 @@
     "constant": true,
     "inputs": [
       {
+        "internalType": "address",
         "name": "account",
         "type": "address"
       }
@@ -38,6 +26,7 @@
     "name": "isWhitelisted",
     "outputs": [
       {
+        "internalType": "bool",
         "name": "",
         "type": "bool"
       }
@@ -52,6 +41,7 @@
     "name": "moc",
     "outputs": [
       {
+        "internalType": "address payable",
         "name": "",
         "type": "address"
       }
@@ -66,6 +56,7 @@
     "name": "mocBurnout",
     "outputs": [
       {
+        "internalType": "address",
         "name": "",
         "type": "address"
       }
@@ -80,76 +71,7 @@
     "name": "mocExchange",
     "outputs": [
       {
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [],
-    "name": "riskProToken",
-    "outputs": [
-      {
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [],
-    "name": "stableToken",
-    "outputs": [
-      {
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [],
-    "name": "mocSettlement",
-    "outputs": [
-      {
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [],
-    "name": "mocConverter",
-    "outputs": [
-      {
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [],
-    "name": "reserveToken",
-    "outputs": [
-      {
+        "internalType": "address",
         "name": "",
         "type": "address"
       }
@@ -164,6 +86,97 @@
     "name": "mocInrate",
     "outputs": [
       {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "mocSettlement",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "mocState",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "reserveToken",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "riskProToken",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "riskProxManager",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "stableToken",
+    "outputs": [
+      {
+        "internalType": "address",
         "name": "",
         "type": "address"
       }
@@ -176,46 +189,52 @@
     "constant": false,
     "inputs": [
       {
+        "internalType": "address payable",
         "name": "mocAddress",
         "type": "address"
       },
       {
+        "internalType": "address",
         "name": "stableTokenAddress",
         "type": "address"
       },
       {
+        "internalType": "address",
         "name": "riskProAddress",
         "type": "address"
       },
       {
+        "internalType": "address",
         "name": "riskProxAddress",
         "type": "address"
       },
       {
+        "internalType": "address",
         "name": "stateAddress",
         "type": "address"
       },
       {
+        "internalType": "address",
         "name": "settlementAddress",
         "type": "address"
       },
       {
-        "name": "converterAddress",
-        "type": "address"
-      },
-      {
+        "internalType": "address",
         "name": "exchangeAddress",
         "type": "address"
       },
       {
+        "internalType": "address",
         "name": "inrateAddress",
         "type": "address"
       },
       {
+        "internalType": "address",
         "name": "burnoutBookAddress",
         "type": "address"
       },
       {
+        "internalType": "address",
         "name": "reserveTokenAddress",
         "type": "address"
       }
