@@ -263,7 +263,15 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMo
     uint256 reserveTokenMarkup,
     uint256 mocMarkup) = mocExchange.redeemRiskProx(msg.sender, bucket, riskProxAmount, vendorAccount);
 
-    redeemWithCommission(msg.sender, reserveTokenCommission, mocCommission, vendorAccount, reserveTokenMarkup, mocMarkup, totalResTokensRedeemed);
+    redeemWithCommission(
+      msg.sender,
+      reserveTokenCommission,
+      mocCommission,
+      vendorAccount,
+      reserveTokenMarkup,
+      mocMarkup,
+      totalResTokensRedeemed
+    );
     /** END UPDATE V0110: 24/09/2020 - Upgrade to support multiple commission rates **/
   }
 
@@ -507,7 +515,12 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMo
   internal {
     // Need to update general State
     mocState.addToReserves(totalResTokensSpent);
-    require(deposit(totalResTokensSpent.add(reserveTokenCommission).add(reserveTokenMarkup), sender), "Token deposit failed on RRC20 Reserve token transfer");
+    require(
+      deposit(
+        totalResTokensSpent.add(reserveTokenCommission).add(reserveTokenMarkup),
+        sender
+      ), "Token deposit failed on RRC20 Reserve token transfer"
+    );
 
     transferMocCommission(sender, mocCommission, vendorAccount, mocMarkup);
 

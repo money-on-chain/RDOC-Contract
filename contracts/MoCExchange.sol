@@ -264,9 +264,9 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
       details.reserveTokenValue = details.finalRiskProAmount == details.riskProDiscountAmount
         ? reserveTokenAmount
         : riskProDiscToResToken(
-            details.finalRiskProAmount,
-            details.riskProRegularPrice,
-            mocState.riskProSpotDiscountRate()
+          details.finalRiskProAmount,
+          details.riskProRegularPrice,
+          mocState.riskProSpotDiscountRate()
         );
 
       emit RiskProWithDiscountMint(
@@ -520,7 +520,11 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
 
     uint256 liqPrice = mocState.getLiquidationPrice();
     // [USD * ReserveTokens / USD]
-    uint256 totalResTokens = mocLibConfig.stableTokensResTokensValue(userStableTokenBalance, mocState.peg(), liqPrice); //stable tokens to reserve tokens
+    uint256 totalResTokens = mocLibConfig.stableTokensResTokensValue(
+      userStableTokenBalance,
+      mocState.peg(),
+      liqPrice
+    ); //stable tokens to reserve tokens
     // If send fails we don't burn the tokens
     if (moc.sendToAddress(destination, totalResTokens)) {
       stableToken.burn(origin, userStableTokenBalance);

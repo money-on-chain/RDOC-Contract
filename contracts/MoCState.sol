@@ -820,7 +820,7 @@ contract MoCState is MoCLibConnection, MoCBase, MoCEMACalculator, IMoCState {
   function resTokenToStableToken(uint256 resTokensAmount) public view returns (uint256) {
     return mocLibConfig.maxStableTokensWithResTokens(resTokensAmount, getReserveTokenPrice());
   }
-    function riskProxToResToken(uint256 riskProxAmount, bytes32 bucket) public view returns (uint256) {
+  function riskProxToResToken(uint256 riskProxAmount, bytes32 bucket) public view returns (uint256) {
     return mocLibConfig.riskProResTokensValuet(riskProxAmount, bucketRiskProTecPrice(bucket));
   }
 
