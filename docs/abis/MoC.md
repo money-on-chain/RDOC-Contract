@@ -21,7 +21,7 @@ address internal stableToken;
 contract RiskProToken internal riskProToken;
 contract MoCRiskProxManager internal riskProxManager;
 contract IMoCState internal mocState;
-contract MoCConverter internal mocConverter;
+address internal DEPRECATED_mocConverter;
 contract IMoCSettlement internal settlement;
 contract IMoCExchange internal mocExchange;
 contract IMoCInrate internal mocInrate;
@@ -199,7 +199,7 @@ modifier transitionState() internal
 - [liquidate()](#liquidate)
 - [transferCommissions(address sender, uint256 totalResTokensSpent, uint256 reserveTokenCommission, uint256 mocCommission, address vendorAccount, uint256 reserveTokenMarkup, uint256 mocMarkup)](#transfercommissions)
 - [transferMocCommission(address sender, uint256 mocCommission, address vendorAccount, uint256 mocMarkup)](#transfermoccommission)
-- [redeemWithMoCFees(address sender, uint256 reserveTokenCommission, uint256 mocCommission, address vendorAccount, uint256 reserveTokenMarkup, uint256 mocMarkup, uint256 reserveTokenAmount)](#redeemwithmocfees)
+- [redeemWithCommission(address sender, uint256 reserveTokenCommission, uint256 mocCommission, address vendorAccount, uint256 reserveTokenMarkup, uint256 mocMarkup, uint256 reserveTokenAmount)](#redeemwithcommission)
 - [transferReserveTokenCommission(address vendorAccount, uint256 reserveTokenCommission, uint256 reserveTokenMarkup)](#transferreservetokencommission)
 - [safeWithdrawFromReserve(address receiver, uint256 tokenAmount)](#safewithdrawfromreserve)
 - [safeWithdraw(address receiver, uint256 tokenAmount)](#safewithdraw)
@@ -802,12 +802,12 @@ function transferMocCommission(address sender, uint256 mocCommission, address ve
 | vendorAccount | address | address of vendor | 
 | mocMarkup | uint256 | vendor markup in MoC | 
 
-### redeemWithMoCFees
+### redeemWithCommission
 
 Transfer redeem operation fees (commissions + vendor markup)
 
 ```js
-function redeemWithMoCFees(address sender, uint256 reserveTokenCommission, uint256 mocCommission, address vendorAccount, uint256 reserveTokenMarkup, uint256 mocMarkup, uint256 reserveTokenAmount) internal nonpayable
+function redeemWithCommission(address sender, uint256 reserveTokenCommission, uint256 mocCommission, address vendorAccount, uint256 reserveTokenMarkup, uint256 mocMarkup, uint256 reserveTokenAmount) internal nonpayable
 ```
 
 **Arguments**

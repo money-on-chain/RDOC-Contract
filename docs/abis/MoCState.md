@@ -57,7 +57,7 @@ uint256 public protected;
 //internal members
 contract PriceProvider internal priceProvider;
 contract IMoCSettlement internal mocSettlement;
-contract MoCConverter internal mocConverter;
+address internal DEPRECATED_mocConverter;
 contract IERC20 internal stableToken;
 contract RiskProToken internal riskProToken;
 contract MoCRiskProxManager internal riskProxManager;
@@ -154,6 +154,11 @@ event MoCVendorsChanged(address  mocVendorsAddress);
 - [getMoCToken()](#getmoctoken)
 - [setMoCVendors(address mocVendorsAddress)](#setmocvendors)
 - [getMoCVendors()](#getmocvendors)
+- [stableTokensToResToken(uint256 stableTokenAmount)](#stabletokenstorestoken)
+- [resTokenToStableToken(uint256 resTokensAmount)](#restokentostabletoken)
+- [riskProxToResToken(uint256 riskProxAmount, bytes32 bucket)](#riskproxtorestoken)
+- [riskProxToResTokenHelper(uint256 riskProxAmount, bytes32 bucket)](#riskproxtorestokenhelper)
+- [resTokenToRiskProx(uint256 resTokensAmount, bytes32 bucket)](#restokentoriskprox)
 - [setMoCTokenInternal(address mocTokenAddress)](#setmoctokeninternal)
 - [setMoCVendorsInternal(address mocVendorsAddress)](#setmocvendorsinternal)
 - [setLiquidationPrice()](#setliquidationprice)
@@ -1403,6 +1408,82 @@ MoCVendors contract address
 
 | Name        | Type           | Description  |
 | ------------- |------------- | -----|
+
+### stableTokensToResToken
+
+⤾ overrides IMoCState.stableTokensToResToken
+
+```js
+function stableTokensToResToken(uint256 stableTokenAmount) public view
+returns(uint256)
+```
+
+**Arguments**
+
+| Name        | Type           | Description  |
+| ------------- |------------- | -----|
+| stableTokenAmount | uint256 |  | 
+
+### resTokenToStableToken
+
+⤾ overrides IMoCState.resTokenToStableToken
+
+```js
+function resTokenToStableToken(uint256 resTokensAmount) public view
+returns(uint256)
+```
+
+**Arguments**
+
+| Name        | Type           | Description  |
+| ------------- |------------- | -----|
+| resTokensAmount | uint256 |  | 
+
+### riskProxToResToken
+
+⤾ overrides IMoCState.riskProxToResToken
+
+```js
+function riskProxToResToken(uint256 riskProxAmount, bytes32 bucket) public view
+returns(uint256)
+```
+
+**Arguments**
+
+| Name        | Type           | Description  |
+| ------------- |------------- | -----|
+| riskProxAmount | uint256 |  | 
+| bucket | bytes32 |  | 
+
+### riskProxToResTokenHelper
+
+```js
+function riskProxToResTokenHelper(uint256 riskProxAmount, bytes32 bucket) public view
+returns(uint256)
+```
+
+**Arguments**
+
+| Name        | Type           | Description  |
+| ------------- |------------- | -----|
+| riskProxAmount | uint256 |  | 
+| bucket | bytes32 |  | 
+
+### resTokenToRiskProx
+
+⤾ overrides IMoCState.resTokenToRiskProx
+
+```js
+function resTokenToRiskProx(uint256 resTokensAmount, bytes32 bucket) public view
+returns(uint256)
+```
+
+**Arguments**
+
+| Name        | Type           | Description  |
+| ------------- |------------- | -----|
+| resTokensAmount | uint256 |  | 
+| bucket | bytes32 |  | 
 
 ### setMoCTokenInternal
 

@@ -24,7 +24,7 @@ address public stableToken;
 address public riskProToken;
 address public riskProxManager;
 address public mocState;
-address public mocConverter;
+address public DEPRECATED_mocConverter;
 address public mocSettlement;
 address public mocExchange;
 address public mocInrate;
@@ -41,14 +41,14 @@ uint256[50] private upgradeGap;
 
 ## Functions
 
-- [initialize(address payable mocAddress, address stableTokenAddress, address riskProAddress, address riskProxAddress, address stateAddress, address settlementAddress, address converterAddress, address exchangeAddress, address inrateAddress, address burnoutBookAddress, address reserveTokenAddress)](#initialize)
+- [initialize(address payable mocAddress, address stableTokenAddress, address riskProAddress, address riskProxAddress, address stateAddress, address settlementAddress, address exchangeAddress, address inrateAddress, address burnoutBookAddress, address reserveTokenAddress)](#initialize)
 
 ### initialize
 
 Initializes the contract
 
 ```js
-function initialize(address payable mocAddress, address stableTokenAddress, address riskProAddress, address riskProxAddress, address stateAddress, address settlementAddress, address converterAddress, address exchangeAddress, address inrateAddress, address burnoutBookAddress, address reserveTokenAddress) public nonpayable initializer 
+function initialize(address payable mocAddress, address stableTokenAddress, address riskProAddress, address riskProxAddress, address stateAddress, address settlementAddress, address exchangeAddress, address inrateAddress, address burnoutBookAddress, address reserveTokenAddress) public nonpayable initializer 
 ```
 
 **Arguments**
@@ -61,7 +61,6 @@ function initialize(address payable mocAddress, address stableTokenAddress, addr
 | riskProxAddress | address | RiskProxManager contract address | 
 | stateAddress | address | MoCState contract address | 
 | settlementAddress | address | MoCSettlement contract address | 
-| converterAddress | address | MoCConverter contract address | 
 | exchangeAddress | address | MoCExchange contract address | 
 | inrateAddress | address | MoCInrate contract address | 
 | burnoutBookAddress | address | (DEPRECATED) MoCBurnout contract address. DO NOT USE. | 

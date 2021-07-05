@@ -23,6 +23,7 @@ struct RiskProxRedeemStruct {
  uint256 bucketLev,
  uint256 riskProxToRedeem,
  uint256 resTokenToRedeem,
+ uint256 riskProxPrice,
  struct MoCExchange.CommissionReturnStruct commission
 }
 ```
@@ -128,7 +129,7 @@ struct StableTokenRedeemStruct {
 ```js
 //internal members
 contract IMoCState internal mocState;
-contract MoCConverter internal mocConverter;
+address internal DEPRECATED_mocConverter;
 contract MoCRiskProxManager internal riskProxManager;
 contract RiskProToken internal riskProToken;
 contract StableToken internal stableToken;
@@ -158,13 +159,13 @@ event RiskProxRedeem(bytes32  bucket, address indexed account, uint256  commissi
 - [initialize(address connectorAddress)](#initialize)
 - [getMoCTokenBalance(address owner, address spender)](#getmoctokenbalance)
 - [calculateCommissionsWithPrices(struct MoCExchange.CommissionParamsStruct params)](#calculatecommissionswithprices)
+- [riskProDiscToResToken(uint256 riskProAmount, uint256 riskProTecPrice, uint256 riskProDiscountRate)](#riskprodisctorestoken)
 - [mintRiskPro(address account, uint256 reserveTokenAmount, address vendorAccount)](#mintriskpro)
 - [redeemRiskPro(address account, uint256 riskProAmount, address vendorAccount)](#redeemriskpro)
 - [redeemFreeStableToken(address account, uint256 stableTokenAmount, address vendorAccount)](#redeemfreestabletoken)
 - [mintStableToken(address account, uint256 resTokensToMint, address vendorAccount)](#mintstabletoken)
 - [redeemStableTokenWithPrice(address userAddress, uint256 amount, uint256 reservePrice)](#redeemstabletokenwithprice)
 - [redeemAllStableToken(address origin, address destination)](#redeemallstabletoken)
-- [mintRiskPro(address account, uint256 reserveTokenCommission, uint256 riskProAmount, uint256 resTokenValue, uint256 mocCommission, uint256 reserveTokenPrice, uint256 mocPrice, uint256 reserveTokenMarkup, uint256 mocMarkup, address vendorAccount)](#mintriskpro)
 - [mintRiskProx(address payable account, bytes32 bucket, uint256 resTokensToMint, address vendorAccount)](#mintriskprox)
 - [redeemRiskProx(address payable account, bytes32 bucket, uint256 riskProxAmount, address vendorAccount)](#redeemriskprox)
 - [forceRedeemRiskProx(bytes32 bucket, address payable account, uint256 riskProxAmount, uint256 riskProxPrice)](#forceredeemriskprox)
@@ -234,12 +235,33 @@ Commissions calculated in MoC price and ReserveToken price; and ReserveToken and
 | ------------- |------------- | -----|
 | params | struct MoCExchange.CommissionParamsStruct | Params defined in CommissionParamsStruct | 
 
+### riskProDiscToResToken
+
+Reserve token equivalent for the amount of riskPro given applying the spotDiscountRate
+
+```js
+function riskProDiscToResToken(uint256 riskProAmount, uint256 riskProTecPrice, uint256 riskProDiscountRate) internal view
+returns(uint256)
+```
+
+**Returns**
+
+Reserve token amount
+
+**Arguments**
+
+| Name        | Type           | Description  |
+| ------------- |------------- | -----|
+| riskProAmount | uint256 | amount of RiskPro [using mocPrecision] | 
+| riskProTecPrice | uint256 | price of RiskPro without discounts [using mocPrecision] | 
+| riskProDiscountRate | uint256 | RiskPro discounts [using mocPrecision] | 
+
 ### mintRiskPro
 
 Mint RiskPros and give it to the msg.sender
 
 ```js
-function mintRiskPro(address account, uint256 reserveTokenAmount, address vendorAccount) public nonpayable onlyWhitelisted 
+function mintRiskPro(address account, uint256 reserveTokenAmount, address vendorAccount) external nonpayable onlyWhitelisted 
 returns(uint256, uint256, uint256, uint256, uint256)
 ```
 
@@ -355,29 +377,6 @@ The amount of ReserveTokens in sent for the redemption or 0 if send does not suc
 | ------------- |------------- | -----|
 | origin | address | address owner of the StableTokens | 
 | destination | address | address to send the ReserveTokens | 
-
-### mintRiskPro
-
-Mint the amount of RiskPros
-
-```js
-function mintRiskPro(address account, uint256 reserveTokenCommission, uint256 riskProAmount, uint256 resTokenValue, uint256 mocCommission, uint256 reserveTokenPrice, uint256 mocPrice, uint256 reserveTokenMarkup, uint256 mocMarkup, address vendorAccount) public nonpayable onlyWhitelisted 
-```
-
-**Arguments**
-
-| Name        | Type           | Description  |
-| ------------- |------------- | -----|
-| account | address | Address that will owned the RiskPros | 
-| reserveTokenCommission | uint256 |  | 
-| riskProAmount | uint256 | Amount of RiskPros to mint [using mocPrecision] | 
-| resTokenValue | uint256 | ReserveTokens cost of the [using reservePrecision] | 
-| mocCommission | uint256 |  | 
-| reserveTokenPrice | uint256 |  | 
-| mocPrice | uint256 |  | 
-| reserveTokenMarkup | uint256 |  | 
-| mocMarkup | uint256 |  | 
-| vendorAccount | address |  | 
 
 ### mintRiskProx
 

@@ -30,7 +30,7 @@ struct InrateParams {
 //internal members
 struct MoCInrateStructs.InrateParams internal riskProxParams;
 contract IMoCState internal mocState;
-contract MoCConverter internal mocConverter;
+address internal DEPRECATED_mocConverter;
 contract MoCRiskProxManager internal riskProxManager;
 
 //public members
