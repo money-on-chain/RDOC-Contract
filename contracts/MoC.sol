@@ -29,6 +29,8 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMo
   RiskProToken internal riskProToken;
   MoCRiskProxManager internal riskProxManager;
   IMoCState internal mocState;
+  /** DEPRECATED **/
+  // solium-disable-next-line mixedcase
   address internal DEPRECATED_mocConverter;
   IMoCSettlement internal settlement;
   IMoCExchange internal mocExchange;
@@ -196,7 +198,15 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMo
     uint256 reserveTokenMarkup,
     uint256 mocMarkup) = mocExchange.redeemRiskPro(msg.sender, riskProAmount, vendorAccount);
 
-    redeemWithCommission(msg.sender, reserveTokenCommission, mocCommission, vendorAccount, reserveTokenMarkup, mocMarkup, resTokensAmount);
+    redeemWithCommission(
+      msg.sender,
+      reserveTokenCommission,
+      mocCommission,
+      vendorAccount,
+      reserveTokenMarkup,
+      mocMarkup,
+      resTokensAmount
+    );
     /** END UPDATE V0110: 24/09/2020 - Upgrade to support multiple commission rates **/
   }
 
@@ -338,7 +348,15 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMo
     uint256 reserveTokenMarkup,
     uint256 mocMarkup) = mocExchange.redeemFreeStableToken(msg.sender, stableTokenAmount, vendorAccount);
 
-    redeemWithCommission(msg.sender, reserveTokenCommission, mocCommission, vendorAccount, reserveTokenMarkup, mocMarkup, resTokensAmount);
+    redeemWithCommission(
+      msg.sender,
+      reserveTokenCommission,
+      mocCommission,
+      vendorAccount,
+      reserveTokenMarkup,
+      mocMarkup,
+      resTokensAmount
+    );
     /** END UPDATE V0110: 24/09/2020 - Upgrade to support multiple commission rates **/
   }
 
