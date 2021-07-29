@@ -48,6 +48,7 @@ module.exports = async moc => {
   ]);
   const unitsPrecision = {
     RES: RESERVE_PRECISION,
+    MOC: MOC_PRECISION,
     USD: MOC_PRECISION,
     COV: MOC_PRECISION,
     RAT: MOC_PRECISION,

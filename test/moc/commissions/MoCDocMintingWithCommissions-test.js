@@ -451,7 +451,7 @@ contract('MoC', function([owner, userAccount, commissionsAccount, vendorAccount,
         await mocHelper.allowReserve(userAccount, toContractBN(mintAmount, 'RES'));
 
         const mintStableToken = mocHelper.mintStableToken(userAccount, mintAmount, vendorAccount);
-        await expectRevert(mintStableToken, 'amount is not enough');
+        await expectRevert(mintStableToken, 'Not enough allowance to make the operation.');
       });
     });
     describe('GIVEN since there is no allowance to pay fees in MoC', function() {
@@ -475,7 +475,7 @@ contract('MoC', function([owner, userAccount, commissionsAccount, vendorAccount,
           vendorAccount,
           await mocHelper.mocInrate.MINT_STABLETOKEN_FEES_RESERVE()
         );
-        await expectRevert(mintStableToken, 'amount is not enough');
+        await expectRevert(mintStableToken, 'Not enough allowance to make the operation.');
       });
     });
     describe('GIVEN since the user does not have MoC, but there is MoC allowance AND ReserveToken balance', function() {

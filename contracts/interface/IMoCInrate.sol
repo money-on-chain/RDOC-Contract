@@ -1,7 +1,8 @@
-pragma solidity 0.5.8;
+pragma solidity ^0.5.8;
 
 interface IMoCInrate {
     // Transaction types
+    // solium-disable mixedcase
     function MINT_RISKPRO_FEES_RESERVE() external view returns(uint8);
     function REDEEM_RISKPRO_FEES_RESERVE() external view returns(uint8);
     function MINT_STABLETOKEN_FEES_RESERVE() external view returns(uint8);
@@ -14,6 +15,7 @@ interface IMoCInrate {
     function REDEEM_STABLETOKEN_FEES_MOC() external view returns(uint8);
     function MINT_RISKPROX_FEES_MOC() external view returns(uint8);
     function REDEEM_RISKPROX_FEES_MOC() external view returns(uint8);
+    // solium-enable mixedcase
 
     function dailyInratePayment() external returns(uint256);
 
@@ -37,7 +39,7 @@ interface IMoCInrate {
 
     function calculateVendorMarkup(address vendorAccount, uint256 amount) external view returns (uint256 markup);
 
-    function calcStableTokenRedInterestValues(uint256 STABLETOKENAmount, uint256 reserveAmount) external view returns(uint256);
+    function calcStableTokenRedInterestValues(uint256 stableTokenAmount, uint256 reserveAmount) external view returns(uint256);
 
     function calcMintInterestValues(bytes32 bucket, uint256 reserveAmount) external view returns(uint256);
 

@@ -34,7 +34,7 @@ uint256 internal constant STEPS;
 Constructor
 
 ```js
-function () public nonpayable MoCSettlementMock 
+function () public nonpayable MoCSettlement 
 ```
 
 **Arguments**

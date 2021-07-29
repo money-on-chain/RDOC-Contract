@@ -53,7 +53,7 @@ In case global coverage falls below the protected threshold, the contract will e
 
 If the RIF funds you allowed doesn't cover the amount you specified on resTokensToMint.
 
-If this is the case the transaction will revert, all your funds will be returned (except the fee paid to the network). The error message will be "amount is not enough".
+If this is the case the transaction will revert, all your funds will be returned (except the fee paid to the network). The error message will be "Not enough allowance to make the operation.".
 
 #### Not enough gas:
 
@@ -136,7 +136,7 @@ This will leave you with a contract similar to the following
 ​
 
 ```js
-pragma solidity 0.5.8;
+pragma solidity ^0.5.8;
 ​
 import "money-on-chain/contracts/MoC.sol";
 import "money-on-chain/contracts/token/RiskProToken.sol";

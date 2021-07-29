@@ -8,7 +8,7 @@ original_id: MoCVendors
 
 View Source: [contracts/MoCVendors.sol](../../contracts/MoCVendors.sol)
 
-**↗ Extends: [MoCVendorsEvents](MoCVendorsEvents.md), [MoCBase](MoCBase.md), [MoCLibConnection](MoCLibConnection.md), [Governed](Governed.md)**
+**↗ Extends: [MoCVendorsEvents](MoCVendorsEvents.md), [MoCBase](MoCBase.md), [MoCLibConnection](MoCLibConnection.md), [Governed](Governed.md), [IMoCVendors](IMoCVendors.md)**
 
 **MoCVendors** - version: 0.1.10
 
@@ -20,9 +20,7 @@ struct VendorDetails {
  bool isActive,
  uint256 markup,
  uint256 totalPaidInMoC,
- uint256 staking,
- uint256 paidMoC,
- uint256 paidReserveToken
+ uint256 staking
 }
 ```
 
@@ -31,9 +29,9 @@ struct VendorDetails {
 
 ```js
 //internal members
-contract MoC internal moc;
-contract MoCState internal mocState;
-contract MoCExchange internal mocExchange;
+contract IMoC internal moc;
+contract IMoCState internal mocState;
+contract IMoCExchange internal mocExchange;
 
 //public members
 uint8 public constant VENDORS_LIST_ARRAY_MAX_LENGTH;
@@ -57,6 +55,7 @@ event VendorStakeAdded(address  account, uint256  staking);
 event VendorStakeRemoved(address  account, uint256  staking);
 event TotalPaidInMoCReset(address  account);
 event VendorGuardianAddressChanged(address  vendorGuardianAddress);
+event VendorReceivedMarkup(address  vendorAdress, uint256  paidMoC, uint256  paidReserveToken);
 ```
 
 ## Modifiers
@@ -98,13 +97,11 @@ modifier onlyVendorGuardian() internal
 - [unregisterVendor(address account)](#unregistervendor)
 - [addStake(uint256 staking)](#addstake)
 - [removeStake(uint256 staking)](#removestake)
-- [updatePaidMarkup(address account, uint256 mocAmount, uint256 resTokenAmount, uint256 totalMoCAmount)](#updatepaidmarkup)
+- [updatePaidMarkup(address account, uint256 mocAmount, uint256 resTokenAmount)](#updatepaidmarkup)
 - [getIsActive(address account)](#getisactive)
 - [getMarkup(address account)](#getmarkup)
 - [getTotalPaidInMoC(address account)](#gettotalpaidinmoc)
 - [getStaking(address account)](#getstaking)
-- [getPaidMoC(address account)](#getpaidmoc)
-- [getPaidReserveToken(address account)](#getpaidreservetoken)
 - [resetTotalPaidInMoC()](#resettotalpaidinmoc)
 - [getVendorGuardianAddress()](#getvendorguardianaddress)
 - [setVendorGuardianAddress(address _vendorGuardianAddress)](#setvendorguardianaddress)
@@ -215,10 +212,13 @@ function removeStake(uint256 staking) public nonpayable onlyActiveVendor
 
 ### updatePaidMarkup
 
+⤾ overrides IMoCVendors.updatePaidMarkup
+
 Allows to update paid markup to vendor
 
 ```js
-function updatePaidMarkup(address account, uint256 mocAmount, uint256 resTokenAmount, uint256 totalMoCAmount) public nonpayable onlyWhitelisted 
+function updatePaidMarkup(address account, uint256 mocAmount, uint256 resTokenAmount) public nonpayable onlyWhitelisted 
+returns(bool)
 ```
 
 **Arguments**
@@ -228,9 +228,10 @@ function updatePaidMarkup(address account, uint256 mocAmount, uint256 resTokenAm
 | account | address | Vendor address | 
 | mocAmount | uint256 | paid markup in MoC | 
 | resTokenAmount | uint256 | paid markup in ReserveToken | 
-| totalMoCAmount | uint256 | total paid in MoC | 
 
 ### getIsActive
+
+⤾ overrides IMoCVendors.getIsActive
 
 Gets if a vendor is active
 
@@ -251,6 +252,8 @@ true if vendor is active; false otherwise
 
 ### getMarkup
 
+⤾ overrides IMoCVendors.getMarkup
+
 Gets vendor markup
 
 ```js
@@ -269,6 +272,8 @@ Vendor markup
 | account | address | Vendor address | 
 
 ### getTotalPaidInMoC
+
+⤾ overrides IMoCVendors.getTotalPaidInMoC
 
 Gets vendor total paid in MoC
 
@@ -289,6 +294,8 @@ Vendor total paid in MoC
 
 ### getStaking
 
+⤾ overrides IMoCVendors.getStaking
+
 Gets vendor staking
 
 ```js
@@ -306,45 +313,9 @@ Vendor staking
 | ------------- |------------- | -----|
 | account | address | Vendor address | 
 
-### getPaidMoC
-
-Gets vendor paid in MoC
-
-```js
-function getPaidMoC(address account) public view
-returns(uint256)
-```
-
-**Returns**
-
-Vendor paid in MoC
-
-**Arguments**
-
-| Name        | Type           | Description  |
-| ------------- |------------- | -----|
-| account | address | Vendor address | 
-
-### getPaidReserveToken
-
-Gets vendor paid in ReserveToken
-
-```js
-function getPaidReserveToken(address account) public view
-returns(uint256)
-```
-
-**Returns**
-
-Vendor total paid in ReserveToken
-
-**Arguments**
-
-| Name        | Type           | Description  |
-| ------------- |------------- | -----|
-| account | address | Vendor address | 
-
 ### resetTotalPaidInMoC
+
+⤾ overrides IMoCVendors.resetTotalPaidInMoC
 
 Allows to reset all active vendor's total paid in MoC during settlement
 

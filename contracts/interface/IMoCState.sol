@@ -1,4 +1,4 @@
-pragma solidity 0.5.8;
+pragma solidity ^0.5.8;
 
 interface IMoCState {
 
@@ -76,4 +76,12 @@ interface IMoCState {
     function maxRiskProxResTokenValue(bytes32 bucket) external view returns(uint256);
 
     function bucketRiskProTecPriceHelper(bytes32 bucket) external view returns(uint256);
+
+    function stableTokensToResToken(uint256 stableTokenAmount) external view returns (uint256);
+
+    function resTokenToStableToken(uint256 resTokensAmount) external view returns (uint256);
+
+    function riskProxToResToken(uint256 riskProxAmount, bytes32 bucket) external view returns (uint256);
+
+    function resTokenToRiskProx(uint256 resTokensAmount, bytes32 bucket) external view returns (uint256);
 }

@@ -8,22 +8,10 @@ original_id: MoCState
 
 View Source: [contracts/MoCState.sol](../../contracts/MoCState.sol)
 
-**↗ Extends: [MoCLibConnection](MoCLibConnection.md), [MoCBase](MoCBase.md), [MoCEMACalculator](MoCEMACalculator.md)**
+**↗ Extends: [MoCLibConnection](MoCLibConnection.md), [MoCBase](MoCBase.md), [MoCEMACalculator](MoCEMACalculator.md), [IMoCState](IMoCState.md)**
 **↘ Derived Contracts: [MoCStateMock](MoCStateMock.md)**
 
 **MoCState** - version: 0.1.10
-
-**Enums**
-### States
-
-```js
-enum States {
- Liquidated,
- RiskProDiscount,
- BelowCobj,
- AboveCobj
-}
-```
 
 ## Structs
 ### InitializeParams
@@ -54,7 +42,7 @@ struct InitializeParams {
 
 ```js
 //public members
-enum MoCState.States public state;
+enum IMoCState.States public state;
 uint256 public dayBlockSpan;
 uint256 public peg;
 uint256 public riskProMaxDiscountRate;
@@ -68,14 +56,14 @@ uint256 public protected;
 
 //internal members
 contract PriceProvider internal priceProvider;
-contract MoCSettlement internal mocSettlement;
-contract MoCConverter internal mocConverter;
-contract StableToken internal stableToken;
+contract IMoCSettlement internal mocSettlement;
+address internal DEPRECATED_mocConverter;
+contract IERC20 internal stableToken;
 contract RiskProToken internal riskProToken;
 contract MoCRiskProxManager internal riskProxManager;
 contract PriceProvider internal mocPriceProvider;
 contract MoCToken internal mocToken;
-contract MoCVendors internal mocVendors;
+address internal mocVendors;
 
 //private members
 uint256[50] private upgradeGap;
@@ -85,7 +73,7 @@ uint256[50] private upgradeGap;
 **Events**
 
 ```js
-event StateTransition(enum MoCState.States  newState);
+event StateTransition(enum IMoCState.States  newState);
 event PriceProviderUpdated(address  oldAddress, address  newAddress);
 event MoCPriceProviderUpdated(address  oldAddress, address  newAddress);
 event MoCTokenChanged(address  mocTokenAddress);
@@ -166,6 +154,11 @@ event MoCVendorsChanged(address  mocVendorsAddress);
 - [getMoCToken()](#getmoctoken)
 - [setMoCVendors(address mocVendorsAddress)](#setmocvendors)
 - [getMoCVendors()](#getmocvendors)
+- [stableTokensToResToken(uint256 stableTokenAmount)](#stabletokenstorestoken)
+- [resTokenToStableToken(uint256 resTokensAmount)](#restokentostabletoken)
+- [riskProxToResToken(uint256 riskProxAmount, bytes32 bucket)](#riskproxtorestoken)
+- [riskProxToResTokenHelper(uint256 riskProxAmount, bytes32 bucket)](#riskproxtorestokenhelper)
+- [resTokenToRiskProx(uint256 resTokensAmount, bytes32 bucket)](#restokentoriskprox)
 - [setMoCTokenInternal(address mocTokenAddress)](#setmoctokeninternal)
 - [setMoCVendorsInternal(address mocVendorsAddress)](#setmocvendorsinternal)
 - [setLiquidationPrice()](#setliquidationprice)
@@ -286,6 +279,8 @@ blocks there are in a day
 
 ### substractFromReserves
 
+⤾ overrides IMoCState.substractFromReserves
+
 Subtract the reserve amount passed by parameter to the reserves total
 
 ```js
@@ -299,6 +294,8 @@ function substractFromReserves(uint256 amount) public nonpayable onlyWhitelisted
 | amount | uint256 | Amount that will be subtract to reserves | 
 
 ### addToReserves
+
+⤾ overrides IMoCState.addToReserves
 
 Add the reserve amount passed by parameter to the reserves total
 
@@ -371,6 +368,8 @@ returns(uint256)
 
 ### globalCoverage
 
+⤾ overrides IMoCState.globalCoverage
+
 GLOBAL Coverage
 
 ```js
@@ -427,6 +426,8 @@ ReserveToken amount of RiskPro in Bucket [using reservePrecision].
 
 ### getReservesRemainder
 
+⤾ overrides IMoCState.getReservesRemainder
+
 Gets the ReserveTokens in the contract that not corresponds to StableToken collateral
 
 ```js
@@ -444,6 +445,8 @@ ReserveTokens remainder [using reservePrecision].
 | ------------- |------------- | -----|
 
 ### coverage
+
+⤾ overrides IMoCState.coverage
 
 BUCKET Coverage
 
@@ -464,6 +467,8 @@ coverage [using mocPrecision]
 
 ### abundanceRatio
 
+⤾ overrides IMoCState.abundanceRatio
+
 Abundance ratio, receives tha amount of stableToken to use the value of stableToken0 and StableToken total supply
 
 ```js
@@ -483,6 +488,8 @@ abundance ratio [using mocPrecision]
 
 ### currentAbundanceRatio
 
+⤾ overrides IMoCState.currentAbundanceRatio
+
 Relation between stableTokens in bucket 0 and StableToken total supply
 
 ```js
@@ -500,6 +507,8 @@ abundance ratio [using mocPrecision]
 | ------------- |------------- | -----|
 
 ### leverage
+
+⤾ overrides IMoCState.leverage
 
 BUCKET Leverage
 
@@ -537,6 +546,8 @@ maxStableToken to issue [using mocPrecision]
 | ------------- |------------- | -----|
 
 ### freeStableToken
+
+⤾ overrides IMoCState.freeStableToken
 
 Returns the amount of stableTokens in bucket 0, that can be redeemed outside of settlement
 
@@ -592,6 +603,8 @@ maxRiskPro for redeem [using mocPrecision].
 | ------------- |------------- | -----|
 
 ### absoluteMaxStableToken
+
+⤾ overrides IMoCState.absoluteMaxStableToken
 
 ABSOLUTE maxStableToken
 
@@ -649,6 +662,8 @@ maxRiskProx [using mocPrecision]
 
 ### maxRiskProxResTokenValue
 
+⤾ overrides IMoCState.maxRiskProxResTokenValue
+
 GLOBAL max riskProx to mint
 
 ```js
@@ -668,6 +683,8 @@ maxRiskProx ReserveTokens value to mint [using reservePrecision]
 
 ### absoluteMaxRiskPro
 
+⤾ overrides IMoCState.absoluteMaxRiskPro
+
 ABSOLUTE maxRiskPro
 
 ```js
@@ -685,6 +702,8 @@ maxStableToken to issue [using mocPrecision].
 | ------------- |------------- | -----|
 
 ### maxRiskProWithDiscount
+
+⤾ overrides IMoCState.maxRiskProWithDiscount
 
 DISCOUNT maxRiskPro
 
@@ -722,6 +741,8 @@ lockedReserveTokens amount [using reservePrecision].
 
 ### riskProTecPrice
 
+⤾ overrides IMoCState.riskProTecPrice
+
 ReserveTokens price of RiskPro
 
 ```js
@@ -739,6 +760,8 @@ the RiskPro Tec Price [using reservePrecision].
 | ------------- |------------- | -----|
 
 ### bucketRiskProTecPrice
+
+⤾ overrides IMoCState.bucketRiskProTecPrice
 
 BUCKET ReserveTokens price of RiskPro
 
@@ -759,6 +782,8 @@ the RiskPro Tec Price [using reservePrecision]
 
 ### bucketRiskProTecPriceHelper
 
+⤾ overrides IMoCState.bucketRiskProTecPriceHelper
+
 BUCKET ReserveTokens price of RiskPro (helper)
 
 ```js
@@ -777,6 +802,8 @@ the RiskPro Tec Price [using reservePrecision]
 | bucket | bytes32 | Name of the bucket used | 
 
 ### riskProDiscountPrice
+
+⤾ overrides IMoCState.riskProDiscountPrice
 
 ReserveTokens price of RiskPro with spot discount applied
 
@@ -852,6 +879,8 @@ RiskPro RiskPro Price [[using mocPrecision]Precision].
 
 ### riskProSpotDiscountRate
 
+⤾ overrides IMoCState.riskProSpotDiscountRate
+
 GLOBAL ReserveTokens Discount rate to apply to RiskProPrice.
 
 ```js
@@ -869,6 +898,8 @@ RiskPro discount rate [using DISCOUNT_PRECISION].
 | ------------- |------------- | -----|
 
 ### daysToSettlement
+
+⤾ overrides IMoCState.daysToSettlement
 
 ⤿ Overridden Implementation(s): [MoCStateMock.daysToSettlement](MoCStateMock.md#daystosettlement)
 
@@ -927,6 +958,8 @@ true if liquidation state is reached, false otherwise
 
 ### getLiquidationPrice
 
+⤾ overrides IMoCState.getLiquidationPrice
+
 Returns the price to use for stableToken redeem in a liquidation event
 
 ```js
@@ -944,6 +977,8 @@ price to use for stableToken redeem in a liquidation event
 | ------------- |------------- | -----|
 
 ### getBucketNReserve
+
+⤾ overrides IMoCState.getBucketNReserve
 
 ```js
 function getBucketNReserve(bytes32 bucket) public view
@@ -1021,6 +1056,8 @@ returns(uint256)
 | ------------- |------------- | -----|
 
 ### getReserveTokenPrice
+
+⤾ overrides IMoCState.getReserveTokenPrice
 
 ```js
 function getReserveTokenPrice() public view
@@ -1141,6 +1178,8 @@ function setPeg(uint256 _peg) public nonpayable onlyAuthorizedChanger
 
 ### getProtected
 
+⤾ overrides IMoCState.getProtected
+
 return the value of the protected threshold configuration param
 
 ```js
@@ -1204,6 +1243,8 @@ function setLiquidationEnabled(bool _liquidationEnabled) public nonpayable onlyA
 | _liquidationEnabled | bool | is liquidation enabled | 
 
 ### nextState
+
+⤾ overrides IMoCState.nextState
 
 Transitions to next state.
 
@@ -1282,6 +1323,8 @@ MoC price provider address
 
 ### getMoCPrice
 
+⤾ overrides IMoCState.getMoCPrice
+
 Gets the MoCPrice
 
 ```js
@@ -1313,6 +1356,8 @@ function setMoCToken(address mocTokenAddress) public nonpayable onlyAuthorizedCh
 | mocTokenAddress | address | MoC token contract address | 
 
 ### getMoCToken
+
+⤾ overrides IMoCState.getMoCToken
 
 Gets the MoC token contract address
 
@@ -1346,6 +1391,8 @@ function setMoCVendors(address mocVendorsAddress) public nonpayable onlyAuthoriz
 
 ### getMoCVendors
 
+⤾ overrides IMoCState.getMoCVendors
+
 Gets the MoCVendors contract addfress
 
 ```js
@@ -1361,6 +1408,82 @@ MoCVendors contract address
 
 | Name        | Type           | Description  |
 | ------------- |------------- | -----|
+
+### stableTokensToResToken
+
+⤾ overrides IMoCState.stableTokensToResToken
+
+```js
+function stableTokensToResToken(uint256 stableTokenAmount) public view
+returns(uint256)
+```
+
+**Arguments**
+
+| Name        | Type           | Description  |
+| ------------- |------------- | -----|
+| stableTokenAmount | uint256 |  | 
+
+### resTokenToStableToken
+
+⤾ overrides IMoCState.resTokenToStableToken
+
+```js
+function resTokenToStableToken(uint256 resTokensAmount) public view
+returns(uint256)
+```
+
+**Arguments**
+
+| Name        | Type           | Description  |
+| ------------- |------------- | -----|
+| resTokensAmount | uint256 |  | 
+
+### riskProxToResToken
+
+⤾ overrides IMoCState.riskProxToResToken
+
+```js
+function riskProxToResToken(uint256 riskProxAmount, bytes32 bucket) public view
+returns(uint256)
+```
+
+**Arguments**
+
+| Name        | Type           | Description  |
+| ------------- |------------- | -----|
+| riskProxAmount | uint256 |  | 
+| bucket | bytes32 |  | 
+
+### riskProxToResTokenHelper
+
+```js
+function riskProxToResTokenHelper(uint256 riskProxAmount, bytes32 bucket) public view
+returns(uint256)
+```
+
+**Arguments**
+
+| Name        | Type           | Description  |
+| ------------- |------------- | -----|
+| riskProxAmount | uint256 |  | 
+| bucket | bytes32 |  | 
+
+### resTokenToRiskProx
+
+⤾ overrides IMoCState.resTokenToRiskProx
+
+```js
+function resTokenToRiskProx(uint256 resTokensAmount, bytes32 bucket) public view
+returns(uint256)
+```
+
+**Arguments**
+
+| Name        | Type           | Description  |
+| ------------- |------------- | -----|
+| resTokensAmount | uint256 |  | 
+| bucket | bytes32 |  | 
 
 ### setMoCTokenInternal
 

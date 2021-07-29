@@ -8,7 +8,7 @@ original_id: MoC
 
 View Source: [contracts/MoC.sol](../../contracts/MoC.sol)
 
-**↗ Extends: [MoCEvents](MoCEvents.md), [MoCReserve](MoCReserve.md), [MoCLibConnection](MoCLibConnection.md), [MoCBase](MoCBase.md), [Stoppable](Stoppable.md)**
+**↗ Extends: [MoCEvents](MoCEvents.md), [MoCReserve](MoCReserve.md), [MoCLibConnection](MoCLibConnection.md), [MoCBase](MoCBase.md), [Stoppable](Stoppable.md), [IMoC](IMoC.md)**
 
 **MoC** - version: 0.1.10
 
@@ -17,14 +17,14 @@ View Source: [contracts/MoC.sol](../../contracts/MoC.sol)
 
 ```js
 //internal members
-contract StableToken internal stableToken;
+address internal stableToken;
 contract RiskProToken internal riskProToken;
 contract MoCRiskProxManager internal riskProxManager;
-contract MoCState internal mocState;
-contract MoCConverter internal mocConverter;
-contract MoCSettlement internal settlement;
-contract MoCExchange internal mocExchange;
-contract MoCInrate internal mocInrate;
+contract IMoCState internal mocState;
+address internal DEPRECATED_mocConverter;
+contract IMoCSettlement internal settlement;
+contract IMoCExchange internal mocExchange;
+contract IMoCInrate internal mocInrate;
 bool internal liquidationExecuted;
 
 //public members
@@ -68,38 +68,38 @@ modifier whenSettlementReady() internal
 ### atState
 
 ```js
-modifier atState(enum MoCState.States _state) internal
+modifier atState(enum IMoCState.States _state) internal
 ```
 
 **Arguments**
 
 | Name        | Type           | Description  |
 | ------------- |------------- | -----|
-| _state | enum MoCState.States |  | 
+| _state | enum IMoCState.States |  | 
 
 ### atLeastState
 
 ```js
-modifier atLeastState(enum MoCState.States _state) internal
+modifier atLeastState(enum IMoCState.States _state) internal
 ```
 
 **Arguments**
 
 | Name        | Type           | Description  |
 | ------------- |------------- | -----|
-| _state | enum MoCState.States |  | 
+| _state | enum IMoCState.States |  | 
 
 ### atMostState
 
 ```js
-modifier atMostState(enum MoCState.States _state) internal
+modifier atMostState(enum IMoCState.States _state) internal
 ```
 
 **Arguments**
 
 | Name        | Type           | Description  |
 | ------------- |------------- | -----|
-| _state | enum MoCState.States |  | 
+| _state | enum IMoCState.States |  | 
 
 ### notInProtectionMode
 
@@ -198,11 +198,11 @@ modifier transitionState() internal
 - [sendToAddress(address receiver, uint256 tokenAmount)](#sendtoaddress)
 - [liquidate()](#liquidate)
 - [transferCommissions(address sender, uint256 totalResTokensSpent, uint256 reserveTokenCommission, uint256 mocCommission, address vendorAccount, uint256 reserveTokenMarkup, uint256 mocMarkup)](#transfercommissions)
-- [transferMocCommission(address sender, uint256 mocCommission, address vendorAccount, uint256 mocMarkup, uint256 totalMoCFee)](#transfermoccommission)
-- [redeemWithMoCFees(address sender, uint256 reserveTokenCommission, uint256 mocCommission, address vendorAccount, uint256 reserveTokenMarkup, uint256 mocMarkup)](#redeemwithmocfees)
+- [transferMocCommission(address sender, uint256 mocCommission, address vendorAccount, uint256 mocMarkup)](#transfermoccommission)
+- [redeemWithCommission(address sender, uint256 reserveTokenCommission, uint256 mocCommission, address vendorAccount, uint256 reserveTokenMarkup, uint256 mocMarkup, uint256 reserveTokenAmount)](#redeemwithcommission)
 - [transferReserveTokenCommission(address vendorAccount, uint256 reserveTokenCommission, uint256 reserveTokenMarkup)](#transferreservetokencommission)
-- [withdrawFromReserve(address receiver, uint256 tokenAmount)](#withdrawfromreserve)
 - [safeWithdrawFromReserve(address receiver, uint256 tokenAmount)](#safewithdrawfromreserve)
+- [safeWithdraw(address receiver, uint256 tokenAmount)](#safewithdraw)
 - [safeDepositInReserve(address receiver, uint256 tokenAmount)](#safedepositinreserve)
 
 ### initialize
@@ -328,6 +328,8 @@ function alterRedeemRequestAmount(bool isAddition, uint256 delta) public nonpaya
 | delta | uint256 | the amount to add/substract to current position | 
 
 ### addReserves
+
+⤾ overrides IMoC.addReserves
 
 Adding tokens to the token reserve and C0 Bucket without minting any token.
 Could revert.
@@ -732,6 +734,8 @@ function runSettlement(uint256 steps) public nonpayable whenNotPaused transition
 
 ### sendToAddress
 
+⤾ overrides IMoC.sendToAddress
+
 Public function to extract and send tokens from the reserve. Will return false if transfer reverts or fails.
 
 ```js
@@ -786,7 +790,7 @@ function transferCommissions(address sender, uint256 totalResTokensSpent, uint25
 Transfer operation fees in MoC (commissions + vendor markup)
 
 ```js
-function transferMocCommission(address sender, uint256 mocCommission, address vendorAccount, uint256 mocMarkup, uint256 totalMoCFee) internal nonpayable
+function transferMocCommission(address sender, uint256 mocCommission, address vendorAccount, uint256 mocMarkup) internal nonpayable
 ```
 
 **Arguments**
@@ -797,14 +801,13 @@ function transferMocCommission(address sender, uint256 mocCommission, address ve
 | mocCommission | uint256 | commission amount in MoC | 
 | vendorAccount | address | address of vendor | 
 | mocMarkup | uint256 | vendor markup in MoC | 
-| totalMoCFee | uint256 | commission + vendor markup in MoC | 
 
-### redeemWithMoCFees
+### redeemWithCommission
 
 Transfer redeem operation fees (commissions + vendor markup)
 
 ```js
-function redeemWithMoCFees(address sender, uint256 reserveTokenCommission, uint256 mocCommission, address vendorAccount, uint256 reserveTokenMarkup, uint256 mocMarkup) internal nonpayable
+function redeemWithCommission(address sender, uint256 reserveTokenCommission, uint256 mocCommission, address vendorAccount, uint256 reserveTokenMarkup, uint256 mocMarkup, uint256 reserveTokenAmount) internal nonpayable
 ```
 
 **Arguments**
@@ -817,6 +820,7 @@ function redeemWithMoCFees(address sender, uint256 reserveTokenCommission, uint2
 | vendorAccount | address | address of vendor | 
 | reserveTokenMarkup | uint256 | vendor markup in ReserveToken | 
 | mocMarkup | uint256 | vendor markup in MoC | 
+| reserveTokenAmount | uint256 |  | 
 
 ### transferReserveTokenCommission
 
@@ -834,26 +838,6 @@ function transferReserveTokenCommission(address vendorAccount, uint256 reserveTo
 | reserveTokenCommission | uint256 | commission amount in ReserveToken | 
 | reserveTokenMarkup | uint256 | vendor markup in ReserveToken | 
 
-### withdrawFromReserve
-
-Extracts tokens from the reserve and update mocState
-
-```js
-function withdrawFromReserve(address receiver, uint256 tokenAmount) internal nonpayable
-returns(bool)
-```
-
-**Returns**
-
-False if RRC20 transfer fails or revert and true if succeeds
-
-**Arguments**
-
-| Name        | Type           | Description  |
-| ------------- |------------- | -----|
-| receiver | address | Account to which the tokens will be send | 
-| tokenAmount | uint256 | Amount to extract from reserve | 
-
 ### safeWithdrawFromReserve
 
 Extracts tokens from the reserve and update mocState but reverts if token transfer fails
@@ -868,6 +852,21 @@ function safeWithdrawFromReserve(address receiver, uint256 tokenAmount) internal
 | ------------- |------------- | -----|
 | receiver | address | Account to which the tokens will be send | 
 | tokenAmount | uint256 | Amount to extract from reserve | 
+
+### safeWithdraw
+
+Extracts tokens from the reserve
+
+```js
+function safeWithdraw(address receiver, uint256 tokenAmount) internal nonpayable
+```
+
+**Arguments**
+
+| Name        | Type           | Description  |
+| ------------- |------------- | -----|
+| receiver | address | Account from which the tokens will be taken | 
+| tokenAmount | uint256 | Amount to deposit | 
 
 ### safeDepositInReserve
 

@@ -1,4 +1,4 @@
-pragma solidity 0.5.8;
+pragma solidity ^0.5.8;
 pragma experimental ABIEncoderV2;
 
 import "openzeppelin-solidity/contracts/math/Math.sol";
@@ -13,7 +13,6 @@ import "./token/MoCToken.sol";
 import "./interface/IMoCSettlement.sol";
 import "moc-governance/contracts/Governance/Governed.sol";
 import "moc-governance/contracts/Governance/IGovernor.sol";
-import "./MoCConverter.sol";
 import "./interface/IMoCState.sol";
 
 contract MoCState is MoCLibConnection, MoCBase, MoCEMACalculator, IMoCState {
@@ -48,7 +47,9 @@ contract MoCState is MoCLibConnection, MoCBase, MoCEMACalculator, IMoCState {
 // Contracts
   PriceProvider internal priceProvider;
   IMoCSettlement internal mocSettlement;
-  MoCConverter internal mocConverter;
+  /** DEPRECATED **/
+  // solium-disable-next-line mixedcase
+  address internal DEPRECATED_mocConverter;
   IERC20 internal stableToken;
   RiskProToken internal riskProToken;
   MoCRiskProxManager internal riskProxManager;
@@ -195,7 +196,7 @@ contract MoCState is MoCLibConnection, MoCBase, MoCEMACalculator, IMoCState {
    RiskProx values and interests holdings
   */
   function collateralReserves() public view returns (uint256) {
-    uint256 resTokensInRiskProx = mocConverter.riskProxToResTokenHelper(riskProxManager.getBucketNRiskPro(BUCKET_X2), BUCKET_X2);
+    uint256 resTokensInRiskProx = riskProxToResTokenHelper(riskProxManager.getBucketNRiskPro(BUCKET_X2), BUCKET_X2);
     uint256 resTokensInBag = riskProxManager.getInrateBag(BUCKET_C0);
 
     return reserves.sub(resTokensInRiskProx).sub(resTokensInBag);
@@ -810,6 +811,29 @@ contract MoCState is MoCLibConnection, MoCBase, MoCEMACalculator, IMoCState {
   /** Internal functions **/
 
   /**********************
+    Ex MoCConverter
+   *********************/
+  function stableTokensToResToken(uint256 stableTokenAmount) public view returns (uint256) {
+    return mocLibConfig.stableTokensResTokensValue(stableTokenAmount, peg, getReserveTokenPrice());
+  }
+
+  function resTokenToStableToken(uint256 resTokensAmount) public view returns (uint256) {
+    return mocLibConfig.maxStableTokensWithResTokens(resTokensAmount, getReserveTokenPrice());
+  }
+  function riskProxToResToken(uint256 riskProxAmount, bytes32 bucket) public view returns (uint256) {
+    return mocLibConfig.riskProResTokensValuet(riskProxAmount, bucketRiskProTecPrice(bucket));
+  }
+
+  function riskProxToResTokenHelper(uint256 riskProxAmount, bytes32 bucket) public view returns(uint256) {
+    return mocLibConfig.riskProResTokensValuet(riskProxAmount, bucketRiskProTecPriceHelper(bucket));
+  }
+
+  function resTokenToRiskProx(uint256 resTokensAmount, bytes32 bucket) public view returns (uint256) {
+    return mocLibConfig.maxRiskProWithResTokens(resTokensAmount, bucketRiskProTecPrice(bucket));
+  }
+
+
+  /**********************
     MoC TOKEN
    *********************/
 
@@ -883,7 +907,6 @@ contract MoCState is MoCLibConnection, MoCBase, MoCEMACalculator, IMoCState {
     stableToken = IERC20(connector.stableToken());
     riskProToken = RiskProToken(connector.riskProToken());
     riskProxManager = MoCRiskProxManager(connector.riskProxManager());
-    mocConverter = MoCConverter(connector.mocConverter());
     setMoCTokenInternal(_mocTokenAddress);
     setMoCVendorsInternal(_mocVendorsAddress);
   }

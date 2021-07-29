@@ -1,11 +1,10 @@
-pragma solidity 0.5.8;
+pragma solidity ^0.5.8;
 
 import "moc-governance/contracts/Governance/Governed.sol";
 import "moc-governance/contracts/Governance/IGovernor.sol";
 import "./MoCLibConnection.sol";
 import "./interface/IMoCState.sol";
 import "./MoCRiskProxManager.sol";
-import "./MoCConverter.sol";
 import "./base/MoCBase.sol";
 import "./interface/IMoCVendors.sol";
 import "./interface/IMoCInrate.sol";
@@ -65,7 +64,9 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
 
   /**CONTRACTS**/
   IMoCState internal mocState;
-  MoCConverter internal mocConverter;
+  /** DEPRECATED **/
+  // solium-disable-next-line mixedcase
+  address internal DEPRECATED_mocConverter;
   MoCRiskProxManager internal riskProxManager;
 
   function setStableTmin(uint256 _stableTmin) public onlyAuthorizedChanger() {
@@ -380,7 +381,7 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
   function calcCommissionValue(uint256 reserveTokenAmount, uint8 txType)
   public view returns(uint256) {
     // Validate txType
-    require (txType > 0, "Invalid transaction type 'txType'");
+    require (txType > 0, "Invalid txType");
 
     uint256 finalCommissionAmount = reserveTokenAmount.mul(commissionRatesByTxType[txType]).div(mocLibConfig.mocPrecision);
     return finalCommissionAmount;
@@ -526,7 +527,7 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
   */
   function calcFullRedeemInterestValue(bytes32 bucket) internal view returns (uint256) {
     // Value in ReserveTokens of all RiskProxs in the bucket
-    uint256 fullRiskProxReserveTokenValue = mocConverter.riskProxToResToken(riskProxManager.getBucketNRiskPro(bucket), bucket);
+    uint256 fullRiskProxReserveTokenValue = mocState.riskProxToResToken(riskProxManager.getBucketNRiskPro(bucket), bucket);
     // Interests to return if a redemption of all RiskProx is done
     return calcRedeemInterestValue(bucket, fullRiskProxReserveTokenValue); // Redeem
   }
@@ -540,7 +541,7 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
   function simulateStableTokenMovement(bytes32 bucket, uint256 resTokensAmount, bool onMinting) internal view returns (uint256) {
     // Calculates stableTokens to move
     uint256 reserveTokenToMove = mocLibConfig.bucketTransferAmount(resTokensAmount, mocState.leverage(bucket));
-    uint256 stableTokensToMove = mocConverter.resTokenToStableToken(reserveTokenToMove);
+    uint256 stableTokensToMove = mocState.resTokenToStableToken(reserveTokenToMove);
 
     if (onMinting) {
       /* Should not happen when minting riskPro because it's
@@ -589,7 +590,6 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
   function initializeContracts() internal {
     riskProxManager = MoCRiskProxManager(connector.riskProxManager());
     mocState = IMoCState(connector.mocState());
-    mocConverter = MoCConverter(connector.mocConverter());
   }
 
   /**

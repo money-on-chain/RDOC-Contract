@@ -288,7 +288,7 @@ contract('MoC: MoCExchange', function([
           // Add arbitrary number to the allowance
           const mintAmount = BigNumber(allowance).plus(10);
           const mintRiskPro = mocHelper.mintRiskPro(userAccount, mintAmount, vendorAccount, false);
-          await expectRevert(mintRiskPro, 'amount is not enough');
+          await expectRevert(mintRiskPro, 'Not enough allowance to make the operation.');
         });
       });
       describe('GIVEN since there is no allowance to pay fees in MoC', function() {
@@ -299,7 +299,7 @@ contract('MoC: MoCExchange', function([
           await mocHelper.mintMoCToken(userAccount, mintAmount, owner);
           // DO NOT approve MoC token on purpose
           const mintRiskPro = mocHelper.mintRiskPro(userAccount, mintAmount, vendorAccount);
-          await expectRevert(mintRiskPro, 'amount is not enough');
+          await expectRevert(mintRiskPro, 'Not enough allowance to make the operation.');
         });
       });
       describe('GIVEN since the user does not have MoC, but there is MoC allowance AND Reserve balance', function() {
