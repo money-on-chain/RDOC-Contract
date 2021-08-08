@@ -220,9 +220,6 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
     return riskProRate;
   }
 
-  // function getCommissionRate() public view returns(uint256) {
-  //   return commissionRate;
-  // }
 
    /**
     @dev Sets RiskPro Holders rate
@@ -263,14 +260,6 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
   function setCommissionsAddress(address payable newCommissionsAddress) public onlyAuthorizedChanger() {
     commissionsAddress = newCommissionsAddress;
   }
-
-  //  /**
-  //   @dev Sets the commission rate for Mint/Redeem transactions
-  //   @param newCommissionRate New commission rate
-  //  */
-  // function setCommissionRate(uint256 newCommissionRate) public onlyAuthorizedChanger() {
-  //   commissionRate = newCommissionRate;
-  // }
 
   /**
     @dev Calculates interest rate for RiskProx Minting, redeem and Free StableToken Redeem
@@ -371,6 +360,18 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
   /** START UPDATE V0110: 24/09/2020  **/
   /** Upgrade to support multiple commission rates **/
   /** Public functions **/
+
+  /**
+    @dev DEPRECATED calculates the Commission rate from the passed RBTC amount for mint/redeem operations
+    @param reserveTokenAmount Total value from which apply the Commission rate [using reservePrecision]
+    @return finalCommissionAmount [using reservePrecision]
+  */
+  function calcCommissionValue(uint256 reserveTokenAmount)
+  external view returns(uint256) {
+    // solium-disable-next-line mixedcase
+    uint256 finalCommissionAmount = reserveTokenAmount.mul(commissionRatesByTxType[MINT_RISKPRO_FEES_RESERVE]).div(mocLibConfig.mocPrecision);
+    return finalCommissionAmount;
+  }
 
   /**
     @dev calculates the Commission rate from the passed ReserveTokens amount for mint/redeem operations
