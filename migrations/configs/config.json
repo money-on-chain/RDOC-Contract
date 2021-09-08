@@ -27,6 +27,7 @@
     "liquidationEnabled": false,
     "protected": 1.5,
     "vendorGuardianAddress": "",
+    "governorOwnerAddress": "",
     "mocTokenCommissionsAddress": "",
     "commissionRates": {
       "MINT_RISKPRO_FEES_RESERVE": 0.001,
@@ -71,6 +72,7 @@
     "liquidationEnabled": false,
     "protected": 1.5,
     "vendorGuardianAddress": "",
+    "governorOwnerAddress": "",
     "mocTokenCommissionsAddress": "",
     "commissionRates": {
       "MINT_RISKPRO_FEES_RESERVE": 0.001,
@@ -122,6 +124,7 @@
     "liquidationEnabled": false,
     "protected": 1.5,
     "vendorGuardianAddress": "",
+    "governorOwnerAddress": "",
     "mocTokenCommissionsAddress": "0xf69287F5Ca3cC3C6d3981f2412109110cB8af076",
     "commissionRates": {
       "MINT_RISKPRO_FEES_RESERVE": 0.001,
@@ -172,6 +175,7 @@
     "liquidationEnabled": false,
     "protected": 1.5,
     "vendorGuardianAddress": "",
+    "governorOwnerAddress": "",
     "mocTokenCommissionsAddress": "0xC61820bFB8F87391d62Cd3976dDc1d35e0cf7128",
     "commissionRates": {
       "MINT_RISKPRO_FEES_RESERVE": 0.001,
