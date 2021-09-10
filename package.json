@@ -17,6 +17,7 @@
     "truffle-compile": "npx truffle compile --all",
     "solium": "node ./node_modules/ethlint/bin/solium -d contracts/",
     "eslint": "npx truffle compile --all; npx eslint 'test/**/*.js' 'scripts/**/*.js'",
+    "eslint-fix": "npx truffle compile --all; npx eslint --fix 'test/**/*.js' 'scripts/**/*.js'",
     "migrate-development": "npx truffle migrate --network development",
     "migrate-qaTestnet": "npx truffle migrate --network rdocTestnetAlpha",
     "migrate-mocTestnet": "npx truffle migrate --network rdocTestnet",
