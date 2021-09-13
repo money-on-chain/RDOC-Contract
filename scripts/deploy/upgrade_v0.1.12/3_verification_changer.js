@@ -1,5 +1,8 @@
 /* eslint-disable no-console */
 
+// 3_verification_changer use to validate target to execute before executed by governor. 
+// So if used please not exec the execute by governor in 2_batch_changer
+
 const BatchChanger = artifacts.require('./changers/BatchChanger.sol');
 const UpgradeDelegator = artifacts.require('./UpgradeDelegator.sol');
 const MoCSettlement = artifacts.require('./MoCSettlement.sol');
@@ -12,89 +15,89 @@ const { getConfig, getNetwork } = require('../helper');
 
 const getCommissionsArray = async config => {
   const mocPrecision = 10 ** 18;
-  const MINT_BPRO_FEES_RBTC = '1';
-  const REDEEM_BPRO_FEES_RBTC = '2';
-  const MINT_DOC_FEES_RBTC = '3';
-  const REDEEM_DOC_FEES_RBTC = '4';
-  const MINT_BTCX_FEES_RBTC = '5';
-  const REDEEM_BTCX_FEES_RBTC = '6';
-  const MINT_BPRO_FEES_MOC = '7';
-  const REDEEM_BPRO_FEES_MOC = '8';
-  const MINT_DOC_FEES_MOC = '9';
-  const REDEEM_DOC_FEES_MOC = '10';
-  const MINT_BTCX_FEES_MOC = '11';
-  const REDEEM_BTCX_FEES_MOC = '12';
+  const MINT_RISKPRO_FEES_RESERVE = '1';
+  const REDEEM_RISKPRO_FEES_RESERVE = '2';
+  const MINT_STABLETOKEN_FEES_RESERVE = '3';
+  const REDEEM_STABLETOKEN_FEES_RESERVE = '4';
+  const MINT_RISKPROX_FEES_RESERVE = '5';
+  const REDEEM_RISKPROX_FEES_RESERVE = '6';
+  const MINT_RISKPRO_FEES_MOC = '7';
+  const REDEEM_RISKPRO_FEES_MOC = '8';
+  const MINT_STABLETOKEN_FEES_MOC = '9';
+  const REDEEM_STABLETOKEN_FEES_MOC = '10';
+  const MINT_RISKPROX_FEES_MOC = '11';
+  const REDEEM_RISKPROX_FEES_MOC = '12';
 
   const ret = [
     {
-      txType: MINT_BPRO_FEES_RBTC,
-      fee: BigNumber(config.valuesToAssign.commissionRates.MINT_BPRO_FEES_RBTC)
+      txType: MINT_RISKPRO_FEES_RESERVE,
+      fee: BigNumber(config.valuesToAssign.commissionRates.MINT_RISKPRO_FEES_RESERVE)
         .times(mocPrecision)
         .toString()
     },
     {
-      txType: REDEEM_BPRO_FEES_RBTC,
-      fee: BigNumber(config.valuesToAssign.commissionRates.REDEEM_BPRO_FEES_RBTC)
+      txType: REDEEM_RISKPRO_FEES_RESERVE,
+      fee: BigNumber(config.valuesToAssign.commissionRates.REDEEM_RISKPRO_FEES_RESERVE)
         .times(mocPrecision)
         .toString()
     },
     {
-      txType: MINT_DOC_FEES_RBTC,
-      fee: BigNumber(config.valuesToAssign.commissionRates.MINT_DOC_FEES_RBTC)
+      txType: MINT_STABLETOKEN_FEES_RESERVE,
+      fee: BigNumber(config.valuesToAssign.commissionRates.MINT_STABLETOKEN_FEES_RESERVE)
         .times(mocPrecision)
         .toString()
     },
     {
-      txType: REDEEM_DOC_FEES_RBTC,
-      fee: BigNumber(config.valuesToAssign.commissionRates.REDEEM_DOC_FEES_RBTC)
+      txType: REDEEM_STABLETOKEN_FEES_RESERVE,
+      fee: BigNumber(config.valuesToAssign.commissionRates.REDEEM_STABLETOKEN_FEES_RESERVE)
         .times(mocPrecision)
         .toString()
     },
     {
-      txType: MINT_BTCX_FEES_RBTC,
-      fee: BigNumber(config.valuesToAssign.commissionRates.MINT_BTCX_FEES_RBTC)
+      txType: MINT_RISKPROX_FEES_RESERVE,
+      fee: BigNumber(config.valuesToAssign.commissionRates.MINT_RISKPROX_FEES_RESERVE)
         .times(mocPrecision)
         .toString()
     },
     {
-      txType: REDEEM_BTCX_FEES_RBTC,
-      fee: BigNumber(config.valuesToAssign.commissionRates.REDEEM_BTCX_FEES_RBTC)
+      txType: REDEEM_RISKPROX_FEES_RESERVE,
+      fee: BigNumber(config.valuesToAssign.commissionRates.REDEEM_RISKPROX_FEES_RESERVE)
         .times(mocPrecision)
         .toString()
     },
     {
-      txType: MINT_BPRO_FEES_MOC,
-      fee: BigNumber(config.valuesToAssign.commissionRates.MINT_BPRO_FEES_MOC)
+      txType: MINT_RISKPRO_FEES_MOC,
+      fee: BigNumber(config.valuesToAssign.commissionRates.MINT_RISKPRO_FEES_MOC)
         .times(mocPrecision)
         .toString()
     },
     {
-      txType: REDEEM_BPRO_FEES_MOC,
-      fee: BigNumber(config.valuesToAssign.commissionRates.REDEEM_BPRO_FEES_MOC)
+      txType: REDEEM_RISKPRO_FEES_MOC,
+      fee: BigNumber(config.valuesToAssign.commissionRates.REDEEM_RISKPRO_FEES_MOC)
         .times(mocPrecision)
         .toString()
     },
     {
-      txType: MINT_DOC_FEES_MOC,
-      fee: BigNumber(config.valuesToAssign.commissionRates.MINT_DOC_FEES_MOC)
+      txType: MINT_STABLETOKEN_FEES_MOC,
+      fee: BigNumber(config.valuesToAssign.commissionRates.MINT_STABLETOKEN_FEES_MOC)
         .times(mocPrecision)
         .toString()
     },
     {
-      txType: REDEEM_DOC_FEES_MOC,
-      fee: BigNumber(config.valuesToAssign.commissionRates.REDEEM_DOC_FEES_MOC)
+      txType: REDEEM_STABLETOKEN_FEES_MOC,
+      fee: BigNumber(config.valuesToAssign.commissionRates.REDEEM_STABLETOKEN_FEES_MOC)
         .times(mocPrecision)
         .toString()
     },
     {
-      txType: MINT_BTCX_FEES_MOC,
-      fee: BigNumber(config.valuesToAssign.commissionRates.MINT_BTCX_FEES_MOC)
+      txType: MINT_RISKPROX_FEES_MOC,
+      fee: BigNumber(config.valuesToAssign.commissionRates.MINT_RISKPROX_FEES_MOC)
         .times(mocPrecision)
         .toString()
     },
     {
-      txType: REDEEM_BTCX_FEES_MOC,
-      fee: BigNumber(config.valuesToAssign.commissionRates.REDEEM_BTCX_FEES_MOC)
+      txType: REDEEM_RISKPROX_FEES_MOC,
+      fee: BigNumber(config.valuesToAssign.commissionRates.REDEEM_RISKPROX_FEES_MOC)
         .times(mocPrecision)
         .toString()
     }

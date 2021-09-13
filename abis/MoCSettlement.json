@@ -273,21 +273,6 @@
     "constant": false,
     "inputs": [
       {
-        "internalType": "contract IGovernor",
-        "name": "_governor",
-        "type": "address"
-      }
-    ],
-    "name": "initialize",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      {
         "internalType": "address",
         "name": "connectorAddress",
         "type": "address"
@@ -301,6 +286,21 @@
         "internalType": "uint256",
         "name": "_blockSpan",
         "type": "uint256"
+      }
+    ],
+    "name": "initialize",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "internalType": "contract IGovernor",
+        "name": "_governor",
+        "type": "address"
       }
     ],
     "name": "initialize",
