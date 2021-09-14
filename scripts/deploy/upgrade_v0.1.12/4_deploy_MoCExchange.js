@@ -1,7 +1,4 @@
 /* eslint-disable no-console */
-const UpgraderChanger = artifacts.require('./changers/UpgraderChanger.sol');
-const Governor = artifacts.require('moc-governance/contracts/Governance/Governor.sol');
-
 const MoCExchange = artifacts.require('./MoCExchange.sol');
 
 const { getConfig, getNetwork, saveConfig } = require('../helper');
@@ -19,14 +16,6 @@ module.exports = async callback => {
     // Deploy contract implementation
     console.log('Deploy MoCExchange');
     const mocExchange = await MoCExchange.new();
-
-    // Upgrade contracts with proxy (using the contract address of contract just deployed)
-    console.log('Upgrade MoCExchange');
-    const upgradeMocExchange = await UpgraderChanger.new(
-      config.proxyAddresses.MoCExchange,
-      config.implementationAddresses.UpgradeDelegator,
-      mocExchange.address
-    );
 
     // Save implementation address to config file
     config.implementationAddresses.MoCExchange = mocExchange.address;
