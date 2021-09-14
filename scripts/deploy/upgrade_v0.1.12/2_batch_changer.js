@@ -10,7 +10,7 @@ const MoCState = artifacts.require('./MoCState.sol');
 
 const BigNumber = require('bignumber.js');
 
-const { getConfig, getNetwork, saveConfig, shouldExecuteChanges } = require('../helper');
+const { getConfig, getNetwork, saveConfig } = require('../helper');
 
 const getCommissionsArray = async config => {
   const mocPrecision = 10 ** 18;
@@ -246,19 +246,6 @@ module.exports = async callback => {
     console.log('datas', datas);
     console.log('Schedule change - BatchChanger');
     await batchChanger.scheduleBatch(targets, datas);
-
-    if (shouldExecuteChanges(network)) {
-      // Execute changes in contracts
-      console.log('Execute change - BatchChanger');
-      const governor = await Governor.at(config.implementationAddresses.Governor);
-      await governor.executeChange(batchChanger.address);
-    } else {
-      console.log('Executing test governor execute change');
-      const governor = await Governor.at(config.implementationAddresses.Governor);
-      await governor.contract.methods
-        .executeChange(config.changerAddresses.BatchChanger)
-        .call({ from: config.governorOwnerAddress });
-    }
 
     console.log('BatchChanger address: ', batchChanger.address);
   } catch (error) {

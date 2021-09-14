@@ -1,8 +1,5 @@
 /* eslint-disable no-console */
-
-// 3_verification_changer use to validate target to execute before executed by governor. 
-// So if used please not exec the execute by governor in 2_batch_changer
-
+const Governor = artifacts.require('moc-governance/contracts/Governance/Governor.sol');
 const BatchChanger = artifacts.require('./changers/BatchChanger.sol');
 const UpgradeDelegator = artifacts.require('./UpgradeDelegator.sol');
 const MoCSettlement = artifacts.require('./MoCSettlement.sol');
@@ -11,7 +8,7 @@ const MoCInrate = artifacts.require('./MoCInrate.sol');
 const MoCState = artifacts.require('./MoCState.sol');
 
 const BigNumber = require('bignumber.js');
-const { getConfig, getNetwork } = require('../helper');
+const { getConfig, getNetwork, shouldExecuteChanges } = require('../helper');
 
 const getCommissionsArray = async config => {
   const mocPrecision = 10 ** 18;
@@ -110,6 +107,8 @@ module.exports = async callback => {
     const network = getNetwork(process.argv);
     const configPath = `${__dirname}/deployConfig-${network}.json`;
     const config = getConfig(network, configPath);
+    let error=[];
+    let msjError;
 
     console.log(`BatchChanger Deploy at: ${config.changerAddresses.BatchChanger}`);
     const batchChanger = await BatchChanger.at(config.changerAddresses.BatchChanger);
@@ -124,7 +123,9 @@ module.exports = async callback => {
     console.log('Length Target: ', lengthTarget.toString());
 
     if (lengthData.toString() !== lengthTarget.toString()) {
-      console.log('ERROR! Not valid array length');
+      msjError='ERROR! Not valid array length';
+      console.log(msjError);
+      error.push(msjError);
     } else {
       console.log('OK! length of arrays');
     }
@@ -145,7 +146,9 @@ module.exports = async callback => {
         `OK! STEP 0. MoC.sol [${config.proxyAddresses.MoC}] Upgrade to implementation [${config.implementationAddresses.MoC}].`
       );
     } else {
-      console.log('ERROR! NOT VALID! STEP 0.');
+      msjError='ERROR! NOT VALID! STEP 0.';
+      console.log(msjError);
+      error.push(msjError);
     }
 
     // STEP 1 MoCExchange.sol Implementation Upgrade
@@ -164,7 +167,9 @@ module.exports = async callback => {
         `OK! STEP ${step}. MoCExchange.sol [${config.proxyAddresses.MoCExchange}] Upgrade to implementation [${config.implementationAddresses.MoCExchange}].`
       );
     } else {
-      console.log(`ERROR! NOT VALID! STEP: ${step}.`);
+      msjError=`ERROR! NOT VALID! STEP: ${step}.`;
+      console.log(msjError);
+      error.push(msjError);
     }
 
     // STEP 2 MoCSettlement.sol Implementation Upgrade
@@ -183,7 +188,9 @@ module.exports = async callback => {
         `OK! STEP ${step}. MoCSettlement.sol [${config.proxyAddresses.MoCSettlement}] Upgrade to implementation [${config.implementationAddresses.MoCSettlement}].`
       );
     } else {
-      console.log(`ERROR! NOT VALID! STEP: ${step}.`);
+      msjError=`ERROR! NOT VALID! STEP: ${step}.`;
+      console.log(msjError);
+      error.push(msjError);
     }
 
     // STEP 3 CommissionSplitter.sol Implementation Upgrade
@@ -205,7 +212,9 @@ module.exports = async callback => {
         `OK! STEP ${step}. CommissionSplitter.sol [${config.proxyAddresses.CommissionSplitter}] Upgrade to implementation [${config.implementationAddresses.CommissionSplitter}].`
       );
     } else {
-      console.log(`ERROR! NOT VALID! STEP: ${step}.`);
+      msjError=`ERROR! NOT VALID! STEP: ${step}.`;
+      console.log(msjError);
+      error.push(msjError);
     }
 
     // STEP 4 MoCInrate.sol Implementation Upgrade
@@ -224,7 +233,9 @@ module.exports = async callback => {
         `OK! STEP ${step}. MoCInrate.sol [${config.proxyAddresses.MoCInrate}] Upgrade to implementation [${config.implementationAddresses.MoCInrate}].`
       );
     } else {
-      console.log(`ERROR! NOT VALID! STEP: ${step}.`);
+      msjError=`ERROR! NOT VALID! STEP: ${step}.`;
+      console.log(msjError);
+      error.push(msjError);
     }
 
     // STEP 5 MoCState.sol Implementation Upgrade
@@ -243,7 +254,9 @@ module.exports = async callback => {
         `OK! STEP ${step}. MoCState.sol [${config.proxyAddresses.MoCState}] Upgrade to implementation [${config.implementationAddresses.MoCState}].`
       );
     } else {
-      console.log(`ERROR! NOT VALID! STEP: ${step}.`);
+      msjError=`ERROR! NOT VALID! STEP: ${step}.`;
+      console.log(msjError);
+      error.push(msjError);
     }
 
     // STEP 6 Prepare MoCSettlement
@@ -260,7 +273,9 @@ module.exports = async callback => {
     if (dataBatch === encodeData && target === targetBatch) {
       console.log(`OK! STEP ${step}. Prepare moCSettlement.sol execute: [fixTasksPointer()]`);
     } else {
-      console.log(`ERROR! NOT VALID! STEP: ${step}.`);
+      msjError=`ERROR! NOT VALID! STEP: ${step}.`;
+      console.log(msjError);
+      error.push(msjError);
     }
 
     // STEP 7 Prepare commissionSplitter - SetMoCToken
@@ -281,7 +296,9 @@ module.exports = async callback => {
         `OK! STEP ${step}. Prepare commissionSplitter.sol execute: [setMocToken(${config.implementationAddresses.MoCToken})]`
       );
     } else {
-      console.log(`ERROR! NOT VALID! STEP: ${step}.`);
+      msjError=`ERROR! NOT VALID! STEP: ${step}.`;
+      console.log(msjError);
+      error.push(msjError);
     }
 
     // STEP 8 Prepare commissionSplitter - mocTokenCommissionsAddress
@@ -301,7 +318,9 @@ module.exports = async callback => {
         `OK! STEP ${step}. Prepare commissionSplitter.sol execute: [setMocTokenCommissionAddress(${config.valuesToAssign.mocTokenCommissionsAddress})]`
       );
     } else {
-      console.log(`ERROR! NOT VALID! STEP: ${step}.`);
+      msjError=`ERROR! NOT VALID! STEP: ${step}.`;
+      console.log(msjError);
+      error.push(msjError);
     }
 
     // STEP 9 Prepare MoCInrate - setCommissionRateByTxType
@@ -327,7 +346,9 @@ module.exports = async callback => {
           `OK! STEP ${varStep}. Prepare MoCInrate.sol execute: [setCommissionRateByTxType(${commissions[i].txType}, ${commissions[i].fee})]`
         );
       } else {
-        console.log(`ERROR! NOT VALID! STEP: ${varStep}.`);
+        msjError=`ERROR! NOT VALID! STEP: ${step}.`;
+        console.log(msjError);
+        error.push(msjError);
       }
 
       varStep += 1;
@@ -351,7 +372,9 @@ module.exports = async callback => {
         `OK! STEP ${step}. Prepare moCState.sol execute: [setMoCPriceProvider(${config.implementationAddresses.MoCPriceProvider})]`
       );
     } else {
-      console.log(`ERROR! NOT VALID! STEP: ${step}.`);
+      msjError=`ERROR! NOT VALID! STEP: ${step}.`;
+      console.log(msjError);
+      error.push(msjError);
     }
 
     // STEP 22 Prepare MoCState - setMoCToken
@@ -370,7 +393,9 @@ module.exports = async callback => {
         `OK! STEP ${step}. Prepare moCState.sol execute: [setMoCToken(${config.implementationAddresses.MoCToken})]`
       );
     } else {
-      console.log(`ERROR! NOT VALID! STEP: ${step}.`);
+      msjError=`ERROR! NOT VALID! STEP: ${step}.`;
+      console.log(msjError);
+      error.push(msjError);
     }
 
     // STEP 23 Prepare MoCState - setMoCVendors
@@ -389,7 +414,9 @@ module.exports = async callback => {
         `OK! STEP ${step}. Prepare moCState.sol execute: [setMoCVendors(${config.proxyAddresses.MoCVendors})]`
       );
     } else {
-      console.log(`ERROR! NOT VALID! STEP: ${step}.`);
+      msjError=`ERROR! NOT VALID! STEP: ${step}.`;
+      console.log(msjError);
+      error.push(msjError);
     }
 
     // STEP 24 Prepare MoCState - setLiquidationEnabled
@@ -408,7 +435,9 @@ module.exports = async callback => {
         `OK! STEP ${step}. Prepare moCState.sol execute: [setLiquidationEnabled(${config.valuesToAssign.liquidationEnabled})]`
       );
     } else {
-      console.log(`ERROR! NOT VALID! STEP: ${step}.`);
+      msjError=`ERROR! NOT VALID! STEP: ${step}.`;
+      console.log(msjError);
+      error.push(msjError);
     }
 
     // STEP 25 Prepare MoCState - setProtected
@@ -430,7 +459,26 @@ module.exports = async callback => {
         `OK! STEP ${step}. Prepare moCState.sol execute: [setProtected(${config.valuesToAssign.protected})]`
       );
     } else {
-      console.log(`ERROR! NOT VALID! STEP: ${step}.`);
+      msjError=`ERROR! NOT VALID! STEP: ${step}.`;
+      console.log(msjError);
+      error.push(msjError);
+    }
+
+
+    if (error.length == 0) {
+      const governor = await Governor.at(config.implementationAddresses.Governor);
+      if (shouldExecuteChanges(network)) {
+        // Execute changes in contracts
+        console.log('Execute change - BatchChanger');
+        await governor.executeChange(batchChanger.address);
+      } else {
+        console.log('Executing test governor execute change');
+        await governor.contract.methods
+          .executeChange(config.changerAddresses.BatchChanger)
+          .call({ from: config.governorOwnerAddress });
+      }
+    }else{
+      console.log('The change was not executed by governor, becase they have this errors: \n *', error.join ('\n * '))
     }
   } catch (error) {
     callback(error);

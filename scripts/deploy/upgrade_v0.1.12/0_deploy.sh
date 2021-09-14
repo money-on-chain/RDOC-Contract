@@ -10,12 +10,10 @@ fi
 
 echo "Using network '$NETWORK'"
 
-#! 3_verification_changer use to validate target to execute before executed by governor. 
-#!So if used please not exec the execute by governor in 2_batch_changer
-
 SCRIPTS="
 1_deploy_MoCExchange.js
 2_batch_changer.js
+3_verification_changer.js
 4_check_deploy.js
 "
 
