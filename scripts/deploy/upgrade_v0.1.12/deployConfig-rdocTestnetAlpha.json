@@ -6,24 +6,24 @@
     "MoCSettlement": "0xF7a2835aF44DF2b831291D7229DcD13D32E57d4A",
     "MoCInrate": "0x2B57fb820601655ca7Da16a5134db4780Aa93E74",
     "MoCState": "0xB80C23576053A1a5278C1a43DC8471F432f77245",
-    "MoCVendors": "",
+    "MoCVendors": "0xd282f98475A6996E1E0325BEa4ADe201Eb4c33B5",
     "CommissionSplitter": "0xE79fE1d8D321d01aA973E319112Fb98eA319B7a1"
   },
   "implementationAddresses": {
-    "MoC": "",
+    "MoC": "0x004e56bE14f7356CA26340a32Ef9a3dD45f244B1",
     "MoCConnector": "",
-    "MoCExchange": "",
-    "MoCSettlement": "",
-    "MoCInrate": "",
-    "MoCState": "",
+    "MoCExchange": "0xDED771909043D1D92A798230ee4DBa1c5aD8bA6f",
+    "MoCSettlement": "0x1bE97081cA31ecd40EA89500D1B456EE2D827896",
+    "MoCInrate": "0x3f632c38A5a2EE5eEbAbdbB763C67388c950685B",
+    "MoCState": "0xB740Ae7F8B9C78AC1D8038889c6295434f0aBE82",
     "ProxyAdmin": "0xffb65F6E24806B7e1A988EeD1Ad07BB2654fF695",
     "UpgradeDelegator": "0xCDAbFbF334A5F6BCe900D2f73470D1e6722365d8",
     "Governor": "0x4eAC4518e81B3A5198aADAb998D2610B46aAA609",
     "MoCToken": "0x0399c7F7B37E21cB9dAE04Fb57E24c68ed0B4635",
     "MoCPriceProvider": "0xE972c8E83A5b97bB4FC867855A0aA13EF96f228D",
-    "MoCVendors": "",
-    "MoCHelperLib": "",
-    "CommissionSplitter": ""
+    "MoCVendors": "0xCFB0f6BDD16d5Cfa0AD723bF04776bD502500d4B",
+    "MoCHelperLib": "0x5A4107D39EE333C729229c8050804BfC697e0Dc4",
+    "CommissionSplitter": "0xB7E7e5d032C0baC4d74862BC56fAbf429B608Db6"
   },
   "valuesToAssign": {
     "commissionRates": {
@@ -46,7 +46,7 @@
     "mocTokenCommissionsAddress": "0xb998C3Da8D24295406d308ea42c85c8acDa880Ba"
   },
   "changerAddresses": {
-    "BatchChanger": ""
+    "BatchChanger": "0x17FeD160F3F15b95F2dD3770076751df0519ae88"
   },
   "governorOwnerAddress": "0xf69287F5Ca3cC3C6d3981f2412109110cB8af076"
 }
