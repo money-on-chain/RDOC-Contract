@@ -51,9 +51,9 @@ module.exports = async callback => {
 
     // Testing if some values have been updated
     const mocPrecision = 10 ** 18;
-    const newFee = BigNumber(newConfig.valuesToAssign.commissionRates.MINT_RISKPRO_FEES_RESERVE).times(
-      mocPrecision
-    );
+    const newFee = BigNumber(
+      newConfig.valuesToAssign.commissionRates.MINT_RISKPRO_FEES_RESERVE
+    ).times(mocPrecision);
 
     // Get value from contract
     const mocInrate = await MoCInrate.at(newConfig.proxyAddresses.MoCInrate);
