@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 const ProxyAdmin = artifacts.require('ProxyAdmin');
+const MoCInrate = artifacts.require('./MoCInrate.sol');
 
 const BigNumber = require('bignumber.js');
 const { getConfig, getNetwork } = require('../helper');
@@ -13,7 +14,15 @@ module.exports = async callback => {
     const originalConfig = getConfig(network, originalConfigPath);
 
     // Getting the keys we want to compare
-    const comparisonKeys = ['MoCExchange'];
+    const comparisonKeys = [
+      'MoC',
+      'MoCExchange',
+      'MoCSettlement',
+      'CommissionSplitter',
+      'MoCInrate',
+      'MoCState',
+      'MoCVendors'
+    ];
 
     const proxyAdmin = await ProxyAdmin.at(originalConfig.implementationAddresses.ProxyAdmin);
 
@@ -39,6 +48,26 @@ module.exports = async callback => {
       }
       console.log('------------------------------------------------------------');
     });
+
+    // Testing if some values have been updated
+    const mocPrecision = 10 ** 18;
+    const newFee = BigNumber(newConfig.valuesToAssign.commissionRates.MINT_RISKPRO_FEES_RESERVE).times(
+      mocPrecision
+    );
+
+    // Get value from contract
+    const mocInrate = await MoCInrate.at(newConfig.proxyAddresses.MoCInrate);
+    const valueFromContract = await mocInrate.commissionRatesByTxType(
+      await mocInrate.MINT_RISKPRO_FEES_RESERVE()
+    );
+    console.log('Obtaining: MINT_RISKPRO_FEES_RESERVE:');
+    console.log(`New fee: ${newFee.toString()}`);
+    console.log(`Value from contract: ${valueFromContract.toString()}`);
+    if (newFee.eq(valueFromContract)) {
+      console.log('\x1b[32m%s\x1b[0m', 'Values are the same');
+    } else {
+      console.log('\x1b[31m%s\x1b[0m', 'Values are not the same');
+    }
   } catch (error) {
     callback(error);
   }
