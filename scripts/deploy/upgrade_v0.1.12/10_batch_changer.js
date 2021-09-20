@@ -143,16 +143,6 @@ module.exports = async callback => {
         .upgrade(config.proxyAddresses.MoCSettlement, config.implementationAddresses.MoCSettlement)
         .encodeABI()
     );
-    // CommissionSplitter
-    targets.push(upgradeDelegatorAddress);
-    datas.push(
-      upgradeDelegator.contract.methods
-        .upgrade(
-          config.proxyAddresses.CommissionSplitter,
-          config.implementationAddresses.CommissionSplitter
-        )
-        .encodeABI()
-    );
     // MoCInrate
     targets.push(upgradeDelegatorAddress);
     datas.push(
@@ -206,6 +196,13 @@ module.exports = async callback => {
           .encodeABI()
       );
     }
+    // set adress of comission spliter
+    targets.push(moCInrateAddress);
+    datas.push(
+      moCInrate.contract.methods
+        .setCommissionsAddress(config.implementationAddresses.CommissionSplitter)
+        .encodeABI()
+    );
 
     console.log('Prepare MoCState');
     const moCStateAddress = config.proxyAddresses.MoCState;
