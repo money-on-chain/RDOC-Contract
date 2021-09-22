@@ -370,7 +370,8 @@ const makeUtils = async (artifacts, networkName, config, owner, deployer) => {
       mocSettlement: getImplementationAddress(proxies, 'MoCSettlement'),
       mocConnector: getImplementationAddress(proxies, 'MoCConnector'),
       mocToken: (await getMoCToken()).address,
-      mocHelperLib: (await MoCLib.deployed()).address
+      mocHelperLib: (await MoCLib.deployed()).address,
+      mocReserve: (await getReserveToken()).address,
     };
   };
 
@@ -590,6 +591,7 @@ const makeUtils = async (artifacts, networkName, config, owner, deployer) => {
       UpgradeDelegator: implementationAddr.upgradeDelegator,
       Governor: implementationAddr.governor,
       MoCToken: implementationAddr.mocToken,
+      MocReserve: implementationAddr.mocReserve,
       MoCPriceProvider: implementationAddr.mocOracle,
       MoCVendors: implementationAddr.mocVendors,
       MoCHelperLib: implementationAddr.mocHelperLib,
@@ -611,7 +613,10 @@ const makeUtils = async (artifacts, networkName, config, owner, deployer) => {
       liquidationEnabled: networkConfig.liquidationEnabled,
       protected: networkConfig.protected,
       vendorGuardianAddress,
-      mocTokenCommissionsAddress
+      mocTokenCommissionsAddress,
+      mocProportion: networkConfig.mocProportion,
+      targetAddressCommissionPayment: networkConfig.targetAddressCommissionPayment
+
     };
 
     const changerAddresses = {};
