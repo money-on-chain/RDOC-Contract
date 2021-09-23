@@ -49,7 +49,7 @@
     "mocProportion": "500000000000000000"
   },
   "changerAddresses": {
-    "BatchChanger": "0x7a21385861dC04aa1D26f346D285eb1eD2178d5B"
+    "BatchChanger": "0x64FF966aEaB340976c9B0Be27FF09203B377CaC2"
   },
   "governorOwnerAddress": "0xf69287F5Ca3cC3C6d3981f2412109110cB8af076"
 }
