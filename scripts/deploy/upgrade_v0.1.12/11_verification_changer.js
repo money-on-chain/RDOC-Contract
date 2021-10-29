@@ -193,33 +193,9 @@ module.exports = async callback => {
       error.push(msjError);
     }
 
-    // STEP 3 CommissionSplitter.sol Implementation Upgrade
+    // STEP 3 MoCInrate.sol Implementation Upgrade
 
     step = 3;
-    targetBatch = await batchChanger.targetsToExecute(step);
-    dataBatch = await batchChanger.datasToExecute(step);
-
-    target = upgradeDelegatorAddress;
-    encodeData = upgradeDelegator.contract.methods
-      .upgrade(
-        config.proxyAddresses.CommissionSplitter,
-        config.implementationAddresses.CommissionSplitter
-      )
-      .encodeABI();
-
-    if (dataBatch === encodeData && target === targetBatch) {
-      console.log(
-        `OK! STEP ${step}. CommissionSplitter.sol [${config.proxyAddresses.CommissionSplitter}] Upgrade to implementation [${config.implementationAddresses.CommissionSplitter}].`
-      );
-    } else {
-      msjError = `ERROR! NOT VALID! STEP: ${step}.`;
-      console.log(msjError);
-      error.push(msjError);
-    }
-
-    // STEP 4 MoCInrate.sol Implementation Upgrade
-
-    step = 4;
     targetBatch = await batchChanger.targetsToExecute(step);
     dataBatch = await batchChanger.datasToExecute(step);
 
@@ -238,9 +214,9 @@ module.exports = async callback => {
       error.push(msjError);
     }
 
-    // STEP 5 MoCState.sol Implementation Upgrade
+    // STEP 4 MoCState.sol Implementation Upgrade
 
-    step = 5;
+    step = 4;
     targetBatch = await batchChanger.targetsToExecute(step);
     dataBatch = await batchChanger.datasToExecute(step);
 
@@ -259,9 +235,9 @@ module.exports = async callback => {
       error.push(msjError);
     }
 
-    // STEP 6 Prepare MoCSettlement
+    // STEP 5 Prepare MoCSettlement
 
-    step = 6;
+    step = 5;
     targetBatch = await batchChanger.targetsToExecute(step);
     dataBatch = await batchChanger.datasToExecute(step);
 
@@ -278,55 +254,10 @@ module.exports = async callback => {
       error.push(msjError);
     }
 
-    // STEP 7 Prepare commissionSplitter - SetMoCToken
+    // STEP 6 Prepare MoCInrate - setCommissionRateByTxType
 
-    step = 7;
-    targetBatch = await batchChanger.targetsToExecute(step);
-    dataBatch = await batchChanger.datasToExecute(step);
-
-    target = config.proxyAddresses.CommissionSplitter;
-    const commissionSplitter = await CommissionSplitter.at(target);
-
-    encodeData = commissionSplitter.contract.methods
-      .setMocToken(config.implementationAddresses.MoCToken)
-      .encodeABI();
-
-    if (dataBatch === encodeData && target === targetBatch) {
-      console.log(
-        `OK! STEP ${step}. Prepare commissionSplitter.sol execute: [setMocToken(${config.implementationAddresses.MoCToken})]`
-      );
-    } else {
-      msjError = `ERROR! NOT VALID! STEP: ${step}.`;
-      console.log(msjError);
-      error.push(msjError);
-    }
-
-    // STEP 8 Prepare commissionSplitter - mocTokenCommissionsAddress
-
-    step = 8;
-    targetBatch = await batchChanger.targetsToExecute(step);
-    dataBatch = await batchChanger.datasToExecute(step);
-
-    target = config.proxyAddresses.CommissionSplitter;
-
-    encodeData = commissionSplitter.contract.methods
-      .setMocTokenCommissionAddress(config.valuesToAssign.mocTokenCommissionsAddress)
-      .encodeABI();
-
-    if (dataBatch === encodeData && target === targetBatch) {
-      console.log(
-        `OK! STEP ${step}. Prepare commissionSplitter.sol execute: [setMocTokenCommissionAddress(${config.valuesToAssign.mocTokenCommissionsAddress})]`
-      );
-    } else {
-      msjError = `ERROR! NOT VALID! STEP: ${step}.`;
-      console.log(msjError);
-      error.push(msjError);
-    }
-
-    // STEP 9 Prepare MoCInrate - setCommissionRateByTxType
-
-    step = 9;
-    let varStep = 9;
+    step = 6;
+    let varStep = 6;
 
     target = config.proxyAddresses.MoCInrate;
     const moCInrate = await MoCInrate.at(target);
@@ -353,11 +284,31 @@ module.exports = async callback => {
 
       varStep += 1;
     }
-    /* eslint-enable no-await-in-loop */
 
-    // STEP 21 Prepare MoCState - setMoCPriceProvider
+    // STEP 18 Prepare MoCInrate - setCommissionsAddress
+    step = 18;
+    target = config.proxyAddresses.MoCInrate;
 
-    step = 21;
+    targetBatch = await batchChanger.targetsToExecute(step);
+    dataBatch = await batchChanger.datasToExecute(step);
+
+    encodeData = moCInrate.contract.methods
+      .setCommissionsAddress(config.proxyAddresses.CommissionSplitter)
+      .encodeABI();
+
+    if (dataBatch === encodeData && target === targetBatch) {
+      console.log(
+        `OK! STEP ${step}. Prepare MoCInrate.sol execute: [setCommissionsAddress(${config.proxyAddresses.CommissionSplitter})]`
+      );
+    } else {
+      msjError = `ERROR! NOT VALID! STEP: ${step}.`;
+      console.log(msjError);
+      error.push(msjError);
+    }
+
+    // STEP 19 Prepare MoCState - setMoCPriceProvider
+
+    step = 19;
     targetBatch = await batchChanger.targetsToExecute(step);
     dataBatch = await batchChanger.datasToExecute(step);
 
@@ -377,9 +328,9 @@ module.exports = async callback => {
       error.push(msjError);
     }
 
-    // STEP 22 Prepare MoCState - setMoCToken
+    // STEP 20 Prepare MoCState - setMoCToken
 
-    step = 22;
+    step = 20;
     targetBatch = await batchChanger.targetsToExecute(step);
     dataBatch = await batchChanger.datasToExecute(step);
 
@@ -398,9 +349,9 @@ module.exports = async callback => {
       error.push(msjError);
     }
 
-    // STEP 23 Prepare MoCState - setMoCVendors
+    // STEP 21 Prepare MoCState - setMoCVendors
 
-    step = 23;
+    step = 21;
     targetBatch = await batchChanger.targetsToExecute(step);
     dataBatch = await batchChanger.datasToExecute(step);
 
@@ -419,9 +370,9 @@ module.exports = async callback => {
       error.push(msjError);
     }
 
-    // STEP 24 Prepare MoCState - setLiquidationEnabled
+    // STEP 22 Prepare MoCState - setLiquidationEnabled
 
-    step = 24;
+    step = 22;
     targetBatch = await batchChanger.targetsToExecute(step);
     dataBatch = await batchChanger.datasToExecute(step);
 
@@ -440,9 +391,9 @@ module.exports = async callback => {
       error.push(msjError);
     }
 
-    // STEP 25 Prepare MoCState - setProtected
+    // STEP 23 Prepare MoCState - setProtected
 
-    step = 25;
+    step = 23;
     targetBatch = await batchChanger.targetsToExecute(step);
     dataBatch = await batchChanger.datasToExecute(step);
 

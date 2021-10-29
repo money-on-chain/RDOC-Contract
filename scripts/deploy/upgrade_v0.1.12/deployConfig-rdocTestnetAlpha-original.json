@@ -1,13 +1,55 @@
 {
   "proxyAddresses": {
-    "MoCExchange": "0x9608F72B879CfbF6c6B9eD4EE768d339140B8074"
+    "MoC": "0x4512f4C1d984bbf8B7f7404EddFb1881cFA79EfD",
+    "MoCConnector": "0x6b1eF14FD679339B5D54d4b8b997611dA1e26800",
+    "MoCExchange": "0x9608F72B879CfbF6c6B9eD4EE768d339140B8074",
+    "MoCSettlement": "0xF7a2835aF44DF2b831291D7229DcD13D32E57d4A",
+    "MoCInrate": "0x2B57fb820601655ca7Da16a5134db4780Aa93E74",
+    "MoCState": "0xB80C23576053A1a5278C1a43DC8471F432f77245",
+    "MoCVendors": "",
+    "CommissionSplitter": ""
   },
   "implementationAddresses": {
+    "MoC": "",
+    "MoCConnector": "",
     "MoCExchange": "",
+    "MoCSettlement": "",
+    "MoCInrate": "",
+    "MoCState": "",
     "ProxyAdmin": "0xffb65F6E24806B7e1A988EeD1Ad07BB2654fF695",
     "UpgradeDelegator": "0xCDAbFbF334A5F6BCe900D2f73470D1e6722365d8",
     "Governor": "0x4eAC4518e81B3A5198aADAb998D2610B46aAA609",
-    "MoCHelperLib": "0xabe1A7b54CF489eCD3fD5844F8aBFdF7e4DF5c74"
+    "MoCToken": "0x0399c7F7B37E21cB9dAE04Fb57E24c68ed0B4635",
+    "MoCPriceProvider": "0xE972c8E83A5b97bB4FC867855A0aA13EF96f228D",
+    "MoCVendors": "",
+    "MoCHelperLib": "",
+    "CommissionSplitter": "",
+    "MocReserve": "0x19F64674D8A5B4E652319F5e239eFd3bc969A1fE"
   },
-  "changerAddresses": {}
+  "valuesToAssign": {
+    "commissionRates": {
+      "MINT_RISKPRO_FEES_RESERVE": 0.001,
+      "REDEEM_RISKPRO_FEES_RESERVE": 0.001,
+      "MINT_STABLETOKEN_FEES_RESERVE": 0.001,
+      "REDEEM_STABLETOKEN_FEES_RESERVE": 0.001,
+      "MINT_RISKPROX_FEES_RESERVE": 0.001,
+      "REDEEM_RISKPROX_FEES_RESERVE": 0.001,
+      "MINT_RISKPRO_FEES_MOC": 0.0005,
+      "REDEEM_RISKPRO_FEES_MOC": 0.0005,
+      "MINT_STABLETOKEN_FEES_MOC": 0.0005,
+      "REDEEM_STABLETOKEN_FEES_MOC": 0.0005,
+      "MINT_RISKPROX_FEES_MOC": 0.0005,
+      "REDEEM_RISKPROX_FEES_MOC": 0.0005
+    },
+    "liquidationEnabled": false,
+    "protected": "1.5",
+    "vendorGuardianAddress": "0xab242e50e95c2f539242763a4ed5db1aee5ce461",
+    "mocTokenCommissionsAddress": "0xb998C3Da8D24295406d308ea42c85c8acDa880Ba",
+    "targetAddressCommissionPayment": "0x30d4433fF09757D33fFf99Cbe49C6384463bF551",
+    "mocProportion": "500000000000000000"
+  },
+  "changerAddresses": {
+    "BatchChanger": ""
+  },
+  "governorOwnerAddress": "0xf69287F5Ca3cC3C6d3981f2412109110cB8af076"
 }
