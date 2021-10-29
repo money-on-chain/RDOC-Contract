@@ -487,7 +487,7 @@ const makeUtils = async (artifacts, networkName, config, owner, deployer) => {
 
     let mocTokenCommissionsAddress = owner;
     if (config.mocTokenCommissionsAddress !== '') {
-      ({ mocTokenCommissionsAddress } = config.mocTokenCommissionsAddress);
+      mocTokenCommissionsAddress  = config.mocTokenCommissionsAddress;
     }
 
     await commissionSplitter.initialize(

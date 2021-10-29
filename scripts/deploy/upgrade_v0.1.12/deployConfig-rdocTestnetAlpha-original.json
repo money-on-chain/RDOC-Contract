@@ -7,7 +7,7 @@
     "MoCInrate": "0x2B57fb820601655ca7Da16a5134db4780Aa93E74",
     "MoCState": "0xB80C23576053A1a5278C1a43DC8471F432f77245",
     "MoCVendors": "",
-    "CommissionSplitter": "0xE79fE1d8D321d01aA973E319112Fb98eA319B7a1"
+    "CommissionSplitter": ""
   },
   "implementationAddresses": {
     "MoC": "",
@@ -23,7 +23,8 @@
     "MoCPriceProvider": "0xE972c8E83A5b97bB4FC867855A0aA13EF96f228D",
     "MoCVendors": "",
     "MoCHelperLib": "",
-    "CommissionSplitter": ""
+    "CommissionSplitter": "",
+    "MocReserve": "0x19F64674D8A5B4E652319F5e239eFd3bc969A1fE"
   },
   "valuesToAssign": {
     "commissionRates": {
@@ -43,7 +44,9 @@
     "liquidationEnabled": false,
     "protected": "1.5",
     "vendorGuardianAddress": "0xab242e50e95c2f539242763a4ed5db1aee5ce461",
-    "mocTokenCommissionsAddress": "0xb998C3Da8D24295406d308ea42c85c8acDa880Ba"
+    "mocTokenCommissionsAddress": "0xb998C3Da8D24295406d308ea42c85c8acDa880Ba",
+    "targetAddressCommissionPayment": "0x30d4433fF09757D33fFf99Cbe49C6384463bF551",
+    "mocProportion": "500000000000000000"
   },
   "changerAddresses": {
     "BatchChanger": ""

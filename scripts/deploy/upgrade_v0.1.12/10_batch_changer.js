@@ -165,24 +165,6 @@ module.exports = async callback => {
     targets.push(moCSettlementAddress);
     datas.push(moCSettlement.contract.methods.fixTasksPointer().encodeABI());
 
-    console.log('Prepare CommissionSplitter');
-    const commissionSplitterAddress = config.proxyAddresses.CommissionSplitter;
-    const commissionSplitter = await CommissionSplitter.at(commissionSplitterAddress);
-    // setMocToken
-    targets.push(commissionSplitterAddress);
-    datas.push(
-      commissionSplitter.contract.methods
-        .setMocToken(config.implementationAddresses.MoCToken)
-        .encodeABI()
-    );
-    // setMocTokenCommissionAddress
-    targets.push(commissionSplitterAddress);
-    datas.push(
-      commissionSplitter.contract.methods
-        .setMocTokenCommissionAddress(config.valuesToAssign.mocTokenCommissionsAddress)
-        .encodeABI()
-    );
-
     console.log('Prepare MoCInrate');
     const moCInrateAddress = config.proxyAddresses.MoCInrate;
     const moCInrate = await MoCInrate.at(moCInrateAddress);
@@ -200,7 +182,7 @@ module.exports = async callback => {
     targets.push(moCInrateAddress);
     datas.push(
       moCInrate.contract.methods
-        .setCommissionsAddress(config.implementationAddresses.CommissionSplitter)
+        .setCommissionsAddress(config.proxyAddresses.CommissionSplitter)
         .encodeABI()
     );
 

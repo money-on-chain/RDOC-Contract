@@ -7,7 +7,7 @@
     "MoCInrate": "0x2B57fb820601655ca7Da16a5134db4780Aa93E74",
     "MoCState": "0xB80C23576053A1a5278C1a43DC8471F432f77245",
     "MoCVendors": "0xd282f98475A6996E1E0325BEa4ADe201Eb4c33B5",
-    "CommissionSplitter": "0xE79fE1d8D321d01aA973E319112Fb98eA319B7a1"
+    "CommissionSplitter": "0xE379f66A1Ec08f93b7F78Ebe34873bE0c2D9ac49"
   },
   "implementationAddresses": {
     "MoC": "0x004e56bE14f7356CA26340a32Ef9a3dD45f244B1",
@@ -23,7 +23,8 @@
     "MoCPriceProvider": "0xE972c8E83A5b97bB4FC867855A0aA13EF96f228D",
     "MoCVendors": "0xCFB0f6BDD16d5Cfa0AD723bF04776bD502500d4B",
     "MoCHelperLib": "0x5A4107D39EE333C729229c8050804BfC697e0Dc4",
-    "CommissionSplitter": "0xB7E7e5d032C0baC4d74862BC56fAbf429B608Db6"
+    "CommissionSplitter": "0x6bc766a4D93bA2fc2507103B5E42EdFe6e395a10",
+    "MocReserve": "0x19F64674D8A5B4E652319F5e239eFd3bc969A1fE"
   },
   "valuesToAssign": {
     "commissionRates": {
@@ -43,10 +44,12 @@
     "liquidationEnabled": false,
     "protected": "1.5",
     "vendorGuardianAddress": "0xab242e50e95c2f539242763a4ed5db1aee5ce461",
-    "mocTokenCommissionsAddress": "0xb998C3Da8D24295406d308ea42c85c8acDa880Ba"
+    "mocTokenCommissionsAddress": "0xb998C3Da8D24295406d308ea42c85c8acDa880Ba",
+    "targetAddressCommissionPayment": "0x30d4433fF09757D33fFf99Cbe49C6384463bF551",
+    "mocProportion": "500000000000000000"
   },
   "changerAddresses": {
-    "BatchChanger": "0x64D1fc6Af85A3B0d42c9c233337cb1B82b399d13"
+    "BatchChanger": "0x64FF966aEaB340976c9B0Be27FF09203B377CaC2"
   },
   "governorOwnerAddress": "0xf69287F5Ca3cC3C6d3981f2412109110cB8af076"
 }
