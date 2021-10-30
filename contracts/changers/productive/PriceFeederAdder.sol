@@ -1,4 +1,4 @@
-pragma solidity 0.5.8;
+pragma solidity ^0.5.8;
 
 import "moc-governance/contracts/Governance/ChangeContract.sol";
 
@@ -15,11 +15,17 @@ interface Medianizer {
   function set(address priceFeed) external;
 }
 
+/**
+ * @dev This productive contract to add a new PriceFeeder with moc---gobernanza.
+ */
 contract PriceFeederAdder is ChangeContract {
   PriceFactory public priceFactory;
   Medianizer public medianizer;
   address public priceFeedOwner;
 
+  /**
+    @dev Constructor
+  */
   constructor(PriceFactory _priceFactory, Medianizer _medianizer, address _priceFeedOwner) public {
     priceFactory = _priceFactory;
     medianizer = _medianizer;

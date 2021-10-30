@@ -5,9 +5,9 @@ let mocHelper;
 let toContractBN;
 const { BN } = web3.utils;
 let BUCKET_C0;
-contract('MoC', function([owner, userAccount]) {
+contract('MoC', function([owner, userAccount, vendorAccount]) {
   before(async function() {
-    const accounts = [owner, userAccount];
+    const accounts = [owner, userAccount, vendorAccount];
     mocHelper = await testHelperBuilder({ owner, accounts });
     ({ toContractBN } = mocHelper);
     ({ BUCKET_C0 } = mocHelper);
@@ -19,11 +19,14 @@ contract('MoC', function([owner, userAccount]) {
   describe('StableToken minting', function() {
     beforeEach(async function() {
       await mocHelper.revertState();
+
+      // Register vendor for test
+      await mocHelper.registerVendor(vendorAccount, 0, owner);
     });
     describe('GIVEN the coverage is below Cobj', function() {
       beforeEach(async function() {
-        await mocHelper.mintRiskProAmount(userAccount, 1);
-        await mocHelper.mintStableTokenAmount(userAccount, 50000);
+        await mocHelper.mintRiskProAmount(userAccount, 1, vendorAccount);
+        await mocHelper.mintStableTokenAmount(userAccount, 50000, vendorAccount);
         await mocHelper.setReserveTokenPrice(8000 * mocHelper.MOC_PRECISION);
       });
       describe('WHEN he tries to buy 1 StableToken', function() {
@@ -32,7 +35,7 @@ contract('MoC', function([owner, userAccount]) {
           const cobj = toContractBN(3 * mocHelper.MOC_PRECISION);
           assert(coverage.lt(cobj), 'Coverage is not below Cobj');
 
-          const promise = mocHelper.mintStableTokenAmount(userAccount, 1);
+          const promise = mocHelper.mintStableTokenAmount(userAccount, 1, vendorAccount);
 
           await expectRevert.unspecified(promise);
         });
@@ -41,13 +44,13 @@ contract('MoC', function([owner, userAccount]) {
 
     describe('GIVEN the max StableToken available is 5000', function() {
       beforeEach(async function() {
-        await mocHelper.mintRiskPro(userAccount, 1);
+        await mocHelper.mintRiskPro(userAccount, 1, vendorAccount);
       });
       describe('WHEN a user tries to mint 10000 StableTokens', function() {
         let prevReserveTokenBalance;
         beforeEach(async function() {
           prevReserveTokenBalance = toContractBN(await mocHelper.getReserveBalance(userAccount));
-          await mocHelper.mintStableTokenAmount(userAccount, 10000);
+          await mocHelper.mintStableTokenAmount(userAccount, 10000, vendorAccount);
         });
         it('THEN he only receives 5000 StableTokens', async function() {
           const stableTokenBalance = await mocHelper.getStableTokenBalance(userAccount);
@@ -75,10 +78,10 @@ contract('MoC', function([owner, userAccount]) {
               const prev = {};
               beforeEach(async function() {
                 // Load ReserveToken on the contract to increase coverage
-                await mocHelper.mintRiskProAmount(owner, 6);
+                await mocHelper.mintRiskProAmount(owner, 6, vendorAccount);
 
                 if (nStableTokens) {
-                  await mocHelper.mintStableTokenAmount(owner, nStableTokens);
+                  await mocHelper.mintStableTokenAmount(owner, nStableTokens, vendorAccount);
                 }
                 [
                   prev.userBalance,
@@ -92,7 +95,11 @@ contract('MoC', function([owner, userAccount]) {
                   this.mocState.getBucketNReserve(BUCKET_C0)
                 ]);
 
-                await mocHelper.mintStableTokenAmount(userAccount, stableTokenAmount);
+                await mocHelper.mintStableTokenAmount(
+                  userAccount,
+                  stableTokenAmount,
+                  vendorAccount
+                );
                 payAmount = new BN(stableTokenAmount)
                   .mul(mocHelper.MOC_PRECISION)
                   .div(new BN(reservePrice));

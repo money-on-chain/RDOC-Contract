@@ -28,18 +28,83 @@ const scenario = {
   }
 };
 
+const initializeSettlement = async (owner, account2, account3, arrayRedeemSize, vendorAccount) => {
+  await mocHelper.mintRiskProAmount(owner, scenario.mintRiskPro, vendorAccount);
+  await mocHelper.mintStableTokenAmount(owner, scenario.mintStableToken, vendorAccount);
+
+  const promisesOwner = [...Array(arrayRedeemSize).keys()].map(() =>
+    mocHelper.moc.redeemStableTokenRequest(toContractBN(scenario.redeemAmountInitOwner, 'USD'), {
+      from: owner
+    })
+  );
+
+  const promisesAccount2 = [...Array(arrayRedeemSize).keys()].map(() =>
+    mocHelper.moc.redeemStableTokenRequest(toContractBN(scenario.redeemAmountInitAccount2, 'USD'), {
+      from: account2
+    })
+  );
+
+  const promisesAccount3 = [...Array(arrayRedeemSize).keys()].map(() =>
+    mocHelper.moc.redeemStableTokenRequest(toContractBN(scenario.redeemAmountInitAccount3, 'USD'), {
+      from: account3
+    })
+  );
+
+  const promises = promisesOwner.concat(promisesAccount2).concat(promisesAccount3);
+
+  await Promise.all(promises);
+};
+
+const initializeSettlementStress = async (accounts, arrayRedeemSize, vendorAccount) => {
+  mocHelper.revertState();
+  // Avoid interests
+  await mocHelper.mocState.setDaysToSettlement(0);
+  const docAccounts = accounts.slice(0, 5);
+  await executeBatched(
+    docAccounts.map(account => () => mocHelper.mintRiskProAmount(account, 100000, vendorAccount))
+  );
+  await executeBatched(
+    docAccounts.map(account => () =>
+      mocHelper.mintStableTokenAmount(account, 100000, vendorAccount)
+    )
+  );
+
+  // Creates an array of identical functions to be called, the amount is arrayRedeemSize
+  const createArrayRedeemSizeCalls = account =>
+    [...Array(arrayRedeemSize)].map(() => () =>
+      mocHelper.moc.redeemStableTokenRequest(toContractBN(100, 'USD'), {
+        from: account
+      })
+    );
+
+  await executeBatched(flatten(accounts.map(createArrayRedeemSizeCalls)));
+  await mocHelper.mocSettlement.setBlockSpan(1);
+};
+
 contract('MoC: Gas limit on alter redeem request', function([
   owner,
   account2,
   account3,
   account4,
+  vendorAccount,
   ...accounts
 ]) {
   before(async function() {
-    const allAccounts = [owner, account2, account3, account4, ...accounts];
+    const allAccounts = [owner, account2, account3, account4, vendorAccount, ...accounts];
     mocHelper = await testHelperBuilder({ owner, accounts: allAccounts, useMock: true });
     ({ toContractBN } = mocHelper);
-    await initializeSettlement(owner, account2, account3, scenario.redeemRequestPerAccount);
+    await mocHelper.revertState();
+
+    // Register vendor for test
+    await mocHelper.registerVendor(vendorAccount, 0, owner);
+
+    await initializeSettlement(
+      owner,
+      account2,
+      account3,
+      scenario.redeemRequestPerAccount,
+      vendorAccount
+    );
   });
 
   describe(`GIVEN there are ${scenario.accounts} accounts which call redeemRequest ${scenario.redeemRequestPerAccount} times per account`, function() {
@@ -173,11 +238,16 @@ contract('MoC: Gas limit on alter redeem request', function([
       });
     });
   });
+
   describe(`GIVEN there are ${accounts.length} accounts`, function() {
     describe(`AND there are ${scenario.redeemStressSizePerAccount} redeem request creations per account`, function() {
       beforeEach(async function() {
         mocHelper.revertState();
-        await initializeSettlementStress(accounts, scenario.redeemStressSizePerAccount);
+        await initializeSettlementStress(
+          accounts,
+          scenario.redeemStressSizePerAccount,
+          vendorAccount
+        );
         const redeemQueueSize = await mocHelper.moc.redeemQueueSize();
         mocHelper.assertBig(
           redeemQueueSize,
@@ -219,55 +289,3 @@ contract('MoC: Gas limit on alter redeem request', function([
     });
   });
 });
-
-const initializeSettlement = async (owner, account2, account3, arrayRedeemSize) => {
-  await mocHelper.mintRiskProAmount(owner, scenario.mintRiskPro);
-  await mocHelper.mintStableTokenAmount(owner, scenario.mintStableToken);
-
-  const promisesOwner = [...Array(arrayRedeemSize).keys()].map(() =>
-    mocHelper.moc.redeemStableTokenRequest(toContractBN(scenario.redeemAmountInitOwner, 'USD'), {
-      from: owner
-    })
-  );
-
-  const promisesAccount2 = [...Array(arrayRedeemSize).keys()].map(() =>
-    mocHelper.moc.redeemStableTokenRequest(toContractBN(scenario.redeemAmountInitAccount2, 'USD'), {
-      from: account2
-    })
-  );
-
-  const promisesAccount3 = [...Array(arrayRedeemSize).keys()].map(() =>
-    mocHelper.moc.redeemStableTokenRequest(toContractBN(scenario.redeemAmountInitAccount3, 'USD'), {
-      from: account3
-    })
-  );
-  const promises = promisesOwner.concat(promisesAccount2).concat(promisesAccount3);
-
-  await Promise.all(promises);
-};
-
-const initializeSettlementStress = async (accounts, arrayRedeemSize) => {
-  mocHelper.revertState();
-  // Avoid interests
-  await mocHelper.mocState.setDaysToSettlement(0);
-  const docAccounts = accounts.slice(0, 5);
-  await executeBatched(
-    docAccounts.map(account => () => mocHelper.mintRiskProAmount(account, 100000))
-  );
-  await executeBatched(
-    docAccounts.map(account => () => mocHelper.mintStableTokenAmount(account, 100000))
-  );
-
-  const promises = [];
-
-  // Creates an array of identical functions to be called, the amount is arrayRedeemSize
-  const createArrayRedeemSizeCalls = account =>
-    [...Array(arrayRedeemSize)].map(() => () =>
-      mocHelper.moc.redeemStableTokenRequest(toContractBN(100, 'USD'), {
-        from: account
-      })
-    );
-
-  await executeBatched(flatten(accounts.map(createArrayRedeemSizeCalls)));
-  await mocHelper.mocSettlement.setBlockSpan(1);
-};

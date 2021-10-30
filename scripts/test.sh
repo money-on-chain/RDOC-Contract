@@ -45,7 +45,7 @@ fi
 truffle version
 
 if [ "$SOLIDITY_COVERAGE" = true ]; then
-  node_modules/.bin/solidity-coverage
+  node --max-old-space-size=8192 node_modules/.bin/solidity-coverage
 else
-  node_modules/.bin/truffle test "$@"
+  node --max-old-space-size=8192 node_modules/.bin/truffle test "$@"
 fi

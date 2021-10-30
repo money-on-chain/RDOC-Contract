@@ -9,10 +9,95 @@ const ACCOUNTS_QUANTITY = 9;
 
 const { BN } = web3.utils;
 
-contract('MoC: Partial Settlement execution', function([owner, ...allAccounts]) {
+// Asserts
+const assertStartSettlementEvent = async (
+  settlementCompleteEvent,
+  reservePrice,
+  stableTokenCount,
+  deleverCount
+) => {
+  mocHelper.assertBigDollar(
+    settlementCompleteEvent.reservePrice,
+    reservePrice,
+    'ReserveTokens Price is not correct'
+  );
+  mocHelper.assertBig(
+    settlementCompleteEvent.stableTokenRedeemCount,
+    stableTokenCount,
+    'Redeem requests processed value is incorrect'
+  );
+  mocHelper.assertBig(
+    settlementCompleteEvent.deleveragingCount,
+    deleverCount,
+    'RiskProx accounts liquidated value is incorrect'
+  );
+};
+
+// Returns a promise that execute
+// Price set and settlement
+const executeSettlementRound = async round => {
+  await mocHelper.setReserveTokenPrice(toContractBN(round.reservePrice, 'USD'));
+  return mocHelper.moc.runSettlement(round.step);
+};
+
+const initializeSettlement = async (vendorAccount, owner, accounts) => {
+  await mocHelper.revertState();
+
+  // Register vendor for test
+  await mocHelper.registerVendor(vendorAccount, 0, owner);
+
+  // Avoid interests
+  await mocHelper.mocState.setDaysToSettlement(0);
+  const stableTokenAccounts = accounts.slice(0, 5);
+  const riskProxAccounts = accounts.slice(5, 8);
+  await Promise.all(
+    stableTokenAccounts.map(account => mocHelper.mintRiskProAmount(account, 10000, vendorAccount))
+  );
+  await Promise.all(
+    stableTokenAccounts.map(account =>
+      mocHelper.mintStableTokenAmount(account, 10000, vendorAccount)
+    )
+  );
+  await Promise.all(
+    stableTokenAccounts.map(account =>
+      mocHelper.moc.redeemStableTokenRequest(toContractBN(10, 'USD'), {
+        from: account
+      })
+    )
+  );
+
+  await Promise.all(
+    riskProxAccounts.map(account =>
+      mocHelper.mintRiskProxAmount(account, BUCKET_X2, 1, vendorAccount)
+    )
+  );
+  initialBalances = await Promise.all(accounts.map(address => mocHelper.getUserBalances(address)));
+  await mocHelper.mocSettlement.setBlockSpan(1);
+};
+
+// Returns a promise that execute
+// Run settlement for all rounds in the scenario in order
+const runScenario = scenario => {
+  const txs = [];
+  const reduced = scenario.rounds.reduce(
+    (prevPromise, round) =>
+      prevPromise.then(tx => {
+        if (tx) txs.push(tx);
+        return executeSettlementRound(round);
+      }),
+    Promise.resolve()
+  );
+  return reduced.then(lastTx => txs.concat(lastTx));
+};
+
+contract('MoC: Partial Settlement execution', function([owner, vendorAccount, ...allAccounts]) {
   const accounts = allAccounts.slice(0, ACCOUNTS_QUANTITY);
   before(async function() {
-    mocHelper = await testHelperBuilder({ owner, accounts: [owner, ...accounts], useMock: true });
+    mocHelper = await testHelperBuilder({
+      owner,
+      accounts: [owner, vendorAccount, ...accounts],
+      useMock: true
+    });
     ({ toContractBN, BUCKET_X2 } = mocHelper);
   });
 
@@ -39,7 +124,7 @@ contract('MoC: Partial Settlement execution', function([owner, ...allAccounts]) 
         let txs = [];
         describe(scenario.description, function() {
           before(async function() {
-            await initializeSettlement(accounts);
+            await initializeSettlement(vendorAccount, owner, accounts);
             txs = await runScenario(scenario);
           });
 
@@ -106,7 +191,7 @@ contract('MoC: Partial Settlement execution', function([owner, ...allAccounts]) 
   describe('Consecutive Settlements', function() {
     describe('GIVEN first settlement is executed', function() {
       before(async function() {
-        await initializeSettlement(accounts);
+        await initializeSettlement(vendorAccount, owner, accounts);
         await mocHelper.moc.runSettlement(4);
         await mocHelper.setReserveTokenPrice(toContractBN(8000, 'USD'));
         await mocHelper.moc.runSettlement(4);
@@ -172,76 +257,3 @@ contract('MoC: Partial Settlement execution', function([owner, ...allAccounts]) 
     });
   });
 });
-
-// Asserts
-const assertStartSettlementEvent = async (
-  settlementCompleteEvent,
-  reservePrice,
-  stableTokenCount,
-  deleverCount
-) => {
-  mocHelper.assertBigDollar(
-    settlementCompleteEvent.reservePrice,
-    reservePrice,
-    'ReserveTokens Price is not correct'
-  );
-  mocHelper.assertBig(
-    settlementCompleteEvent.stableTokenRedeemCount,
-    stableTokenCount,
-    'Redeem requests processed value is incorrect'
-  );
-  mocHelper.assertBig(
-    settlementCompleteEvent.deleveragingCount,
-    deleverCount,
-    'RiskProx accounts liquidated value is incorrect'
-  );
-};
-
-// Returns a promise that execute
-// Run settlement for all rounds in the scenario in order
-const runScenario = scenario => {
-  const txs = [];
-  const reduced = scenario.rounds.reduce(
-    (prevPromise, round) =>
-      prevPromise.then(tx => {
-        if (tx) txs.push(tx);
-        return executeSettlementRound(round);
-      }),
-    Promise.resolve()
-  );
-  return reduced.then(lastTx => txs.concat(lastTx));
-};
-
-// Returns a promise that execute
-// Price set and settlement
-const executeSettlementRound = async round => {
-  await mocHelper.setReserveTokenPrice(toContractBN(round.reservePrice, 'USD'));
-  return mocHelper.moc.runSettlement(round.step);
-};
-
-const initializeSettlement = async accounts => {
-  mocHelper.revertState();
-  // Avoid interests
-  await mocHelper.mocState.setDaysToSettlement(0);
-  const stableTokenAccounts = accounts.slice(0, 5);
-  const riskProxAccounts = accounts.slice(5, 8);
-  await Promise.all(
-    stableTokenAccounts.map(account => mocHelper.mintRiskProAmount(account, 10000))
-  );
-  await Promise.all(
-    stableTokenAccounts.map(account => mocHelper.mintStableTokenAmount(account, 10000))
-  );
-  await Promise.all(
-    stableTokenAccounts.map(account =>
-      mocHelper.moc.redeemStableTokenRequest(toContractBN(10, 'USD'), {
-        from: account
-      })
-    )
-  );
-
-  await Promise.all(
-    riskProxAccounts.map(account => mocHelper.mintRiskProxAmount(account, BUCKET_X2, 1))
-  );
-  initialBalances = await Promise.all(accounts.map(address => mocHelper.getUserBalances(address)));
-  await mocHelper.mocSettlement.setBlockSpan(1);
-};

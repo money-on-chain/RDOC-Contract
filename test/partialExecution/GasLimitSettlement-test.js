@@ -4,23 +4,44 @@ const { executeBatched } = require('../testHelpers/networkHelper');
 let mocHelper;
 let toContractBN;
 let BUCKET_X2;
-const BTCX_OWNERS_QUANTITY = 9;
+const RISKPROX_OWNERS_QUANTITY = 9;
 
-contract('MoC: Gas limit on settlement', function([owner, ...riskProxOwners]) {
-  const riskProxAccounts = riskProxOwners.slice(0, BTCX_OWNERS_QUANTITY);
+const initializeSettlement = async (owner, vendorAccount, riskProxOwners) => {
+  mocHelper.revertState();
+  await mocHelper.mintRiskProAmount(owner, 10000, vendorAccount);
+  await mocHelper.mintStableTokenAmount(owner, 1000, vendorAccount);
+  const redeemFunctions = [...Array(100)].map(() => () =>
+    mocHelper.moc.redeemStableTokenRequest(toContractBN(1, 'USD'), {
+      from: owner
+    })
+  );
+
+  await executeBatched(redeemFunctions);
+  await executeBatched(
+    riskProxOwners.map(acc => () => mocHelper.mintRiskProx(acc, BUCKET_X2, 0.001, vendorAccount))
+  );
+  // Enabling Settlement
+  await mocHelper.mocSettlement.setBlockSpan(1);
+};
+
+contract('MoC: Gas limit on settlement', function([owner, vendorAccount, ...riskProxOwners]) {
+  const riskProxAccounts = riskProxOwners.slice(0, RISKPROX_OWNERS_QUANTITY);
   before(async function() {
     mocHelper = await testHelperBuilder({
       owner,
-      accounts: [owner, ...riskProxAccounts],
+      accounts: [owner, vendorAccount, ...riskProxAccounts],
       useMock: true
     });
     ({ toContractBN } = mocHelper);
     ({ BUCKET_X2 } = mocHelper);
+
+    // Register vendor for test
+    await mocHelper.registerVendor(vendorAccount, 0, owner);
   });
 
-  describe(`GIVEN there are 100 redeemRequests and ${BTCX_OWNERS_QUANTITY} riskProx owners`, function() {
+  describe(`GIVEN there are 100 redeemRequests and ${RISKPROX_OWNERS_QUANTITY} riskProx owners`, function() {
     before(async function() {
-      await initializeSettlement(owner, riskProxAccounts);
+      await initializeSettlement(owner, vendorAccount, riskProxAccounts);
     });
     describe('WHEN the settlement is executed with 150 steps', function() {
       describe('WHEN settlement is executed in transactions of 50 steps each', function() {
@@ -53,21 +74,3 @@ contract('MoC: Gas limit on settlement', function([owner, ...riskProxOwners]) {
     });
   });
 });
-
-const initializeSettlement = async (owner, riskProxOwners) => {
-  mocHelper.revertState();
-  await mocHelper.mintRiskProAmount(owner, 10000);
-  await mocHelper.mintStableTokenAmount(owner, 1000);
-  const redeemFunctions = [...Array(100)].map(() => () =>
-    mocHelper.moc.redeemStableTokenRequest(toContractBN(1, 'USD'), {
-      from: owner
-    })
-  );
-
-  await executeBatched(redeemFunctions);
-  await executeBatched(
-    riskProxOwners.map(acc => () => mocHelper.mintRiskProx(acc, BUCKET_X2, 0.001))
-  );
-  // Enabling Settlement
-  await mocHelper.mocSettlement.setBlockSpan(1);
-};

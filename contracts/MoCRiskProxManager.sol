@@ -1,4 +1,4 @@
-pragma solidity 0.5.8;
+pragma solidity ^0.5.8;
 
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "./base/MoCBase.sol";
@@ -44,7 +44,7 @@ contract MoCRiskProxManager is MoCBucketContainer {
     @param bucket bucket from which the RiskProx will be removed
     @param account user address to redeem for
     @param riskProxAmount riskProx amount to redeem [using mocPresicion]
-    @param totalCost btc value of bproxAmount [using reservePrecision]
+    @param totalCost ReserveToken value of riskProxAmount [using reservePrecision]
   */
   function assignRiskProx(bytes32 bucket, address payable account, uint256 riskProxAmount, uint256 totalCost)
     public

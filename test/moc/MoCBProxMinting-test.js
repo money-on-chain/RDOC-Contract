@@ -6,9 +6,9 @@ let toContractBN;
 let BUCKET_X2;
 let BUCKET_C0;
 
-contract('MoC : MoCExchange', function([owner, userAccount]) {
+contract('MoC : MoCExchange', function([owner, userAccount, vendorAccount]) {
   before(async function() {
-    const accounts = [owner, userAccount];
+    const accounts = [owner, userAccount, vendorAccount];
     mocHelper = await testHelperBuilder({ owner, accounts, useMock: true });
     ({ toContractBN } = mocHelper);
     ({ BUCKET_C0, BUCKET_X2 } = mocHelper);
@@ -18,8 +18,11 @@ contract('MoC : MoCExchange', function([owner, userAccount]) {
     reservePrice = await mocHelper.getReserveTokenPrice();
   });
 
-  beforeEach(function() {
-    return mocHelper.revertState();
+  beforeEach(async function() {
+    await mocHelper.revertState();
+
+    // Register vendor for test
+    await mocHelper.registerVendor(vendorAccount, 0, owner);
   });
 
   describe('RiskProx minting', function() {
@@ -72,8 +75,8 @@ contract('MoC : MoCExchange', function([owner, userAccount]) {
     describe('GIVEN the user have 18 RiskPro and 8000 StableTokens and Price falls to 8000 and days to settlement is 2', function() {
       beforeEach(async function() {
         await this.mocState.setDaysToSettlement(toContractBN(2, 'DAY'));
-        await mocHelper.mintRiskProAmount(userAccount, 18);
-        await mocHelper.mintStableTokenAmount(userAccount, 80000);
+        await mocHelper.mintRiskProAmount(userAccount, 18, vendorAccount);
+        await mocHelper.mintStableTokenAmount(userAccount, 80000, vendorAccount);
         // Move price to change RiskProx price and make it different
         // from RiskPro price
         reservePrice = toContractBN(8000 * mocHelper.MOC_PRECISION);
@@ -123,7 +126,7 @@ contract('MoC : MoCExchange', function([owner, userAccount]) {
 
             initialBalance = toContractBN(await mocHelper.getReserveBalance(owner));
 
-            await mocHelper.mintRiskProxAmount(owner, BUCKET_X2, s.params.nRiskProx);
+            await mocHelper.mintRiskProxAmount(owner, BUCKET_X2, s.params.nRiskProx, vendorAccount);
           });
           it(`THEN he receives ${s.expect.nRiskProx} RiskProx`, async function() {
             const balance = await mocHelper.getRiskProxBalance(BUCKET_X2, owner);

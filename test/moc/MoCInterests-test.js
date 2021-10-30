@@ -3,9 +3,9 @@ const testHelperBuilder = require('../mocHelper.js');
 let mocHelper;
 let toContractBN;
 let BUCKET_X2;
-contract('MoC : MoCExchange', function([owner, userAccount]) {
+contract('MoC : MoCExchange', function([owner, userAccount, vendorAccount]) {
   before(async function() {
-    const accounts = [owner, userAccount];
+    const accounts = [owner, userAccount, vendorAccount];
     mocHelper = await testHelperBuilder({ owner, accounts, useMock: true });
     ({ toContractBN } = mocHelper);
     this.moc = mocHelper.moc;
@@ -14,15 +14,18 @@ contract('MoC : MoCExchange', function([owner, userAccount]) {
     ({ BUCKET_X2 } = mocHelper);
   });
 
-  beforeEach(function() {
-    return mocHelper.revertState();
+  beforeEach(async function() {
+    await mocHelper.revertState();
+
+    // Register vendor for test
+    await mocHelper.registerVendor(vendorAccount, 0, owner);
   });
 
   describe('RiskProx Mint interest calculation', function() {
     const onMinting = true;
     beforeEach(async function() {
-      await mocHelper.mintRiskProAmount(userAccount, 18);
-      await mocHelper.mintStableTokenAmount(userAccount, 80000);
+      await mocHelper.mintRiskProAmount(userAccount, 18, vendorAccount);
+      await mocHelper.mintStableTokenAmount(userAccount, 80000, vendorAccount);
       await this.mocState.setDaysToSettlement(toContractBN(1, 'DAY'));
     });
     describe('WHEN all StableTokens are in bucket 0 ', function() {
@@ -147,18 +150,16 @@ contract('MoC : MoCExchange', function([owner, userAccount]) {
       let params;
       describe(`WHEN the user have 4.99959195 RiskProx AND ${s.params.freeStableTokenRedeem.nStableTokens} FreeStableTokens are redeemed AND a user wants to redeem ${s.params.nReserve} ReserveTokens value in RiskProx`, function() {
         beforeEach(async function() {
-          await mocHelper.mintRiskPro(userAccount, 18);
-          await mocHelper.mintStableToken(userAccount, 80000);
+          await mocHelper.mintRiskPro(userAccount, 18, vendorAccount);
+          await mocHelper.mintStableToken(userAccount, 80000, vendorAccount);
           await this.mocState.setDaysToSettlement(toContractBN(2, 'DAY'));
           ({ params } = mocHelper.getContractReadyState(s));
-          await mocHelper.mintRiskProxAmount(userAccount, BUCKET_X2, 5);
-
-          await this.moc.redeemFreeStableToken(
-            toContractBN(params.freeStableTokenRedeem.nStableTokens),
-            {
-              from: userAccount
-            }
-          );
+          await mocHelper.mintRiskProxAmount(userAccount, BUCKET_X2, 5, vendorAccount);
+          await mocHelper.redeemFreeStableToken({
+            userAccount,
+            stableTokenAmount: params.freeStableTokenRedeem.nStableTokens,
+            vendorAccount
+          });
         });
         it(`THEN inrate should be ${s.expect.inrate}`, async function() {
           const inrate = await this.mocInrate.spotInrate();

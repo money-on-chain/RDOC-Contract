@@ -5,9 +5,9 @@ let mocHelper;
 let toContractBN;
 let BUCKET_C0;
 
-contract('MoC: MoCExchange', function([owner, userAccount]) {
+contract('MoC: MoCExchange', function([owner, userAccount, vendorAccount]) {
   before(async function() {
-    const accounts = [owner, userAccount];
+    const accounts = [owner, userAccount, vendorAccount];
     mocHelper = await testHelperBuilder({ owner, accounts });
     ({ toContractBN } = mocHelper);
     this.moc = mocHelper.moc;
@@ -15,8 +15,11 @@ contract('MoC: MoCExchange', function([owner, userAccount]) {
     ({ BUCKET_C0 } = mocHelper);
   });
 
-  beforeEach(function() {
-    return mocHelper.revertState();
+  beforeEach(async function() {
+    await mocHelper.revertState();
+
+    // Register vendor for test
+    await mocHelper.registerVendor(vendorAccount, 0, owner);
   });
 
   describe('RiskPro minting', function() {
@@ -27,7 +30,7 @@ contract('MoC: MoCExchange', function([owner, userAccount]) {
           let c0riskProPrevBalance;
           beforeEach(async function() {
             if (nRiskPros) {
-              await mocHelper.mintRiskProAmount(owner, nRiskPros);
+              await mocHelper.mintRiskProAmount(owner, nRiskPros, vendorAccount);
             }
 
             userPrevBalance = toContractBN(await mocHelper.getReserveBalance(userAccount));
@@ -80,7 +83,7 @@ contract('MoC: MoCExchange', function([owner, userAccount]) {
       let maxRiskPro;
       const from = userAccount;
       beforeEach(async function() {
-        await mocHelper.mintRiskPro(from, 11, true);
+        await mocHelper.mintRiskPro(from, 11, vendorAccount);
         c0PrevRiskProBalance = await this.mocState.getBucketNRiskPro(BUCKET_C0);
         c0PrevReserveTokenBalance = await this.mocState.getBucketNReserve(BUCKET_C0);
         initialRiskProBalance = await mocHelper.getRiskProBalance(userAccount);
@@ -88,7 +91,7 @@ contract('MoC: MoCExchange', function([owner, userAccount]) {
       });
       describe('AND there are 50000 StableTokens AND ReserveTokens Price falls to 8000', function() {
         beforeEach(async function() {
-          await mocHelper.mintStableTokenAmount(owner, 50000);
+          await mocHelper.mintStableTokenAmount(owner, 50000, vendorAccount);
           await mocHelper.setReserveTokenPrice(8000 * mocHelper.MOC_PRECISION);
         });
         describe('WHEN he tries to redeem 3 RiskPros', function() {
@@ -96,7 +99,7 @@ contract('MoC: MoCExchange', function([owner, userAccount]) {
             const coverage = await this.mocState.globalCoverage();
             const cobj = 3 * mocHelper.MOC_PRECISION;
             assert(coverage < cobj, 'Coverage is not below Cobj');
-            const riskProRedemption = mocHelper.redeemRiskPro(from, 3);
+            const riskProRedemption = mocHelper.redeemRiskPro(from, 3, vendorAccount);
             await expectRevert.unspecified(riskProRedemption);
           });
         });
@@ -108,7 +111,7 @@ contract('MoC: MoCExchange', function([owner, userAccount]) {
         });
         describe('WHEN he tries to redeem 11 RiskPros', function() {
           it('THEN he receives only the max redeem amount', async function() {
-            await mocHelper.redeemRiskPro(from, 11);
+            await mocHelper.redeemRiskPro(from, 11, vendorAccount);
 
             const riskProBalance = await mocHelper.getRiskProBalance(userAccount);
             const balanceDiff = initialRiskProBalance.sub(riskProBalance);
@@ -123,7 +126,7 @@ contract('MoC: MoCExchange', function([owner, userAccount]) {
       });
       describe('WHEN he tries to redeem 20 RiskPros', function() {
         it('THEN he redeems all his RiskPros', async function() {
-          await mocHelper.redeemRiskPro(from, 20);
+          await mocHelper.redeemRiskPro(from, 20, vendorAccount);
 
           const riskProBalance = await mocHelper.getRiskProBalance(userAccount);
           mocHelper.assertBig(riskProBalance, 0, 'The redemption riskPro amount was incorrect');
@@ -131,7 +134,7 @@ contract('MoC: MoCExchange', function([owner, userAccount]) {
       });
       describe('WHEN he tries to redeem 6 RiskPros', function() {
         beforeEach(async function() {
-          await mocHelper.redeemRiskPro(from, 6);
+          await mocHelper.redeemRiskPro(from, 6, vendorAccount);
         });
         it('THEN he receives the corresponding amount of ReserveTokens AND his RiskPro balance is 4', async function() {
           const userBalance = toContractBN(await mocHelper.getReserveBalance(userAccount));
@@ -159,8 +162,8 @@ contract('MoC: MoCExchange', function([owner, userAccount]) {
     describe('GIVEN there are 10 RiskPros, 50000 StableTokens AND the ReserveTokens price falls to 6400', function() {
       beforeEach(async function() {
         await mocHelper.setSmoothingFactor(10 ** 18);
-        await mocHelper.mintRiskProAmount(owner, 10);
-        await mocHelper.mintStableTokenAmount(owner, 50000);
+        await mocHelper.mintRiskProAmount(owner, 10, vendorAccount);
+        await mocHelper.mintStableTokenAmount(owner, 50000, vendorAccount);
 
         userPrevBalance = await mocHelper.getReserveBalance(userAccount);
         await mocHelper.setReserveTokenPrice(6400 * mocHelper.MOC_PRECISION);
@@ -173,7 +176,7 @@ contract('MoC: MoCExchange', function([owner, userAccount]) {
       describe('WHEN a user sent 10 ReserveTokens to mint RiskPros', function() {
         const sentAmount = 10;
         beforeEach(async function() {
-          await mocHelper.mintRiskPro(userAccount, sentAmount);
+          await mocHelper.mintRiskPro(userAccount, sentAmount, vendorAccount);
         });
         it('THEN he receives the correct 13.913 of RiskPros', async function() {
           const balance = await mocHelper.getRiskProBalance(userAccount);
@@ -205,7 +208,7 @@ contract('MoC: MoCExchange', function([owner, userAccount]) {
       let userPrevBalance;
       beforeEach(async function() {
         await mocHelper.setSmoothingFactor(10 ** 18);
-        await mocHelper.mintRiskProAmount(owner, 10);
+        await mocHelper.mintRiskProAmount(owner, 10, vendorAccount);
         userPrevBalance = toContractBN(await mocHelper.getReserveBalance(userAccount));
       });
 
@@ -213,7 +216,7 @@ contract('MoC: MoCExchange', function([owner, userAccount]) {
         describe('AND the discount is set to 10%', function() {
           describe('AND the Amount of StableTokens is 50000', function() {
             beforeEach(async function() {
-              await mocHelper.mintStableTokenAmount(owner, 50000);
+              await mocHelper.mintStableTokenAmount(owner, 50000, vendorAccount);
             });
 
             describe('WHEN ReserveTokens Price is 5400', function() {
@@ -226,7 +229,8 @@ contract('MoC: MoCExchange', function([owner, userAccount]) {
                 beforeEach(async function() {
                   await mocHelper.mintRiskProAmount(
                     userAccount,
-                    maxWithDiscount.div(mocHelper.RESERVE_PRECISION)
+                    maxWithDiscount.div(mocHelper.RESERVE_PRECISION),
+                    vendorAccount
                   );
                 });
                 it('AND coverage should be close to utpdu', async function() {
@@ -244,7 +248,12 @@ contract('MoC: MoCExchange', function([owner, userAccount]) {
                 beforeEach(async function() {
                   totalWithDiscount = await mocHelper.reserveTokenNeededToMintRiskPro(0.5);
                   const applyPrecision = false;
-                  await mocHelper.mintRiskPro(userAccount, totalWithDiscount, applyPrecision);
+                  await mocHelper.mintRiskPro(
+                    userAccount,
+                    totalWithDiscount,
+                    vendorAccount,
+                    applyPrecision
+                  );
                 });
                 it('THEN he receives 0.5 RiskPros on his account', async function() {
                   const balance = await mocHelper.getRiskProBalance(userAccount);
@@ -286,6 +295,77 @@ contract('MoC: MoCExchange', function([owner, userAccount]) {
             });
           });
         });
+      });
+    });
+  });
+
+  describe('RiskPro tec price', function() {
+    describe('GIVEN the user have 18 RiskPro and 80000 StableTokens and ReserveToken price falls to 2000 and liquidation is not enabled', function() {
+      const expectedReserveTokenPrice = 2000;
+      const expectedExponentialMovingAverage = 10000;
+      const expectedGlobalCoverage = '0.65';
+      const expectedRiskProDiscountRate = 70;
+      const expectedRiskProTecPrice = 1;
+      const expectedMaxRiskProWithDiscount = '54027013506753376688344172086043021510';
+
+      beforeEach(async function() {
+        await mocHelper.mintRiskProAmount(userAccount, 18, vendorAccount);
+        await mocHelper.mintStableTokenAmount(userAccount, 80000, vendorAccount);
+        // Move price to change RiskProx price and make it different
+        // from RiskPro price
+        const reserveTokenPrice = toContractBN(2000 * mocHelper.MOC_PRECISION);
+        await mocHelper.setReserveTokenPrice(reserveTokenPrice);
+      });
+      it(`THEN the ReserveToken price in USD should be ${expectedReserveTokenPrice}`, async function() {
+        const reserveTokenPrice = await this.mocState.getReserveTokenPrice();
+
+        mocHelper.assertBigReserve(
+          reserveTokenPrice,
+          expectedReserveTokenPrice,
+          'ReserveToken Price in USD is incorrect'
+        );
+      });
+      it(`THEN the Exponential Moving Average in USD should be ${expectedExponentialMovingAverage}`, async function() {
+        const ema = await this.mocState.getExponentalMovingAverage();
+
+        mocHelper.assertBigDollar(
+          ema,
+          expectedExponentialMovingAverage,
+          'Exponential Moving Average in USD is incorrect'
+        );
+      });
+      it(`THEN the global coverage should be ${expectedGlobalCoverage}`, async function() {
+        const coverage = await this.mocState.globalCoverage();
+
+        mocHelper.assertBigReserve(
+          coverage,
+          expectedGlobalCoverage,
+          'Global coverage is incorrect'
+        );
+      });
+      it(`THEN the RiskPro spot discount rate should be ${expectedRiskProDiscountRate}`, async function() {
+        const riskProSpotDiscount = await this.mocState.riskProSpotDiscountRate();
+
+        assert(
+          riskProSpotDiscount.toNumber() === expectedRiskProDiscountRate,
+          'RiskPro spot discount rate is incorrect'
+        );
+      });
+      it(`THEN the RiskProx price in ReserveToken should be ${expectedRiskProTecPrice} wei`, async function() {
+        const riskProTecPrice = await this.mocState.riskProTecPrice();
+
+        assert(
+          riskProTecPrice.toNumber() === expectedRiskProTecPrice,
+          'RiskPro tec price is incorrect'
+        );
+      });
+      it(`THEN Max RiskPro With Discount should be ${expectedMaxRiskProWithDiscount}`, async function() {
+        const riskProsWithDiscount = await this.mocState.maxRiskProWithDiscount();
+
+        assert(
+          riskProsWithDiscount.toString() === expectedMaxRiskProWithDiscount,
+          'Max RiskPro With Discount is incorrect'
+        );
       });
     });
   });

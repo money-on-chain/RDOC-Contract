@@ -1,18 +1,18 @@
-pragma solidity 0.5.8;
+pragma solidity ^0.5.8;
 
 import "moc-governance/contracts/Governance/Governed.sol";
+import "moc-governance/contracts/Governance/IGovernor.sol";
 import "./MoCLibConnection.sol";
-import "./MoCState.sol";
+import "./interface/IMoCState.sol";
 import "./MoCRiskProxManager.sol";
-import "./MoCConverter.sol";
 import "./base/MoCBase.sol";
-
+import "./interface/IMoCVendors.sol";
+import "./interface/IMoCInrate.sol";
 
 contract MoCInrateEvents {
   event InrateDailyPay(uint256 amount, uint256 daysToSettlement, uint256 nReserveBucketC0);
   event RiskProHoldersInterestPay(uint256 amount, uint256 nReserveBucketC0BeforePay);
 }
-
 
 contract MoCInrateStructs {
   struct InrateParams {
@@ -21,11 +21,15 @@ contract MoCInrateStructs {
     uint256 power;
   }
 
-  InrateParams riskProxParams = InrateParams({tMax: 261157876067800, tMin: 0, power: 1});
+  InrateParams riskProxParams = InrateParams({
+    tMax: 261157876067800,
+    tMin: 0,
+    power: 1
+  });
 }
 
 
-contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnection, Governed {
+contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnection, Governed, IMoCInrate {
   using SafeMath for uint256;
 
   // Last block when a payment was executed
@@ -41,8 +45,17 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
 
   // Target addres to transfer commissions of mint/redeem
   address payable public commissionsAddress;
+  /** UPDATE V0110: 24/09/2020 - Upgrade to support multiple commission rates **/
+  /** DEPRECATED **/
   // commissionRate [using mocPrecision]
-  uint256 public commissionRate;
+  // solium-disable-next-line mixedcase
+  uint256 public DEPRECATED_commissionRate;
+
+  /************************************/
+  /***** UPGRADE v017       ***********/
+  /************************************/
+
+  /** START UPDATE V017: 01/11/2019 **/
 
   // Upgrade to support redeem stable inrate parameter
   uint256 public stableTmin;
@@ -50,43 +63,11 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
   uint256 public stableTmax;
 
   /**CONTRACTS**/
-  MoCState internal mocState;
-  MoCConverter internal mocConverter;
+  IMoCState internal mocState;
+  /** DEPRECATED **/
+  // solium-disable-next-line mixedcase
+  address internal DEPRECATED_mocConverter;
   MoCRiskProxManager internal riskProxManager;
-
-  function initialize(
-    address connectorAddress,
-    address _governor,
-    uint256 riskProxTmin,
-    uint256 riskProxPower,
-    uint256 riskProxTmax,
-    uint256 _riskProRate,
-    uint256 blockSpanRiskPro,
-    address payable riskProInterestTargetAddress,
-    address payable commissionsAddressTarget,
-    uint256 commissionRateParam,
-    uint256 _stableTmin,
-    uint256 _stablePower,
-    uint256 _stableTmax
-  ) public initializer {
-    initializePrecisions();
-    initializeBase(connectorAddress);
-    initializeContracts();
-    initializeValues(
-      _governor,
-      riskProxTmin,
-      riskProxPower,
-      riskProxTmax,
-      _riskProRate,
-      commissionsAddressTarget,
-      commissionRateParam,
-      blockSpanRiskPro,
-      riskProInterestTargetAddress,
-      _stableTmin,
-      _stablePower,
-      _stableTmax
-    );
-  }
 
   function setStableTmin(uint256 _stableTmin) public onlyAuthorizedChanger() {
     stableTmin = _stableTmin;
@@ -113,6 +94,69 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
   }
 
   /**
+    @dev Calculates an average interest rate between after and before free stableToken Redemption
+    @param stableTokenRedeem StableTokens to redeem [using mocPrecision]
+    @return Interest rate value [using mocPrecision]
+   */
+  function stableTokenInrateAvg(uint256 stableTokenRedeem) public view returns (uint256) {
+    uint256 preAbRatio = mocState.currentAbundanceRatio();
+    uint256 posAbRatio = mocState.abundanceRatio(riskProxManager.getBucketNStableToken(BUCKET_C0).sub(stableTokenRedeem));
+
+    return mocLibConfig.inrateAvg(stableTmax, stablePower, stableTmin, preAbRatio, posAbRatio);
+  }
+
+  /** END UPDATE V017: 01/11/2019 **/
+
+  /**
+    @dev Initializes the contract
+    @param connectorAddress MoCConnector contract address
+    @param _governor Governor contract address
+    @param riskProxTmin  Minimum interest rate [using mocPrecision]
+    @param riskProxPower Power is a parameter for interest rate calculation [using noPrecision]
+    @param riskProxTmax Maximun interest rate [using mocPrecision]
+    @param _riskProRate BitPro holder interest rate [using mocPrecision]
+    @param blockSpanRiskPro BitPro blockspan to configure payments periods[using mocPrecision]
+    @param riskProInterestTargetAddress Target address to transfer the weekly BitPro holders interest
+    @param commissionsAddressTarget Target addres to transfer commissions of mint/redeem
+    @param _stableTmin Upgrade to support red stable inrate parameter
+    @param _stablePower Upgrade to support red stable inrate parameter
+    @param _stableTmax Upgrade to support red stable inrate parameter
+  */
+  function initialize(
+    address connectorAddress,
+    address _governor,
+    uint256 riskProxTmin,
+    uint256 riskProxPower,
+    uint256 riskProxTmax,
+    uint256 _riskProRate,
+    uint256 blockSpanRiskPro,
+    address payable riskProInterestTargetAddress,
+    address payable commissionsAddressTarget,
+    //uint256 commissionRateParam,
+    uint256 _stableTmin,
+    uint256 _stablePower,
+    uint256 _stableTmax
+  ) public initializer {
+    initializePrecisions();
+    initializeBase(connectorAddress);
+    initializeContracts();
+    initializeValues(
+      _governor,
+      riskProxTmin,
+      riskProxPower,
+      riskProxTmax,
+      _riskProRate,
+      commissionsAddressTarget,
+      //commissionRateParam,
+      blockSpanRiskPro,
+      riskProInterestTargetAddress,
+      _stableTmin,
+      _stablePower,
+      _stableTmax
+    );
+  }
+
+/**
    * @dev gets tMin param of RiskProx tokens
    * @return returns tMin of RiskProx
    */
@@ -176,11 +220,8 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
     return riskProRate;
   }
 
-  function getCommissionRate() public view returns (uint256) {
-    return commissionRate;
-  }
 
-  /**
+   /**
     @dev Sets RiskPro Holders rate
     @param newRiskProRate New RiskPro rate
    */
@@ -188,7 +229,7 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
     riskProRate = newRiskProRate;
   }
 
-  /**
+   /**
     @dev Sets the blockspan RiskPro Intereset rate payment is enable to be executed
     @param newRiskProBlockSpan New RiskPro Block span
    */
@@ -205,27 +246,19 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
   }
 
   /**
-    @dev Sets the target address to transfer RiskPro Holders rate
-    @param newRiskProInterestAddress New RiskPro rate
-   */
+   @dev Sets the target address to transfer RiskPro Holders rate
+   @param newRiskProInterestAddress New RiskPro rate
+  */
   function setRiskProInterestAddress(address payable newRiskProInterestAddress) public onlyAuthorizedChanger() {
     riskProInterestAddress = newRiskProInterestAddress;
   }
 
   /**
-    @dev Sets the target address to transfer commissions of Mint/Redeem transactions
-    @param newCommissionsAddress New commisions address
-   */
+   @dev Sets the target address to transfer commissions of Mint/Redeem transactions
+   @param newCommissionsAddress New commisions address
+  */
   function setCommissionsAddress(address payable newCommissionsAddress) public onlyAuthorizedChanger() {
     commissionsAddress = newCommissionsAddress;
-  }
-
-  /**
-    @dev Sets the commission rate for Mint/Redeem transactions
-    @param newCommissionRate New commission rate
-   */
-  function setCommissionRate(uint256 newCommissionRate) public onlyAuthorizedChanger() {
-    commissionRate = newCommissionRate;
   }
 
   /**
@@ -240,7 +273,6 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
 
   /**
     @dev Calculates an average interest rate between after and before mint/redeem
-
     @param bucket Name of the bucket involved in the operation
     @param resTokensAmount Value of the operation from which calculates the inrate [using reservePrecision]
     @param onMinting Value that represents if the calculation is based on mint or on redeem
@@ -254,23 +286,9 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
   }
 
   /**
-    @dev Calculates an average interest rate between after and before free stableToken Redemption
-
-    @param stableTokenRedeem StableTokens to redeem [using mocPrecision]
-    @return Interest rate value [using mocPrecision]
+    @dev returns the amount of ReserveTokens to pay in concept of interest to bucket C0
    */
-  function stableTokenInrateAvg(uint256 stableTokenRedeem) public view returns (uint256) {
-    uint256 preAbRatio = mocState.currentAbundanceRatio();
-    uint256 posAbRatio = mocState.abundanceRatio(riskProxManager.getBucketNStableToken(BUCKET_C0).sub(stableTokenRedeem));
-
-    return mocLibConfig.inrateAvg(stableTmax, stablePower, stableTmin, preAbRatio, posAbRatio);
-  }
-
-  /**
-    @dev returns the amount of ReserveTokens to pay in concept of interest
-    to bucket C0
-   */
-  function dailyInrate() public view returns (uint256) {
+  function dailyInrate() public view returns(uint256) {
     uint256 daysToSettl = mocState.daysToSettlement();
     uint256 totalInrateInBag = riskProxManager.getInrateBag(BUCKET_C0);
 
@@ -280,7 +298,9 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
 
     // ([RES] * [DAY] / ([DAY] + [DAY])) = [RES]
     // inrateBag / (daysToSettlement + 1)
-    uint256 toPay = totalInrateInBag.mul(mocLibConfig.dayPrecision).div(daysToSettl.add(mocLibConfig.dayPrecision));
+    uint256 toPay = totalInrateInBag
+      .mul(mocLibConfig.dayPrecision)
+      .div(daysToSettl.add(mocLibConfig.dayPrecision));
 
     return toPay;
   }
@@ -333,15 +353,60 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
     return Math.min(proportionalInterest, redeemInterest);
   }
 
+  /************************************/
+  /***** UPGRADE v0110      ***********/
+  /************************************/
+
+  /** START UPDATE V0110: 24/09/2020  **/
+  /** Upgrade to support multiple commission rates **/
+  /** Public functions **/
+
   /**
-    @dev calculates the Commission rate from the passed ReserveTokens amount for mint/redeem operations
+    @dev DEPRECATED calculates the Commission rate from the passed RBTC amount for mint/redeem operations
     @param reserveTokenAmount Total value from which apply the Commission rate [using reservePrecision]
     @return finalCommissionAmount [using reservePrecision]
   */
-  function calcCommissionValue(uint256 reserveTokenAmount) public view returns (uint256) {
-    uint256 finalCommissionAmount = reserveTokenAmount.mul(commissionRate).div(mocLibConfig.mocPrecision);
+  function calcCommissionValue(uint256 reserveTokenAmount)
+  external view returns(uint256) {
+    // solium-disable-next-line mixedcase
+    uint256 finalCommissionAmount = reserveTokenAmount.mul(commissionRatesByTxType[MINT_RISKPRO_FEES_RESERVE]).div(mocLibConfig.mocPrecision);
     return finalCommissionAmount;
   }
+
+  /**
+    @dev calculates the Commission rate from the passed ReserveTokens amount for mint/redeem operations
+    @param reserveTokenAmount Total value from which apply the Commission rate [using reservePrecision]
+    @param txType Transaction type according to constant values defined in this contract
+    @return finalCommissionAmount [using reservePrecision]
+  */
+  function calcCommissionValue(uint256 reserveTokenAmount, uint8 txType)
+  public view returns(uint256) {
+    // Validate txType
+    require (txType > 0, "Invalid txType");
+
+    uint256 finalCommissionAmount = reserveTokenAmount.mul(commissionRatesByTxType[txType]).div(mocLibConfig.mocPrecision);
+    return finalCommissionAmount;
+  }
+
+  /**
+    @dev calculates the vendor markup rate from the passed vendor account and amount
+    @param vendorAccount Vendor address
+    @param amount Total value from which apply the vendor markup rate [using reservePrecision]
+    @return finalCommissionAmount [using reservePrecision]
+  */
+  function calculateVendorMarkup(address vendorAccount, uint256 amount) public view
+    returns (uint256 markup) {
+    // Calculate according to vendor markup
+    if (vendorAccount != address(0)) {
+      IMoCVendors mocVendors = IMoCVendors(mocState.getMoCVendors());
+
+      markup = amount.mul(mocVendors.getMarkup(vendorAccount)).div(mocLibConfig.mocPrecision);
+    }
+
+    return markup;
+  }
+
+  /** END UPDATE V0110: 24/09/2020 **/
 
   /**
     @dev Calculates ReserveTokens value to return to the user in concept of interests
@@ -363,7 +428,8 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
   /**
     @dev Moves the daily amount of interest rate to C0 bucket
   */
-  function dailyInratePayment() public onlyWhitelisted(msg.sender) onlyOnceADay() returns (uint256) {
+  function dailyInratePayment() public
+  onlyWhitelisted(msg.sender) onlyOnceADay() returns(uint256) {
     uint256 toPay = dailyInrate();
     lastDailyPayBlock = block.number;
 
@@ -397,12 +463,32 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
    * @dev Pays the RiskPro Holders interest rates
    * @return interest payed in ReserveTokens [using reservePrecsion]
    */
-  function payRiskProHoldersInterestPayment() public onlyWhitelisted(msg.sender) onlyWhenRiskProInterestsIsEnabled() returns (uint256) {
+  function payRiskProHoldersInterestPayment() public
+  onlyWhitelisted(msg.sender)
+  onlyWhenRiskProInterestsIsEnabled() returns(uint256) {
     (uint256 riskProInterest, uint256 bucketBtnc0) = calculateRiskProHoldersInterest();
     lastRiskProInterestBlock = block.number;
     emit RiskProHoldersInterestPay(riskProInterest, bucketBtnc0);
     return riskProInterest;
   }
+
+  /************************************/
+  /***** UPGRADE v0110      ***********/
+  /************************************/
+
+  /** START UPDATE V0110: 24/09/2020  **/
+  /** Upgrade to support multiple commission rates **/
+  /** Public functions **/
+  /**
+    @dev Sets the commission rate to a particular transaction type
+    @param txType Transaction type according to constant values defined in this contract
+    @param value Commission rate
+  */
+  function setCommissionRateByTxType(uint8 txType, uint256 value) public onlyAuthorizedChanger() {
+    commissionRatesByTxType[txType] = value;
+  }
+
+  /** END UPDATE V0110: 24/09/2020 **/
 
   /**
     @dev Calculates the interest rate to pay until the settlement day
@@ -436,21 +522,19 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
   }
 
   /**
-    @dev This function calculates the interest to return
-    if a user redeem all RiskProx in existance
+    @dev This function calculates the interest to return if a user redeem all RiskProx in existance
     @param bucket Bucket to use to calculate interest
     @return Interests [using reservePrecision]
   */
   function calcFullRedeemInterestValue(bytes32 bucket) internal view returns (uint256) {
     // Value in ReserveTokens of all RiskProxs in the bucket
-    uint256 fullRiskProxReserveTokenValue = mocConverter.riskProxToResToken(riskProxManager.getBucketNRiskPro(bucket), bucket);
+    uint256 fullRiskProxReserveTokenValue = mocState.riskProxToResToken(riskProxManager.getBucketNRiskPro(bucket), bucket);
     // Interests to return if a redemption of all RiskProx is done
     return calcRedeemInterestValue(bucket, fullRiskProxReserveTokenValue); // Redeem
   }
 
   /**
     @dev Calculates the final amount of Bucket 0 StableTokens on RiskProx mint/redeem
-
     @param bucket Name of the bucket involved in the operation
     @param resTokensAmount Value of the operation from which calculates the inrate [using reservePrecision]
     @return Final bucket 0 StableToken amount
@@ -458,16 +542,15 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
   function simulateStableTokenMovement(bytes32 bucket, uint256 resTokensAmount, bool onMinting) internal view returns (uint256) {
     // Calculates stableTokens to move
     uint256 reserveTokenToMove = mocLibConfig.bucketTransferAmount(resTokensAmount, mocState.leverage(bucket));
-    uint256 stableTokensToMove = mocConverter.resTokenToStableToken(reserveTokenToMove);
+    uint256 stableTokensToMove = mocState.resTokenToStableToken(reserveTokenToMove);
 
     if (onMinting) {
       /* Should not happen when minting riskPro because it's
       not possible to mint more than max riskProx but is
       useful when trying to calculate inrate before minting */
-      return
-        riskProxManager.getBucketNStableToken(BUCKET_C0) > stableTokensToMove
-          ? riskProxManager.getBucketNStableToken(BUCKET_C0).sub(stableTokensToMove)
-          : 0;
+      return riskProxManager.getBucketNStableToken(BUCKET_C0) > stableTokensToMove
+        ? riskProxManager.getBucketNStableToken(BUCKET_C0).sub(stableTokensToMove)
+        : 0;
     } else {
       return riskProxManager.getBucketNStableToken(BUCKET_C0).add(Math.min(stableTokensToMove, riskProxManager.getBucketNStableToken(bucket)));
     }
@@ -475,11 +558,10 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
 
   /**
     @dev Returns the days to use for interests calculation
-
     @param countAllDays Value that represents if the calculation is based on mint or on redeem
     @return days [using dayPrecision]
    */
-  function inrateDayCount(bool countAllDays) internal view returns (uint256) {
+  function inrateDayCount(bool countAllDays) internal view returns(uint256) {
     uint256 daysToSettl = mocState.daysToSettlement();
 
     if (daysToSettl < mocLibConfig.dayPrecision) {
@@ -508,8 +590,7 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
    */
   function initializeContracts() internal {
     riskProxManager = MoCRiskProxManager(connector.riskProxManager());
-    mocState = MoCState(connector.mocState());
-    mocConverter = MoCConverter(connector.mocConverter());
+    mocState = IMoCState(connector.mocState());
   }
 
   /**
@@ -521,6 +602,9 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
    * @param _riskProRate RiskPro holder interest rate [using mocPrecision]
    * @param blockSpanRiskPro RiskPro blockspan to configure payments periods[using mocPrecision]
    * @param riskProInterestsTarget Target address to transfer the weekly RiskPro holders interest
+   * @param _stableTmin Upgrade to support red stable inrate parameter
+   * @param _stablePower Upgrade to support red stable inrate parameter
+   * @param _stableTmax Upgrade to support red stable inrate parameter
    */
   function initializeValues(
     address _governor,
@@ -529,7 +613,7 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
     uint256 riskProxMax,
     uint256 _riskProRate,
     address payable commissionsAddressTarget,
-    uint256 commissionRateParam,
+    //uint256 commissionRateParam,
     uint256 blockSpanRiskPro,
     address payable riskProInterestsTarget,
     uint256 _stableTmin,
@@ -543,12 +627,37 @@ contract MoCInrate is MoCInrateEvents, MoCInrateStructs, MoCBase, MoCLibConnecti
     riskProRate = _riskProRate;
     riskProInterestAddress = riskProInterestsTarget;
     riskProInterestBlockSpan = blockSpanRiskPro;
-    commissionRate = commissionRateParam;
+    //commissionRate = commissionRateParam;
     commissionsAddress = commissionsAddressTarget;
     stableTmin = _stableTmin;
     stablePower = _stablePower;
     stableTmax = _stableTmax;
   }
+
+  /************************************/
+  /***** UPGRADE v0110      ***********/
+  /************************************/
+
+  /** START UPDATE V0110: 24/09/2020  **/
+  /** Upgrade to support multiple commission rates **/
+
+  // Transaction types
+  uint8 public constant MINT_RISKPRO_FEES_RESERVE = 1;
+  uint8 public constant REDEEM_RISKPRO_FEES_RESERVE = 2;
+  uint8 public constant MINT_STABLETOKEN_FEES_RESERVE = 3;
+  uint8 public constant REDEEM_STABLETOKEN_FEES_RESERVE = 4;
+  uint8 public constant MINT_RISKPROX_FEES_RESERVE = 5;
+  uint8 public constant REDEEM_RISKPROX_FEES_RESERVE = 6;
+  uint8 public constant MINT_RISKPRO_FEES_MOC = 7;
+  uint8 public constant REDEEM_RISKPRO_FEES_MOC = 8;
+  uint8 public constant MINT_STABLETOKEN_FEES_MOC = 9;
+  uint8 public constant REDEEM_STABLETOKEN_FEES_MOC = 10;
+  uint8 public constant MINT_RISKPROX_FEES_MOC = 11;
+  uint8 public constant REDEEM_RISKPROX_FEES_MOC = 12;
+
+  mapping(uint8 => uint256) public commissionRatesByTxType;
+
+  /** END UPDATE V0110: 24/09/2020 **/
 
   // Leave a gap betweeen inherited contracts variables in order to be
   // able to add more variables in them later

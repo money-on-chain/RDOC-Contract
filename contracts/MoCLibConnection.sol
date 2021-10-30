@@ -1,7 +1,6 @@
-pragma solidity 0.5.8;
+pragma solidity ^0.5.8;
 
 import "./MoCHelperLib.sol";
-
 
 /**
   @dev Interface with MocHelperLib
@@ -11,22 +10,26 @@ contract MoCLibConnection {
   MoCHelperLib.MocLibConfig internal mocLibConfig;
 
   /*
-   * Precision getters
-   */
-  function getMocPrecision() public view returns (uint256) {
+  * Precision getters
+  */
+  function getMocPrecision() public view returns(uint256) {
     return mocLibConfig.mocPrecision;
   }
 
-  function getReservePrecision() public view returns (uint256) {
+  function getReservePrecision() public view returns(uint256) {
     return mocLibConfig.reservePrecision;
   }
 
-  function getDayPrecision() public view returns (uint256) {
+  function getDayPrecision() public view returns(uint256) {
     return mocLibConfig.dayPrecision;
   }
 
   function initializePrecisions() internal {
-    mocLibConfig = MoCHelperLib.MocLibConfig({reservePrecision: 10**18, mocPrecision: 10**18, dayPrecision: 1});
+    mocLibConfig = MoCHelperLib.MocLibConfig({
+      reservePrecision: 10 ** 18,
+      mocPrecision: 10 ** 18,
+      dayPrecision: 1
+    });
   }
 
   // Leave a gap betweeen inherited contracts variables in order to be

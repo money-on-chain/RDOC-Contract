@@ -6,11 +6,11 @@
     "MoC": "MoC",
     "MoCConnector": "MoCConnector",
     "MoCRiskProxManager": "MoCRiskProxManager",
-    "MoCBurnout": "MoCBurnout",
-    "MoCSettlement": "MoCSettlement",
-    "MoCConverter": "MoCConverter",
-    "MoCState": "MoCState",
+    "MoCSettlement": "MoCSettlementMock",
+    "MoCState": "MoCStateMock",
     "MoCExchange": "MoCExchange",
-    "MoCInrate": "MoCInrate"
+    "MoCInrate": "MoCInrate",
+    "CommissionSplitter": "CommissionSplitter",
+    "MoCVendors": "MoCVendors"
   }
 }

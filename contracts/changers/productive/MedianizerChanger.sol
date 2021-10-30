@@ -1,8 +1,11 @@
-pragma solidity 0.5.8;
+pragma solidity ^0.5.8;
 
 import "moc-governance/contracts/Governance/ChangeContract.sol";
 import "../../MoCState.sol";
 
+/**
+ * @dev This productive contract is used to set the address of the ReserveToken Medianizer contract of MoCState with moc---gobernanza.
+ */
 contract MedianizerChanger is ChangeContract {
   MoCState public mocState;
   address public newMedianizer;

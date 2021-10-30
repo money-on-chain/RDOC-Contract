@@ -1,4 +1,4 @@
-pragma solidity 0.5.8;
+pragma solidity ^0.5.8;
 import "../MoCState.sol";
 import "moc-governance/contracts/Governance/ChangeContract.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
@@ -19,7 +19,7 @@ contract PriceProviderChanger is ChangeContract, Ownable {
     priceProvider = _priceProvider;
   }
 
-  function execute() external {    
+  function execute() external {
     mocState.setPriceProvider(priceProvider);
   }
 

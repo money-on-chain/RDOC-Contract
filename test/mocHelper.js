@@ -50,7 +50,7 @@ const setAllowanceForAll = (reserveToken, moc, accounts) =>
     accounts.map(from => () => reserveToken.approve(moc.address, INITIAL_BALANCE, { from }))
   );
 
-module.exports = async ({ owner, useMock, accounts, reserveType }) => {
+module.exports = async ({ owner, useMock = true, accounts, reserveType }) => {
   const contracts = await createBaseContracts({
     owner,
     useMock,

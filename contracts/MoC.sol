@@ -1,53 +1,84 @@
-pragma solidity 0.5.8;
+pragma solidity ^0.5.8;
 
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "./MoCLibConnection.sol";
-import "./token/StableToken.sol";
 import "./token/RiskProToken.sol";
 import "./MoCRiskProxManager.sol";
-import "./MoCState.sol";
-import "./MoCConverter.sol";
-import "./MoCSettlement.sol";
-import "./MoCExchange.sol";
-import "./MoCBurnout.sol";
+import "./interface/IMoCState.sol";
+import "./interface/IMoCSettlement.sol";
+import "./interface/IMoCExchange.sol";
 import "./base/MoCBase.sol";
 import "./base/MoCReserve.sol";
 import "moc-governance/contracts/Stopper/Stoppable.sol";
 import "moc-governance/contracts/Governance/IGovernor.sol";
-
+import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
+import "./interface/IMoCVendors.sol";
+import "./interface/IMoCInrate.sol";
+import "./interface/IMoC.sol";
 
 contract MoCEvents {
   event BucketLiquidation(bytes32 bucket);
+  event ContractLiquidated(address mocAddress);
 }
 
-
-contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable {
+contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMoC {
   using SafeMath for uint256;
 
-  // Contracts
-  StableToken internal stableToken;
+  /// @dev Contracts.
+  address internal stableToken;
   RiskProToken internal riskProToken;
   MoCRiskProxManager internal riskProxManager;
-  MoCState internal mocState;
-  MoCConverter internal mocConverter;
-  MoCSettlement internal settlement;
-  MoCExchange internal mocExchange;
-  MoCInrate internal mocInrate;
-  MoCBurnout public mocBurnout;
+  IMoCState internal mocState;
+  /** DEPRECATED **/
+  // solium-disable-next-line mixedcase
+  address internal DEPRECATED_mocConverter;
+  IMoCSettlement internal settlement;
+  IMoCExchange internal mocExchange;
+  IMoCInrate internal mocInrate;
+  /// @dev 'MoCBurnout' is deprecated. DO NOT use this variable.
+  /** DEPRECATED **/
+  // solium-disable-next-line mixedcase
+  address public DEPRECATED_mocBurnout;
 
-  // Indicates if ReserveTokens remainder was sent and
-  // RiskProToken was paused
+  /// @dev Indicates if ReserveTokens remainder was sent and RiskProToken was paused
   bool internal liquidationExecuted;
 
-  function initialize(address connectorAddress, address governorAddress, address stopperAddress, bool startStoppable) public initializer {
+  /**
+    @dev Initializes the contract
+    @param connectorAddress MoCConnector contract address
+    @param governorAddress Governor contract address
+    @param stopperAddress Stopper contract address
+    @param startStoppable Indicates if the contract starts being unstoppable or not
+  */
+  function initialize(
+    address connectorAddress,
+    address governorAddress,
+    address stopperAddress,
+    bool startStoppable
+  ) public initializer {
     initializePrecisions();
     initializeBase(connectorAddress);
-    initializeContracts();
-    initializeGovernanceContracts(stopperAddress, governorAddress, startStoppable);
+    //initializeContracts
+    stableToken = connector.stableToken();
+    riskProToken = RiskProToken(connector.riskProToken());
+    riskProxManager = MoCRiskProxManager(connector.riskProxManager());
+    mocState = IMoCState(connector.mocState());
+    settlement = IMoCSettlement(connector.mocSettlement());
+    mocExchange = IMoCExchange(connector.mocExchange());
+    mocInrate = IMoCInrate(connector.mocInrate());
+    setReserveToken(connector.reserveToken());
+    //initializeGovernanceContracts
+    Stoppable.initialize(stopperAddress, IGovernor(governorAddress), startStoppable);
   }
 
   /****************************INTERFACE*******************************************/
 
+  /**
+    @dev Gets the RiskProx balance of an address
+    @param bucket Name of the bucket
+    @param account Address
+    @return RiskProx balance of the address
+  */
   function riskProxBalanceOf(bytes32 bucket, address account) public view returns (uint256) {
     return riskProxManager.riskProxBalanceOf(bucket, account);
   }
@@ -57,29 +88,32 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable {
     @param index queue position to get
     @return redeemer's address and amount he submitted
   */
-  function getRedeemRequestAt(uint256 index) public view returns (address, uint256) {
+  function getRedeemRequestAt(uint256 index) public view returns(address, uint256) {
     return settlement.getRedeemRequestAt(index);
   }
 
   /**
-    @dev returns current redeem queue size
+    @dev Returns current redeem queue size
+    @return redeem queue size
    */
-  function redeemQueueSize() public view returns (uint256) {
+  function redeemQueueSize() public view returns(uint256) {
     return settlement.redeemQueueSize();
   }
 
   /**
-    @dev returns the total amount of StableTokens in the redeem queue for redeemer
+    @dev Returns the total amount of StableTokens in the redeem queue for redeemer
     @param redeemer address for which ^ is computed
+    @return total amount of Docs in the redeem queue for redeemer
    */
   function stableTokenAmountToRedeem(address redeemer) public view returns (uint256) {
     return settlement.stableTokenAmountToRedeem(redeemer);
   }
 
+
   /**
-   * @dev Creates or updates the amount of a StableToken redeem Request from the msg.sender
-   * @param stableTokenAmount Amount of StableTokens to redeem on settlement [using mocPrecision]
-   */
+  * @dev Creates or updates the amount of a StableToken redeem Request from the msg.sender
+  * @param stableTokenAmount Amount of StableTokens to redeem on settlement [using mocPrecision]
+  */
   function redeemStableTokenRequest(uint256 stableTokenAmount) public whenNotPaused() whenSettlementReady() {
     settlement.addRedeemRequest(stableTokenAmount, msg.sender);
   }
@@ -96,7 +130,6 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable {
   /**
     @dev Adding tokens to the token reserve and C0 Bucket without minting any token.
     Could revert.
-
     @param tokenAmount Amount to deposit.
    */
   function addReserves(uint256 tokenAmount) public {
@@ -105,119 +138,233 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable {
   }
 
   /**
+    @dev Mints RiskPro and pays the comissions of the operation (retrocompatible function).
+    @dev Retrocompatible function.
+    @param resTokensToMint Amount in ReserveToken to mint
+   */
+  function mintRiskPro(uint256 resTokensToMint)
+  public {
+    mintRiskProVendors(resTokensToMint, address(0));
+  }
+
+  /**
     @dev Mints RiskPro and pays the comissions of the operation.
     @param resTokensToMint Amount Reserve Tokens to spend in minting
+    @param vendorAccount Vendor address
    */
-  function mintRiskPro(uint256 resTokensToMint) public whenNotPaused() transitionState() {
-    uint256 allowedBalance = getAllowance(msg.sender);
-    (uint256 resTokensExchangeTokens, uint256 commissionSpent) = mocExchange.mintRiskPro(msg.sender, resTokensToMint);
+  function mintRiskProVendors(uint256 resTokensToMint, address vendorAccount)
+  public
+  whenNotPaused() transitionState() notInProtectionMode() {
+    /** UPDATE V0110: 24/09/2020 - Upgrade to support multiple commission rates **/
+    (uint256 totalResTokensSpent,
+    uint256 reserveTokenCommission,
+    uint256 mocCommission,
+    uint256 reserveTokenMarkup,
+    uint256 mocMarkup) = mocExchange.mintRiskPro(msg.sender, resTokensToMint, vendorAccount);
 
-    uint256 totalResTokensSpent = resTokensExchangeTokens.add(commissionSpent);
-    require(totalResTokensSpent <= allowedBalance, "amount is not enough");
-
-    safeDepositInReserve(msg.sender, totalResTokensSpent);
-
-    //Transfer commissions to commissions address
-    safeWithdrawFromReserve(mocInrate.commissionsAddress(), commissionSpent);
+    transferCommissions(
+      msg.sender,
+      totalResTokensSpent,
+      reserveTokenCommission,
+      mocCommission,
+      vendorAccount,
+      reserveTokenMarkup,
+      mocMarkup
+    );
+    /** END UPDATE V0110: 24/09/2020 - Upgrade to support multiple commission rates **/
   }
 
   /**
-   * @dev Redeems RiskPro Tokens and pays the comissions of the operation in ReserveTokens
-     @param riskProAmount Amout in RiskPro
-   */
-  function redeemRiskPro(uint256 riskProAmount) public whenNotPaused() transitionState() atLeastState(MoCState.States.AboveCobj) {
-    (uint256 resTokensAmount, uint256 commissionSpent) = mocExchange.redeemRiskPro(msg.sender, riskProAmount);
-
-    safeWithdrawFromReserve(msg.sender, resTokensAmount);
-
-    // Transfer commissions to commissions address
-    safeWithdrawFromReserve(mocInrate.commissionsAddress(), commissionSpent);
+    @dev Redeems RiskPro Tokens and pays the comissions of the operation (retrocompatible function).
+    @param riskProAmount Amout in RiskPro
+  */
+  function redeemRiskPro(uint256 riskProAmount)
+  public {
+    redeemRiskProVendors(riskProAmount, address(0));
   }
 
   /**
-   * @dev Mint StableToken tokens and pays the commisions of the operation
-   * @param resTokensToMint Amount in ReserveTokens to mint
-   */
-  function mintStableToken(uint256 resTokensToMint) public whenNotPaused() transitionState() atLeastState(MoCState.States.AboveCobj) {
-    uint256 allowedBalance = getAllowance(msg.sender);
-    (uint256 resTokensExchangeSpent, uint256 commissionSpent) = mocExchange.mintStableToken(msg.sender, resTokensToMint);
+    @dev Redeems RiskPro Tokens and pays the comissions of the operation in ReserveTokens
+    @param riskProAmount Amout in RiskPro
+    @param vendorAccount Vendor address
+  */
+  function redeemRiskProVendors(uint256 riskProAmount, address vendorAccount)
+  public
+  whenNotPaused() transitionState() atLeastState(IMoCState.States.AboveCobj) {
+    /** UPDATE V0110: 24/09/2020 - Upgrade to support multiple commission rates **/
+    (uint256 resTokensAmount,
+    uint256 reserveTokenCommission,
+    uint256 mocCommission,
+    uint256 reserveTokenMarkup,
+    uint256 mocMarkup) = mocExchange.redeemRiskPro(msg.sender, riskProAmount, vendorAccount);
 
-    uint256 totalResTokensSpent = resTokensExchangeSpent.add(commissionSpent);
-    require(totalResTokensSpent <= allowedBalance, "amount is not enough");
-
-    safeDepositInReserve(msg.sender, totalResTokensSpent);
-
-    // Transfer commissions to commissions address
-    safeWithdrawFromReserve(mocInrate.commissionsAddress(), commissionSpent);
+    redeemWithCommission(
+      msg.sender,
+      reserveTokenCommission,
+      mocCommission,
+      vendorAccount,
+      reserveTokenMarkup,
+      mocMarkup,
+      resTokensAmount
+    );
+    /** END UPDATE V0110: 24/09/2020 - Upgrade to support multiple commission rates **/
   }
 
   /**
-     @dev Redeems RiskProx Tokens and pays the comissions of the operation in ReserveTokens
-     @param bucket Bucket to reedem, for example X2
-     @param riskProxAmount Amount in RiskProx
-   */
-  function redeemRiskProx(bytes32 bucket, uint256 riskProxAmount)
-    public
-    whenNotPaused()
-    whenSettlementReady()
-    availableBucket(bucket)
-    notBaseBucket(bucket)
-    transitionState()
-    bucketStateTransition(bucket)
-  {
-    (uint256 totalReserveTokenRedeemed, uint256 commissionSpent) = mocExchange.redeemRiskProx(msg.sender, bucket, riskProxAmount);
-
-    safeWithdrawFromReserve(msg.sender, totalReserveTokenRedeemed);
-
-    // Transfer commissions to commissions address
-    safeWithdrawFromReserve(mocInrate.commissionsAddress(), commissionSpent);
+    @dev StableToken Doc tokens and pays the commisions of the operation (retrocompatible function).
+    @dev Retrocompatible function.
+    @param resTokensToMint Amount in ReserveToken to mint
+  */
+  function mintStableToken(uint256 resTokensToMint)
+  public {
+    mintStableTokenVendors(resTokensToMint, address(0));
   }
 
   /**
-   * @dev BUCKET riskProx minting
-   * @param bucket Name of the bucket used
-   * @param resTokensToMint amount to mint on ReserveTokens
-   **/
-  function mintRiskProx(bytes32 bucket, uint256 resTokensToMint)
-    public
-    whenNotPaused()
-    whenSettlementReady()
-    availableBucket(bucket)
-    notBaseBucket(bucket)
-    transitionState()
-    bucketStateTransition(bucket)
-  {
-    uint256 allowedBalance = getAllowance(msg.sender);
-    (uint256 resTokensExchangeSpent, uint256 commissionSpent) = mocExchange.mintRiskProx(msg.sender, bucket, resTokensToMint);
+    @dev Mint StableToken tokens and pays the commisions of the operation
+    @param resTokensToMint Amount in ReserveTokens to mint
+    @param vendorAccount Vendor address
+  */
+  function mintStableTokenVendors(uint256 resTokensToMint, address vendorAccount)
+  public
+  whenNotPaused() transitionState() atLeastState(IMoCState.States.AboveCobj) {
+    /** UPDATE V0110: 24/09/2020 - Upgrade to support multiple commission rates **/
+    (uint256 totalResTokensSpent,
+    uint256 reserveTokenCommission,
+    uint256 mocCommission,
+    uint256 reserveTokenMarkup,
+    uint256 mocMarkup) = mocExchange.mintStableToken(msg.sender, resTokensToMint, vendorAccount);
 
-    uint256 totalResTokensSpent = resTokensExchangeSpent.add(commissionSpent);
-    require(totalResTokensSpent <= allowedBalance, "amount is not enough");
-
-    // Need to update general State
-    safeDepositInReserve(msg.sender, totalResTokensSpent);
-
-    // Transfer commissions to commissions address
-    safeWithdrawFromReserve(mocInrate.commissionsAddress(), commissionSpent);
+    transferCommissions(
+      msg.sender,
+      totalResTokensSpent,
+      reserveTokenCommission,
+      mocCommission,
+      vendorAccount,
+      reserveTokenMarkup,
+      mocMarkup
+    );
+    /** END UPDATE V0110: 24/09/2020 - Upgrade to support multiple commission rates **/
   }
 
   /**
-   * @dev Redeems the requested amount for the msg.sender, or the max amount of free stableTokens possible.
-   * @param stableTokenAmount Amount of StableTokens to redeem.
-   */
-  function redeemFreeStableToken(uint256 stableTokenAmount) public whenNotPaused() transitionState() {
-    (uint256 resTokensAmount, uint256 commissionSpent) = mocExchange.redeemFreeStableToken(msg.sender, stableTokenAmount);
+    @dev Redeems RiskProx Tokens and pays the comissions of the operation in ReserveToken (retrocompatible function).
+    @dev Retrocompatible function.
+    @param bucket Bucket to reedem, for example X2
+    @param riskProxAmount Amount in RiskProx
+  */
+  function redeemRiskProx(bytes32 bucket, uint256 riskProxAmount) public {
+    redeemRiskProxVendors(bucket, riskProxAmount, address(0));
+  }
 
-    safeWithdrawFromReserve(msg.sender, resTokensAmount);
+  /**
+    @dev Redeems RiskProx Tokens and pays the comissions of the operation in ReserveTokens
+    @param bucket Bucket to reedem, for example X2
+    @param riskProxAmount Amount in RiskProx
+    @param vendorAccount Vendor address
+  */
+  function redeemRiskProxVendors(bytes32 bucket, uint256 riskProxAmount, address vendorAccount) public
+  whenNotPaused() whenSettlementReady() availableBucket(bucket) notBaseBucket(bucket)
+  transitionState() bucketStateTransition(bucket) {
+    /** UPDATE V0110: 24/09/2020 - Upgrade to support multiple commission rates **/
+    (uint256 totalResTokensRedeemed,
+    uint256 reserveTokenCommission,
+    uint256 mocCommission,
+    uint256 reserveTokenMarkup,
+    uint256 mocMarkup) = mocExchange.redeemRiskProx(msg.sender, bucket, riskProxAmount, vendorAccount);
 
-    // Transfer commissions to commissions address
-    safeWithdrawFromReserve(mocInrate.commissionsAddress(), commissionSpent);
+    redeemWithCommission(
+      msg.sender,
+      reserveTokenCommission,
+      mocCommission,
+      vendorAccount,
+      reserveTokenMarkup,
+      mocMarkup,
+      totalResTokensRedeemed
+    );
+    /** END UPDATE V0110: 24/09/2020 - Upgrade to support multiple commission rates **/
+  }
+
+  /**
+    @dev BUCKET riskProx riskProx (retrocompatible function).
+    @dev Retrocompatible function.
+    @param bucket Name of the bucket used
+    @param resTokensToMint amount to mint on ReserveToken
+  */
+  function mintRiskProx(bytes32 bucket, uint256 resTokensToMint) public {
+    mintRiskProxVendors(bucket, resTokensToMint, address(0));
+  }
+
+  /**
+    @dev BUCKET riskProx minting
+    @param bucket Name of the bucket used
+    @param resTokensToMint amount to mint on ReserveToken
+    @param vendorAccount Vendor address
+  */
+  function mintRiskProxVendors(bytes32 bucket, uint256 resTokensToMint, address vendorAccount) public
+  whenNotPaused() whenSettlementReady() availableBucket(bucket) notBaseBucket(bucket)
+  transitionState() bucketStateTransition(bucket) {
+    /** UPDATE V0110: 24/09/2020 - Upgrade to support multiple commission rates **/
+    (uint256 totalResTokensSpent,
+    uint256 reserveTokenCommission,
+    uint256 mocCommission,
+    uint256 reserveTokenMarkup,
+    uint256 mocMarkup) = mocExchange.mintRiskProx(msg.sender, bucket, resTokensToMint, vendorAccount);
+
+    transferCommissions(
+      msg.sender,
+      totalResTokensSpent,
+      reserveTokenCommission,
+      mocCommission,
+      vendorAccount,
+      reserveTokenMarkup,
+      mocMarkup
+    );
+    /** END UPDATE V0110: 24/09/2020 - Upgrade to support multiple commission rates **/
+  }
+
+  /**
+    @dev Redeems the requested amount for the msg.sender, or the max amount of free stableTokens possible (retrocompatible function).
+    @dev Retrocompatible function.
+    @param stableTokenAmount Amount of StableTokens to redeem.
+  */
+  function redeemFreeStableToken(uint256 stableTokenAmount)
+  public {
+    redeemFreeStableTokenVendors(stableTokenAmount, address(0));
+  }
+
+  /**
+    @dev Redeems the requested amount for the msg.sender, or the max amount of free stableTokens possible.
+    @param stableTokenAmount Amount of StableTokens to redeem.
+    @param vendorAccount Vendor address
+  */
+  function redeemFreeStableTokenVendors(uint256 stableTokenAmount, address vendorAccount)
+  public
+  whenNotPaused() transitionState() notInProtectionMode() {
+    /** UPDATE V0110: 24/09/2020 - Upgrade to support multiple commission rates **/
+    (uint256 resTokensAmount,
+    uint256 reserveTokenCommission,
+    uint256 mocCommission,
+    uint256 reserveTokenMarkup,
+    uint256 mocMarkup) = mocExchange.redeemFreeStableToken(msg.sender, stableTokenAmount, vendorAccount);
+
+    redeemWithCommission(
+      msg.sender,
+      reserveTokenCommission,
+      mocCommission,
+      vendorAccount,
+      reserveTokenMarkup,
+      mocMarkup,
+      resTokensAmount
+    );
+    /** END UPDATE V0110: 24/09/2020 - Upgrade to support multiple commission rates **/
   }
 
   /**
    * @dev Allow redeem on liquidation state, user StableTokens get burned and he receives
    * the equivalent ReserveTokens if can be covered, or the maximum available
    **/
-  function redeemAllStableToken() public atState(MoCState.States.Liquidated) {
+  function redeemAllStableToken() public atState(IMoCState.States.Liquidated) {
     mocExchange.redeemAllStableToken(msg.sender, msg.sender);
   }
 
@@ -229,32 +376,45 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable {
   }
 
   /**
-   * @dev Pays the RiskPro interest and transfers it to the address mocInrate.riskProInterestAddress
-   * RiskPro interests = Nb (bucket 0) * riskProRate.
-   */
+    @dev Pays the RiskPro interest and transfers it to the address mocInrate.riskProInterestAddress
+    RiskPro interests = Nb (bucket 0) * riskProRate.
+  */
   function payRiskProHoldersInterestPayment() public whenNotPaused() {
     uint256 toPay = mocInrate.payRiskProHoldersInterestPayment();
-    if (withdrawFromReserve(mocInrate.getRiskProInterestAddress(), toPay)) {
+    if (withdraw(toPay, mocInrate.getRiskProInterestAddress())) {
+      mocState.substractFromReserves(toPay);
       riskProxManager.substractValuesFromBucket(BUCKET_C0, toPay, 0, 0);
     }
   }
 
   /**
-   * @dev Calculates RiskPro holders holder interest by taking the total amount of RBCs available on Bucket 0.
-   * RiskPro interests = Nb (bucket 0) * riskProRate.
-   */
+    @dev Calculates RiskPro holders holder interest by taking the total amount of RBCs available on Bucket 0.
+    RiskPro interests = Nb (bucket 0) * riskProRate.
+  */
   function calculateRiskProHoldersInterest() public view returns (uint256, uint256) {
     return mocInrate.calculateRiskProHoldersInterest();
   }
 
-  function getRiskProInterestAddress() public view returns (address payable) {
+  /**
+    @dev Gets the target address to transfer RiskPro Holders rate
+    @return Target address to transfer RiskPro Holders interest
+  */
+  function getRiskProInterestAddress() public view returns (address) {
     return mocInrate.getRiskProInterestAddress();
   }
 
+  /**
+    @dev Gets the rate for RiskPro Holders
+    @return RiskPro Rate
+  */
   function getRiskProRate() public view returns (uint256) {
     return mocInrate.getRiskProRate();
   }
 
+  /**
+    @dev Gets the blockspan of RiskPro that represents the frecuency of RiskPro holders interest payment
+    @return returns power of bitProInterestBlockSpan
+  */
   function getRiskProInterestBlockSpan() public view returns (uint256) {
     return mocInrate.getRiskProInterestBlockSpan();
   }
@@ -268,17 +428,19 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable {
   }
 
   /**
-    @dev Returns true if blockSpan number of blocks has pass since last execution
+    @dev Indicates if settlement is enabled
+    @return Returns true if blockSpan number of blocks has passed since last execution; otherwise false
   */
-  function isSettlementEnabled() public view returns (bool) {
+  function isSettlementEnabled() public view returns(bool) {
     return settlement.isSettlementEnabled();
   }
 
   /**
-   * @dev Checks if bucket liquidation is reached.
-   * @return true if bucket liquidation is reached, false otherwise
-   */
-  function isBucketLiquidationReached(bytes32 bucket) public view returns (bool) {
+    @dev Checks if bucket liquidation is reached.
+    @param bucket Name of bucket.
+    @return true if bucket liquidation is reached, false otherwise
+  */
+  function isBucketLiquidationReached(bytes32 bucket) public view returns(bool) {
     if (mocState.coverage(bucket) <= mocState.liq()) {
       return true;
     }
@@ -286,7 +448,7 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable {
   }
 
   function evalBucketLiquidation(bytes32 bucket) public availableBucket(bucket) notBaseBucket(bucket) whenSettlementReady() {
-    if (mocState.coverage(bucket) <= mocState.liq()) {
+    if (isBucketLiquidationReached(bucket)) {
       riskProxManager.liquidateBucket(bucket, BUCKET_C0);
 
       emit BucketLiquidation(bucket);
@@ -294,46 +456,23 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable {
   }
 
   /**
-   * @dev Set Burnout address.
-   * @param burnoutAddress Address to which the funds will be sent on liquidation.
-   */
-  function setBurnoutAddress(address payable burnoutAddress) public whenNotPaused() atLeastState(MoCState.States.RiskProDiscount) {
-    mocBurnout.pushBurnoutAddress(msg.sender, burnoutAddress);
+    @dev Evaluates if liquidation state has been reached and runs liq if that's the case
+  */
+  function evalLiquidation() public transitionState() {
+    // DO NOTHING. Everything is handled in transitionState() modifier.
   }
 
   /**
-   * @dev Get Burnout address.
-   */
-  function getBurnoutAddress() public view returns (address) {
-    return mocBurnout.getBurnoutAddress(msg.sender);
-  }
-
-  /**
-   * @dev Evaluates if liquidation state has been reached and runs liq if that's the case
-   */
-  function evalLiquidation(uint256 steps) public {
-    mocState.nextState();
-
-    if (mocState.state() == MoCState.States.Liquidated) {
-      liquidate();
-      mocBurnout.executeBurnout(steps);
-    }
-  }
-
-  /**
-   * @dev Runs all settlement process
-   */
+    @dev Runs all settlement process
+    @param steps Number of steps
+  */
   function runSettlement(uint256 steps) public whenNotPaused() transitionState() {
-    uint256 accumCommissions = settlement.runSettlement(steps);
-
     // Transfer accums commissions to commissions address
-    safeWithdrawFromReserve(mocInrate.commissionsAddress(), accumCommissions);
+    safeWithdrawFromReserve(mocInrate.commissionsAddress(), settlement.runSettlement(steps));
   }
 
   /**
-  * @dev Public function to extract and send tokens from the reserve.
-    Will return false if transfer reverts or fails.
-
+    @dev Public function to extract and send tokens from the reserve. Will return false if transfer reverts or fails.
     @param receiver Account to which the tokens will be send
     @param tokenAmount Amount of tokens to send
     @return False if RRC20 transfer fails or revert and true if succeeds
@@ -342,65 +481,160 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable {
     if (tokenAmount == 0) {
       return true;
     }
-
-    return withdrawFromReserve(receiver, tokenAmount);
+    if (withdraw(tokenAmount, receiver)) {
+      mocState.substractFromReserves(tokenAmount);
+      return true;
+    }
+    return false;
   }
 
   function liquidate() internal {
     if (!liquidationExecuted) {
-      pauseRiskProToken();
-      sendReservesRemainder();
+      //pauseRiskProToken
+      if (!riskProToken.paused()) {
+        riskProToken.pause();
+      }
+      //sendReservesRemainder
+      safeWithdrawFromReserve(mocInrate.commissionsAddress(), mocState.getReservesRemainder());
       liquidationExecuted = true;
+
+      emit ContractLiquidated(connector.moc());
     }
   }
 
+  /************************************/
+  /***** UPGRADE v0110      ***********/
+  /************************************/
+
+  /** START UPDATE V0110: 24/09/2020  **/
+  /** Upgrade to support multiple commission rates **/
+  /** Internal functions **/
+
   /**
-    @dev Transfer the value that not corresponds to
-    StableToken Collateral
+    @dev Transfer mint operation fees (commissions + vendor markup)
+    @param sender address of msg.sender
+    @param totalResTokensSpent amount in ReserveToken spent
+    @param reserveTokenCommission commission amount in ReserveToken
+    @param mocCommission commission amount in MoC
+    @param vendorAccount address of vendor
+    @param reserveTokenMarkup vendor markup in ReserveToken
+    @param mocMarkup vendor markup in MoC
   */
-  function sendReservesRemainder() internal {
-    uint256 riskProResTokenValue = mocState.getReservesRemainder();
-    safeWithdrawFromReserve(mocInrate.commissionsAddress(), riskProResTokenValue);
+  // solium-disable-next-line security/no-assign-params
+  function transferCommissions(
+    address sender,
+    uint256 totalResTokensSpent,
+    uint256 reserveTokenCommission,
+    uint256 mocCommission,
+    address vendorAccount,
+    uint256 reserveTokenMarkup,
+    uint256 mocMarkup
+  )
+  internal {
+    // Need to update general State
+    mocState.addToReserves(totalResTokensSpent);
+    require(
+      deposit(
+        totalResTokensSpent.add(reserveTokenCommission).add(reserveTokenMarkup),
+        sender
+      ), "Token deposit failed on RRC20 Reserve token transfer"
+    );
+
+    transferMocCommission(sender, mocCommission, vendorAccount, mocMarkup);
+
+    transferReserveTokenCommission(vendorAccount, reserveTokenCommission, reserveTokenMarkup);
+
   }
 
-  function initializeContracts() internal {
-    stableToken = StableToken(connector.stableToken());
-    riskProToken = RiskProToken(connector.riskProToken());
-    riskProxManager = MoCRiskProxManager(connector.riskProxManager());
-    mocState = MoCState(connector.mocState());
-    settlement = MoCSettlement(connector.mocSettlement());
-    mocConverter = MoCConverter(connector.mocConverter());
-    mocExchange = MoCExchange(connector.mocExchange());
-    mocInrate = MoCInrate(connector.mocInrate());
-    mocBurnout = MoCBurnout(connector.mocBurnout());
-    setReserveToken(connector.reserveToken());
-  }
+  /**
+    @dev Transfer operation fees in MoC (commissions + vendor markup)
+    @param sender address of msg.sender
+    @param mocCommission commission amount in MoC
+    @param vendorAccount address of vendor
+    @param mocMarkup vendor markup in MoC
+  */
+  // solium-disable-next-line security/no-assign-params
+  function transferMocCommission(
+    address sender,
+    uint256 mocCommission,
+    address vendorAccount,
+    uint256 mocMarkup
+  ) internal {
+    uint256 totalMoCFee = mocCommission.add(mocMarkup);
+    // If commission and markup are paid in MoC
+    if (totalMoCFee > 0) {
+      IMoCVendors mocVendors = IMoCVendors(mocState.getMoCVendors());
+      // Transfer MoC from sender to this contract
+      IERC20 mocToken = IERC20(mocState.getMoCToken());
 
-  function initializeGovernanceContracts(address stopperAddress, address governorAddress, bool startStoppable) internal {
-    Stoppable.initialize(stopperAddress, IGovernor(governorAddress), startStoppable);
-  }
-
-  function pauseRiskProToken() internal {
-    if (!riskProToken.paused()) {
-      riskProToken.pause();
+      // Transfer vendor markup in MoC
+      if (mocVendors.updatePaidMarkup(vendorAccount, mocMarkup, 0)) {
+        // Transfer MoC to vendor address
+        mocToken.transferFrom(sender, vendorAccount, mocMarkup);
+        // Transfer MoC to commissions address
+        mocToken.transferFrom(sender, mocInrate.commissionsAddress(), mocCommission);
+      } else {
+        // Transfer MoC to commissions address
+        mocToken.transferFrom(sender, mocInrate.commissionsAddress(), totalMoCFee);
+      }
     }
   }
 
   /**
-    @dev Extracts tokens from the reserve and update mocState
-    @param receiver Account to which the tokens will be send
-    @param tokenAmount Amount to extract from reserve
-    @return False if RRC20 transfer fails or revert and true if succeeds
-   */
-  function withdrawFromReserve(address receiver, uint256 tokenAmount) internal returns (bool) {
-    bool result = withdraw(tokenAmount, receiver);
+    @dev Transfer redeem operation fees (commissions + vendor markup)
+    @param sender address of msg.sender
+    @param reserveTokenCommission commission amount in ReserveToken
+    @param mocCommission commission amount in MoC
+    @param vendorAccount address of vendor
+    @param reserveTokenMarkup vendor markup in ReserveToken
+    @param mocMarkup vendor markup in MoC
+  */
+  function redeemWithCommission(
+    address sender,
+    uint256 reserveTokenCommission,
+    uint256 mocCommission,
+    address vendorAccount,
+    uint256 reserveTokenMarkup,
+    uint256 mocMarkup,
+    uint256 reserveTokenAmount
+  )
+   internal {
+    safeWithdraw(sender, reserveTokenAmount);
+    mocState.substractFromReserves(reserveTokenAmount.add(reserveTokenCommission).add(reserveTokenMarkup));
 
-    if (result) {
-      mocState.substractFromReserves(tokenAmount);
-    }
+    transferMocCommission(sender, mocCommission, vendorAccount, mocMarkup);
 
-    return result;
+    transferReserveTokenCommission(vendorAccount, reserveTokenCommission, reserveTokenMarkup);
+
   }
+
+  /**
+    @dev Transfer operation fees in ReserveToken (commissions + vendor markup)
+    @param vendorAccount address of vendor
+    @param reserveTokenCommission commission amount in ReserveToken
+    @param reserveTokenMarkup vendor markup in ReserveToken
+  */
+  function transferReserveTokenCommission(address vendorAccount, uint256 reserveTokenCommission, uint256 reserveTokenMarkup) internal {
+
+    uint256 totalResTokenFee = reserveTokenCommission.add(reserveTokenMarkup);
+    //(uint256 reserveTokenMarkupInMoC, , ) = mocExchange.convertToMoCPrice(reserveTokenMarkup);
+
+    if (totalResTokenFee > 0) {
+      IMoCVendors mocVendors = IMoCVendors(mocState.getMoCVendors());
+      // Transfer vendor markup in MoC
+      if (mocVendors.updatePaidMarkup(vendorAccount, 0, reserveTokenMarkup)) {
+        // Transfer ReserveToken to vendor address
+        safeWithdraw(vendorAccount, reserveTokenMarkup);
+        // Transfer ReserveToken to commissions address
+        safeWithdraw(mocInrate.commissionsAddress(), reserveTokenCommission);
+      } else {
+        // Transfer ReserveToken to commissions address
+        safeWithdraw(mocInrate.commissionsAddress(), totalResTokenFee);
+      }
+    }
+  }
+
+  /** END UPDATE V0110: 24/09/2020 **/
 
   /**
     @dev Extracts tokens from the reserve and update mocState but reverts if token transfer fails
@@ -408,8 +642,16 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable {
     @param tokenAmount Amount to extract from reserve
    */
   function safeWithdrawFromReserve(address receiver, uint256 tokenAmount) internal {
-    require(withdraw(tokenAmount, receiver), "Token withdrawal failed on RRC20 Reserve token transfer");
+    safeWithdraw(receiver, tokenAmount);
     mocState.substractFromReserves(tokenAmount);
+  }
+  /**
+    @dev Extracts tokens from the reserve
+    @param receiver Account from which the tokens will be taken
+    @param tokenAmount Amount to deposit
+   */
+  function safeWithdraw(address receiver, uint256 tokenAmount) internal {
+    require(withdraw(tokenAmount, receiver), "Token withdrawal failed on RRC20 Reserve token transfer");
   }
 
   /**
@@ -422,24 +664,31 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable {
     mocState.addToReserves(tokenAmount);
   }
 
+
+
   /***** STATE MODIFIERS *****/
   modifier whenSettlementReady() {
     require(settlement.isSettlementReady(), "Function can only be called when settlement is ready");
     _;
   }
 
-  modifier atState(MoCState.States _state) {
+  modifier atState(IMoCState.States _state) {
     require(mocState.state() == _state, "Function cannot be called at this state.");
     _;
   }
 
-  modifier atLeastState(MoCState.States _state) {
+  modifier atLeastState(IMoCState.States _state) {
     require(mocState.state() >= _state, "Function cannot be called at this state.");
     _;
   }
 
-  modifier atMostState(MoCState.States _state) {
+  modifier atMostState(IMoCState.States _state) {
     require(mocState.state() <= _state, "Function cannot be called at this state.");
+    _;
+  }
+
+  modifier notInProtectionMode() {
+    require(mocState.globalCoverage() > mocState.getProtected(), "Function cannot be called at protection mode.");
     _;
   }
 
@@ -458,11 +707,14 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable {
     _;
   }
 
-  modifier transitionState() {
+  modifier transitionState()
+  {
     mocState.nextState();
-    if (mocState.state() == MoCState.States.Liquidated) {
+    if (mocState.state() == IMoCState.States.Liquidated) {
       liquidate();
-    } else _;
+    }
+    else
+      _;
   }
 
   // Leave a gap betweeen inherited contracts variables in order to be

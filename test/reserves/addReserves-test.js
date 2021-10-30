@@ -5,29 +5,32 @@ let toContractBN;
 let BUCKET_C0;
 let BUCKET_X2;
 
-contract('MoC: Reserves control', function([owner, userAccount]) {
+contract('MoC: Reserves control', function([owner, userAccount, vendorAccount]) {
   before(async function() {
-    const accounts = [owner, userAccount];
+    const accounts = [owner, userAccount, vendorAccount];
     mocHelper = await testHelperBuilder({ owner, accounts });
     ({ toContractBN, BUCKET_C0, BUCKET_X2 } = mocHelper);
   });
 
   beforeEach(async function() {
     await mocHelper.revertState();
+
+    // Register vendor for test
+    await mocHelper.registerVendor(vendorAccount, 0, owner);
   });
 
   describe('GIVEN there are RiskPros and StableTokens minted', function() {
     beforeEach(async function() {
-      await mocHelper.mintRiskPro(owner, 1);
-      await mocHelper.mintStableToken(owner, 10000);
+      await mocHelper.mintRiskPro(owner, 1, vendorAccount);
+      await mocHelper.mintStableToken(owner, 10000, vendorAccount);
     });
 
-    it('THEN there are no Docs or BitPro available', async function() {
+    it('THEN there are no StableTokens or RiskPro available', async function() {
       const maxStableToken = await mocHelper.maxStableToken();
       const maxRiskPro = await mocHelper.maxRiskPro();
 
-      mocHelper.assertBigReserve(maxStableToken, 0, 'Max doc to mint is not zero.');
-      mocHelper.assertBigReserve(maxRiskPro, 0, 'Max Bpro to redeem is not zero.');
+      mocHelper.assertBigReserve(maxStableToken, 0, 'Max StableToken to mint is not zero.');
+      mocHelper.assertBigReserve(maxRiskPro, 0, 'Max RiskPro to redeem is not zero.');
     });
 
     describe('WHEN a user adds 100 tokens to the reserve', function() {
@@ -38,12 +41,12 @@ contract('MoC: Reserves control', function([owner, userAccount]) {
       it('THEN there are StableTokens available to mint', async function() {
         const maxStableToken = await mocHelper.maxStableToken();
 
-        assert(maxStableToken > 0, 'There are no Docs available to mint');
+        assert(maxStableToken > 0, 'There are no StableTokens available to mint');
       });
-      it('THEN there are BPros available to redeem', async function() {
+      it('THEN there are RiskPros available to redeem', async function() {
         const maxRiskPro = await mocHelper.maxRiskPro();
 
-        assert(maxRiskPro > 0, 'There are no BPros available to mint');
+        assert(maxRiskPro > 0, 'There are no RiskPros available to mint');
       });
     });
   });
@@ -74,10 +77,10 @@ contract('MoC: Reserves control', function([owner, userAccount]) {
 
         mocHelper.assertBigReserve(x2State.nReserve, 0, 'Bucket C0 reserves is incorrect');
       });
-      it('AND there are Docs available to mint', async function() {
+      it('AND there are StableTokens available to mint', async function() {
         const maxStableToken = await mocHelper.maxStableToken();
 
-        assert(maxStableToken > 0, 'There are no Docs available to mint');
+        assert(maxStableToken > 0, 'There are no StableTokens available to mint');
       });
     });
   });

@@ -1,23 +1,40 @@
 const testHelperBuilder = require('../mocHelper.js');
 
+const CommissionSplitterChangerDeploy = artifacts.require('CommissionSplitterChangerDeploy.sol');
+
 let mocHelper;
 let commissionSplitter;
 let splitterPrecision;
 let toContractBN;
+let mocToken;
 
-const executeOperations = (user, operations) => {
-  const promises = operations.map(async op => mocHelper.mintRiskPro(user, op.reserve));
+const executeOperations = (user, operations, vendorAccount) => {
+  const promises = operations.map(async op =>
+    mocHelper.mintRiskProAmount(
+      user,
+      op.reserve,
+      vendorAccount,
+      await mocHelper.mocInrate.MINT_RISKPRO_FEES_RESERVE()
+    )
+  );
 
   return Promise.all(promises);
 };
 
 const operationsTotal = operations => operations.reduce((last, op) => op.reserve + last, 0);
 
-contract('CommissionSplitter', function([owner, userAccount, commissionsAccount]) {
+contract('CommissionSplitter', function([
+  owner,
+  userAccount,
+  commissionsAccount,
+  vendorAccount,
+  mocCommissionsAccount
+]) {
   before(async function() {
-    const accounts = [owner, userAccount];
+    const accounts = [owner, userAccount, vendorAccount, mocCommissionsAccount];
     mocHelper = await testHelperBuilder({ owner, accounts });
-    ({ toContractBN, commissionSplitter } = mocHelper);
+    ({ toContractBN, commissionSplitter, mocToken } = mocHelper);
+    await mocHelper.saveState();
   });
 
   describe('GIVEN commissions are being sent to a CommissionSplitter contract AND MOC Proportion is 0', function() {
@@ -29,7 +46,7 @@ contract('CommissionSplitter', function([owner, userAccount, commissionsAccount]
           }
         ],
         proportion: 0,
-        commissionAmount: 2,
+        commissionAmount: 1,
         mocAmount: 0
       },
       {
@@ -43,7 +60,7 @@ contract('CommissionSplitter', function([owner, userAccount, commissionsAccount]
         ],
         proportion: 1,
         commissionAmount: 0,
-        mocAmount: 6.666
+        mocAmount: 3.333
       },
       {
         mintOperations: [
@@ -58,18 +75,26 @@ contract('CommissionSplitter', function([owner, userAccount, commissionsAccount]
           }
         ],
         proportion: 0.5,
-        commissionAmount: 1.5,
-        mocAmount: 1.5
+        commissionAmount: 0.75,
+        mocAmount: 0.75
       }
     ];
 
     scenarios.forEach(s => {
       describe(`WHEN proportion is set to ${s.proportion}`, function() {
         before(async function() {
+          await mocHelper.revertState();
           // deploying Commission splitter
           splitterPrecision = await commissionSplitter.PRECISION();
-          // set commissions rate
-          await mocHelper.mockMocInrateChanger.setCommissionRate(toContractBN(0.002, 'RAT'));
+
+          // Register vendor for test
+          await mocHelper.registerVendor(vendorAccount, 0, owner);
+
+          // Commission rates for test are set in functionHelper.js
+          await mocHelper.mockMocInrateChanger.setCommissionRates(
+            await mocHelper.getCommissionsArrayNonZero()
+          );
+
           // set commissions address
           await mocHelper.mockMocInrateChanger.setCommissionsAddress(commissionSplitter.address);
           // update params
@@ -85,7 +110,10 @@ contract('CommissionSplitter', function([owner, userAccount, commissionsAccount]
           s.mintOperations
         )} Reserve tokens to mint RiskPros paying commissions`, function() {
           before(async function() {
-            await executeOperations(userAccount, s.mintOperations);
+            // Empty commission splitter just to have a more robust test
+            await commissionSplitter.split();
+
+            await executeOperations(userAccount, s.mintOperations, vendorAccount);
           });
           it(`THEN CommissionSplitter Reserve Token balance should be ${s.commissionAmount +
             s.mocAmount}`, async function() {
@@ -94,7 +122,7 @@ contract('CommissionSplitter', function([owner, userAccount, commissionsAccount]
             mocHelper.assertBigReserve(
               splitterBalance,
               s.commissionAmount + s.mocAmount,
-              'user reserveToken balance is incorrect'
+              'Commission splitters reserveToken balance is incorrect'
             );
           });
 
@@ -141,6 +169,64 @@ contract('CommissionSplitter', function([owner, userAccount, commissionsAccount]
           });
         });
       });
+    });
+  });
+
+  describe('WHEN split is made with MocTokens', function() {
+    before(async function() {
+      await mocHelper.revertState();
+
+      const commissionSplitterChangerDeploy = await CommissionSplitterChangerDeploy.new(
+        commissionSplitter.address,
+        mocToken.address,
+        mocCommissionsAccount,
+        {
+          from: owner
+        }
+      );
+
+      // update params
+      await mocHelper.governor.executeChange(commissionSplitterChangerDeploy.address);
+
+      // Set Final commissionAddress Proportion from scenario
+      await mocHelper.setFinalCommissionAddress(commissionsAccount);
+    });
+
+    it('THEN should receive 100% of the MocTokens on the mocTokenCommissionAddress', async function() {
+      const mocTokenAmount = '510000003';
+      await mocHelper.mintMoCToken(commissionSplitter.address, mocTokenAmount, owner);
+
+      let commissionSpliterMocTokenBalance = await mocHelper.getMoCBalance(
+        commissionSplitter.address
+      );
+      mocHelper.assertBigReserve(
+        commissionSpliterMocTokenBalance,
+        mocTokenAmount,
+        'Commission Splitter initial MoC Token balance is incorrect'
+      );
+      let mocCommissionsAccountBalance = await mocHelper.getMoCBalance(mocCommissionsAccount);
+      mocHelper.assertBigReserve(
+        mocCommissionsAccountBalance,
+        '0',
+        'Initial MoC Token Commission balance is incorrect'
+      );
+
+      // Send the funds to the comission address
+      await commissionSplitter.split();
+
+      commissionSpliterMocTokenBalance = await mocHelper.getMoCBalance(commissionSplitter.address);
+      mocHelper.assertBigReserve(
+        commissionSpliterMocTokenBalance,
+        '0',
+        'Commission Splitter end MoC Token balance is incorrect'
+      );
+
+      mocCommissionsAccountBalance = await mocHelper.getMoCBalance(mocCommissionsAccount);
+      mocHelper.assertBigReserve(
+        mocCommissionsAccountBalance,
+        mocTokenAmount,
+        'End MoC Token Commission account balance is incorrect'
+      );
     });
   });
 });

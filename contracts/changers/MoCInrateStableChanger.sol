@@ -1,5 +1,6 @@
-pragma solidity 0.5.8;
-import "../MoCState.sol";
+pragma solidity ^0.5.8;
+
+import "../MoCInrate.sol";
 import "moc-governance/contracts/Governance/ChangeContract.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 /**

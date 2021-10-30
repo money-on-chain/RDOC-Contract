@@ -1,0 +1,52 @@
+{
+  "proxyAddresses": {
+    "MoC": "",
+    "MoCConnector": "",
+    "MoCExchange": "",
+    "MoCSettlement": "",
+    "MoCInrate": "",
+    "MoCState": "",
+    "MoCVendors": "",
+    "CommissionSplitter": ""
+  },
+  "implementationAddresses": {
+    "MoC": "",
+    "MoCConnector": "",
+    "MoCExchange": "",
+    "MoCSettlement": "",
+    "MoCInrate": "",
+    "MoCState": "",
+    "ProxyAdmin": "",
+    "UpgradeDelegator": "",
+    "Governor": "",
+    "MoCToken": "",
+    "MoCPriceProvider": "",
+    "MoCVendors": "",
+    "MoCHelperLib": "",
+    "CommissionSplitter": ""
+  },
+  "valuesToAssign": {
+    "commissionRates": {
+      "MINT_RISKPRO_FEES_RESERVE": 0.001,
+      "REDEEM_RISKPRO_FEES_RESERVE": 0.001,
+      "MINT_STABLETOKEN_FEES_RESERVE": 0.001,
+      "REDEEM_STABLETOKEN_FEES_RESERVE": 0.001,
+      "MINT_RISKPROX_FEES_RESERVE": 0.001,
+      "REDEEM_RISKPROX_FEES_RESERVE": 0.001,
+      "MINT_RISKPRO_FEES_MOC": 0.0005,
+      "REDEEM_RISKPRO_FEES_MOC": 0.0005,
+      "MINT_STABLETOKEN_FEES_MOC": 0.0005,
+      "REDEEM_STABLETOKEN_FEES_MOC": 0.0005,
+      "MINT_RISKPROX_FEES_MOC": 0.0005,
+      "REDEEM_RISKPROX_FEES_MOC": 0.0005
+    },
+    "liquidationEnabled": false,
+    "protected": "1.5",
+    "vendorGuardianAddress": "",
+    "mocTokenCommissionsAddress": ""
+  },
+  "changerAddresses": {
+    "BatchChanger": ""
+  },
+  "governorOwnerAddress": ""
+}

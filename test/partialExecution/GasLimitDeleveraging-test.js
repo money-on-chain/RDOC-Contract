@@ -5,21 +5,38 @@ let mocHelper;
 let BUCKET_X2;
 let initialAccounts;
 let afterAccounts;
-contract('MoC: Gas limit on deleveraging', function([owner, ...accounts]) {
+
+const initializeDeleveraging = async (owner, vendorAccount, accounts) => {
+  await mocHelper.mintRiskProAmount(owner, 10 * accounts.length, vendorAccount);
+  await mocHelper.mintStableTokenAmount(owner, 50000 * accounts.length, vendorAccount);
+  await executeBatched(
+    accounts.map(account => () => mocHelper.mintRiskProx(account, BUCKET_X2, 5, vendorAccount))
+  );
+};
+
+contract.skip('MoC: Gas limit on deleveraging', function([owner, vendorAccount, ...accounts]) {
   initialAccounts = accounts.slice(0, 300);
   afterAccounts = accounts.slice(300, 500);
   before(async function() {
     this.timeout(500000);
-    mocHelper = await testHelperBuilder({ owner, accounts: [owner, ...accounts], useMock: true });
+    mocHelper = await testHelperBuilder({
+      owner,
+      accounts: [owner, vendorAccount, ...accounts],
+      useMock: true
+    });
     ({ BUCKET_X2 } = mocHelper);
     this.mocSettlement = mocHelper.mocSettlement;
     this.riskProx = mocHelper.riskProx;
     this.moc = mocHelper.moc;
+
     mocHelper.revertState();
 
-    await initializeDeleveraging(owner, initialAccounts.slice(0, 100));
-    await initializeDeleveraging(owner, initialAccounts.slice(100, 200));
-    await initializeDeleveraging(owner, initialAccounts.slice(200, 300));
+    // Register vendor for test
+    await mocHelper.registerVendor(vendorAccount, 0, owner);
+
+    await initializeDeleveraging(owner, vendorAccount, initialAccounts.slice(0, 100));
+    await initializeDeleveraging(owner, vendorAccount, initialAccounts.slice(100, 200));
+    await initializeDeleveraging(owner, vendorAccount, initialAccounts.slice(200, 300));
   });
 
   describe(`WHEN there are ${initialAccounts.length} accounts which minted BProx`, function() {
@@ -39,8 +56,8 @@ contract('MoC: Gas limit on deleveraging', function([owner, ...accounts]) {
     });
     describe(`AND ${afterAccounts.length} accounts also minted BProx`, function() {
       beforeEach(async function() {
-        await initializeDeleveraging(owner, afterAccounts.slice(0, 100));
-        await initializeDeleveraging(owner, afterAccounts.slice(100, 200));
+        await initializeDeleveraging(owner, vendorAccount, afterAccounts.slice(0, 100));
+        await initializeDeleveraging(owner, vendorAccount, afterAccounts.slice(100, 200));
       });
       it(`THEN must be ${initialAccounts.length +
         afterAccounts.length} active addresses`, async function() {
@@ -52,7 +69,7 @@ contract('MoC: Gas limit on deleveraging', function([owner, ...accounts]) {
         );
       });
     });
-    describe('WHEN BTC price changes to 5000 USD', function() {
+    describe('WHEN ReserveToken price changes to 5000 USD', function() {
       beforeEach(async function() {
         await mocHelper.setReserveTokenPrice(5000 * mocHelper.MOC_PRECISION);
       });
@@ -88,7 +105,7 @@ contract('MoC: Gas limit on deleveraging', function([owner, ...accounts]) {
     describe(`WHEN ${accoutsNewLiquidation.length} minted BProx`, function() {
       it(`THEN must be ${accoutsNewLiquidation.length} active addresses`, async function() {
         await mocHelper.setReserveTokenPrice(10000 * mocHelper.MOC_PRECISION);
-        await initializeDeleveraging(owner, accoutsNewLiquidation);
+        await initializeDeleveraging(owner, vendorAccount, accoutsNewLiquidation);
         const activeAddressLength = await this.riskProx.getActiveAddressesCount(BUCKET_X2);
         mocHelper.assertBig(
           activeAddressLength,
@@ -106,7 +123,7 @@ contract('MoC: Gas limit on deleveraging', function([owner, ...accounts]) {
       });
     });
 
-    describe('WHEN BTC price changes to 2500', function() {
+    describe('WHEN ReserveToken price changes to 2500', function() {
       beforeEach(async function() {
         await mocHelper.setReserveTokenPrice(2500 * mocHelper.MOC_PRECISION);
       });
@@ -137,11 +154,3 @@ contract('MoC: Gas limit on deleveraging', function([owner, ...accounts]) {
     });
   });
 });
-
-const initializeDeleveraging = async (owner, accounts) => {
-  await mocHelper.mintRiskProAmount(owner, 10 * accounts.length);
-  await mocHelper.mintStableTokenAmount(owner, 50000 * accounts.length);
-  await executeBatched(
-    accounts.map(account => () => mocHelper.mintRiskProx(account, BUCKET_X2, 5))
-  );
-};

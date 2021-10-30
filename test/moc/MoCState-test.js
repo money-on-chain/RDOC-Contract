@@ -5,16 +5,19 @@ let toContractBN;
 let BUCKET_C0;
 let BUCKET_X2;
 
-contract('MoC', function([owner]) {
+contract('MoC', function([owner, vendorAccount]) {
   before(async function() {
-    mocHelper = await testHelperBuilder({ owner, accounts: [owner] });
+    mocHelper = await testHelperBuilder({ owner, accounts: [owner, vendorAccount] });
     ({ toContractBN, BUCKET_C0, BUCKET_X2 } = mocHelper);
     this.mocState = mocHelper.mocState;
     this.moc = mocHelper.moc;
   });
 
-  beforeEach(function() {
-    return mocHelper.revertState();
+  beforeEach(async function() {
+    await mocHelper.revertState();
+
+    // Register vendor for test
+    await mocHelper.registerVendor(vendorAccount, 0, owner);
   });
 
   describe('State variables', function() {
@@ -23,7 +26,9 @@ contract('MoC', function([owner]) {
     const baseState = {
       nRiskPro: 0,
       nStableTokens: 0,
-      reservePrice: { from: 10000, to: 10000 }
+      reservePrice: { from: 10000, to: 10000 },
+      nStableTokenReserveAmount: 0,
+      riskProReserveTokenAmount: 0
     };
 
     const states = [
@@ -94,10 +99,10 @@ contract('MoC', function([owner]) {
               await mocHelper.setSmoothingFactor(0.5 * 10 ** 18);
 
               if (state.nRiskPro) {
-                await mocHelper.mintRiskProAmount(owner, state.nRiskPro);
+                await mocHelper.mintRiskProAmount(owner, state.nRiskPro, vendorAccount);
               }
               if (state.nStableTokens) {
-                await mocHelper.mintStableTokenAmount(owner, state.nStableTokens);
+                await mocHelper.mintStableTokenAmount(owner, state.nStableTokens, vendorAccount);
               }
 
               await mocHelper.setReserveTokenPrice(toContractBN(state.reservePrice.to, 'USD'));

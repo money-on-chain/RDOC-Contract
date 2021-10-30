@@ -4,9 +4,14 @@ let mocHelper;
 let toContractBN;
 let BUCKET_C0;
 
-contract('MoC: RiskPro holder interests payment', function([owner, account, targetAddr]) {
+contract('MoC: RiskPro holder interests payment', function([
+  owner,
+  account,
+  targetAddr,
+  vendorAccount
+]) {
   before(async function() {
-    const accounts = [owner, account, targetAddr];
+    const accounts = [owner, account, targetAddr, vendorAccount];
     mocHelper = await testHelperBuilder({ owner, accounts, useMock: true });
     ({ toContractBN } = mocHelper);
     this.moc = mocHelper.moc;
@@ -16,8 +21,11 @@ contract('MoC: RiskPro holder interests payment', function([owner, account, targ
     ({ BUCKET_C0 } = mocHelper);
   });
 
-  beforeEach(function() {
-    return mocHelper.revertState();
+  beforeEach(async function() {
+    await mocHelper.revertState();
+
+    // Register vendor for test
+    await mocHelper.registerVendor(vendorAccount, 0, owner);
   });
 
   const scenarios = [
@@ -51,7 +59,11 @@ contract('MoC: RiskPro holder interests payment', function([owner, account, targ
     let beforeTargetAddressBalance = 0;
     describe('GIVEN there are 2 ReserveTokens in the C0 nReserveToken Bucket', function() {
       beforeEach(async function() {
-        await mocHelper.mintRiskPro(account, toContractBN(s.riskProMintReserveToken));
+        await mocHelper.mintRiskPro(
+          account,
+          toContractBN(s.riskProMintReserveToken),
+          vendorAccount
+        );
         await this.mockMocInrateChanger.setRiskProRate(toContractBN(s.riskProHolderRate));
         await this.mockMocInrateChanger.setRiskProInterestAddress(s.riskProInterestTargetAddress);
         await this.mockMocInrateChanger.setRiskProInterestBlockSpan(s.blockSpan);
@@ -67,11 +79,11 @@ contract('MoC: RiskPro holder interests payment', function([owner, account, targ
           'Weekly RiskPro holders is deferent'
         );
       });
-      it('THEN bitpro blockSpan is correct', async function() {
+      it('THEN RiskPro blockSpan is correct', async function() {
         const riskProBlockSpan = await mocHelper.getRiskProInterestBlockSpan();
         assert(riskProBlockSpan, s.blockSpan, 'RiskPro holders blockSpan is deferent');
       });
-      it('THEN bitpro weekly rate is correct', async function() {
+      it('THEN RiskPro weekly rate is correct', async function() {
         const riskProRate = await mocHelper.getRiskProRate();
         assert(riskProRate, s.riskProHolderRate, 'RiskPro holders rate is deferent');
       });
