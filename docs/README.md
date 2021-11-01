@@ -10,4 +10,4 @@ The rationale behind this is that deposits of RIF help collateralize the RDOCs, 
 
 Please read our documentation: 
 
-## [Documentation wiki](https://docs.moneyonchain.com/main-contract/)
+## [Documentation wiki](https://docs.moneyonchain.com/rdoc-contract/)
