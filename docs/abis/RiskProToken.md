@@ -17,15 +17,23 @@ View Source: [contracts/token/RiskProToken.sol](../../contracts/token/RiskProTok
 
 ```js
 string private _name;
-string private _symbol;
-uint8 private _decimals;
-
 ```
+---
+
+```js
+string private _symbol;
+```
+---
+
+```js
+uint8 private _decimals;
+```
+---
 
 ## Functions
 
-- [()](#)
-- [()](#)
+- [()](#riskprotokensol)
+- [()](#riskprotokensol)
 
 ### 
 

@@ -41,44 +41,151 @@ struct InitializeParams {
 **Constants & Variables**
 
 ```js
-//public members
 enum IMoCState.States public state;
-uint256 public dayBlockSpan;
-uint256 public peg;
-uint256 public riskProMaxDiscountRate;
-uint256 public liq;
-uint256 public utpdu;
-uint256 public reserves;
-uint256 public liquidationPrice;
-uint256 public maxMintRiskPro;
-bool public liquidationEnabled;
-uint256 public protected;
-
-//internal members
-contract PriceProvider internal priceProvider;
-contract IMoCSettlement internal mocSettlement;
-address internal DEPRECATED_mocConverter;
-contract IERC20 internal stableToken;
-contract RiskProToken internal riskProToken;
-contract MoCRiskProxManager internal riskProxManager;
-contract PriceProvider internal mocPriceProvider;
-contract MoCToken internal mocToken;
-address internal mocVendors;
-
-//private members
-uint256[50] private upgradeGap;
-
 ```
-
-**Events**
+---
 
 ```js
-event StateTransition(enum IMoCState.States  newState);
-event PriceProviderUpdated(address  oldAddress, address  newAddress);
-event MoCPriceProviderUpdated(address  oldAddress, address  newAddress);
-event MoCTokenChanged(address  mocTokenAddress);
-event MoCVendorsChanged(address  mocVendorsAddress);
+uint256 public dayBlockSpan;
 ```
+---
+
+```js
+uint256 public peg;
+```
+---
+
+```js
+uint256 public riskProMaxDiscountRate;
+```
+---
+
+```js
+uint256 public liq;
+```
+---
+
+```js
+uint256 public utpdu;
+```
+---
+
+```js
+uint256 public reserves;
+```
+---
+
+```js
+uint256 public liquidationPrice;
+```
+---
+
+```js
+uint256 public maxMintRiskPro;
+```
+---
+
+```js
+bool public liquidationEnabled;
+```
+---
+
+```js
+uint256 public protected;
+```
+---
+
+```js
+contract PriceProvider internal priceProvider;
+```
+---
+
+```js
+contract IMoCSettlement internal mocSettlement;
+```
+---
+
+```js
+address internal DEPRECATED_mocConverter;
+```
+---
+
+```js
+contract IERC20 internal stableToken;
+```
+---
+
+```js
+contract RiskProToken internal riskProToken;
+```
+---
+
+```js
+contract MoCRiskProxManager internal riskProxManager;
+```
+---
+
+```js
+contract PriceProvider internal mocPriceProvider;
+```
+---
+
+```js
+contract MoCToken internal mocToken;
+```
+---
+
+```js
+address internal mocVendors;
+```
+---
+
+```js
+uint256[50] private upgradeGap;
+```
+---
+
+## StateTransition
+
+**Parameters**
+
+| Name        | Type           | Description  |
+| ------------- |------------- | -----|
+| newState | enum IMoCState.States |  | 
+
+## PriceProviderUpdated
+
+**Parameters**
+
+| Name        | Type           | Description  |
+| ------------- |------------- | -----|
+| oldAddress | address |  | 
+| newAddress | address |  | 
+
+## MoCPriceProviderUpdated
+
+**Parameters**
+
+| Name        | Type           | Description  |
+| ------------- |------------- | -----|
+| oldAddress | address |  | 
+| newAddress | address |  | 
+
+## MoCTokenChanged
+
+**Parameters**
+
+| Name        | Type           | Description  |
+| ------------- |------------- | -----|
+| mocTokenAddress | address |  | 
+
+## MoCVendorsChanged
+
+**Parameters**
+
+| Name        | Type           | Description  |
+| ------------- |------------- | -----|
+| mocVendorsAddress | address |  | 
 
 ## Functions
 

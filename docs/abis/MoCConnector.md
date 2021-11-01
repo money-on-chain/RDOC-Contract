@@ -18,26 +18,69 @@ Provides access control between all MoC Contracts
 **Constants & Variables**
 
 ```js
-//public members
 address payable public moc;
-address public stableToken;
-address public riskProToken;
-address public riskProxManager;
-address public mocState;
-address public DEPRECATED_mocConverter;
-address public mocSettlement;
-address public mocExchange;
-address public mocInrate;
-address public mocBurnout;
-address public reserveToken;
-
-//internal members
-bool internal initialized;
-
-//private members
-uint256[50] private upgradeGap;
-
 ```
+---
+
+```js
+address public stableToken;
+```
+---
+
+```js
+address public riskProToken;
+```
+---
+
+```js
+address public riskProxManager;
+```
+---
+
+```js
+address public mocState;
+```
+---
+
+```js
+address public DEPRECATED_mocConverter;
+```
+---
+
+```js
+address public mocSettlement;
+```
+---
+
+```js
+address public mocExchange;
+```
+---
+
+```js
+address public mocInrate;
+```
+---
+
+```js
+address public mocBurnout;
+```
+---
+
+```js
+address public reserveToken;
+```
+---
+
+```js
+bool internal initialized;
+```
+---
+
+```js
+uint256[50] private upgradeGap;
+```
+---
 
 ## Functions
 

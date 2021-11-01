@@ -21,13 +21,17 @@ you want to block a Blockable (example: BlockableGovernor )
 
 ```js
 contract Blockable public blockable;
-uint256 public unblockDate;
-
 ```
+---
+
+```js
+uint256 public unblockDate;
+```
+---
 
 ## Functions
 
-- [(Blockable _blockable, uint256 _unblockDate)](#)
+- [(Blockable _blockable, uint256 _unblockDate)](#blockersol)
 - [execute()](#execute)
 
 ### 
@@ -49,7 +53,8 @@ function (Blockable _blockable, uint256 _unblockDate) public nonpayable
 
 ⤾ overrides ChangeContract.execute
 
-Execute the changes.
+Execute the changes.Should be called by the governor, but this contract does not check that explicitly because it is not its responsability in
+the current architecture
 
 ```js
 function execute() external nonpayable

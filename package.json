@@ -42,7 +42,7 @@
   "author": "Money On Chain",
   "license": "ISC",
   "dependencies": {
-    "@thinkanddev/solidoc": "^2.0.0",
+    "@thinkanddev/solidoc": "^3.0.1",
     "moc-governance": "git+ssh://git@github.com:money-on-chain/Areopagus-Governance.git#v0.3.1-optimizer",
     "moment": "2.24.0",
     "openzeppelin-eth": "2.1.3",

@@ -19,19 +19,28 @@ with MoC --- governance.
 **Constants & Variables**
 
 ```js
-//private members
 contract MoCInrate private mocInrate;
-
-//public members
-uint256 public stableTmin;
-uint256 public stableTmax;
-uint256 public stablePower;
-
 ```
+---
+
+```js
+uint256 public stableTmin;
+```
+---
+
+```js
+uint256 public stableTmax;
+```
+---
+
+```js
+uint256 public stablePower;
+```
+---
 
 ## Functions
 
-- [(MoCInrate _mocInrate, uint256 _stableTmin, uint256 _stableTmax, uint256 _stablePower)](#)
+- [(MoCInrate _mocInrate, uint256 _stableTmin, uint256 _stableTmax, uint256 _stablePower)](#mocinratestablechangersol)
 - [execute()](#execute)
 - [setStableTmin(uint256 _stableTmin)](#setstabletmin)
 - [setStableTmax(uint256 _stableTmax)](#setstabletmax)

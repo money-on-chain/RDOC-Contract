@@ -20,16 +20,29 @@ it is guaranteed that you will be blocked until that date
 **Constants & Variables**
 
 ```js
-//private members
 string private constant NOT_AUTHORIZED_TO_BLOCK;
-string private constant BLOCKED;
-string private constant THRESHOLD_TOO_LOW;
-uint256[50] private upgradeGap;
-
-//public members
-uint256 public unblockDate;
-
 ```
+---
+
+```js
+string private constant BLOCKED;
+```
+---
+
+```js
+string private constant THRESHOLD_TOO_LOW;
+```
+---
+
+```js
+uint256[50] private upgradeGap;
+```
+---
+
+```js
+uint256 public unblockDate;
+```
+---
 
 ## Modifiers
 
@@ -71,7 +84,8 @@ returns(bool)
 
 ### initialize
 
-Initialize the contract with the basic settings
+Initialize the contract with the basic settingsThis initialize replaces the constructor but it is not called automatically.
+It is necessary because of the upgradeability of the contracts
 
 ```js
 function initialize(uint256 _firstUnblockDate) public nonpayable initializer 
@@ -81,12 +95,11 @@ function initialize(uint256 _firstUnblockDate) public nonpayable initializer
 
 | Name        | Type           | Description  |
 | ------------- |------------- | -----|
-| _firstUnblockDate | uint256 | Timestamp of the first threshold that should be passed before the governor is active
-again | 
+| _firstUnblockDate | uint256 | Timestamp of the first threshold that should be passed before the governor is activeagain | 
 
 ### isAuthorizedToBlock
 
-Defines which addresses are authorized to Block and which are not
+Defines which addresses are authorized to Block and which are notShould be defined by subclasses
 
 ```js
 function isAuthorizedToBlock(address who) public view
@@ -101,7 +114,8 @@ returns(bool)
 
 ### blockUntil
 
-Blocks the governor until unblockAt
+Blocks the governor until unblockAtThe new threshold should be big enough to block the governor after the tx and the contract should not be blocked, but that is enforced
+in the executeChange function which ALWAYS should be called before calling this function because it is the only one authorizing a changer
 
 ```js
 function blockUntil(uint256 newUnblockDate) public nonpayable notBlocked 
@@ -111,6 +125,5 @@ function blockUntil(uint256 newUnblockDate) public nonpayable notBlocked
 
 | Name        | Type           | Description  |
 | ------------- |------------- | -----|
-| newUnblockDate | uint256 | Timestamp of the next threshold that should be passed before the governor is active
-again | 
+| newUnblockDate | uint256 | Timestamp of the next threshold that should be passed before the governor is activeagain | 
 
