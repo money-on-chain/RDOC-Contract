@@ -6,7 +6,8 @@ RIF On Chain runs on the [RSK network](https://www.rsk.co/) and uses the RIF tok
 
 The rationale behind this is that deposits of RIF help collateralize the RDOCs, RIFPro absorbs the USD-RIF rate fluctuations, and RIF2X is leveraged borrowing value from RIFPro and RDOC holders, with a daily interest rate being paid to the former.
 
-You can find a [full explanation about the platform starting here](rationale/main-concepts.md).
+## Documentation
 
-You can learn [how to integrate your apps to the platform here](integration/introduction-to-moc.md).
+Please read our documentation: 
 
+## [Documentation wiki](https://docs.moneyonchain.com/rdoc-contract/)
