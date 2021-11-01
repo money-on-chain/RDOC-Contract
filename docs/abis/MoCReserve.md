@@ -16,21 +16,39 @@ View Source: [contracts/base/MoCReserve.sol](../../contracts/base/MoCReserve.sol
 **Constants & Variables**
 
 ```js
-//public members
 contract IERC20 public reserveToken;
-
-//private members
-uint256[50] private upgradeGap;
-
 ```
-
-**Events**
+---
 
 ```js
-event CallRevert();
-event DepositFailed(address indexed origin, uint256  amount);
-event WithdrawFailed(address indexed destination, uint256  amount);
+uint256[50] private upgradeGap;
 ```
+---
+
+## CallRevert
+
+**Parameters**
+
+| Name        | Type           | Description  |
+| ------------- |------------- | -----|
+
+## DepositFailed
+
+**Parameters**
+
+| Name        | Type           | Description  |
+| ------------- |------------- | -----|
+| origin | address |  | 
+| amount | uint256 |  | 
+
+## WithdrawFailed
+
+**Parameters**
+
+| Name        | Type           | Description  |
+| ------------- |------------- | -----|
+| destination | address |  | 
+| amount | uint256 |  | 
 
 ## Modifiers
 

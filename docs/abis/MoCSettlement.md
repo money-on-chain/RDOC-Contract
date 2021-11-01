@@ -53,38 +53,134 @@ struct SettlementInfo {
 **Constants & Variables**
 
 ```js
-//public members
 bytes32 public constant StableToken_REDEMPTION_TASK;
-bytes32 public constant DELEVERAGING_TASK;
-bytes32 public constant SETTLEMENT_TASK;
-
-//internal members
-contract IMoCState internal mocState;
-contract IMoCExchange internal mocExchange;
-contract StableToken internal stableToken;
-contract MoCRiskProxManager internal riskProxManager;
-uint256 internal lastProcessedBlock;
-uint256 internal blockSpan;
-struct MoCSettlement.SettlementInfo internal settlementInfo;
-
-//private members
-struct MoCSettlement.RedeemRequest[] private redeemQueue;
-mapping(address => struct MoCSettlement.UserRedeemRequest) private redeemMapping;
-uint256 private redeemQueueLength;
-uint256[50] private upgradeGap;
-
 ```
-
-**Events**
+---
 
 ```js
-event RedeemRequestAlter(address indexed redeemer, bool  isAddition, uint256  delta);
-event RedeemRequestProcessed(address indexed redeemer, uint256  commission, uint256  amount);
-event SettlementRedeemStableToken(uint256  queueSize, uint256  accumCommissions, uint256  reservePrice);
-event SettlementDeleveraging(uint256  leverage, uint256  riskProxPrice, uint256  reservePrice, uint256  startBlockNumber);
-event SettlementStarted(uint256  stableTokenRedeemCount, uint256  deleveragingCount, uint256  riskProxPrice, uint256  reservePrice);
-event SettlementCompleted(uint256  commissionsPayed);
+bytes32 public constant DELEVERAGING_TASK;
 ```
+---
+
+```js
+bytes32 public constant SETTLEMENT_TASK;
+```
+---
+
+```js
+contract IMoCState internal mocState;
+```
+---
+
+```js
+contract IMoCExchange internal mocExchange;
+```
+---
+
+```js
+contract StableToken internal stableToken;
+```
+---
+
+```js
+contract MoCRiskProxManager internal riskProxManager;
+```
+---
+
+```js
+uint256 internal lastProcessedBlock;
+```
+---
+
+```js
+uint256 internal blockSpan;
+```
+---
+
+```js
+struct MoCSettlement.SettlementInfo internal settlementInfo;
+```
+---
+
+```js
+struct MoCSettlement.RedeemRequest[] private redeemQueue;
+```
+---
+
+```js
+mapping(address => struct MoCSettlement.UserRedeemRequest) private redeemMapping;
+```
+---
+
+```js
+uint256 private redeemQueueLength;
+```
+---
+
+```js
+uint256[50] private upgradeGap;
+```
+---
+
+## RedeemRequestAlter
+
+**Parameters**
+
+| Name        | Type           | Description  |
+| ------------- |------------- | -----|
+| redeemer | address |  | 
+| isAddition | bool |  | 
+| delta | uint256 |  | 
+
+## RedeemRequestProcessed
+
+**Parameters**
+
+| Name        | Type           | Description  |
+| ------------- |------------- | -----|
+| redeemer | address |  | 
+| commission | uint256 |  | 
+| amount | uint256 |  | 
+
+## SettlementRedeemStableToken
+
+**Parameters**
+
+| Name        | Type           | Description  |
+| ------------- |------------- | -----|
+| queueSize | uint256 |  | 
+| accumCommissions | uint256 |  | 
+| reservePrice | uint256 |  | 
+
+## SettlementDeleveraging
+
+**Parameters**
+
+| Name        | Type           | Description  |
+| ------------- |------------- | -----|
+| leverage | uint256 |  | 
+| riskProxPrice | uint256 |  | 
+| reservePrice | uint256 |  | 
+| startBlockNumber | uint256 |  | 
+
+## SettlementStarted
+
+**Parameters**
+
+| Name        | Type           | Description  |
+| ------------- |------------- | -----|
+| stableTokenRedeemCount | uint256 |  | 
+| deleveragingCount | uint256 |  | 
+| riskProxPrice | uint256 |  | 
+| reservePrice | uint256 |  | 
+
+## SettlementCompleted
+
+**Parameters**
+
+| Name        | Type           | Description  |
+| ------------- |------------- | -----|
+| commissionsPayed | uint256 |  | 
 
 ## Modifiers
 

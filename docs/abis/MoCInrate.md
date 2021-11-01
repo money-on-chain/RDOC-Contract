@@ -27,48 +27,163 @@ struct InrateParams {
 **Constants & Variables**
 
 ```js
-//internal members
 struct MoCInrateStructs.InrateParams internal riskProxParams;
-contract IMoCState internal mocState;
-address internal DEPRECATED_mocConverter;
-contract MoCRiskProxManager internal riskProxManager;
-
-//public members
-uint256 public lastDailyPayBlock;
-uint256 public riskProRate;
-address payable public riskProInterestAddress;
-uint256 public lastRiskProInterestBlock;
-uint256 public riskProInterestBlockSpan;
-address payable public commissionsAddress;
-uint256 public DEPRECATED_commissionRate;
-uint256 public stableTmin;
-uint256 public stablePower;
-uint256 public stableTmax;
-uint8 public constant MINT_RISKPRO_FEES_RESERVE;
-uint8 public constant REDEEM_RISKPRO_FEES_RESERVE;
-uint8 public constant MINT_STABLETOKEN_FEES_RESERVE;
-uint8 public constant REDEEM_STABLETOKEN_FEES_RESERVE;
-uint8 public constant MINT_RISKPROX_FEES_RESERVE;
-uint8 public constant REDEEM_RISKPROX_FEES_RESERVE;
-uint8 public constant MINT_RISKPRO_FEES_MOC;
-uint8 public constant REDEEM_RISKPRO_FEES_MOC;
-uint8 public constant MINT_STABLETOKEN_FEES_MOC;
-uint8 public constant REDEEM_STABLETOKEN_FEES_MOC;
-uint8 public constant MINT_RISKPROX_FEES_MOC;
-uint8 public constant REDEEM_RISKPROX_FEES_MOC;
-mapping(uint8 => uint256) public commissionRatesByTxType;
-
-//private members
-uint256[50] private upgradeGap;
-
 ```
-
-**Events**
+---
 
 ```js
-event InrateDailyPay(uint256  amount, uint256  daysToSettlement, uint256  nReserveBucketC0);
-event RiskProHoldersInterestPay(uint256  amount, uint256  nReserveBucketC0BeforePay);
+contract IMoCState internal mocState;
 ```
+---
+
+```js
+address internal DEPRECATED_mocConverter;
+```
+---
+
+```js
+contract MoCRiskProxManager internal riskProxManager;
+```
+---
+
+```js
+uint256 public lastDailyPayBlock;
+```
+---
+
+```js
+uint256 public riskProRate;
+```
+---
+
+```js
+address payable public riskProInterestAddress;
+```
+---
+
+```js
+uint256 public lastRiskProInterestBlock;
+```
+---
+
+```js
+uint256 public riskProInterestBlockSpan;
+```
+---
+
+```js
+address payable public commissionsAddress;
+```
+---
+
+```js
+uint256 public DEPRECATED_commissionRate;
+```
+---
+
+```js
+uint256 public stableTmin;
+```
+---
+
+```js
+uint256 public stablePower;
+```
+---
+
+```js
+uint256 public stableTmax;
+```
+---
+
+```js
+uint8 public constant MINT_RISKPRO_FEES_RESERVE;
+```
+---
+
+```js
+uint8 public constant REDEEM_RISKPRO_FEES_RESERVE;
+```
+---
+
+```js
+uint8 public constant MINT_STABLETOKEN_FEES_RESERVE;
+```
+---
+
+```js
+uint8 public constant REDEEM_STABLETOKEN_FEES_RESERVE;
+```
+---
+
+```js
+uint8 public constant MINT_RISKPROX_FEES_RESERVE;
+```
+---
+
+```js
+uint8 public constant REDEEM_RISKPROX_FEES_RESERVE;
+```
+---
+
+```js
+uint8 public constant MINT_RISKPRO_FEES_MOC;
+```
+---
+
+```js
+uint8 public constant REDEEM_RISKPRO_FEES_MOC;
+```
+---
+
+```js
+uint8 public constant MINT_STABLETOKEN_FEES_MOC;
+```
+---
+
+```js
+uint8 public constant REDEEM_STABLETOKEN_FEES_MOC;
+```
+---
+
+```js
+uint8 public constant MINT_RISKPROX_FEES_MOC;
+```
+---
+
+```js
+uint8 public constant REDEEM_RISKPROX_FEES_MOC;
+```
+---
+
+```js
+mapping(uint8 => uint256) public commissionRatesByTxType;
+```
+---
+
+```js
+uint256[50] private upgradeGap;
+```
+---
+
+## InrateDailyPay
+
+**Parameters**
+
+| Name        | Type           | Description  |
+| ------------- |------------- | -----|
+| amount | uint256 |  | 
+| daysToSettlement | uint256 |  | 
+| nReserveBucketC0 | uint256 |  | 
+
+## RiskProHoldersInterestPay
+
+**Parameters**
+
+| Name        | Type           | Description  |
+| ------------- |------------- | -----|
+| amount | uint256 |  | 
+| nReserveBucketC0BeforePay | uint256 |  | 
 
 ## Modifiers
 
@@ -126,6 +241,7 @@ modifier onlyWhenRiskProInterestsIsEnabled() internal
 - [calcMintInterestValues(bytes32 bucket, uint256 reserveTokenAmount)](#calcmintinterestvalues)
 - [calcStableTokenRedInterestValues(uint256 stableTokenAmount, uint256 reserveTokenAmount)](#calcstabletokenredinterestvalues)
 - [calcFinalRedeemInterestValue(bytes32 bucket, uint256 reserveTokenToRedeem)](#calcfinalredeeminterestvalue)
+- [calcCommissionValue(uint256 reserveTokenAmount)](#calccommissionvalue)
 - [calcCommissionValue(uint256 reserveTokenAmount, uint8 txType)](#calccommissionvalue)
 - [calculateVendorMarkup(address vendorAccount, uint256 amount)](#calculatevendormarkup)
 - [calcRedeemInterestValue(bytes32 bucket, uint256 reserveTokenToRedeem)](#calcredeeminterestvalue)
@@ -594,6 +710,25 @@ Reserves to recover in concept of interests [using reservePrecision]
 | ------------- |------------- | -----|
 | bucket | bytes32 | Bucket to use to calculate interest | 
 | reserveTokenToRedeem | uint256 | Total value from which calculate interest [using reservePrecision] | 
+
+### calcCommissionValue
+
+DEPRECATED calculates the Commission rate from the passed RBTC amount for mint/redeem operations
+
+```js
+function calcCommissionValue(uint256 reserveTokenAmount) external view
+returns(uint256)
+```
+
+**Returns**
+
+finalCommissionAmount [using reservePrecision]
+
+**Arguments**
+
+| Name        | Type           | Description  |
+| ------------- |------------- | -----|
+| reserveTokenAmount | uint256 | Total value from which apply the Commission rate [using reservePrecision] | 
 
 ### calcCommissionValue
 

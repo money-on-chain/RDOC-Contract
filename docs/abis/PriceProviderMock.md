@@ -17,13 +17,17 @@ View Source: [contracts/mocks/PriceProviderMock.sol](../../contracts/mocks/Price
 
 ```js
 bytes32 internal price;
-bool internal has;
-
 ```
+---
+
+```js
+bool internal has;
+```
+---
 
 ## Functions
 
-- [(uint256 _price)](#)
+- [(uint256 _price)](#priceprovidermocksol)
 - [peek()](#peek)
 - [poke(uint128 val_, uint32 )](#poke)
 - [post(uint128 val_, uint32 , address )](#post)

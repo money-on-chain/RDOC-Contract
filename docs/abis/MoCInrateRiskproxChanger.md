@@ -20,12 +20,12 @@ with MoC --- governance.
 
 ```js
 contract MoCInrate private mocInrate;
-
 ```
+---
 
 ## Functions
 
-- [(MoCInrate _mocInrate, uint256 riskProxMin, uint256 riskProxMax, uint256 riskProxPower)](#)
+- [(MoCInrate _mocInrate, uint256 riskProxMin, uint256 riskProxMax, uint256 riskProxPower)](#mocinrateriskproxchangersol)
 - [execute()](#execute)
 - [setRiskProxTmin(uint256 _btxcTmin)](#setriskproxtmin)
 - [setRiskProxTmax(uint256 _btxcTax)](#setriskproxtmax)

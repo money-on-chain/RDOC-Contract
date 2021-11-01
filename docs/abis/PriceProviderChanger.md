@@ -20,13 +20,17 @@ with MoC --- governance.
 
 ```js
 contract MoCState public mocState;
-address public priceProvider;
-
 ```
+---
+
+```js
+address public priceProvider;
+```
+---
 
 ## Functions
 
-- [(MoCState _mocState, address _priceProvider)](#)
+- [(MoCState _mocState, address _priceProvider)](#priceproviderchangersol)
 - [execute()](#execute)
 - [setPriceProvider(address _priceProvider)](#setpriceprovider)
 

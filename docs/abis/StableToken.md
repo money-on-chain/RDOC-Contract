@@ -17,15 +17,23 @@ View Source: [contracts/token/StableToken.sol](../../contracts/token/StableToken
 
 ```js
 string private _name;
-string private _symbol;
-uint8 private _decimals;
-
 ```
+---
+
+```js
+string private _symbol;
+```
+---
+
+```js
+uint8 private _decimals;
+```
+---
 
 ## Functions
 
-- [()](#)
-- [()](#)
+- [()](#stabletokensol)
+- [()](#stabletokensol)
 
 ### 
 

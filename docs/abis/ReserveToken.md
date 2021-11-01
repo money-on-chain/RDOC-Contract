@@ -16,16 +16,29 @@ View Source: [contracts/test-contracts/ReserveToken.sol](../../contracts/test-co
 **Constants & Variables**
 
 ```js
-//private members
 string private _name;
-string private _symbol;
-uint8 private _decimals;
-bool private failState;
-
-//public members
-mapping(address => bool) public blacklist;
-
 ```
+---
+
+```js
+string private _symbol;
+```
+---
+
+```js
+uint8 private _decimals;
+```
+---
+
+```js
+bool private failState;
+```
+---
+
+```js
+mapping(address => bool) public blacklist;
+```
+---
 
 ## Modifiers
 
@@ -45,7 +58,7 @@ modifier notBlacklisted(address account) internal
 
 ## Functions
 
-- [()](#)
+- [()](#reservetokensol)
 - [claim(uint256 amount)](#claim)
 - [setToFail(bool toFail)](#settofail)
 - [blacklistAccount(address account)](#blacklistaccount)
