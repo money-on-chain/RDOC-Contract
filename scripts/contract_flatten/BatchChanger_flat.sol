@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // File: openzeppelin-solidity/contracts/ownership/Ownable.sol
 
 pragma solidity ^0.5.0;
@@ -78,7 +79,6 @@ contract Ownable {
 
 // File: contracts/changers/BatchChanger.sol
 
-// SPDX-License-Identifier: MIT
 pragma solidity ^0.5.0;
 // solium-disable no-experimental
 pragma experimental ABIEncoderV2;
