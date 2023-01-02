@@ -44,3 +44,4 @@ mnemonic.txt
 deployConfig-development*.json
 deployConfig-coverage*.json
 deployConfig-regtest*.json
+.git/
