@@ -1,0 +1,2 @@
+cd hardhat
+npx commitlint --edit $1

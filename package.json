@@ -1,6 +1,6 @@
 {
   "name": "rdoc-contract",
-  "version": "0.1.15",
+  "version": "0.1.16",
   "private": true,
   "homepage": "https://github.com/money-on-chain/RDOC-Contract",
   "description": "RIF collateralized stablecoin using decentralized three-token system",
@@ -25,6 +25,7 @@
     "deploy-reset-development": "rm zos.dev-*.json; rm -r build/contracts; cat zos.json.empty > zos.json; npx truffle migrate --network development --reset",
     "deploy-reset-qaTestnet": "rm zos.dev-*.json; rm -r build/contracts; cat zos.json.empty > zos.json; npx truffle migrate --network rdocTestnetAlpha --reset",
     "deploy-reset-mocTestnet": "rm zos.dev-*.json; rm -r build/contracts; cat zos.json.empty > zos.json; npx truffle migrate --network rdocTestnet --reset",
+    "deploy-reset-devTestnet": "rm zos.dev-*.json; rm -r build/contracts; cat zos.json.empty > zos.json; npx truffle migrate --network devTestnet --reset",
     "deploy-reset-mocMainnet": "rm zos.dev-*.json; rm -r build/contracts; cat zos.json.empty > zos.json; npx truffle migrate --network rdocMainnet --reset",
     "pretty-sc": "prettier --write **/*.sol",
     "contract-size": "npx truffle compile; node calcSize.js",

@@ -2,7 +2,7 @@
 
 ## MoCInrate
 
-Deals with interest payments on leverage deposits and defines the interest rates to trade with RDOC and RIF2X. Also with the commission rates to operate on the RIF On Chain platform.
+Deals with the commission rates to operate on the RIF On Chain platform.
 
 - mainnet: [0x1DaB07c4FD07d6eE1359a5198ACa2DEe64F371f3](https://explorer.rsk.co/address/0x1DaB07c4FD07d6eE1359a5198ACa2DEe64F371f3)
 - testnet: [0x4C54053845F4f219AddB43ef3A7d4478E89a2A47](https://explorer.testnet.rsk.co/address/0x4C54053845F4f219AddB43ef3A7d4478E89a2A47)

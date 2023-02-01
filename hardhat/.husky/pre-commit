@@ -1,0 +1,2 @@
+cd hardhat
+npm run lint
