@@ -14,7 +14,6 @@ import { HardhatUserConfig } from "hardhat/config";
 import { NetworkUserConfig } from "hardhat/types";
 import "solidity-coverage";
 import "hardhat-storage-layout";
-import "hardhat-storage-layout-diff";
 
 dotenvConfig({ path: resolve(__dirname, "./.env") });
 
