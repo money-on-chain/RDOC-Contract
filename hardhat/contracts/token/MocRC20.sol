@@ -65,8 +65,9 @@ contract MocRC20 is IMocRC20, AccessControlEnumerableUpgradeable, ERC20Upgradeab
      *
      * - the caller must have the `MINTER_ROLE`.
      */
-    function mint(address to, uint256 amount) external virtual onlyRole(MINTER_ROLE) {
+    function mint(address to, uint256 amount) external virtual onlyRole(MINTER_ROLE) returns (bool) {
         _mint(to, amount);
+        return true;
     }
 
     /**
@@ -76,8 +77,9 @@ contract MocRC20 is IMocRC20, AccessControlEnumerableUpgradeable, ERC20Upgradeab
      *
      * - the caller must have the `BURNER_ROLE`.
      */
-    function burn(address to, uint256 amount) external virtual onlyRole(BURNER_ROLE) {
+    function burn(address to, uint256 amount) external virtual onlyRole(BURNER_ROLE) returns (bool) {
         _burn(to, amount);
+        return true;
     }
 
     /**

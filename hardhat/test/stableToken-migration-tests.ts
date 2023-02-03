@@ -1,6 +1,8 @@
 import { Address } from "hardhat-deploy/dist/types";
 import { ethers, getNamedAccounts } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { ContractTransaction } from "ethers";
+import { expect } from "chai";
 import {
   MoC,
   MoCExchangeOld,
@@ -13,7 +15,7 @@ import {
   UpgradeDelegator,
 } from "../typechain";
 import { fixtureDeployed } from "./fixture";
-import { deployContract, pEth } from "./helpers/utils";
+import { Balance, deployContract, pEth } from "./helpers/utils";
 import { assertPrec } from "./helpers/assertHelper";
 
 describe("Feature: Stable Token migration", () => {
@@ -44,12 +46,28 @@ describe("Feature: Stable Token migration", () => {
       await reserveToken.approve(mocMoc.address, pEth(100000));
       await mocMoc.mintRiskPro(pEth(100000));
     });
-    describe("AND alice has 100 stable tokens", async () => {
+    describe("AND alice has 1000000 StableToken", async () => {
       beforeEach(async () => {
         await reserveToken.connect(aliceSigner).approve(mocMoc.address, pEth(100));
         await mocMoc.connect(aliceSigner).mintStableToken(pEth(100));
-        // TODO: why i sent 100 and receive 1000000?
         assertPrec(await stableToken.balanceOf(alice), pEth(1000000));
+      });
+      describe("WHEN alice redeems 10 StableTokenV1", async () => {
+        let aliceReserveTokenBalanceBefore: Balance;
+        let aliceStableTokenV1BalanceBefore: Balance;
+        beforeEach(async () => {
+          aliceReserveTokenBalanceBefore = await reserveToken.balanceOf(alice);
+          aliceStableTokenV1BalanceBefore = await stableToken.balanceOf(alice);
+          await mocMoc.connect(aliceSigner).redeemFreeStableToken(pEth(10));
+        });
+        it("THEN alice StableToken balance decrease by 10", async () => {
+          const diff = aliceStableTokenV1BalanceBefore.sub(await stableToken.balanceOf(alice));
+          assertPrec(diff, pEth(10));
+        });
+        it("THEN alice ReserveToken balance increase by 0.001", async () => {
+          const diff = (await reserveToken.balanceOf(alice)).sub(aliceReserveTokenBalanceBefore);
+          assertPrec(diff, pEth("0.001"));
+        });
       });
       describe("AND mocExchangeV2 and StableTokenMigrationChanger are deployed", async () => {
         let changer: StableTokenMigrationChanger;
@@ -70,9 +88,77 @@ describe("Feature: Stable Token migration", () => {
           beforeEach(async () => {
             await changer.execute();
           });
-          it("WHEN alice tries to redeem StableTokenV1 before migrate them", async () => {
-            await mocMoc.redeemFreeStableToken(pEth(100));
-            assertPrec(await stableToken.balanceOf(alice), pEth(1000000));
+          it("THEN StableTokenV1 and StableTokenV2 total supply are the same", async () => {
+            assertPrec(await stableToken.totalSupply(), await stableTokenV2.totalSupply());
+          });
+          it("THEN TokenMigrator contract has all StableTokenV2 total supply", async () => {
+            assertPrec(await stableTokenV2.balanceOf(tokenMigrator.address), await stableTokenV2.totalSupply());
+          });
+          describe("WHEN alice tries to redeem StableTokenV1 before migrate them", async () => {
+            let aliceReserveTokenBalanceBefore: Balance;
+            beforeEach(async () => {
+              aliceReserveTokenBalanceBefore = await reserveToken.balanceOf(alice);
+              await mocMoc.connect(aliceSigner).redeemFreeStableToken(pEth(100));
+            });
+            it("THEN because alice StableToken balance is 0 she redeems nothing", async () => {
+              assertPrec(await stableToken.balanceOf(alice), pEth(1000000));
+              assertPrec(await reserveToken.balanceOf(alice), aliceReserveTokenBalanceBefore);
+            });
+          });
+          describe("WHEN alice mints 1000000 StableToken again", () => {
+            let aliceStableTokenV1BalanceBefore: Balance;
+            let aliceStableTokenV2BalanceBefore: Balance;
+            beforeEach(async () => {
+              aliceStableTokenV1BalanceBefore = await stableToken.balanceOf(alice);
+              aliceStableTokenV2BalanceBefore = await stableTokenV2.balanceOf(alice);
+              await reserveToken.connect(aliceSigner).approve(mocMoc.address, pEth(100));
+              await mocMoc.connect(aliceSigner).mintStableToken(pEth(100));
+            });
+            it("THEN alice StableTokenV1 balance doesn`t change", async () => {
+              assertPrec(await stableToken.balanceOf(alice), aliceStableTokenV1BalanceBefore);
+            });
+            it("THEN alice receives 1000000 StableTokenV2", async () => {
+              const diff = (await stableTokenV2.balanceOf(alice)).sub(aliceStableTokenV2BalanceBefore);
+              assertPrec(diff, pEth(1000000));
+            });
+          });
+          describe("AND alice migrates her StableTokens", () => {
+            let aliceStableTokenV1BalanceBefore: Balance;
+            let migratorStableTokenV1BalanceBefore: Balance;
+            let migratorStableTokenV2BalanceBefore: Balance;
+            let tx: ContractTransaction;
+            beforeEach(async () => {
+              aliceStableTokenV1BalanceBefore = await stableToken.balanceOf(alice);
+              migratorStableTokenV1BalanceBefore = await stableToken.balanceOf(tokenMigrator.address);
+              migratorStableTokenV2BalanceBefore = await stableTokenV2.balanceOf(tokenMigrator.address);
+              await stableToken.connect(aliceSigner).approve(tokenMigrator.address, aliceStableTokenV1BalanceBefore);
+              tx = await tokenMigrator.connect(aliceSigner).migrateToken();
+            });
+            it("THEN alice StableTokenV1 balance is 0", async () => {
+              assertPrec(await stableToken.balanceOf(alice), 0);
+            });
+            it("THEN alice StableTokenV2 balance is updated with StableTokenV1 balance before", async () => {
+              assertPrec(await stableTokenV2.balanceOf(alice), aliceStableTokenV1BalanceBefore);
+            });
+            it("THEN TokenMigrator StableTokenV1 balance increase alice balance", async () => {
+              const diff = (await stableToken.balanceOf(tokenMigrator.address)).sub(migratorStableTokenV1BalanceBefore);
+              assertPrec(diff, aliceStableTokenV1BalanceBefore);
+            });
+            it("THEN TokenMigrator StableTokenV2 balance decrease alice balance", async () => {
+              const diff = migratorStableTokenV2BalanceBefore.sub(await stableTokenV2.balanceOf(tokenMigrator.address));
+              assertPrec(diff, aliceStableTokenV1BalanceBefore);
+            });
+            it("THEN a TokenMigrated event is emitted", async function () {
+              await expect(tx).to.emit(tokenMigrator, "TokenMigrated").withArgs(alice, aliceStableTokenV1BalanceBefore);
+            });
+            describe("WHEN alice tries to migrates StableTokensV1 again", () => {
+              it("THEN tx reverts because doesn't have balance", async () => {
+                await expect(tokenMigrator.connect(aliceSigner).migrateToken()).to.be.revertedWithCustomError(
+                  tokenMigrator,
+                  "InsufficientTokenV1Balance",
+                );
+              });
+            });
           });
         });
       });

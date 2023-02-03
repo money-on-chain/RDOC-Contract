@@ -2,6 +2,7 @@ import { ethers } from "hardhat";
 import { BigNumber } from "@ethersproject/bignumber";
 
 export const gasLimit = 6800000;
+export type Balance = BigNumber;
 
 export const deployUUPSProxy = async (contract: string, typechain: any) => {
   const MocImplementationFactory = await ethers.getContractFactory(contract);

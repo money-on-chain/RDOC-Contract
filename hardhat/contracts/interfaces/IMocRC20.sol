@@ -12,13 +12,13 @@ interface IMocRC20 is IERC20Upgradeable {
      * @dev Creates `amount` new tokens for `to`.
      * See {ERC20-_mint}.
      */
-    function mint(address to, uint256 amount) external;
+    function mint(address to, uint256 amount) external returns (bool);
 
     /**
      * @dev Burns a specific `amount` of tokens for `to`.
      * * See {ERC20-_burn}.
      */
-    function burn(address to, uint256 amount) external;
+    function burn(address to, uint256 amount) external returns (bool);
 
     /**
      * @dev returns true if the `_account` address has full control over this token

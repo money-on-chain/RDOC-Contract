@@ -4,6 +4,8 @@ pragma solidity 0.8.16;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract TokenMigrator {
+    error InsufficientTokenV1Balance();
+
     IERC20 public immutable tokenV1;
     IERC20 public immutable tokenV2;
     uint256 public _totalMigrated;
@@ -28,12 +30,13 @@ contract TokenMigrator {
      * @notice executes the migration from Token V1 to Token V2.
      * Users need to give allowance to this contract to transfer Token V1 before executing this transaction.
      * The migration ratio is 1:1
-     * @param amount_ the amount of Token V1 to be migrated
      */
-    function migrateToken(uint256 amount_) external {
-        _totalMigrated += amount_;
-        tokenV1.transferFrom(msg.sender, address(this), amount_);
-        tokenV2.transfer(msg.sender, amount_);
-        emit TokenMigrated(msg.sender, amount_);
+    function migrateToken() external {
+        uint256 amount = tokenV1.balanceOf(msg.sender);
+        if (amount == 0) revert InsufficientTokenV1Balance();
+        _totalMigrated += amount;
+        tokenV1.transferFrom(msg.sender, address(this), amount);
+        tokenV2.transfer(msg.sender, amount);
+        emit TokenMigrated(msg.sender, amount);
     }
 }
