@@ -37,9 +37,9 @@ import {
   TokenMigrator__factory,
   UpgradeDelegator,
   UpgradeDelegator__factory,
+  MoCExchange_v020,
+  MoCExchange_v020__factory,
 } from "../typechain";
-import { MoCExchangeOld__factory } from "../typechain/factories/contracts/MoCExchange_v020.sol/MoCExchangeOld__factory";
-import { MoCExchangeOld } from "../typechain/contracts/MoCExchange_v020.sol/MoCExchangeOld";
 import { deployContract, deployTransparentProxy, baseParams, pEth, deployUUPSProxy } from "./helpers/utils";
 
 export const fixtureDeployed = memoizee(
@@ -51,7 +51,7 @@ export const fixtureDeployed = memoizee(
     mocSettlement: MoCSettlementMock;
     mocInrate: MoCInrate;
     mocVendors: MoCVendors;
-    mocExchangeOld: MoCExchangeOld;
+    mocExchange_v020: MoCExchange_v020;
     riskProxManager: MoCRiskProxManager;
     stopper: Stopper;
     mocCommissionSplitter: CommissionSplitter;
@@ -98,10 +98,10 @@ export const fixtureDeployed = memoizee(
         proxyAdmin.address,
         MoCVendors__factory,
       );
-      const mocExchangeOld: MoCExchangeOld = await deployTransparentProxy(
-        "MoCExchangeOld",
+      const mocExchange_v020: MoCExchange_v020 = await deployTransparentProxy(
+        "MoCExchange_v020",
         proxyAdmin.address,
-        MoCExchangeOld__factory,
+        MoCExchange_v020__factory,
         {
           libraries: { MoCHelperLib: mocHelperLib.address },
         },
@@ -142,7 +142,7 @@ export const fixtureDeployed = memoizee(
         riskProxManager.address,
         mocState.address,
         mocSettlement.address,
-        mocExchangeOld.address,
+        mocExchange_v020.address,
         mocInrate.address,
         deployer,
         reserveToken.address,
@@ -154,7 +154,7 @@ export const fixtureDeployed = memoizee(
         baseParams.startStoppable,
       );
       await stopper.initialize(deployer);
-      await mocExchangeOld.initialize(mocConnector.address);
+      await mocExchange_v020.initialize(mocConnector.address);
       await mocState[
         "initialize((address,address,address,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,address,address,address,bool,uint256))"
       ]({
@@ -221,13 +221,13 @@ export const fixtureDeployed = memoizee(
 
       await reserveToken.claim(pEth(100000000000));
       await reserveToken.connect(await ethers.getSigner(alice)).claim(pEth(100000000000));
-      await transferOwnershipAndMinting(riskProToken, mocExchangeOld.address);
-      await transferOwnershipAndMinting(stableToken, mocExchangeOld.address);
+      await transferOwnershipAndMinting(riskProToken, mocExchange_v020.address);
+      await transferOwnershipAndMinting(stableToken, mocExchange_v020.address);
       await transferPausingRole(riskProToken, mocMoc.address);
       await proxyAdmin.transferOwnership(upgradeDelegator.address);
 
       const stableTokenV2: StableTokenV2 = await deployUUPSProxy("StableTokenV2", StableTokenV2__factory);
-      await stableTokenV2.initialize("USR", "USR", mocExchangeOld.address, governorMock.address);
+      await stableTokenV2.initialize("USR", "USR", mocExchange_v020.address, governorMock.address);
 
       const tokenMigrator: TokenMigrator = await deployContract("TokenMigrator", TokenMigrator__factory, [
         stableToken.address,
@@ -242,7 +242,7 @@ export const fixtureDeployed = memoizee(
         mocSettlement,
         mocInrate,
         mocVendors,
-        mocExchangeOld,
+        mocExchange_v020,
         riskProxManager,
         stopper,
         mocCommissionSplitter,

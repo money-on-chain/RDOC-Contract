@@ -3,7 +3,9 @@ pragma solidity ^0.5.8;
 import "zos-lib/contracts/upgradeability/AdminUpgradeabilityProxy.sol";
 import "moc-governance/contracts/Governance/ChangeContract.sol";
 import "moc-governance/contracts/Upgradeability/UpgradeDelegator.sol";
-import "../MoCExchange.sol";
+import "../MoCExchange_v021.sol";
+// import required to compile the contract
+import "../../contracts_updated/MoCExchange_v020.sol";
 
 /**
   @title StableTokenMigrationChanger
@@ -12,7 +14,7 @@ contract StableTokenMigrationChanger is ChangeContract {
 
   AdminUpgradeabilityProxy public proxy;
   UpgradeDelegator public upgradeDelegator;
-  address public currentImplementation;
+  address public middleTermImplementation;
   address public newImplementation;
   address public stableTokenV2;
   address public bridgeAddress;
@@ -26,13 +28,14 @@ contract StableTokenMigrationChanger is ChangeContract {
   constructor(
     AdminUpgradeabilityProxy _proxy,
     UpgradeDelegator _upgradeDelegator, 
+    address _middleTermImplementation,
     address _newImplementation,
     address _stableTokenV2Address,
     address _bridgeAddress
   ) public {
     proxy = _proxy;
     upgradeDelegator = _upgradeDelegator;
-    currentImplementation = upgradeDelegator.getProxyImplementation(_proxy);
+    middleTermImplementation = _middleTermImplementation;
     newImplementation = _newImplementation;
     stableTokenV2 = _stableTokenV2Address;
     bridgeAddress = _bridgeAddress;
@@ -54,7 +57,7 @@ contract StableTokenMigrationChanger is ChangeContract {
     @dev IMPORTANT: This function should not be overriden
    */
   function _upgrade() internal {
-    upgradeDelegator.upgrade(proxy, newImplementation);
+    upgradeDelegator.upgrade(proxy, middleTermImplementation);
   }
 
   /**
@@ -69,9 +72,9 @@ contract StableTokenMigrationChanger is ChangeContract {
     @dev This function can be overriden by child changers to upgrade contracts that require some changes after the upgrade
    */
   function _afterUpgrade() internal {
-    MoCExchange(address(proxy)).migrateStableToken(stableTokenV2, bridgeAddress);
-    // rollback to the current implementation, we don't want that new implementation be alive more than in
+    MoCExchange_v021(address(proxy)).migrateStableToken(stableTokenV2, bridgeAddress);
+    // upgrade again to a new implementation, we don't want that middle term implementation be alive more than
     // this atomic transaction
-    upgradeDelegator.upgrade(proxy, currentImplementation);
+    upgradeDelegator.upgrade(proxy, newImplementation);
   }
 }

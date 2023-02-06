@@ -1,19 +1,19 @@
 pragma solidity ^0.5.8;
 pragma experimental ABIEncoderV2;
 
-import "./MoCLibConnection.sol";
-import "./token/RiskProToken.sol";
-import "./token/StableToken.sol";
-import "./interface/IMoCInrate.sol";
-import "./base/MoCBase.sol";
-import "./token/MoCToken.sol";
-import "./MoCRiskProxManager.sol";
+import "../contracts/MoCLibConnection.sol";
+import "../contracts/token/RiskProToken.sol";
+import "../contracts/token/StableToken.sol";
+import "../contracts/interface/IMoCInrate.sol";
+import "../contracts/base/MoCBase.sol";
+import "../contracts/token/MoCToken.sol";
+import "../contracts/MoCRiskProxManager.sol";
 import "openzeppelin-solidity/contracts/math/Math.sol";
-import "./interface/IMoC.sol";
-import "./interface/IMoCExchange.sol";
-import "./interface/IMoCState.sol";
+import "../contracts/interface/IMoC.sol";
+import "../contracts/interface/IMoCExchange.sol";
+import "../contracts/interface/IMoCState.sol";
 
-contract MoCExchangeEvents {
+contract MoCExchangeEvents_v020 {
   event RiskProMint(
     address indexed account,
     uint256 amount,
@@ -114,8 +114,7 @@ contract MoCExchangeEvents {
   );
 }
 
-
-contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
+contract MoCExchange_v020 is MoCExchangeEvents_v020, MoCBase, MoCLibConnection {
   using Math for uint256;
   using SafeMath for uint256;
 

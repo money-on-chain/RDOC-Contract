@@ -5,7 +5,7 @@ import { ContractTransaction } from "ethers";
 import { expect } from "chai";
 import {
   MoC,
-  MoCExchangeOld,
+  MoCExchange_v020,
   ReserveToken,
   StableToken,
   StableTokenMigrationChanger,
@@ -13,6 +13,7 @@ import {
   StableTokenV2,
   TokenMigrator,
   UpgradeDelegator,
+  MoCExchange_v021__factory,
 } from "../typechain";
 import { fixtureDeployed } from "./fixture";
 import { Balance, deployContract, pEth } from "./helpers/utils";
@@ -24,7 +25,7 @@ describe("Feature: Stable Token migration", () => {
   let stableToken: StableToken;
   let stableTokenV2: StableTokenV2;
   let tokenMigrator: TokenMigrator;
-  let mocExchangeOld: MoCExchangeOld;
+  let mocExchangeProxy: MoCExchange_v020;
   let upgradeDelegator: UpgradeDelegator;
   let mocHelperAddress: Address;
   let alice: Address;
@@ -35,7 +36,7 @@ describe("Feature: Stable Token migration", () => {
       ({
         mocHelperAddress,
         mocMoc,
-        mocExchangeOld,
+        mocExchange_v020: mocExchangeProxy,
         upgradeDelegator,
         reserveToken,
         stableToken,
@@ -69,17 +70,22 @@ describe("Feature: Stable Token migration", () => {
           assertPrec(diff, pEth("0.001"));
         });
       });
-      describe("AND mocExchangeV2 and StableTokenMigrationChanger are deployed", async () => {
+      describe("AND mocExchange_v021, mocExchange and StableTokenMigrationChanger are deployed", async () => {
         let changer: StableTokenMigrationChanger;
         beforeEach(async () => {
-          const MocImplementationFactory = await ethers.getContractFactory("MoCExchange", {
+          const MocExchange_v021Factory = await ethers.getContractFactory("MoCExchange_v021", {
             libraries: { MoCHelperLib: mocHelperAddress },
           });
-          const mocEchangeV2 = await MocImplementationFactory.deploy();
+          const mocEchange_v021 = await MocExchange_v021Factory.deploy();
+          const MocExchangeFactory = await ethers.getContractFactory("MoCExchange", {
+            libraries: { MoCHelperLib: mocHelperAddress },
+          });
+          const mocExchange = await MocExchangeFactory.deploy();
           changer = await deployContract("StableTokenMigrationChanger", StableTokenMigrationChanger__factory, [
-            mocExchangeOld.address,
+            mocExchangeProxy.address,
             upgradeDelegator.address,
-            mocEchangeV2.address,
+            mocEchange_v021.address,
+            mocExchange.address,
             stableTokenV2.address,
             tokenMigrator.address,
           ]);
@@ -93,6 +99,15 @@ describe("Feature: Stable Token migration", () => {
           });
           it("THEN TokenMigrator contract has all StableTokenV2 total supply", async () => {
             assertPrec(await stableTokenV2.balanceOf(tokenMigrator.address), await stableTokenV2.totalSupply());
+          });
+          describe("WHEN someone tries to call migrateStableToken in mocExchange", () => {
+            it("THEN tx reverts because function is not available, only exist atomically during the upgrade", async () => {
+              const mocExchange = MoCExchange_v021__factory.connect(
+                mocExchangeProxy.address,
+                ethers.provider.getSigner(),
+              );
+              await expect(mocExchange.migrateStableToken(stableTokenV2.address, tokenMigrator.address)).to.be.reverted;
+            });
           });
           describe("WHEN alice tries to redeem StableTokenV1 before migrate them", async () => {
             let aliceReserveTokenBalanceBefore: Balance;
