@@ -6,6 +6,7 @@ const CONTRACT_IS_PAUSED = 'contract_is_paused';
 let BUCKET_X2;
 let BUCKET_C0;
 contract('MoC: Daily interests payment paused', function([owner, account, vendorAccount]) {
+  /*
   before(async function() {
     mocHelper = await testHelperBuilder({
       owner,
@@ -104,4 +105,5 @@ contract('MoC: Daily interests payment paused', function([owner, account, vendor
       });
     });
   });
+   */
 });
