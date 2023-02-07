@@ -3,14 +3,14 @@
     "MoC": "0x4512f4C1d984bbf8B7f7404EddFb1881cFA79EfD"
   },
   "implementationAddresses": {
-    "MoC": "",
+    "MoC": "0x10f9E9beb8deD262da3091fEaB62DA51616EEf0a",
     "MoCHelperLib": "0x5A4107D39EE333C729229c8050804BfC697e0Dc4",
     "ProxyAdmin": "0xffb65F6E24806B7e1A988EeD1Ad07BB2654fF695",
     "UpgradeDelegator": "0xCDAbFbF334A5F6BCe900D2f73470D1e6722365d8",
     "Governor": "0x4eAC4518e81B3A5198aADAb998D2610B46aAA609"
   },
   "changerAddresses": {
-    "Changer": ""
+    "Changer": "0x96CB0bb1308fE4ac597C6eefe8D41Ad1c42F6fFB"
   },
   "governorOwnerAddress": "0x7D124cC0f59aDA5793AD8edA9eD1836cB7e797a3"
 }
