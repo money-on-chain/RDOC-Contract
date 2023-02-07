@@ -155,23 +155,8 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMo
   function mintRiskProVendors(uint256 resTokensToMint, address vendorAccount)
   public
   whenNotPaused() transitionState() notInProtectionMode() {
-    /** UPDATE V0110: 24/09/2020 - Upgrade to support multiple commission rates **/
-    (uint256 totalResTokensSpent,
-    uint256 reserveTokenCommission,
-    uint256 mocCommission,
-    uint256 reserveTokenMarkup,
-    uint256 mocMarkup) = mocExchange.mintRiskPro(msg.sender, resTokensToMint, vendorAccount);
-
-    transferCommissions(
-      msg.sender,
-      totalResTokensSpent,
-      reserveTokenCommission,
-      mocCommission,
-      vendorAccount,
-      reserveTokenMarkup,
-      mocMarkup
-    );
-    /** END UPDATE V0110: 24/09/2020 - Upgrade to support multiple commission rates **/
+    /** UPDATE V0114: 07/02/2023 - Removal of leveraged positions. Please take a look at http://bit.ly/3XPiKUA **/
+    revert("Mint Leveraged position is disabled. See: http://bit.ly/3XPiKUA");
   }
 
   /**
