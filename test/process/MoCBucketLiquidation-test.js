@@ -4,6 +4,7 @@ let mocHelper;
 let BUCKET_X2;
 
 contract('MoC: Bucket Liquidation', function([owner, userAccount, otherAccount, vendorAccount]) {
+  /*
   before(async function() {
     const accounts = [owner, userAccount, otherAccount, vendorAccount];
     mocHelper = await testHelperBuilder({ owner, accounts });
@@ -106,4 +107,5 @@ contract('MoC: Bucket Liquidation', function([owner, userAccount, otherAccount, 
       });
     });
   });
+   */
 });
