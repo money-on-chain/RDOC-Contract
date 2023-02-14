@@ -7,7 +7,7 @@ import "./MoCWhitelist.sol";
 /**
   @dev Provides access control between all MoC Contracts
  */
-contract MoCConnector is MoCWhitelist, Initializable {
+contract MoCConnector_v021 is MoCWhitelist, Initializable {
   // References
   address payable public moc;
   address public stableToken;
@@ -79,17 +79,13 @@ contract MoCConnector is MoCWhitelist, Initializable {
   /***** UPGRADE v021       ***********/
   /************************************/
   
-  // DEPRECATED. 
-  // This function was used atomically in upgrade v020 to migrate stableTokenV1 to stableTokenV2
-  // After that, it is removed in this contract version to cannot be called more than once.
-  
-  // /**
-  //   @dev Migrates to a new stable token contract
-  //   @param newStableTokenAddress_ new stable token contract address
-  // */
-  // function migrateStableToken(address newStableTokenAddress_) public {
-  //   stableToken = newStableTokenAddress_;
-  // }
+  /**
+    @dev Migrates to a new stable token contract
+    @param newStableTokenAddress_ new stable token contract address
+  */
+  function migrateStableToken(address newStableTokenAddress_) public {
+    stableToken = newStableTokenAddress_;
+  }
   
   // Leave a gap betweeen inherited contracts variables in order to be
   // able to add more variables in them later

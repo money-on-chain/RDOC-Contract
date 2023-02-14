@@ -11,21 +11,36 @@ import "hardhat-docgen";
 import "hardhat-gas-reporter";
 import { removeConsoleLog } from "hardhat-preprocessor";
 import { HardhatUserConfig } from "hardhat/config";
-import { NetworkUserConfig } from "hardhat/types";
 import "solidity-coverage";
 import "hardhat-storage-layout";
 
 dotenvConfig({ path: resolve(__dirname, "./.env") });
 
-const chainIds = {
-  ganache: 1337,
-  goerli: 5,
-  hardhat: 31337,
-  kovan: 42,
-  mainnet: 1,
-  rinkeby: 4,
-  ropsten: 3,
+type DeployParameters = {
+  stableTokenV2Params: {
+    name: string;
+    symbol: string;
+  };
+  mocAddresses: {
+    mocExchange: string;
+    governor: string;
+    stableTokenV1: string;
+  };
+  // gas limit applied for each tx during deployment
+  // Hardhat gas limit config cannot be used because we are using ethers.js library. https://github.com/NomicFoundation/hardhat/pull/2406
+  gasLimit: number;
 };
+declare module "hardhat/types/config" {
+  export interface HardhatNetworkUserConfig {
+    deployParameters: DeployParameters;
+  }
+  export interface HardhatNetworkConfig {
+    deployParameters: DeployParameters;
+  }
+  export interface HttpNetworkConfig {
+    deployParameters: DeployParameters;
+  }
+}
 
 // Ensure that we have all the environment variables we need.
 let mnemonic: string;
@@ -35,12 +50,6 @@ if (!process.env.MNEMONIC) {
   mnemonic = process.env.MNEMONIC;
 }
 
-let infuraApiKey: string;
-if (!process.env.INFURA_API_KEY) {
-  throw new Error("Please set your INFURA_API_KEY in a .env file");
-} else {
-  infuraApiKey = process.env.INFURA_API_KEY;
-}
 const getPath = () => {
   if (process.env.COMPILE_LEGACY) {
     return {
@@ -60,20 +69,6 @@ const getPath = () => {
   }
 };
 
-const createTestnetConfig = (network: keyof typeof chainIds): NetworkUserConfig => {
-  const url: string = "https://" + network + ".infura.io/v3/" + infuraApiKey;
-  return {
-    accounts: {
-      count: 10,
-      initialIndex: 0,
-      mnemonic,
-      path: "m/44'/60'/0'/0",
-    },
-    chainId: chainIds[network],
-    url,
-  };
-};
-
 const config: HardhatUserConfig = {
   defaultNetwork: "hardhat",
   namedAccounts: {
@@ -90,17 +85,105 @@ const config: HardhatUserConfig = {
         mnemonic,
         accountsBalance: "100000000000000000000000000000000000",
       },
-      chainId: chainIds.hardhat,
       gasPrice: 0,
       initialBaseFeePerGas: 0,
       // TODO: remove this
       allowUnlimitedContractSize: true,
+      deployParameters: {
+        stableTokenV2Params: {
+          name: "USR",
+          symbol: "USR",
+        },
+        mocAddresses: {
+          // random addresses
+          mocExchange: "0xf984d6f2afcf057984034ac06f2a2182cb62ce5c",
+          governor: "0x94b25b38DB7cF2138E8327Fc54543a117fC20E72",
+          stableTokenV1: "0xb4776c2bd17df529b98ea31661d9d852eabdd217",
+        },
+        gasLimit: 6800000,
+      },
       tags: ["local"],
     },
-    goerli: createTestnetConfig("goerli"),
-    kovan: createTestnetConfig("kovan"),
-    rinkeby: createTestnetConfig("rinkeby"),
-    ropsten: createTestnetConfig("ropsten"),
+    devTestnet: {
+      accounts: {
+        mnemonic,
+      },
+      chainId: 31,
+      url: "https://public-node.testnet.rsk.co",
+      deployParameters: {
+        stableTokenV2Params: {
+          name: "USR",
+          symbol: "USR",
+        },
+        mocAddresses: {
+          mocExchange: "",
+          governor: "",
+          stableTokenV1: "",
+        },
+        gasLimit: 6800000,
+      },
+      tags: ["testnet"],
+    },
+    rdocTestnetAlpha: {
+      accounts: {
+        mnemonic,
+      },
+      chainId: 31,
+      url: "https://public-node.testnet.rsk.co",
+      deployParameters: {
+        stableTokenV2Params: {
+          name: "USR",
+          symbol: "USR",
+        },
+        mocAddresses: {
+          mocExchange: "",
+          governor: "",
+          stableTokenV1: "",
+        },
+        gasLimit: 6800000,
+      },
+      tags: ["testnet"],
+    },
+    rdocTestnet: {
+      accounts: {
+        mnemonic,
+      },
+      chainId: 31,
+      url: "https://public-node.testnet.rsk.co",
+      deployParameters: {
+        stableTokenV2Params: {
+          name: "USR",
+          symbol: "USR",
+        },
+        mocAddresses: {
+          mocExchange: "",
+          governor: "",
+          stableTokenV1: "",
+        },
+        gasLimit: 6800000,
+      },
+      tags: ["testnet"],
+    },
+    rdocMainnet: {
+      accounts: {
+        mnemonic,
+      },
+      chainId: 30,
+      url: "https://public-node.rsk.co",
+      deployParameters: {
+        stableTokenV2Params: {
+          name: "USR",
+          symbol: "USR",
+        },
+        mocAddresses: {
+          mocExchange: "",
+          governor: "",
+          stableTokenV1: "",
+        },
+        gasLimit: 6800000,
+      },
+      tags: ["mainnet"],
+    },
   },
   paths: getPath(),
   solidity: {

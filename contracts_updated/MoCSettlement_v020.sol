@@ -2,18 +2,18 @@ pragma solidity ^0.5.8;
 
 import "openzeppelin-solidity/contracts/math/Math.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
-import "./base/MoCBase.sol";
-import "./token/StableToken.sol";
-import "./interface/IMoCState.sol";
-import "./interface/IMoCExchange.sol";
-import "./MoCRiskProxManager.sol";
-import "./PartialExecution.sol";
+import "../contracts/base/MoCBase.sol";
+import "../contracts/token/StableToken.sol";
+import "../contracts/interface/IMoCState.sol";
+import "../contracts/interface/IMoCExchange.sol";
+import "../contracts/MoCRiskProxManager.sol";
+import "../contracts/PartialExecution.sol";
 import "moc-governance/contracts/Governance/Governed.sol";
 import "moc-governance/contracts/Governance/IGovernor.sol";
-import "./interface/IMoCVendors.sol";
-import "./interface/IMoCSettlement.sol";
+import "../contracts/interface/IMoCVendors.sol";
+import "../contracts/interface/IMoCSettlement.sol";
 
-contract MoCSettlementEvents {
+contract MoCSettlementEvents_v020 {
   event RedeemRequestAlter(address indexed redeemer, bool isAddition, uint256 delta);
   event RedeemRequestProcessed(address indexed redeemer, uint256 commission, uint256 amount);
   event SettlementRedeemStableToken(uint256 queueSize, uint256 accumCommissions, uint256 reservePrice);
@@ -27,8 +27,8 @@ contract MoCSettlementEvents {
   event SettlementCompleted(uint256 commissionsPayed);
 }
 
-contract MoCSettlement is
-MoCSettlementEvents,
+contract MoCSettlement_v020 is
+MoCSettlementEvents_v020,
 MoCBase,
 PartialExecution,
 Governed,
@@ -105,22 +105,6 @@ IMoCSettlement
     initializeContracts();
     initializeValues(_governor, _blockSpan);
   }
-
-  /************************************/
-  /***** UPGRADE v021       ***********/
-  /************************************/
-  
-  // DEPRECATED. 
-  // This function was used atomically in upgrade v020 to migrate stableTokenV1 to stableTokenV2
-  // After that, it is removed in this contract version to cannot be called more than once.
-  
-  // /**
-  //   @dev Migrates to a new stable token contract
-  //   @param newStableTokenAddress_ new stable token contract address
-  // */
-  // function migrateStableToken(address newStableTokenAddress_) public {
-  //   stableToken = StableToken(newStableTokenAddress_);
-  // }
 
   /**
    *  @dev Set the blockspan configuration blockspan of settlement

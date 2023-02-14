@@ -2,20 +2,20 @@ pragma solidity ^0.5.8;
 pragma experimental ABIEncoderV2;
 
 import "openzeppelin-solidity/contracts/math/Math.sol";
-import "./interface/PriceProvider.sol";
-import "./MoCEMACalculator.sol";
-import "./base/MoCBase.sol";
-import "./MoCLibConnection.sol";
-import "./MoCRiskProxManager.sol";
+import "../contracts/interface/PriceProvider.sol";
+import "../contracts/MoCEMACalculator.sol";
+import "../contracts/base/MoCBase.sol";
+import "../contracts/MoCLibConnection.sol";
+import "../contracts/MoCRiskProxManager.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
-import "./token/RiskProToken.sol";
-import "./token/MoCToken.sol";
-import "./interface/IMoCSettlement.sol";
+import "../contracts/token/RiskProToken.sol";
+import "../contracts/token/MoCToken.sol";
+import "../contracts/interface/IMoCSettlement.sol";
 import "moc-governance/contracts/Governance/Governed.sol";
 import "moc-governance/contracts/Governance/IGovernor.sol";
-import "./interface/IMoCState.sol";
+import "../contracts/interface/IMoCState.sol";
 
-contract MoCState is MoCLibConnection, MoCBase, MoCEMACalculator, IMoCState {
+contract MoCState_v020 is MoCLibConnection, MoCBase, MoCEMACalculator, IMoCState {
   using Math for uint256;
   using SafeMath for uint256;
 
@@ -101,22 +101,6 @@ contract MoCState is MoCLibConnection, MoCBase, MoCEMACalculator, IMoCState {
       params.protected);
     initializeMovingAverage(params.ema, params.smoothFactor, params.emaBlockSpan);
   }
-
-  /************************************/
-  /***** UPGRADE v021       ***********/
-  /************************************/
-  
-  // DEPRECATED. 
-  // This function was used atomically in upgrade v020 to migrate stableTokenV1 to stableTokenV2
-  // After that, it is removed in this contract version to cannot be called more than once.
-  
-  // /**
-  //   @dev Migrates to a new stable token contract
-  //   @param newStableTokenAddress_ new stable token contract address
-  // */
-  // function migrateStableToken(address newStableTokenAddress_) public {
-  //   stableToken = IERC20(newStableTokenAddress_);
-  // }
 
   /**
    @dev Sets the max discount rate.

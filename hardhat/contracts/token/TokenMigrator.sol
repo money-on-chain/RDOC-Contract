@@ -15,7 +15,7 @@ contract TokenMigrator {
      * @param sender_ the caller of the migration
      * @param amount_ the amount being migrated
      */
-    event TokenMigrated(address indexed sender_, uint256 amount_);
+    event TokenMigrated(address indexed sender_, address indexed user_, uint256 amount_);
 
     /**
      * @param tokenV1_ the address of the old token
@@ -27,16 +27,36 @@ contract TokenMigrator {
     }
 
     /**
-     * @notice executes the migration from Token V1 to Token V2.
-     * Users need to give allowance to this contract to transfer Token V1 before executing this transaction.
+     * @notice executes the migration from Token V1 to Token V2 for `user_`.
+     * `user_` must give Token V1 allowance to this contract to transfer Token V1 before executing this transaction.
+     * The migration ratio is 1:1
+     * @param user_ address who migrates the tokens
+     */
+    function _migrateToken(address user_) internal {
+        uint256 amount = tokenV1.balanceOf(user_);
+        if (amount == 0) revert InsufficientTokenV1Balance();
+        _totalMigrated += amount;
+        tokenV1.transferFrom(user_, address(this), amount);
+        tokenV2.transfer(user_, amount);
+        emit TokenMigrated(msg.sender, user_, amount);
+    }
+
+    /**
+     * @notice executes the migration from Token V1 to Token V2 for function caller.
+     * Caller must give Token V1 allowance to this contract to transfer Token V1 before executing this transaction.
      * The migration ratio is 1:1
      */
     function migrateToken() external {
-        uint256 amount = tokenV1.balanceOf(msg.sender);
-        if (amount == 0) revert InsufficientTokenV1Balance();
-        _totalMigrated += amount;
-        tokenV1.transferFrom(msg.sender, address(this), amount);
-        tokenV2.transfer(msg.sender, amount);
-        emit TokenMigrated(msg.sender, amount);
+        _migrateToken(msg.sender);
+    }
+
+    /**
+     * @notice executes the migration from Token V1 to Token V2 for `user_`.
+     * `user_` must give Token V1 allowance to this contract to transfer Token V1 before executing this transaction.
+     * The migration ratio is 1:1
+     * @param user_ address who migrates the tokens
+     */
+    function migrateTokenFrom(address user_) external {
+        _migrateToken(user_);
     }
 }

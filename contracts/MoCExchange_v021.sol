@@ -141,7 +141,7 @@ contract MoCExchange_v021 is MoCExchangeEvents_v021, MoCBase, MoCLibConnection {
   }
 
   /************************************/
-  /***** UPGRADE v020       ***********/
+  /***** UPGRADE v021       ***********/
   /************************************/
   
   /**

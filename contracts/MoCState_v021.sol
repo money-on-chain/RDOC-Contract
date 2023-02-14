@@ -15,7 +15,7 @@ import "moc-governance/contracts/Governance/Governed.sol";
 import "moc-governance/contracts/Governance/IGovernor.sol";
 import "./interface/IMoCState.sol";
 
-contract MoCState is MoCLibConnection, MoCBase, MoCEMACalculator, IMoCState {
+contract MoCState_v021 is MoCLibConnection, MoCBase, MoCEMACalculator, IMoCState {
   using Math for uint256;
   using SafeMath for uint256;
 
@@ -106,17 +106,13 @@ contract MoCState is MoCLibConnection, MoCBase, MoCEMACalculator, IMoCState {
   /***** UPGRADE v021       ***********/
   /************************************/
   
-  // DEPRECATED. 
-  // This function was used atomically in upgrade v020 to migrate stableTokenV1 to stableTokenV2
-  // After that, it is removed in this contract version to cannot be called more than once.
-  
-  // /**
-  //   @dev Migrates to a new stable token contract
-  //   @param newStableTokenAddress_ new stable token contract address
-  // */
-  // function migrateStableToken(address newStableTokenAddress_) public {
-  //   stableToken = IERC20(newStableTokenAddress_);
-  // }
+  /**
+    @dev Migrates to a new stable token contract
+    @param newStableTokenAddress_ new stable token contract address
+  */
+  function migrateStableToken(address newStableTokenAddress_) public {
+    stableToken = IERC20(newStableTokenAddress_);
+  }
 
   /**
    @dev Sets the max discount rate.

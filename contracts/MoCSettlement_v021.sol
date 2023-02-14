@@ -13,7 +13,7 @@ import "moc-governance/contracts/Governance/IGovernor.sol";
 import "./interface/IMoCVendors.sol";
 import "./interface/IMoCSettlement.sol";
 
-contract MoCSettlementEvents {
+contract MoCSettlementEvents_v021 {
   event RedeemRequestAlter(address indexed redeemer, bool isAddition, uint256 delta);
   event RedeemRequestProcessed(address indexed redeemer, uint256 commission, uint256 amount);
   event SettlementRedeemStableToken(uint256 queueSize, uint256 accumCommissions, uint256 reservePrice);
@@ -27,8 +27,8 @@ contract MoCSettlementEvents {
   event SettlementCompleted(uint256 commissionsPayed);
 }
 
-contract MoCSettlement is
-MoCSettlementEvents,
+contract MoCSettlement_v021 is
+MoCSettlementEvents_v021,
 MoCBase,
 PartialExecution,
 Governed,
@@ -110,17 +110,13 @@ IMoCSettlement
   /***** UPGRADE v021       ***********/
   /************************************/
   
-  // DEPRECATED. 
-  // This function was used atomically in upgrade v020 to migrate stableTokenV1 to stableTokenV2
-  // After that, it is removed in this contract version to cannot be called more than once.
-  
-  // /**
-  //   @dev Migrates to a new stable token contract
-  //   @param newStableTokenAddress_ new stable token contract address
-  // */
-  // function migrateStableToken(address newStableTokenAddress_) public {
-  //   stableToken = StableToken(newStableTokenAddress_);
-  // }
+  /**
+    @dev Migrates to a new stable token contract
+    @param newStableTokenAddress_ new stable token contract address
+  */
+  function migrateStableToken(address newStableTokenAddress_) public {
+    stableToken = StableToken(newStableTokenAddress_);
+  }
 
   /**
    *  @dev Set the blockspan configuration blockspan of settlement

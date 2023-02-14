@@ -16,12 +16,12 @@ import "./interface/IMoCVendors.sol";
 import "./interface/IMoCInrate.sol";
 import "./interface/IMoC.sol";
 
-contract MoCEvents {
+contract MoCEvents_v021 {
   event BucketLiquidation(bytes32 bucket);
   event ContractLiquidated(address mocAddress);
 }
 
-contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMoC {
+contract MoC_v021 is MoCEvents_v021, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMoC {
   using SafeMath for uint256;
 
   /// @dev Contracts.
@@ -75,17 +75,13 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMo
   /***** UPGRADE v021       ***********/
   /************************************/
   
-  // DEPRECATED. 
-  // This function was used atomically in upgrade v020 to migrate stableTokenV1 to stableTokenV2
-  // After that, it is removed in this contract version to cannot be called more than once.
-  
-  // /**
-  //   @dev Migrates to a new stable token contract
-  //   @param newStableTokenAddress_ new stable token contract address
-  // */
-  // function migrateStableToken(address newStableTokenAddress_) public {
-  //   stableToken = newStableTokenAddress_;
-  // }
+  /**
+    @dev Migrates to a new stable token contract
+    @param newStableTokenAddress_ new stable token contract address
+  */
+  function migrateStableToken(address newStableTokenAddress_) public {
+    stableToken = newStableTokenAddress_;
+  }
 
   /****************************INTERFACE*******************************************/
 
@@ -320,8 +316,23 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMo
   function mintRiskProxVendors(bytes32 bucket, uint256 resTokensToMint, address vendorAccount) public
   whenNotPaused() whenSettlementReady() availableBucket(bucket) notBaseBucket(bucket)
   transitionState() bucketStateTransition(bucket) {
-    /** UPDATE V0114: 07/02/2023 - Removal of leveraged positions. Please take a look at http://bit.ly/3XPiKUA **/
-    revert("Mint Leveraged position is disabled. See: http://bit.ly/3XPiKUA");
+    /** UPDATE V0110: 24/09/2020 - Upgrade to support multiple commission rates **/
+    (uint256 totalResTokensSpent,
+    uint256 reserveTokenCommission,
+    uint256 mocCommission,
+    uint256 reserveTokenMarkup,
+    uint256 mocMarkup) = mocExchange.mintRiskProx(msg.sender, bucket, resTokensToMint, vendorAccount);
+
+    transferCommissions(
+      msg.sender,
+      totalResTokensSpent,
+      reserveTokenCommission,
+      mocCommission,
+      vendorAccount,
+      reserveTokenMarkup,
+      mocMarkup
+    );
+    /** END UPDATE V0110: 24/09/2020 - Upgrade to support multiple commission rates **/
   }
 
   /**

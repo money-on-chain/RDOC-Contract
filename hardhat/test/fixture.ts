@@ -4,24 +4,24 @@ import { Address } from "hardhat-deploy/types";
 import {
   CommissionSplitter,
   CommissionSplitter__factory,
-  MoC,
-  MoCConnector,
-  MoCConnector__factory,
+  MoC_v020,
+  MoC_v020__factory,
+  MoCConnector_v020,
+  MoCConnector_v020__factory,
   MoCInrate,
   MoCInrate__factory,
   MockGovernor__factory,
   MoCPriceProviderMock__factory,
   MoCRiskProxManager,
   MoCRiskProxManager__factory,
-  MoCSettlementMock,
-  MoCSettlementMock__factory,
-  MoCState,
-  MoCStateMock__factory,
+  MoCSettlement_v020,
+  MoCSettlement_v020__factory,
+  MoCState_v020,
+  MoCState_v020__factory,
   MoCToken,
   MoCToken__factory,
   MoCVendors,
   MoCVendors__factory,
-  MoC__factory,
   PriceProviderMock__factory,
   ReserveToken,
   ReserveToken__factory,
@@ -45,13 +45,13 @@ import { deployContract, deployTransparentProxy, baseParams, pEth, deployUUPSPro
 export const fixtureDeployed = memoizee(
   (): (() => Promise<{
     mocHelperAddress: Address;
-    mocConnector: MoCConnector;
-    mocMoc: MoC;
-    mocState: MoCState;
-    mocSettlement: MoCSettlementMock;
+    moc_v020: MoC_v020;
+    mocConnector_v020: MoCConnector_v020;
+    mocExchange_v020: MoCExchange_v020;
+    mocState_v020: MoCState_v020;
+    mocSettlement_v020: MoCSettlement_v020;
     mocInrate: MoCInrate;
     mocVendors: MoCVendors;
-    mocExchange_v020: MoCExchange_v020;
     riskProxManager: MoCRiskProxManager;
     stopper: Stopper;
     mocCommissionSplitter: CommissionSplitter;
@@ -71,24 +71,24 @@ export const fixtureDeployed = memoizee(
       const MocHelperLibFactory = await ethers.getContractFactory("MoCHelperLib");
       const mocHelperLib = await MocHelperLibFactory.deploy();
 
-      const mocConnector: MoCConnector = await deployTransparentProxy(
-        "MoCConnector",
+      const mocConnector_v020: MoCConnector_v020 = await deployTransparentProxy(
+        "MoCConnector_v020",
         proxyAdmin.address,
-        MoCConnector__factory,
+        MoCConnector_v020__factory,
       );
-      const mocMoc: MoC = await deployTransparentProxy("MoC", proxyAdmin.address, MoC__factory);
-      const mocState: MoCState = await deployTransparentProxy(
-        "MoCStateMock",
+      const moc_v020: MoC_v020 = await deployTransparentProxy("MoC_v020", proxyAdmin.address, MoC_v020__factory);
+      const mocState_v020: MoCState_v020 = await deployTransparentProxy(
+        "MoCState_v020",
         proxyAdmin.address,
-        MoCStateMock__factory,
+        MoCState_v020__factory,
         {
           libraries: { MoCHelperLib: mocHelperLib.address },
         },
       );
-      const mocSettlement: MoCSettlementMock = await deployTransparentProxy(
-        "MoCSettlementMock",
+      const mocSettlement_v020: MoCSettlement_v020 = await deployTransparentProxy(
+        "MoCSettlement_v020",
         proxyAdmin.address,
-        MoCSettlementMock__factory,
+        MoCSettlement_v020__factory,
       );
       const mocInrate: MoCInrate = await deployTransparentProxy("MoCInrate", proxyAdmin.address, MoCInrate__factory, {
         libraries: { MoCHelperLib: mocHelperLib.address },
@@ -135,30 +135,30 @@ export const fixtureDeployed = memoizee(
         [],
       );
 
-      await mocConnector.initialize(
-        mocMoc.address,
+      await mocConnector_v020.initialize(
+        moc_v020.address,
         stableToken.address,
         riskProToken.address,
         riskProxManager.address,
-        mocState.address,
-        mocSettlement.address,
+        mocState_v020.address,
+        mocSettlement_v020.address,
         mocExchange_v020.address,
         mocInrate.address,
         deployer,
         reserveToken.address,
       );
-      await mocMoc["initialize(address,address,address,bool)"](
-        mocConnector.address,
+      await moc_v020["initialize(address,address,address,bool)"](
+        mocConnector_v020.address,
         governorMock.address,
         stopper.address,
         baseParams.startStoppable,
       );
       await stopper.initialize(deployer);
-      await mocExchange_v020.initialize(mocConnector.address);
-      await mocState[
+      await mocExchange_v020.initialize(mocConnector_v020.address);
+      await mocState_v020[
         "initialize((address,address,address,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,address,address,address,bool,uint256))"
       ]({
-        connectorAddress: mocConnector.address,
+        connectorAddress: mocConnector_v020.address,
         governor: governorMock.address,
         priceProvider: priceProvider.address,
         liq: baseParams.liq, // mocPrecision
@@ -178,7 +178,7 @@ export const fixtureDeployed = memoizee(
       await mocInrate[
         "initialize(address,address,uint256,uint256,uint256,uint256,uint256,address,address,uint256,uint256,uint256)"
       ](
-        mocConnector.address,
+        mocConnector_v020.address,
         governorMock.address,
         baseParams.riskProxTmin,
         baseParams.riskProxPower,
@@ -193,18 +193,18 @@ export const fixtureDeployed = memoizee(
         baseParams.stableTmax,
       );
       await riskProxManager["initialize(address,address,uint256,uint256)"](
-        mocConnector.address,
+        mocConnector_v020.address,
         governorMock.address,
         baseParams.c0Cobj,
         baseParams.x2Cobj,
       );
-      await mocSettlement["initialize(address,address,uint256)"](
-        mocConnector.address,
+      await mocSettlement_v020["initialize(address,address,uint256)"](
+        mocConnector_v020.address,
         governorMock.address,
         baseParams.settlementBlockSpan,
       );
       await mocCommissionSplitter["initialize(address,address,uint256,address,address,address,address)"](
-        mocMoc.address,
+        moc_v020.address,
         deployer,
         baseParams.mocProportion,
         governorMock.address,
@@ -214,7 +214,7 @@ export const fixtureDeployed = memoizee(
       );
       await upgradeDelegator["initialize(address,address)"](governorMock.address, proxyAdmin.address);
       await mocVendors["initialize(address,address,address)"](
-        mocConnector.address,
+        mocConnector_v020.address,
         governorMock.address,
         deployer /*vendorGuardian*/,
       );
@@ -223,7 +223,7 @@ export const fixtureDeployed = memoizee(
       await reserveToken.connect(await ethers.getSigner(alice)).claim(pEth(100000000000));
       await transferOwnershipAndMinting(riskProToken, mocExchange_v020.address);
       await transferOwnershipAndMinting(stableToken, mocExchange_v020.address);
-      await transferPausingRole(riskProToken, mocMoc.address);
+      await transferPausingRole(riskProToken, moc_v020.address);
       await proxyAdmin.transferOwnership(upgradeDelegator.address);
 
       const stableTokenV2: StableTokenV2 = await deployUUPSProxy("StableTokenV2", StableTokenV2__factory);
@@ -236,13 +236,13 @@ export const fixtureDeployed = memoizee(
 
       return {
         mocHelperAddress: mocHelperLib.address,
-        mocConnector,
-        mocMoc,
-        mocState,
-        mocSettlement,
+        moc_v020,
+        mocConnector_v020,
+        mocExchange_v020,
+        mocState_v020,
+        mocSettlement_v020,
         mocInrate,
         mocVendors,
-        mocExchange_v020,
         riskProxManager,
         stopper,
         mocCommissionSplitter,
