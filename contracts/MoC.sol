@@ -78,12 +78,15 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMo
   // DEPRECATED. 
   // This function was used atomically in upgrade v020 to migrate stableTokenV1 to stableTokenV2
   // After that, it is removed in this contract version to cannot be called more than once.
-  
+  //
+  // event StableTokenMigrated(address oldStableTokenAddress_, address newStableTokenAddress_);
+  //
   // /**
   //   @dev Migrates to a new stable token contract
   //   @param newStableTokenAddress_ new stable token contract address
   // */
   // function migrateStableToken(address newStableTokenAddress_) public {
+  //   emit StableTokenMigrated(stableToken, newStableTokenAddress_);  
   //   stableToken = newStableTokenAddress_;
   // }
 

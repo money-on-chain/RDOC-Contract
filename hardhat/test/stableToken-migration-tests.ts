@@ -21,6 +21,18 @@ import {
   MoCSettlement_v021__factory,
   MoCConnector_v021__factory,
   MoC_v021__factory,
+  MoC,
+  AdminUpgradeabilityProxy,
+  AdminUpgradeabilityProxy__factory,
+  MoC_v021,
+  MoCConnector_v021,
+  MoCConnector,
+  MoCExchange_v021,
+  MoCExchange,
+  MoCState_v021,
+  MoCState,
+  MoCSettlement_v021,
+  MoCSettlement,
 } from "../typechain";
 import { fixtureDeployed } from "./fixture";
 import { Balance, deployContract, pEth } from "./helpers/utils";
@@ -41,6 +53,7 @@ describe("Feature: Stable Token migration", () => {
   let deployer: Address;
   let alice: Address;
   let aliceSigner: SignerWithAddress;
+  let signer: any;
   let moc_v020Factory: any;
   let moc_v021Factory: any;
   let mocFactory: any;
@@ -73,6 +86,7 @@ describe("Feature: Stable Token migration", () => {
         tokenMigrator,
       } = await fixtureDeployed()());
       aliceSigner = await ethers.getSigner(alice);
+      signer = await ethers.provider.getSigner();
       await reserveToken.approve(mocProxy.address, pEth(100000));
       await mocProxy.mintRiskPro(pEth(100000));
 
@@ -263,26 +277,36 @@ describe("Feature: Stable Token migration", () => {
       });
       describe("AND MoC v021, MoC and StableTokenMigrationChanger are deployed", () => {
         let changer: StableTokenMigrationChanger;
+        let moc_v021: MoC_v021;
+        let moc: MoC;
+        let mocConnector_v021: MoCConnector_v021;
+        let mocConnector: MoCConnector;
+        let mocExchange_v021: MoCExchange_v021;
+        let mocExchange: MoCExchange;
+        let mocState_v021: MoCState_v021;
+        let mocState: MoCState;
+        let mocSettlement_v021: MoCSettlement_v021;
+        let mocSettlement: MoCSettlement;
         beforeEach(async () => {
           // deploy MoC
-          const moc_v021 = await moc_v021Factory.deploy();
-          const moc = await mocFactory.deploy();
+          moc_v021 = await moc_v021Factory.deploy();
+          moc = await mocFactory.deploy();
 
           // deploy MoCConnector
-          const mocConnector_v021 = await mocConnector_v021Factory.deploy();
-          const mocConnector = await mocConnectorFactory.deploy();
+          mocConnector_v021 = await mocConnector_v021Factory.deploy();
+          mocConnector = await mocConnectorFactory.deploy();
 
           // deploy MoCExchange
-          const mocEchange_v021 = await mocExchange_v021Factory.deploy();
-          const mocExchange = await mocExchangeFactory.deploy();
+          mocExchange_v021 = await mocExchange_v021Factory.deploy();
+          mocExchange = await mocExchangeFactory.deploy();
 
           // deploy MoCState
-          const mocState_v021 = await mocState_v021Factory.deploy();
-          const mocState = await mocStateFactory.deploy();
+          mocState_v021 = await mocState_v021Factory.deploy();
+          mocState = await mocStateFactory.deploy();
 
           // deploy MoCSettlement
-          const mocSettlement_v021 = await mocSettlement_v021Factory.deploy();
-          const mocSettlement = await mocSettlementFactory.deploy();
+          mocSettlement_v021 = await mocSettlement_v021Factory.deploy();
+          mocSettlement = await mocSettlementFactory.deploy();
 
           changer = await deployContract("StableTokenMigrationChanger", StableTokenMigrationChanger__factory, [
             upgradeDelegator.address,
@@ -301,7 +325,7 @@ describe("Feature: Stable Token migration", () => {
               },
               {
                 proxy: mocExchangeProxy.address,
-                middleTermImplementation: mocEchange_v021.address,
+                middleTermImplementation: mocExchange_v021.address,
                 newImplementation: mocExchange.address,
               },
               {
@@ -318,8 +342,128 @@ describe("Feature: Stable Token migration", () => {
           ]);
         });
         describe("WHEN changer is executed", () => {
+          let tx: ContractTransaction;
           beforeEach(async () => {
-            await changer.execute();
+            tx = await changer.execute();
+          });
+          describe("WHEN check Moc Upgrade events", () => {
+            let mocProxyAsAdminUpgradeabilityProxy: AdminUpgradeabilityProxy;
+            beforeEach(async () => {
+              mocProxyAsAdminUpgradeabilityProxy = AdminUpgradeabilityProxy__factory.connect(mocProxy.address, signer);
+            });
+            it("THEN a Upgrade event is emitted with Moc v021 address implementation", async () => {
+              await expect(tx).to.emit(mocProxyAsAdminUpgradeabilityProxy, "Upgraded").withArgs(moc_v021.address);
+            });
+            it("THEN a Upgrade event is emitted with Moc address implementation", async () => {
+              await expect(tx).to.emit(mocProxyAsAdminUpgradeabilityProxy, "Upgraded").withArgs(moc.address);
+            });
+          });
+          describe("WHEN check MocConnector Upgrade events", () => {
+            let mocConnectorProxyAsAdminUpgradeabilityProxy: AdminUpgradeabilityProxy;
+            beforeEach(async () => {
+              mocConnectorProxyAsAdminUpgradeabilityProxy = AdminUpgradeabilityProxy__factory.connect(
+                mocConnectorProxy.address,
+                signer,
+              );
+            });
+            it("THEN a Upgrade event is emitted with MocConnector v021 address implementation", async () => {
+              await expect(tx)
+                .to.emit(mocConnectorProxyAsAdminUpgradeabilityProxy, "Upgraded")
+                .withArgs(mocConnector_v021.address);
+            });
+            it("THEN a Upgrade event is emitted with MocConnector address implementation", async () => {
+              await expect(tx)
+                .to.emit(mocConnectorProxyAsAdminUpgradeabilityProxy, "Upgraded")
+                .withArgs(mocConnector.address);
+            });
+          });
+          describe("WHEN check MocExchange Upgrade events", () => {
+            let mocExchangeProxyAsAdminUpgradeabilityProxy: AdminUpgradeabilityProxy;
+            beforeEach(async () => {
+              mocExchangeProxyAsAdminUpgradeabilityProxy = AdminUpgradeabilityProxy__factory.connect(
+                mocExchangeProxy.address,
+                signer,
+              );
+            });
+            it("THEN a Upgrade event is emitted with MocExchange v021 address implementation", async () => {
+              await expect(tx)
+                .to.emit(mocExchangeProxyAsAdminUpgradeabilityProxy, "Upgraded")
+                .withArgs(mocExchange_v021.address);
+            });
+            it("THEN a Upgrade event is emitted with MocExchange address implementation", async () => {
+              await expect(tx)
+                .to.emit(mocExchangeProxyAsAdminUpgradeabilityProxy, "Upgraded")
+                .withArgs(mocExchange.address);
+            });
+          });
+          describe("WHEN check MocState Upgrade events", () => {
+            let mocStateProxyAsAdminUpgradeabilityProxy: AdminUpgradeabilityProxy;
+            beforeEach(async () => {
+              mocStateProxyAsAdminUpgradeabilityProxy = AdminUpgradeabilityProxy__factory.connect(
+                mocStateProxy.address,
+                signer,
+              );
+            });
+            it("THEN a Upgrade event is emitted with MocState v021 address implementation", async () => {
+              await expect(tx)
+                .to.emit(mocStateProxyAsAdminUpgradeabilityProxy, "Upgraded")
+                .withArgs(mocState_v021.address);
+            });
+            it("THEN a Upgrade event is emitted with MocState address implementation", async () => {
+              await expect(tx).to.emit(mocStateProxyAsAdminUpgradeabilityProxy, "Upgraded").withArgs(mocState.address);
+            });
+          });
+          describe("WHEN check MocSettlement Upgrade events", () => {
+            let mocSettlementProxyAsAdminUpgradeabilityProxy: AdminUpgradeabilityProxy;
+            beforeEach(async () => {
+              mocSettlementProxyAsAdminUpgradeabilityProxy = AdminUpgradeabilityProxy__factory.connect(
+                mocSettlementProxy.address,
+                signer,
+              );
+            });
+            it("THEN a Upgrade event is emitted with MocSettlement v021 address implementation", async () => {
+              await expect(tx)
+                .to.emit(mocSettlementProxyAsAdminUpgradeabilityProxy, "Upgraded")
+                .withArgs(mocSettlement_v021.address);
+            });
+            it("THEN a Upgrade event is emitted with MocSettlement address implementation", async () => {
+              await expect(tx)
+                .to.emit(mocSettlementProxyAsAdminUpgradeabilityProxy, "Upgraded")
+                .withArgs(mocSettlement.address);
+            });
+          });
+          it("THEN a StableTokenMigrated event is emitted by MoC", async () => {
+            const mocProxyAsMoC_v021 = MoC_v021__factory.connect(mocProxy.address, signer);
+            await expect(tx)
+              .to.emit(mocProxyAsMoC_v021, "StableTokenMigrated")
+              .withArgs(stableToken.address, stableTokenV2.address);
+          });
+          it("THEN a StableTokenMigrated event is emitted by MoCConnector", async () => {
+            const mocProxyAsMoCConnector_v021 = MoCConnector_v021__factory.connect(mocConnectorProxy.address, signer);
+            await expect(tx)
+              .to.emit(mocProxyAsMoCConnector_v021, "StableTokenMigrated")
+              .withArgs(stableToken.address, stableTokenV2.address);
+          });
+          it("THEN a StableTokenMigrated event is emitted by MoCExchange", async () => {
+            const mocProxyAsMoCExchange_v021 = MoCExchange_v021__factory.connect(mocExchangeProxy.address, signer);
+            await expect(tx)
+              .to.emit(mocProxyAsMoCExchange_v021, "StableTokenMigrated")
+              .withArgs(stableToken.address, stableTokenV2.address);
+          });
+          it("THEN a StableTokenMigrated event is emitted by MoCState", async () => {
+            const mocProxyAsMoCState_v021 = MoCState_v021__factory.connect(mocStateProxy.address, signer);
+            await expect(tx)
+              .to.emit(mocProxyAsMoCState_v021, "StableTokenMigrated")
+              .withArgs(stableToken.address, stableTokenV2.address);
+          });
+          it("THEN a StableTokenMigrated event is emitted by MoCSettlement", async () => {
+            const mocProxyAsMoCSettlement_v021 = MoCSettlement_v021__factory.connect(
+              mocSettlementProxy.address,
+              signer,
+            );
+            await expect(tx)
+              .to.emit(mocProxyAsMoCSettlement_v021, "StableTokenMigrated")
+              .withArgs(stableToken.address, stableTokenV2.address);
           });
           it("THEN StableTokenV1 and StableTokenV2 total supply are the same", async () => {
             assertPrec(await stableToken.totalSupply(), await stableTokenV2.totalSupply());
@@ -332,42 +476,39 @@ describe("Feature: Stable Token migration", () => {
           });
           describe("WHEN someone tries to call migrateStableToken in moc", () => {
             it("THEN tx reverts because function is not available, only exist atomically during the upgrade", async () => {
-              const moc = MoC_v021__factory.connect(mocProxy.address, ethers.provider.getSigner());
-              await expect(moc.migrateStableToken(stableTokenV2.address)).to.be.revertedWithoutReason;
+              const mocProxyAsMoC_v021 = MoC_v021__factory.connect(mocProxy.address, signer);
+              await expect(mocProxyAsMoC_v021.migrateStableToken(stableTokenV2.address)).to.be.revertedWithoutReason;
             });
           });
           describe("WHEN someone tries to call migrateStableToken in mocConnector", () => {
             it("THEN tx reverts because function is not available, only exist atomically during the upgrade", async () => {
-              const mocConnector = MoCConnector_v021__factory.connect(
-                mocConnectorProxy.address,
-                ethers.provider.getSigner(),
-              );
-              await expect(mocConnector.migrateStableToken(stableTokenV2.address)).to.be.revertedWithoutReason;
+              const mocProxyAsMoCConnector_v021 = MoCConnector_v021__factory.connect(mocConnectorProxy.address, signer);
+              await expect(mocProxyAsMoCConnector_v021.migrateStableToken(stableTokenV2.address)).to.be
+                .revertedWithoutReason;
             });
           });
           describe("WHEN someone tries to call migrateStableToken in mocExchange", () => {
             it("THEN tx reverts because function is not available, only exist atomically during the upgrade", async () => {
-              const mocExchange = MoCExchange_v021__factory.connect(
-                mocExchangeProxy.address,
-                ethers.provider.getSigner(),
-              );
-              await expect(mocExchange.migrateStableToken(stableTokenV2.address, tokenMigrator.address)).to.be
-                .revertedWithoutReason;
+              const mocProxyAsMoCExchange_v021 = MoCExchange_v021__factory.connect(mocExchangeProxy.address, signer);
+              await expect(mocProxyAsMoCExchange_v021.migrateStableToken(stableTokenV2.address, tokenMigrator.address))
+                .to.be.revertedWithoutReason;
             });
           });
           describe("WHEN someone tries to call migrateStableToken in mocState", () => {
             it("THEN tx reverts because function is not available, only exist atomically during the upgrade", async () => {
-              const mocState = MoCState_v021__factory.connect(mocStateProxy.address, ethers.provider.getSigner());
-              await expect(mocState.migrateStableToken(stableTokenV2.address)).to.be.revertedWithoutReason;
+              const mocProxyAsMoCState_v021 = MoCState_v021__factory.connect(mocStateProxy.address, signer);
+              await expect(mocProxyAsMoCState_v021.migrateStableToken(stableTokenV2.address)).to.be
+                .revertedWithoutReason;
             });
           });
           describe("WHEN someone tries to call migrateStableToken in mocSettlement", () => {
             it("THEN tx reverts because function is not available, only exist atomically during the upgrade", async () => {
-              const mocSettlement = MoCSettlement_v021__factory.connect(
+              const mocProxyAsMoCSettlement_v021 = MoCSettlement_v021__factory.connect(
                 mocSettlementProxy.address,
-                ethers.provider.getSigner(),
+                signer,
               );
-              await expect(mocSettlement.migrateStableToken(stableTokenV2.address)).to.be.revertedWithoutReason;
+              await expect(mocProxyAsMoCSettlement_v021.migrateStableToken(stableTokenV2.address)).to.be
+                .revertedWithoutReason;
             });
           });
           describe("WHEN alice tries to redeem StableTokenV1 before migrate them", () => {
@@ -442,7 +583,7 @@ describe("Feature: Stable Token migration", () => {
               const diff = migratorStableTokenV2BalanceBefore.sub(await stableTokenV2.balanceOf(tokenMigrator.address));
               assertPrec(diff, aliceStableTokenV1BalanceBefore);
             });
-            it("THEN a TokenMigrated event is emitted", async function () {
+            it("THEN a TokenMigrated event is emitted", async () => {
               await expect(tx)
                 .to.emit(tokenMigrator, "TokenMigrated")
                 .withArgs(alice, alice, aliceStableTokenV1BalanceBefore);
@@ -462,7 +603,7 @@ describe("Feature: Stable Token migration", () => {
               await stableToken.connect(aliceSigner).approve(tokenMigrator.address, await stableToken.balanceOf(alice));
               tx = await tokenMigrator.migrateTokenFrom(alice);
             });
-            it("THEN a TokenMigrated event is emitted", async function () {
+            it("THEN a TokenMigrated event is emitted", async () => {
               await expect(tx)
                 .to.emit(tokenMigrator, "TokenMigrated")
                 .withArgs(deployer, alice, await stableTokenV2.balanceOf(alice));

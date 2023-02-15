@@ -1,17 +1,17 @@
 pragma solidity ^0.5.8;
 pragma experimental ABIEncoderV2;
 
-import "./MoCLibConnection.sol";
-import "./token/RiskProToken.sol";
-import "./token/StableToken.sol";
-import "./interface/IMoCInrate.sol";
-import "./base/MoCBase.sol";
-import "./token/MoCToken.sol";
-import "./MoCRiskProxManager.sol";
+import "../contracts/MoCLibConnection.sol";
+import "../contracts/token/RiskProToken.sol";
+import "../contracts/token/StableToken.sol";
+import "../contracts/interface/IMoCInrate.sol";
+import "../contracts/base/MoCBase.sol";
+import "../contracts/token/MoCToken.sol";
+import "../contracts/MoCRiskProxManager.sol";
 import "openzeppelin-solidity/contracts/math/Math.sol";
-import "./interface/IMoC.sol";
-import "./interface/IMoCExchange.sol";
-import "./interface/IMoCState.sol";
+import "../contracts/interface/IMoC.sol";
+import "../contracts/interface/IMoCExchange.sol";
+import "../contracts/interface/IMoCState.sol";
 
 contract MoCExchangeEvents_v021 {
   event RiskProMint(
@@ -144,6 +144,8 @@ contract MoCExchange_v021 is MoCExchangeEvents_v021, MoCBase, MoCLibConnection {
   /***** UPGRADE v021       ***********/
   /************************************/
   
+  event StableTokenMigrated(address oldStableTokenAddress_, address newStableTokenAddress_);
+  
   /**
     @dev Migrates to a new stable token contract
       Mints the new tokens to bridge contract in the same amount of the total supply of the old ones,
@@ -154,6 +156,7 @@ contract MoCExchange_v021 is MoCExchangeEvents_v021, MoCBase, MoCLibConnection {
   */
   function migrateStableToken(address newStableTokenAddress_, address bridgeAddress_) public {
     uint256 totalSupply = stableToken.totalSupply();
+    emit StableTokenMigrated(address(stableToken), newStableTokenAddress_);
     stableToken = StableToken(newStableTokenAddress_);
     stableToken.mint(bridgeAddress_, totalSupply);
   }

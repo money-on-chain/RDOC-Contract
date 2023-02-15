@@ -4,11 +4,11 @@ pragma experimental ABIEncoderV2;
 import "zos-lib/contracts/upgradeability/AdminUpgradeabilityProxy.sol";
 import "moc-governance/contracts/Governance/ChangeContract.sol";
 import "moc-governance/contracts/Upgradeability/UpgradeDelegator.sol";
-import "../MoC_v021.sol";
-import "../base/MoCConnector_v021.sol";
-import "../MoCExchange_v021.sol";
-import "../MoCState_v021.sol";
-import "../MoCSettlement_v021.sol";
+import "../../contracts_updated/MoC_v021.sol";
+import "../../contracts_updated/MoCConnector_v021.sol";
+import "../../contracts_updated/MoCExchange_v021.sol";
+import "../../contracts_updated/MoCState_v021.sol";
+import "../../contracts_updated/MoCSettlement_v021.sol";
 
 // import contracts v020 required to be compiled for testings
 import "../../contracts_updated/MoC_v020.sol";

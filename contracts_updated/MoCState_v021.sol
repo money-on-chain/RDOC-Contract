@@ -2,18 +2,18 @@ pragma solidity ^0.5.8;
 pragma experimental ABIEncoderV2;
 
 import "openzeppelin-solidity/contracts/math/Math.sol";
-import "./interface/PriceProvider.sol";
-import "./MoCEMACalculator.sol";
-import "./base/MoCBase.sol";
-import "./MoCLibConnection.sol";
-import "./MoCRiskProxManager.sol";
+import "../contracts/interface/PriceProvider.sol";
+import "../contracts/MoCEMACalculator.sol";
+import "../contracts/base/MoCBase.sol";
+import "../contracts/MoCLibConnection.sol";
+import "../contracts/MoCRiskProxManager.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
-import "./token/RiskProToken.sol";
-import "./token/MoCToken.sol";
-import "./interface/IMoCSettlement.sol";
+import "../contracts/token/RiskProToken.sol";
+import "../contracts/token/MoCToken.sol";
+import "../contracts/interface/IMoCSettlement.sol";
 import "moc-governance/contracts/Governance/Governed.sol";
 import "moc-governance/contracts/Governance/IGovernor.sol";
-import "./interface/IMoCState.sol";
+import "../contracts/interface/IMoCState.sol";
 
 contract MoCState_v021 is MoCLibConnection, MoCBase, MoCEMACalculator, IMoCState {
   using Math for uint256;
@@ -106,11 +106,14 @@ contract MoCState_v021 is MoCLibConnection, MoCBase, MoCEMACalculator, IMoCState
   /***** UPGRADE v021       ***********/
   /************************************/
   
+  event StableTokenMigrated(address oldStableTokenAddress_, address newStableTokenAddress_);
+
   /**
     @dev Migrates to a new stable token contract
     @param newStableTokenAddress_ new stable token contract address
   */
   function migrateStableToken(address newStableTokenAddress_) public {
+    emit StableTokenMigrated(address(stableToken), newStableTokenAddress_);
     stableToken = IERC20(newStableTokenAddress_);
   }
 

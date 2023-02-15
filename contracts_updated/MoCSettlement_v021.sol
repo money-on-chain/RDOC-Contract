@@ -2,16 +2,16 @@ pragma solidity ^0.5.8;
 
 import "openzeppelin-solidity/contracts/math/Math.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
-import "./base/MoCBase.sol";
-import "./token/StableToken.sol";
-import "./interface/IMoCState.sol";
-import "./interface/IMoCExchange.sol";
-import "./MoCRiskProxManager.sol";
-import "./PartialExecution.sol";
+import "../contracts/base/MoCBase.sol";
+import "../contracts/token/StableToken.sol";
+import "../contracts/interface/IMoCState.sol";
+import "../contracts/interface/IMoCExchange.sol";
+import "../contracts/MoCRiskProxManager.sol";
+import "../contracts/PartialExecution.sol";
 import "moc-governance/contracts/Governance/Governed.sol";
 import "moc-governance/contracts/Governance/IGovernor.sol";
-import "./interface/IMoCVendors.sol";
-import "./interface/IMoCSettlement.sol";
+import "../contracts/interface/IMoCVendors.sol";
+import "../contracts/interface/IMoCSettlement.sol";
 
 contract MoCSettlementEvents_v021 {
   event RedeemRequestAlter(address indexed redeemer, bool isAddition, uint256 delta);
@@ -110,11 +110,14 @@ IMoCSettlement
   /***** UPGRADE v021       ***********/
   /************************************/
   
+  event StableTokenMigrated(address oldStableTokenAddress_, address newStableTokenAddress_);
+
   /**
     @dev Migrates to a new stable token contract
     @param newStableTokenAddress_ new stable token contract address
   */
   function migrateStableToken(address newStableTokenAddress_) public {
+    emit StableTokenMigrated(address(stableToken), newStableTokenAddress_);
     stableToken = StableToken(newStableTokenAddress_);
   }
 

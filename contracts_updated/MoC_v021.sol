@@ -1,20 +1,20 @@
 pragma solidity ^0.5.8;
 
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
-import "./MoCLibConnection.sol";
-import "./token/RiskProToken.sol";
-import "./MoCRiskProxManager.sol";
-import "./interface/IMoCState.sol";
-import "./interface/IMoCSettlement.sol";
-import "./interface/IMoCExchange.sol";
-import "./base/MoCBase.sol";
-import "./base/MoCReserve.sol";
+import "../contracts/MoCLibConnection.sol";
+import "../contracts/token/RiskProToken.sol";
+import "../contracts/MoCRiskProxManager.sol";
+import "../contracts/interface/IMoCState.sol";
+import "../contracts/interface/IMoCSettlement.sol";
+import "../contracts/interface/IMoCExchange.sol";
+import "../contracts/base/MoCBase.sol";
+import "../contracts/base/MoCReserve.sol";
 import "moc-governance/contracts/Stopper/Stoppable.sol";
 import "moc-governance/contracts/Governance/IGovernor.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
-import "./interface/IMoCVendors.sol";
-import "./interface/IMoCInrate.sol";
-import "./interface/IMoC.sol";
+import "../contracts/interface/IMoCVendors.sol";
+import "../contracts/interface/IMoCInrate.sol";
+import "../contracts/interface/IMoC.sol";
 
 contract MoCEvents_v021 {
   event BucketLiquidation(bytes32 bucket);
@@ -75,11 +75,14 @@ contract MoC_v021 is MoCEvents_v021, MoCReserve, MoCLibConnection, MoCBase, Stop
   /***** UPGRADE v021       ***********/
   /************************************/
   
+  event StableTokenMigrated(address oldStableTokenAddress_, address newStableTokenAddress_);
+  
   /**
     @dev Migrates to a new stable token contract
     @param newStableTokenAddress_ new stable token contract address
   */
   function migrateStableToken(address newStableTokenAddress_) public {
+    emit StableTokenMigrated(stableToken, newStableTokenAddress_);
     stableToken = newStableTokenAddress_;
   }
 
