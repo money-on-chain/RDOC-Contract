@@ -29,7 +29,7 @@ contract StableTokenMigrationChanger is ChangeContract {
   }
   UpgradeDelegator public upgradeDelegator;
   address public stableTokenV2;
-  address public bridgeAddress;
+  address public tokenMigrator;
 
   // 0: MoC
   // 1: MocConnector
@@ -41,16 +41,21 @@ contract StableTokenMigrationChanger is ChangeContract {
   /**
     @notice Constructor
     @param _upgradeDelegator Address of the upgradeDelegator in charge of that proxy
+    @param _stableTokenV2Address Address of the new Stable Token to migrate
+    @param _tokenMigratorAddress Address of the Token Migrator contract who recives Stable Token V1 
+      and makes the swaps to Stable Token V2
+    @param _upgradesAddresses Addresses array of the contracts that needs to update the Stable Token variable:
+      MoC, MoCConnector, MoCExchange, MoCState, MoCSettlement
   */
   constructor(
     UpgradeDelegator _upgradeDelegator,
     address _stableTokenV2Address,
-    address _bridgeAddress,
+    address _tokenMigratorAddress,
     UpgradesAddresses[5] memory _upgradesAddresses
   ) public {
     upgradeDelegator = _upgradeDelegator;
     stableTokenV2 = _stableTokenV2Address;
-    bridgeAddress = _bridgeAddress;
+    tokenMigrator = _tokenMigratorAddress;
    
     // 0: MoC
     upgradesAddresses[0] = _upgradesAddresses[0];
@@ -106,7 +111,7 @@ contract StableTokenMigrationChanger is ChangeContract {
   function _afterUpgrade() internal { 
     MoC_v021(address(upgradesAddresses[0].proxy)).migrateStableToken(stableTokenV2);
     MoCConnector_v021(address(upgradesAddresses[1].proxy)).migrateStableToken(stableTokenV2);
-    MoCExchange_v021(address(upgradesAddresses[2].proxy)).migrateStableToken(stableTokenV2, bridgeAddress);
+    MoCExchange_v021(address(upgradesAddresses[2].proxy)).migrateStableToken(stableTokenV2, tokenMigrator);
     MoCState_v021(address(upgradesAddresses[3].proxy)).migrateStableToken(stableTokenV2);
     MoCSettlement_v021(address(upgradesAddresses[4].proxy)).migrateStableToken(stableTokenV2);
     // upgrade again to a new implementation, we don't want that middle term implementation be alive more than
