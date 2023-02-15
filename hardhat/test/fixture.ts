@@ -10,7 +10,6 @@ import {
   MoCConnector_v020__factory,
   MoCInrate,
   MoCInrate__factory,
-  MockGovernor__factory,
   MoCPriceProviderMock__factory,
   MoCRiskProxManager,
   MoCRiskProxManager__factory,
@@ -39,8 +38,10 @@ import {
   UpgradeDelegator__factory,
   MoCExchange_v020,
   MoCExchange_v020__factory,
+  ProxyAdmin__factory,
+  ProxyAdmin,
 } from "../typechain";
-import { deployContract, deployTransparentProxy, baseParams, pEth, deployUUPSProxy } from "./helpers/utils";
+import { deployContract, deployTransparentProxy, baseParams, pEth } from "./helpers/utils";
 
 export const fixtureDeployed = memoizee(
   (): (() => Promise<{
@@ -64,12 +65,16 @@ export const fixtureDeployed = memoizee(
     tokenMigrator: TokenMigrator;
   }>) => {
     return deployments.createFixture(async ({ ethers }) => {
+      await deployments.fixture();
       const { deployer, alice } = await getNamedAccounts();
-      const ProxyAdminFactory = await ethers.getContractFactory("ProxyAdmin");
-      const proxyAdmin = await ProxyAdminFactory.deploy();
+      const signer = await ethers.provider.getSigner();
 
-      const MocHelperLibFactory = await ethers.getContractFactory("MoCHelperLib");
-      const mocHelperLib = await MocHelperLibFactory.deploy();
+      const deployedProxyAdmin = await deployments.getOrNull("ProxyAdmin");
+      if (!deployedProxyAdmin) throw new Error("No ProxyAdmin deployed.");
+      const proxyAdmin: ProxyAdmin = ProxyAdmin__factory.connect(deployedProxyAdmin.address, signer);
+
+      const mocHelperLib = await deployments.getOrNull("MoCHelperLib");
+      if (!mocHelperLib) throw new Error("No MoCHelperLib deployed.");
 
       const mocConnector_v020: MoCConnector_v020 = await deployTransparentProxy(
         "MoCConnector_v020",
@@ -98,14 +103,14 @@ export const fixtureDeployed = memoizee(
         proxyAdmin.address,
         MoCVendors__factory,
       );
-      const mocExchange_v020: MoCExchange_v020 = await deployTransparentProxy(
-        "MoCExchange_v020",
-        proxyAdmin.address,
-        MoCExchange_v020__factory,
-        {
-          libraries: { MoCHelperLib: mocHelperLib.address },
-        },
+
+      const deployedMocExchange_v020 = await deployments.getOrNull("MoCExchangeProxy");
+      if (!deployedMocExchange_v020) throw new Error("No MoCExchangeProxy deployed.");
+      const mocExchange_v020: MoCExchange_v020 = MoCExchange_v020__factory.connect(
+        deployedMocExchange_v020.address,
+        signer,
       );
+
       const riskProxManager: MoCRiskProxManager = await deployTransparentProxy(
         "MoCRiskProxManager",
         proxyAdmin.address,
@@ -118,7 +123,10 @@ export const fixtureDeployed = memoizee(
         CommissionSplitter__factory,
       );
 
-      const stableToken: StableToken = await deployContract("StableToken", StableToken__factory, []);
+      const deployedStableToken = await deployments.getOrNull("StableToken");
+      if (!deployedStableToken) throw new Error("No StableToken deployed.");
+      const stableToken: StableToken = StableToken__factory.connect(deployedStableToken.address, signer);
+
       const mocToken: MoCToken = await deployContract("MoCToken", MoCToken__factory, []);
       const riskProToken: RiskProToken = await deployContract("RiskProToken", RiskProToken__factory, []);
       const reserveToken: ReserveToken = await deployContract("ReserveToken", ReserveToken__factory, []);
@@ -128,7 +136,10 @@ export const fixtureDeployed = memoizee(
       const mocPriceProvider = await deployContract("MoCPriceProviderMock", MoCPriceProviderMock__factory, [
         baseParams.mocPrice,
       ]);
-      const governorMock = await deployContract("GovernorMock", MockGovernor__factory, []);
+
+      const governorMock = await deployments.getOrNull("GovernorMock");
+      if (!governorMock) throw new Error("No GovernorMock deployed.");
+
       const upgradeDelegator: UpgradeDelegator = await deployContract(
         "UpgradeDelegator",
         UpgradeDelegator__factory,
@@ -226,13 +237,13 @@ export const fixtureDeployed = memoizee(
       await transferPausingRole(riskProToken, moc_v020.address);
       await proxyAdmin.transferOwnership(upgradeDelegator.address);
 
-      const stableTokenV2: StableTokenV2 = await deployUUPSProxy("StableTokenV2", StableTokenV2__factory);
-      await stableTokenV2.initialize("USR", "USR", mocExchange_v020.address, governorMock.address);
+      const deployedStableTokenV2 = await deployments.getOrNull("StableTokenV2Proxy");
+      if (!deployedStableTokenV2) throw new Error("No StableTokenV2Proxy deployed.");
+      const stableTokenV2: StableTokenV2 = StableTokenV2__factory.connect(deployedStableTokenV2.address, signer);
 
-      const tokenMigrator: TokenMigrator = await deployContract("TokenMigrator", TokenMigrator__factory, [
-        stableToken.address,
-        stableTokenV2.address,
-      ]);
+      const deployedTokenMigrator = await deployments.getOrNull("TokenMigrator");
+      if (!deployedTokenMigrator) throw new Error("No TokenMigrator deployed.");
+      const tokenMigrator: TokenMigrator = TokenMigrator__factory.connect(deployedTokenMigrator.address, signer);
 
       return {
         mocHelperAddress: mocHelperLib.address,

@@ -10,7 +10,12 @@ const deployFunc: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const deployedStableTokenV2 = await deployments.getOrNull("StableTokenV2Proxy");
   if (!deployedStableTokenV2) throw new Error("No StableTokenV2Proxy deployed.");
 
-  // TODO: in local env we could deploy contracts needed for constructor args and use this deploy script for testing too
+  // for local test initialize with deployed contracts
+  if (hre.network.tags.local) {
+    const deployedStableToken = await deployments.getOrNull("StableToken");
+    if (!deployedStableToken) throw new Error("No StableToken deployed.");
+    mocAddresses.stableTokenV1 = deployedStableToken.address;
+  }
   const deployImplResult = await deploy("TokenMigrator", {
     contract: "TokenMigrator",
     args: [mocAddresses.stableTokenV1, deployedStableTokenV2.address],
@@ -24,3 +29,4 @@ export default deployFunc;
 
 deployFunc.id = "deployed_TokenMigrator"; // id required to prevent re-execution
 deployFunc.tags = ["TokenMigrator"];
+deployFunc.dependencies = ["OnlyForTest", "StableTokenV2"];

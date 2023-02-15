@@ -13,7 +13,17 @@ const deployFunc: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   if (!deployedStableTokenV2) throw new Error("No StableTokenV2Proxy deployed.");
   const stableTokenV2: StableTokenV2 = StableTokenV2__factory.connect(deployedStableTokenV2.address, signer);
 
-  // TODO: in local env we could deploy contracts needed for initialization and use this deploy script for testing too
+  // for local test initialize with deployed contracts
+  if (hre.network.tags.local) {
+    const deployedMoCExchangeProxy = await deployments.getOrNull("MoCExchangeProxy");
+    if (!deployedMoCExchangeProxy) throw new Error("No MoCExchangeProxy deployed.");
+    mocAddresses.mocExchange = deployedMoCExchangeProxy.address;
+
+    const deployedGovernorMock = await deployments.getOrNull("GovernorMock");
+    if (!deployedGovernorMock) throw new Error("No GovernorMock deployed.");
+    mocAddresses.governor = deployedGovernorMock.address;
+  }
+
   await stableTokenV2.initialize(
     stableTokenV2Params.name,
     stableTokenV2Params.symbol,
@@ -27,3 +37,4 @@ export default deployFunc;
 
 deployFunc.id = "deployed_StableTokenV2"; // id required to prevent re-execution
 deployFunc.tags = ["StableTokenV2"];
+deployFunc.dependencies = ["OnlyForTest"];
