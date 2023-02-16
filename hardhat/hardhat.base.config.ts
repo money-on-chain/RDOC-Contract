@@ -104,6 +104,23 @@ const config: HardhatUserConfig = {
       },
       tags: ["local"],
     },
+    development: {
+      url: "http://127.0.0.1:8545",
+      deployParameters: {
+        stableTokenV2Params: {
+          name: "USR",
+          symbol: "USR",
+        },
+        mocAddresses: {
+          // addresses deployed locally
+          mocExchange: "0x2984673887d3966d8cb97A00577fe796d8DB3D02",
+          governor: "0x6A5a8B49eC1B2647d1E4b342408f5216773Cb39b",
+          stableTokenV1: "0x95a51870C1F502baFdFC25c5a1224a2322ea968C",
+        },
+        gasLimit: 6800000,
+      },
+      tags: ["dev"],
+    },
     devTestnet: {
       accounts: {
         mnemonic,

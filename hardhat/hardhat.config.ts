@@ -10,6 +10,6 @@
 import config from "./hardhat.base.config";
 
 // import here any custom task you need
-// import "./scripts/custom-tasks";
+import "./scripts/custom-tasks";
 
 export default config;

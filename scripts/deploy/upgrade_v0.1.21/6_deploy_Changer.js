@@ -2,7 +2,7 @@
 const Governor = artifacts.require('moc-governance/contracts/Governance/Governor.sol');
 const StableTokenMigrationChanger = artifacts.require('./changers/StableTokenMigrationChanger.sol');
 
-const { getConfig, getNetwork, saveConfig /* , shouldExecuteChanges */ } = require('../helper');
+const { getConfig, getNetwork, saveConfig, shouldExecuteChanges } = require('../helper');
 
 module.exports = async callback => {
   try {
@@ -49,18 +49,18 @@ module.exports = async callback => {
     config.changerAddresses.StableTokenMigrationChanger = stableTokenMigrationChanger.address;
     saveConfig(config, configPath);
 
-    // if (shouldExecuteChanges(network)) {
-    //   // Execute changes in contracts
-    //   console.log('Execute change - Changer');
-    //   const governor = await Governor.at(config.implementationAddresses.Governor);
-    //   await governor.executeChange(stableTokenMigrationChanger.address);
-    // } else {
-    //   console.log('Executing test governor execute change');
-    //   const governor = await Governor.at(config.implementationAddresses.Governor);
-    //   await governor.contract.methods
-    //     .executeChange(config.changerAddresses.Changer)
-    //     .call({ from: config.governorOwnerAddress });
-    // }
+    if (shouldExecuteChanges(network)) {
+      // Execute changes in contracts
+      console.log('Execute change - Changer');
+      const governor = await Governor.at(config.implementationAddresses.Governor);
+      await governor.executeChange(stableTokenMigrationChanger.address);
+    } else {
+      console.log('Executing test governor execute change');
+      const governor = await Governor.at(config.implementationAddresses.Governor);
+      await governor.contract.methods
+        .executeChange(config.changerAddresses.Changer)
+        .call({ from: config.governorOwnerAddress });
+    }
   } catch (error) {
     callback(error);
   }
