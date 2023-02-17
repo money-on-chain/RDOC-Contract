@@ -1,7 +1,7 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
 import { ethers } from "hardhat";
-import { deployUUPSArtifact, getNetworkDeployParams } from "../scripts/utils";
+import { deployUUPSArtifact, getNetworkDeployParams, waitForTxConfirmation } from "../scripts/utils";
 import { StableTokenV2, StableTokenV2__factory } from "../typechain";
 
 const deployFunc: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
@@ -24,12 +24,14 @@ const deployFunc: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     mocAddresses.governor = deployedGovernorMock.address;
   }
 
-  await stableTokenV2.initialize(
-    stableTokenV2Params.name,
-    stableTokenV2Params.symbol,
-    mocAddresses.mocExchange,
-    mocAddresses.governor,
-    { gasLimit },
+  await waitForTxConfirmation(
+    stableTokenV2.initialize(
+      stableTokenV2Params.name,
+      stableTokenV2Params.symbol,
+      mocAddresses.mocExchange,
+      mocAddresses.governor,
+      { gasLimit },
+    ),
   );
   return hre.network.live; // prevents re execution on live networks
 };

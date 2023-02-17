@@ -125,13 +125,13 @@ const config: HardhatUserConfig = {
       url: "https://public-node.testnet.rsk.co",
       deployParameters: {
         stableTokenV2Params: {
-          name: "USR",
-          symbol: "USR",
+          name: "Fake ST2",
+          symbol: "FST2",
         },
         mocAddresses: {
-          mocExchange: "",
-          governor: "",
-          stableTokenV1: "",
+          mocExchange: "0xA83326CBDA10A7575820683d2e205D19715e3048",
+          governor: "0x3Ea7B73D5728878ACE0896e30dd30e08aBf34182",
+          stableTokenV1: "0x63573e8350f1B1c27dF5B5e2425D8f595d01fe5b",
         },
         gasLimit: 6800000,
       },

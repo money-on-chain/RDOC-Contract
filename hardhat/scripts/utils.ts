@@ -1,4 +1,12 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types/runtime";
+import { ContractReceipt, ContractTransaction } from "ethers";
+
+export const waitForTxConfirmation = async (
+  tx: Promise<ContractTransaction>,
+  confirmations: number = 1,
+): Promise<ContractReceipt> => {
+  return (await tx).wait(confirmations);
+};
 
 export const deployUUPSArtifact = async ({
   hre,
