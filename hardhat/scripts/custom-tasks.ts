@@ -96,8 +96,8 @@ task("migrate-StableTokens", "migrate Stable Tokens").setAction(async (taskArgs,
   const [sender] = await ethers.getSigners();
   console.log(`Migrating Stable Token V1 amount: ${await stableTokenV1.balanceOf(sender.address)}`);
   await stableTokenV1.approve(tokenMigratorAddress, await stableTokenV1.balanceOf(sender.address));
-  console.log(await tokenMigrator.tokenV1());
-  console.log(await tokenMigrator.tokenV2());
+  console.log(await tokenMigrator.legacyToken());
+  console.log(await tokenMigrator.newToken());
   await tokenMigrator.migrateToken({
     gasLimit: 6800000,
   });

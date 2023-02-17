@@ -85,10 +85,6 @@ const config: HardhatUserConfig = {
         mnemonic,
         accountsBalance: "100000000000000000000000000000000000",
       },
-      gasPrice: 0,
-      initialBaseFeePerGas: 0,
-      // TODO: remove this
-      allowUnlimitedContractSize: true,
       deployParameters: {
         stableTokenV2Params: {
           name: "USR",
