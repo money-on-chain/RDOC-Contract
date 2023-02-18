@@ -129,9 +129,9 @@ const config: HardhatUserConfig = {
           symbol: "FST2",
         },
         mocAddresses: {
-          mocExchange: "0xA83326CBDA10A7575820683d2e205D19715e3048",
-          governor: "0x3Ea7B73D5728878ACE0896e30dd30e08aBf34182",
-          stableTokenV1: "0x63573e8350f1B1c27dF5B5e2425D8f595d01fe5b",
+          mocExchange: "0xdeb20E752Ae0c8060C2B44Ee00c9dd70f433f7A1",
+          governor: "0x9Ec59F3c1DA316F9222506bb35D06C3fa9f39fa6",
+          stableTokenV1: "0x2347b03b8bC723A3d66F49a91b3aDd79b1DefeB4",
         },
         gasLimit: 6800000,
       },
