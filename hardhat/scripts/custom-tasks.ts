@@ -84,90 +84,93 @@ const getContracts = async (
 };
 
 task("mint-ReserveTokens", "mint Reserve Token(only for local tests)")
+  .addParam("wallet", "wallet ID", "0", types.string)
   .addParam("amount", "amount of Reserve Tokens to claim", "", types.string)
   .setAction(async (taskArgs, hre) => {
     const { ethers } = hre;
     const { reserveToken } = await getContracts(hre);
+    const sender = (await ethers.getSigners())[taskArgs.wallet];
     await waitForTxConfirmation(
-      reserveToken.claim(pEth(ethers, taskArgs.amount), {
+      reserveToken.connect(sender).claim(pEth(ethers, taskArgs.amount), {
         gasLimit: 6800000,
       }),
     );
-    const [sender] = await ethers.getSigners();
     console.log(`Reserve Token actual balance: ${await reserveToken.balanceOf(sender.address)}`);
   });
 
 task("mint-RiskProTokens", "mint RiskPro Tokens")
+  .addParam("wallet", "wallet ID", "0", types.string)
   .addParam("amount", "amount of Reserve Tokens to use for mint RiskPro Tokens", "", types.string)
   .setAction(async (taskArgs, hre) => {
     const { ethers } = hre;
     const { reserveToken, riskProToken, moc } = await getContracts(hre);
-
+    const sender = (await ethers.getSigners())[taskArgs.wallet];
     await waitForTxConfirmation(
-      reserveToken.approve(moc.address, pEth(ethers, taskArgs.amount), {
+      reserveToken.connect(sender).approve(moc.address, pEth(ethers, taskArgs.amount), {
         gasLimit: 6800000,
       }),
     );
     await waitForTxConfirmation(
-      moc.mintRiskPro(pEth(ethers, taskArgs.amount), {
+      moc.connect(sender).mintRiskPro(pEth(ethers, taskArgs.amount), {
         gasLimit: 6800000,
       }),
     );
-    const [sender] = await ethers.getSigners();
     console.log(`Reserve Token actual balance: ${await reserveToken.balanceOf(sender.address)}`);
     console.log(`RiskPro Token actual balance: ${await riskProToken.balanceOf(sender.address)}`);
   });
 
 task("mint-StableTokens", "mint Stable Tokens")
+  .addParam("wallet", "wallet ID", "0", types.string)
   .addParam("amount", "amount of Reserve Tokens to use for mint Stable Tokens", "", types.string)
   .setAction(async (taskArgs, hre) => {
     const { ethers } = hre;
     const { reserveToken, moc, actualStableToken } = await getContracts(hre);
-
+    const sender = (await ethers.getSigners())[taskArgs.wallet];
     await waitForTxConfirmation(
-      reserveToken.approve(moc.address, pEth(ethers, taskArgs.amount), {
+      reserveToken.connect(sender).approve(moc.address, pEth(ethers, taskArgs.amount), {
         gasLimit: 6800000,
       }),
     );
     await waitForTxConfirmation(
-      moc.mintStableToken(pEth(ethers, taskArgs.amount), {
+      moc.connect(sender).mintStableToken(pEth(ethers, taskArgs.amount), {
         gasLimit: 6800000,
       }),
     );
-    const [sender] = await ethers.getSigners();
     console.log(`Reserve Token actual balance: ${await reserveToken.balanceOf(sender.address)}`);
     console.log(`Stable Token Token actual balance: ${await actualStableToken.balanceOf(sender.address)}`);
   });
 
 task("redeem-StableTokens", "redeem Stable Tokens")
+  .addParam("wallet", "wallet ID", "0", types.string)
   .addParam("amount", "amount of Stable Tokens to redeem", "", types.string)
   .setAction(async (taskArgs, hre) => {
     const { ethers } = hre;
     const { reserveToken, moc, actualStableToken } = await getContracts(hre);
-
+    const sender = (await ethers.getSigners())[taskArgs.wallet];
     await waitForTxConfirmation(
-      moc.redeemFreeStableToken(pEth(ethers, taskArgs.amount), {
+      moc.connect(sender).redeemFreeStableToken(pEth(ethers, taskArgs.amount), {
         gasLimit: 6800000,
       }),
     );
-    const [sender] = await ethers.getSigners();
     console.log(`Reserve Token actual balance: ${await reserveToken.balanceOf(sender.address)}`);
     console.log(`Stable Token Token actual balance: ${await actualStableToken.balanceOf(sender.address)}`);
   });
 
-task("migrate-StableTokens", "migrate Stable Tokens").setAction(async (taskArgs, hre) => {
-  const { ethers } = hre;
-  const { tokenMigrator, stableTokenV1, stableTokenV2 } = await getContracts(hre);
-  const [sender] = await ethers.getSigners();
-  console.log(`Migrating Stable Token V1 amount: ${await stableTokenV1.balanceOf(sender.address)}`);
-  await waitForTxConfirmation(
-    stableTokenV1.approve(tokenMigrator.address, await stableTokenV1.balanceOf(sender.address)),
-  );
-  await waitForTxConfirmation(
-    tokenMigrator.migrateToken({
-      gasLimit: 6800000,
-    }),
-  );
-  console.log(`Stable Token V1 Token actual balance: ${await stableTokenV1.balanceOf(sender.address)}`);
-  console.log(`Stable Token V2 Token actual balance: ${await stableTokenV2.balanceOf(sender.address)}`);
-});
+task("migrate-StableTokens", "migrate Stable Tokens")
+  .addParam("wallet", "wallet ID", "0", types.string)
+  .setAction(async (taskArgs, hre) => {
+    const { ethers } = hre;
+    const { tokenMigrator, stableTokenV1, stableTokenV2 } = await getContracts(hre);
+    const sender = (await ethers.getSigners())[taskArgs.wallet];
+    console.log(`Migrating Stable Token V1 amount: ${await stableTokenV1.balanceOf(sender.address)}`);
+    await waitForTxConfirmation(
+      stableTokenV1.connect(sender).approve(tokenMigrator.address, await stableTokenV1.balanceOf(sender.address)),
+    );
+    await waitForTxConfirmation(
+      tokenMigrator.connect(sender).migrateToken({
+        gasLimit: 6800000,
+      }),
+    );
+    console.log(`Stable Token V1 Token actual balance: ${await stableTokenV1.balanceOf(sender.address)}`);
+    console.log(`Stable Token V2 Token actual balance: ${await stableTokenV2.balanceOf(sender.address)}`);
+  });
