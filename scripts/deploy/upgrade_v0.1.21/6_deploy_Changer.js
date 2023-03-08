@@ -18,27 +18,27 @@ module.exports = async callback => {
       [
         {
           proxy: config.proxyAddresses.MoC,
-          middleTermImplementation: config.implementationAddresses.MoC_v021,
+          middleTermImplementation: config.implementationAddresses.MoC_v0116,
           newImplementation: config.implementationAddresses.MoC
         },
         {
           proxy: config.proxyAddresses.MoCConnector,
-          middleTermImplementation: config.implementationAddresses.MoCConnector_v021,
+          middleTermImplementation: config.implementationAddresses.MoCConnector_v0116,
           newImplementation: config.implementationAddresses.MoCConnector
         },
         {
           proxy: config.proxyAddresses.MoCExchange,
-          middleTermImplementation: config.implementationAddresses.MoCExchange_v021,
+          middleTermImplementation: config.implementationAddresses.MoCExchange_v0116,
           newImplementation: config.implementationAddresses.MoCExchange
         },
         {
           proxy: config.proxyAddresses.MoCState,
-          middleTermImplementation: config.implementationAddresses.MoCState_v021,
+          middleTermImplementation: config.implementationAddresses.MoCState_v0116,
           newImplementation: config.implementationAddresses.MoCState
         },
         {
           proxy: config.proxyAddresses.MoCSettlement,
-          middleTermImplementation: config.implementationAddresses.MoCSettlement_v021,
+          middleTermImplementation: config.implementationAddresses.MoCSettlement_v0116,
           newImplementation: config.implementationAddresses.MoCSettlement
         }
       ]

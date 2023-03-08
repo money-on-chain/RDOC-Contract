@@ -13,7 +13,7 @@ import "moc-governance/contracts/Governance/IGovernor.sol";
 import "../contracts/interface/IMoCVendors.sol";
 import "../contracts/interface/IMoCSettlement.sol";
 
-contract MoCSettlementEvents_v020 {
+contract MoCSettlementEvents_v0115 {
   event RedeemRequestAlter(address indexed redeemer, bool isAddition, uint256 delta);
   event RedeemRequestProcessed(address indexed redeemer, uint256 commission, uint256 amount);
   event SettlementRedeemStableToken(uint256 queueSize, uint256 accumCommissions, uint256 reservePrice);
@@ -27,8 +27,8 @@ contract MoCSettlementEvents_v020 {
   event SettlementCompleted(uint256 commissionsPayed);
 }
 
-contract MoCSettlement_v020 is
-MoCSettlementEvents_v020,
+contract MoCSettlement_v0115 is
+MoCSettlementEvents_v0115,
 MoCBase,
 PartialExecution,
 Governed,

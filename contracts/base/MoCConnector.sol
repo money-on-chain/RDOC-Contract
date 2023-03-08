@@ -76,11 +76,11 @@ contract MoCConnector is MoCWhitelist, Initializable {
   }
 
   /************************************/
-  /***** UPGRADE v021       ***********/
+  /***** UPGRADE v0116       ***********/
   /************************************/
   
   // DEPRECATED. 
-  // This function was used atomically in upgrade v020 to migrate stableTokenV1 to stableTokenV2
+  // This function was used atomically in upgrade v0115 to migrate stableTokenV1 to stableTokenV2
   // After that, it is removed in this contract version to cannot be called more than once.
   //
   // event StableTokenMigrated(address oldStableTokenAddress_, address newStableTokenAddress_);

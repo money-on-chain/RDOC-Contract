@@ -16,12 +16,12 @@ import "../contracts/interface/IMoCVendors.sol";
 import "../contracts/interface/IMoCInrate.sol";
 import "../contracts/interface/IMoC.sol";
 
-contract MoCEvents_v020 {
+contract MoCEvents_v0115 {
   event BucketLiquidation(bytes32 bucket);
   event ContractLiquidated(address mocAddress);
 }
 
-contract MoC_v020 is MoCEvents_v020, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMoC {
+contract MoC_v0115 is MoCEvents_v0115, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMoC {
   using SafeMath for uint256;
 
   /// @dev Contracts.
@@ -304,23 +304,8 @@ contract MoC_v020 is MoCEvents_v020, MoCReserve, MoCLibConnection, MoCBase, Stop
   function mintRiskProxVendors(bytes32 bucket, uint256 resTokensToMint, address vendorAccount) public
   whenNotPaused() whenSettlementReady() availableBucket(bucket) notBaseBucket(bucket)
   transitionState() bucketStateTransition(bucket) {
-    /** UPDATE V0110: 24/09/2020 - Upgrade to support multiple commission rates **/
-    (uint256 totalResTokensSpent,
-    uint256 reserveTokenCommission,
-    uint256 mocCommission,
-    uint256 reserveTokenMarkup,
-    uint256 mocMarkup) = mocExchange.mintRiskProx(msg.sender, bucket, resTokensToMint, vendorAccount);
-
-    transferCommissions(
-      msg.sender,
-      totalResTokensSpent,
-      reserveTokenCommission,
-      mocCommission,
-      vendorAccount,
-      reserveTokenMarkup,
-      mocMarkup
-    );
-    /** END UPDATE V0110: 24/09/2020 - Upgrade to support multiple commission rates **/
+    /** UPDATE V0114: 07/02/2023 - Removal of leveraged positions. Please take a look at http://bit.ly/3XPiKUA **/
+    revert("Mint Leveraged position is disabled. See: http://bit.ly/3XPiKUA");
   }
 
   /**

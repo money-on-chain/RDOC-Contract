@@ -1,13 +1,14 @@
 pragma solidity ^0.5.8;
+pragma experimental ABIEncoderV2;
 
-import "./MoCSettlement_v020.sol";
+import "./MoCState_v0115.sol";
 
-contract MoCSettlement_v021 is MoCSettlement_v020 {
+contract MoCState_v0116 is MoCState_v0115 {
 
   /************************************/
-  /***** UPGRADE v021       ***********/
+  /***** UPGRADE v0116       ***********/
   /************************************/
-
+  
   event StableTokenMigrated(address oldStableTokenAddress_, address newStableTokenAddress_);
 
   /**
@@ -16,6 +17,6 @@ contract MoCSettlement_v021 is MoCSettlement_v020 {
   */
   function migrateStableToken(address newStableTokenAddress_) public {
     emit StableTokenMigrated(address(stableToken), newStableTokenAddress_);
-    stableToken = StableToken(newStableTokenAddress_);
+    stableToken = IERC20(newStableTokenAddress_);
   }
 }

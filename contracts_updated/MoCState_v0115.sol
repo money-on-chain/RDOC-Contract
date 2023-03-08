@@ -15,7 +15,7 @@ import "moc-governance/contracts/Governance/Governed.sol";
 import "moc-governance/contracts/Governance/IGovernor.sol";
 import "../contracts/interface/IMoCState.sol";
 
-contract MoCState_v020 is MoCLibConnection, MoCBase, MoCEMACalculator, IMoCState {
+contract MoCState_v0115 is MoCLibConnection, MoCBase, MoCEMACalculator, IMoCState {
   using Math for uint256;
   using SafeMath for uint256;
 

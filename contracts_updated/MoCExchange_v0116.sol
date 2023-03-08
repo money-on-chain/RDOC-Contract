@@ -1,14 +1,14 @@
 pragma solidity ^0.5.8;
 pragma experimental ABIEncoderV2;
 
-import "./MoCExchange_v020.sol";
+import "./MoCExchange_v0115.sol";
 
-contract MoCExchange_v021 is MoCExchange_v020 {
+contract MoCExchange_v0116 is MoCExchange_v0115 {
   using Math for uint256;
   using SafeMath for uint256;
 
   /************************************/
-  /***** UPGRADE v021       ***********/
+  /***** UPGRADE v0116       ***********/
   /************************************/
   
   event StableTokenMigrated(address oldStableTokenAddress_, address newStableTokenAddress_);

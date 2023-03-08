@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-const MoCExchangeV021 = artifacts.require('./MoCExchange_v021.sol');
+const MoCExchangev0116 = artifacts.require('./MoCExchange_v0116.sol');
 const MoCExchange = artifacts.require('./MoCExchange.sol');
 
 const { getConfig, getNetwork, saveConfig } = require('../helper');
@@ -12,24 +12,24 @@ module.exports = async callback => {
 
     // Link MoCHelperLib
     console.log('Link MoCHelperLib');
-    MoCExchangeV021.link('MoCHelperLib', config.implementationAddresses.MoCHelperLib);
+    MoCExchangev0116.link('MoCHelperLib', config.implementationAddresses.MoCHelperLib);
     MoCExchange.link('MoCHelperLib', config.implementationAddresses.MoCHelperLib);
 
     // Deploy contract implementation
-    console.log('Deploying MoCExchange v021 ...');
-    const mocExchangeV021 = await MoCExchangeV021.new();
+    console.log('Deploying MoCExchange v0116 ...');
+    const mocExchangev0116 = await MoCExchangev0116.new();
 
     // Deploy contract implementation
     console.log('Deploying MoCExchange ...');
     const mocExchange = await MoCExchange.new();
 
     // Save implementation address to config file
-    config.implementationAddresses.MoCExchange_v021 = mocExchangeV021.address;
+    config.implementationAddresses.MoCExchange_v0116 = mocExchangev0116.address;
     config.implementationAddresses.MoCExchange = mocExchange.address;
 
     saveConfig(config, configPath);
 
-    console.log('MoCExchange v021 implementation address: ', mocExchangeV021.address);
+    console.log('MoCExchange v0116 implementation address: ', mocExchangev0116.address);
     console.log('MoCExchange implementation address: ', mocExchange.address);
   } catch (error) {
     callback(error);

@@ -4,18 +4,18 @@ pragma experimental ABIEncoderV2;
 import "zos-lib/contracts/upgradeability/AdminUpgradeabilityProxy.sol";
 import "moc-governance/contracts/Governance/ChangeContract.sol";
 import "moc-governance/contracts/Upgradeability/UpgradeDelegator.sol";
-import "../../contracts_updated/MoC_v021.sol";
-import "../../contracts_updated/MoCConnector_v021.sol";
-import "../../contracts_updated/MoCExchange_v021.sol";
-import "../../contracts_updated/MoCState_v021.sol";
-import "../../contracts_updated/MoCSettlement_v021.sol";
+import "../../contracts_updated/MoC_v0116.sol";
+import "../../contracts_updated/MoCConnector_v0116.sol";
+import "../../contracts_updated/MoCExchange_v0116.sol";
+import "../../contracts_updated/MoCState_v0116.sol";
+import "../../contracts_updated/MoCSettlement_v0116.sol";
 
-// import contracts v020 required to be compiled for testings
-import "../../contracts_updated/MoC_v020.sol";
-import "../../contracts_updated/MoCConnector_v020.sol";
-import "../../contracts_updated/MoCExchange_v020.sol";
-import "../../contracts_updated/MoCState_v020.sol";
-import "../../contracts_updated/MoCSettlement_v020.sol";
+// import contracts v0115 required to be compiled for testings
+import "../../contracts_updated/MoC_v0115.sol";
+import "../../contracts_updated/MoCConnector_v0115.sol";
+import "../../contracts_updated/MoCExchange_v0115.sol";
+import "../../contracts_updated/MoCState_v0115.sol";
+import "../../contracts_updated/MoCSettlement_v0115.sol";
 
 
 /**
@@ -109,11 +109,11 @@ contract StableTokenMigrationChanger is ChangeContract {
     @dev This function can be overriden by child changers to upgrade contracts that require some changes after the upgrade
    */
   function _afterUpgrade() internal { 
-    MoC_v021(address(upgradesAddresses[0].proxy)).migrateStableToken(stableTokenV2);
-    MoCConnector_v021(address(upgradesAddresses[1].proxy)).migrateStableToken(stableTokenV2);
-    MoCExchange_v021(address(upgradesAddresses[2].proxy)).migrateStableToken(stableTokenV2, tokenMigrator);
-    MoCState_v021(address(upgradesAddresses[3].proxy)).migrateStableToken(stableTokenV2);
-    MoCSettlement_v021(address(upgradesAddresses[4].proxy)).migrateStableToken(stableTokenV2);
+    MoC_v0116(address(upgradesAddresses[0].proxy)).migrateStableToken(stableTokenV2);
+    MoCConnector_v0116(address(upgradesAddresses[1].proxy)).migrateStableToken(stableTokenV2);
+    MoCExchange_v0116(address(upgradesAddresses[2].proxy)).migrateStableToken(stableTokenV2, tokenMigrator);
+    MoCState_v0116(address(upgradesAddresses[3].proxy)).migrateStableToken(stableTokenV2);
+    MoCSettlement_v0116(address(upgradesAddresses[4].proxy)).migrateStableToken(stableTokenV2);
     // upgrade again to a new implementation, we don't want that middle term implementation be alive more than
     // this atomic transaction
     // 0: MoC

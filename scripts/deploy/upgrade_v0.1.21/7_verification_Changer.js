@@ -76,9 +76,9 @@ module.exports = async callback => {
       console.log('ERROR! Proxy MoC.sol is not the same ', changerInfo.mocProxy);
     }
 
-    if (changerInfo.mocMiddleTermImplementation === config.implementationAddresses.MoC_v021) {
+    if (changerInfo.mocMiddleTermImplementation === config.implementationAddresses.MoC_v0116) {
       console.log(
-        'OK. Implementation MoC_v021.sol contract: ',
+        'OK. Implementation MoC_v0116.sol contract: ',
         changerInfo.mocMiddleTermImplementation
       );
     } else {
@@ -106,10 +106,10 @@ module.exports = async callback => {
 
     if (
       changerInfo.mocConnectorMiddleTermImplementation ===
-      config.implementationAddresses.MoCConnector_v021
+      config.implementationAddresses.MoCConnector_v0116
     ) {
       console.log(
-        'OK. Implementation MoCConnector_v021.sol contract: ',
+        'OK. Implementation MoCConnector_v0116.sol contract: ',
         changerInfo.mocConnectorMiddleTermImplementation
       );
     } else {
@@ -140,10 +140,10 @@ module.exports = async callback => {
 
     if (
       changerInfo.mocExchangeMiddleTermImplementation ===
-      config.implementationAddresses.MoCExchange_v021
+      config.implementationAddresses.MoCExchange_v0116
     ) {
       console.log(
-        'OK. Implementation MoCExchange_v021.sol contract: ',
+        'OK. Implementation MoCExchange_v0116.sol contract: ',
         changerInfo.mocExchangeMiddleTermImplementation
       );
     } else {
@@ -173,10 +173,10 @@ module.exports = async callback => {
     }
 
     if (
-      changerInfo.mocStateMiddleTermImplementation === config.implementationAddresses.MoCState_v021
+      changerInfo.mocStateMiddleTermImplementation === config.implementationAddresses.MoCState_v0116
     ) {
       console.log(
-        'OK. Implementation MoCState_v021.sol contract: ',
+        'OK. Implementation MoCState_v0116.sol contract: ',
         changerInfo.mocStateMiddleTermImplementation
       );
     } else {
@@ -210,10 +210,10 @@ module.exports = async callback => {
 
     if (
       changerInfo.mocSettlementMiddleTermImplementation ===
-      config.implementationAddresses.MoCSettlement_v021
+      config.implementationAddresses.MoCSettlement_v0116
     ) {
       console.log(
-        'OK. Implementation MoCSettlement_v021.sol contract: ',
+        'OK. Implementation MoCSettlement_v0116.sol contract: ',
         changerInfo.mocSettlementMiddleTermImplementation
       );
     } else {

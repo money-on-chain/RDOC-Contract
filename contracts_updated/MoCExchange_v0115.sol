@@ -13,7 +13,7 @@ import "../contracts/interface/IMoC.sol";
 import "../contracts/interface/IMoCExchange.sol";
 import "../contracts/interface/IMoCState.sol";
 
-contract MoCExchangeEvents_v020 {
+contract MoCExchangeEvents_v0115 {
   event RiskProMint(
     address indexed account,
     uint256 amount,
@@ -114,7 +114,7 @@ contract MoCExchangeEvents_v020 {
   );
 }
 
-contract MoCExchange_v020 is MoCExchangeEvents_v020, MoCBase, MoCLibConnection {
+contract MoCExchange_v0115 is MoCExchangeEvents_v0115, MoCBase, MoCLibConnection {
   using Math for uint256;
   using SafeMath for uint256;
 
