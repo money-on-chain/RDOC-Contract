@@ -77,16 +77,7 @@ contract MocRC20 is IMocRC20, AccessControlEnumerableUpgradeable, ERC20Upgradeab
      *
      * - the caller must have the `BURNER_ROLE`.
      */
-    function burn(address to, uint256 amount) external virtual onlyRole(BURNER_ROLE) returns (bool) {
+    function burn(address to, uint256 amount) external virtual onlyRole(BURNER_ROLE) {
         _burn(to, amount);
-        return true;
-    }
-
-    /**
-     * @inheritdoc IMocRC20
-     */
-    function hasFullRoles(address _account) public view virtual override returns (bool) {
-        return
-            hasRole(MINTER_ROLE, _account) && hasRole(BURNER_ROLE, _account) && hasRole(DEFAULT_ADMIN_ROLE, _account);
     }
 }
