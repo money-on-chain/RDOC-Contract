@@ -1,18 +1,10 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
-import { ethers } from "hardhat";
-import { deployUUPSArtifact, getNetworkDeployParams, waitForTxConfirmation } from "../scripts/utils";
-import { StableTokenV2, StableTokenV2__factory } from "../typechain";
+import { deployUUPSArtifact, getNetworkDeployParams } from "../scripts/utils";
 
 const deployFunc: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const { deployments } = hre;
-  const signer = ethers.provider.getSigner();
-  const { stableTokenV2Params, mocAddresses, gasLimit } = getNetworkDeployParams(hre);
-  await deployUUPSArtifact({ hre, contract: "StableTokenV2" });
-  const deployedStableTokenV2 = await deployments.getOrNull("StableTokenV2Proxy");
-  if (!deployedStableTokenV2) throw new Error("No StableTokenV2Proxy deployed.");
-  const stableTokenV2: StableTokenV2 = StableTokenV2__factory.connect(deployedStableTokenV2.address, signer);
-
+  const { stableTokenV2Params, mocAddresses } = getNetworkDeployParams(hre);
   // for local test initialize with deployed contracts
   if (hre.network.tags.local) {
     const deployedMoCExchangeProxy = await deployments.getOrNull("MoCExchangeProxy");
@@ -24,15 +16,17 @@ const deployFunc: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     mocAddresses.governor = deployedGovernorMock.address;
   }
 
-  await waitForTxConfirmation(
-    stableTokenV2.initialize(
+  await deployUUPSArtifact({
+    hre,
+    contract: "StableTokenV2",
+    initializeArgs: [
       stableTokenV2Params.name,
       stableTokenV2Params.symbol,
       mocAddresses.mocExchange,
       mocAddresses.governor,
-      { gasLimit },
-    ),
-  );
+    ],
+  });
+
   return hre.network.live; // prevents re execution on live networks
 };
 export default deployFunc;
