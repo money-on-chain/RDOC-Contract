@@ -71,8 +71,8 @@ module.exports = {
     rdocMainnet: {
       provider: new HDWalletProvider(mnemonic, 'https://public-node.rsk.co'),
       network_id: '30',
-      gas: 6500000,
-      gasPrice: 66000000,
+      gas: 6700000,
+      gasPrice: 69000000,
       skipDryRun: true
     }
   },

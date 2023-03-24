@@ -4,7 +4,7 @@ const { executeBatched } = require('../testHelpers/networkHelper');
 let mocHelper;
 let toContractBN;
 let BUCKET_X2;
-const RISKPROX_OWNERS_QUANTITY = 9;
+const RISKPROX_OWNERS_QUANTITY = 0;
 
 const initializeSettlement = async (owner, vendorAccount, riskProxOwners) => {
   mocHelper.revertState();

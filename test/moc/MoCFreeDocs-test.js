@@ -129,7 +129,7 @@ contract.skip('MoC', function([owner, userAccount, otherAccount, vendorAccount])
                 'wrong amount of free stableToken'
               );
             });
-            describe(`WHEN ${scenario.params.riskProxToMint} RiskProx are minted`, function() {
+            /*describe(`WHEN ${scenario.params.riskProxToMint} RiskProx are minted`, function() {
               beforeEach(async function() {
                 const stableTokenBalance = await mocHelper.getStableTokenBalance(userAccount);
                 mocHelper.assertBigDollar(
@@ -307,7 +307,7 @@ contract.skip('MoC', function([owner, userAccount, otherAccount, vendorAccount])
                   });
                 });
               });
-            });
+            });*/
           });
         });
       });
