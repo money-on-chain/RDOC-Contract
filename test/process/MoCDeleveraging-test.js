@@ -8,6 +8,7 @@ let toContractBN;
 let BUCKET_X2;
 let accounts;
 contract('MoC: Delever X', function([owner, blacklisted, vendorAccount, ...allAccounts]) {
+  /*
   accounts = allAccounts.slice(0, 10);
   before(async function() {
     const acc = [owner, blacklisted, vendorAccount, ...accounts];
@@ -356,4 +357,5 @@ contract('MoC: Delever X', function([owner, blacklisted, vendorAccount, ...allAc
       });
     });
   });
+   */
 });

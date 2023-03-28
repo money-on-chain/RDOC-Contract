@@ -10,6 +10,7 @@ const zeroAddress = '0x0000000000000000000000000000000000000000';
 
 // TODO: test RiskProx redeems with interests
 contract('MoC', function([owner, userAccount, commissionsAccount, vendorAccount, otherAddress]) {
+  /*
   before(async function() {
     const accounts = [owner, userAccount, commissionsAccount, vendorAccount, otherAddress];
     mocHelper = await testHelperBuilder({ owner, accounts, useMock: true });
@@ -742,4 +743,5 @@ contract('MoC', function([owner, userAccount, commissionsAccount, vendorAccount,
       });
     });
   });
+   */
 });

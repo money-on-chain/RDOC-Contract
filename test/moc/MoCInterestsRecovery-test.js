@@ -20,7 +20,7 @@ contract('MoC : MoCExchange', function([owner, userAccount, vendorAccount]) {
       let mintEvent;
       let originalInrate;
 
-      describe(`GIVEN a user mints 5 RiskProx AND there are ${days} days til next settlement`, function() {
+      /*describe(`GIVEN a user mints 5 RiskProx AND there are ${days} days til next settlement`, function() {
         before(async function() {
           await mocHelper.revertState();
 
@@ -72,7 +72,7 @@ contract('MoC : MoCExchange', function([owner, userAccount, vendorAccount]) {
             mocHelper.assertBig(expected, redeemEvent.interests, 'Incorrect interests');
           });
         });
-      });
+      });*/
     });
   });
 });

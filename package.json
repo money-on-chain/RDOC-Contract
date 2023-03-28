@@ -1,6 +1,6 @@
 {
   "name": "rdoc-contract",
-  "version": "0.1.12",
+  "version": "0.1.14",
   "private": true,
   "homepage": "https://github.com/money-on-chain/RDOC-Contract",
   "description": "RIF collateralized stablecoin using decentralized three-token system",
@@ -62,7 +62,6 @@
     "eslint-plugin-mocha": "6.0.0",
     "eslint-plugin-prettier": "3.1.0",
     "eslint-plugin-promise": "4.2.1",
-    "eth-gas-reporter": "^0.2.22",
     "ethlint": "1.2.4",
     "ganache-cli": "6.4.5",
     "mocha": "6.2.0",

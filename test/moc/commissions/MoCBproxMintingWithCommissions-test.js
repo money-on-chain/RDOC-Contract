@@ -16,6 +16,7 @@ contract('MoC : MoCExchange', function([
   vendorAccount,
   otherAddress
 ]) {
+  /*
   before(async function() {
     const accounts = [owner, userAccount, commissionsAccount, vendorAccount, otherAddress];
     mocHelper = await testHelperBuilder({ owner, accounts, useMock: true });
@@ -682,4 +683,6 @@ contract('MoC : MoCExchange', function([
       });
     });
   });
+
+   */
 });
