@@ -1,7 +1,27 @@
-// SPDX-License-Identifier: 
-// File: openzeppelin-solidity/contracts/math/SafeMath.sol
+/*
+Copyright MOC Investments Corp. 2020. All rights reserved.
 
-pragma solidity ^0.5.0;
+You acknowledge and agree that MOC Investments Corp. (“MOC”) (or MOC’s licensors) own all legal right, title and interest in and to the work, software, application, source code, documentation and any other documents in this repository (collectively, the “Program”), including any intellectual property rights which subsist in the Program (whether those rights happen to be registered or not, and wherever in the world those rights may exist), whether in source code or any other form.
+
+Subject to the limited license below, you may not (and you may not permit anyone else to) distribute, publish, copy, modify, merge, combine with another program, create derivative works of, reverse engineer, decompile or otherwise attempt to extract the source code of, the Program or any part thereof, except that you may contribute to this repository.
+
+You are granted a non-exclusive, non-transferable, non-sublicensable license to distribute, publish, copy, modify, merge, combine with another program or create derivative works of the Program (such resulting program, collectively, the “Resulting Program”) solely for Non-Commercial Use as long as you:
+ 1. give prominent notice (“Notice”) with each copy of the Resulting Program that the Program is used in the Resulting Program and that the Program is the copyright of MOC Investments Corp.; and
+ 2. subject the Resulting Program and any distribution, publication, copy, modification, merger therewith, combination with another program or derivative works thereof to the same Notice requirement and Non-Commercial Use restriction set forth herein.
+
+“Non-Commercial Use” means each use as described in clauses (1)-(3) below, as reasonably determined by MOC Investments Corp. in its sole discretion:
+ 1. personal use for research, personal study, private entertainment, hobby projects or amateur pursuits, in each case without any anticipated commercial application;
+ 2. use by any charitable organization, educational institution, public research organization, public safety or health organization, environmental protection organization or government institution; or
+ 3. the number of monthly active users of the Resulting Program across all versions thereof and platforms globally do not exceed 100 at any time.
+
+You will not use any trade mark, service mark, trade name, logo of MOC Investments Corp. or any other company or organization in a way that is likely or intended to cause confusion about the owner or authorized user of such marks, names or logos.
+
+If you have any questions, comments or interest in pursuing any other use cases, please reach out to us at moc.license@moneyonchain.com.
+
+*/
+
+pragma solidity ^0.5.8;
+
 
 /**
  * @dev Wrappers over Solidity's arithmetic operations with added overflow
@@ -109,9 +129,7 @@ library SafeMath {
     }
 }
 
-// File: contracts/MoCHelperLib.sol
 
-pragma solidity ^0.5.8;
 
 
 library MoCHelperLib {
@@ -784,10 +802,6 @@ library MoCHelperLib {
   }
 }
 
-// File: contracts/MoCLibConnection.sol
-
-pragma solidity ^0.5.8;
-
 
 /**
   @dev Interface with MocHelperLib
@@ -824,9 +838,8 @@ contract MoCLibConnection {
   uint256[50] private upgradeGap;
 }
 
-// File: openzeppelin-solidity/contracts/token/ERC20/IERC20.sol
 
-pragma solidity ^0.5.0;
+
 
 /**
  * @dev Interface of the ERC20 standard as defined in the EIP. Does not include
@@ -903,10 +916,6 @@ interface IERC20 {
     event Approval(address indexed owner, address indexed spender, uint256 value);
 }
 
-// File: openzeppelin-solidity/contracts/token/ERC20/ERC20Detailed.sol
-
-pragma solidity ^0.5.0;
-
 
 /**
  * @dev Optional functions from the ERC20 standard.
@@ -959,9 +968,6 @@ contract ERC20Detailed is IERC20 {
     }
 }
 
-// File: openzeppelin-solidity/contracts/token/ERC20/ERC20.sol
-
-pragma solidity ^0.5.0;
 
 
 
@@ -1189,9 +1195,8 @@ contract ERC20 is IERC20 {
     }
 }
 
-// File: openzeppelin-solidity/contracts/access/Roles.sol
 
-pragma solidity ^0.5.0;
+
 
 /**
  * @title Roles
@@ -1227,10 +1232,6 @@ library Roles {
         return role.bearer[account];
     }
 }
-
-// File: openzeppelin-solidity/contracts/access/roles/PauserRole.sol
-
-pragma solidity ^0.5.0;
 
 
 contract PauserRole {
@@ -1272,10 +1273,6 @@ contract PauserRole {
         emit PauserRemoved(account);
     }
 }
-
-// File: openzeppelin-solidity/contracts/lifecycle/Pausable.sol
-
-pragma solidity ^0.5.0;
 
 
 /**
@@ -1348,11 +1345,6 @@ contract Pausable is PauserRole {
     }
 }
 
-// File: openzeppelin-solidity/contracts/token/ERC20/ERC20Pausable.sol
-
-pragma solidity ^0.5.0;
-
-
 
 /**
  * @title Pausable token
@@ -1380,9 +1372,8 @@ contract ERC20Pausable is ERC20, Pausable {
     }
 }
 
-// File: openzeppelin-solidity/contracts/access/roles/MinterRole.sol
 
-pragma solidity ^0.5.0;
+
 
 
 contract MinterRole {
@@ -1425,11 +1416,6 @@ contract MinterRole {
     }
 }
 
-// File: openzeppelin-solidity/contracts/token/ERC20/ERC20Mintable.sol
-
-pragma solidity ^0.5.0;
-
-
 
 /**
  * @dev Extension of `ERC20` that adds a set of accounts with the `MinterRole`,
@@ -1451,9 +1437,6 @@ contract ERC20Mintable is ERC20, MinterRole {
     }
 }
 
-// File: openzeppelin-solidity/contracts/ownership/Ownable.sol
-
-pragma solidity ^0.5.0;
 
 /**
  * @dev Contract module which provides a basic access control mechanism, where
@@ -1529,11 +1512,6 @@ contract Ownable {
     }
 }
 
-// File: contracts/token/OwnerBurnableToken.sol
-
-pragma solidity ^0.5.8;
-
-
 
 /**
  * @title Owner Burnable Token
@@ -1549,12 +1527,6 @@ contract OwnerBurnableToken is Ownable, ERC20Mintable {
     _burn(who, value);
   }
 }
-
-// File: contracts/token/RiskProToken.sol
-
-pragma solidity ^0.5.8;
-
-
 
 
 contract RiskProToken is ERC20Detailed, ERC20Pausable, OwnerBurnableToken {
@@ -1576,9 +1548,8 @@ contract RiskProToken is ERC20Detailed, ERC20Pausable, OwnerBurnableToken {
   }
 }
 
-// File: zos-lib/contracts/Initializable.sol
 
-pragma solidity >=0.4.24 <0.6.0;
+
 
 
 /**
@@ -1640,9 +1611,9 @@ contract Initializable {
   uint256[50] private ______gap;
 }
 
-// File: contracts/base/MoCWhitelist.sol
 
-pragma solidity ^0.5.8;
+
+
 
 /**
   @dev Provides access control between all MoC Contracts
@@ -1686,11 +1657,6 @@ contract MoCWhitelist {
   // able to add more variables in them later
   uint256[50] private upgradeGap;
 }
-
-// File: contracts/base/MoCConnector.sol
-
-pragma solidity ^0.5.8;
-
 
 
 /**
@@ -1769,9 +1735,6 @@ contract MoCConnector is MoCWhitelist, Initializable {
   uint256[50] private upgradeGap;
 }
 
-// File: contracts/base/MoCConstants.sol
-
-pragma solidity ^0.5.8;
 
 /**
  * @dev Defines special constants to use along all the MoC System
@@ -1780,13 +1743,6 @@ contract MoCConstants {
   bytes32 constant public BUCKET_X2 = "X2";
   bytes32 constant public BUCKET_C0 = "C0";
 }
-
-// File: contracts/base/MoCBase.sol
-
-pragma solidity ^0.5.8;
-
-
-
 
 /**
   @dev General usefull modifiers and functions
@@ -1811,9 +1767,7 @@ contract MoCBase is MoCConstants, Initializable {
   uint256[50] private upgradeGap;
 }
 
-// File: openzeppelin-solidity/contracts/math/Math.sol
 
-pragma solidity ^0.5.0;
 
 /**
  * @dev Standard math utilities missing in the Solidity language.
@@ -1843,9 +1797,8 @@ library Math {
     }
 }
 
-// File: moc-governance/contracts/Governance/ChangeContract.sol
 
-pragma solidity ^0.5.8;
+
 
 /**
   @title ChangeContract
@@ -1863,10 +1816,6 @@ interface ChangeContract {
    */
   function execute() external;
 }
-
-// File: moc-governance/contracts/Governance/IGovernor.sol
-
-pragma solidity ^0.5.8;
 
 
 /**
@@ -1891,11 +1840,6 @@ interface IGovernor{
    */
   function isAuthorizedChanger(address _changer) external view returns (bool);
 }
-
-// File: moc-governance/contracts/Governance/Governed.sol
-
-pragma solidity ^0.5.8;
-
 
 
 /**
@@ -1946,14 +1890,6 @@ contract Governed is Initializable {
   // able to add more variables in them later
   uint256[50] private upgradeGap;
 }
-
-// File: contracts/MoCBucketContainer.sol
-
-pragma solidity ^0.5.8;
-
-
-
-
 
 
 contract MoCBucketContainer is MoCBase, Governed {
@@ -2241,12 +2177,6 @@ contract MoCBucketContainer is MoCBase, Governed {
   uint256[50] private upgradeGap;
 }
 
-// File: contracts/MoCRiskProxManager.sol
-
-pragma solidity ^0.5.8;
-
-
-
 
 
 contract MoCRiskProxManager is MoCBucketContainer {
@@ -2368,9 +2298,6 @@ contract MoCRiskProxManager is MoCBucketContainer {
   uint256[50] private upgradeGap;
 }
 
-// File: contracts/interface/IMoCState.sol
-
-pragma solidity ^0.5.8;
 
 interface IMoCState {
 
@@ -2458,10 +2385,6 @@ interface IMoCState {
     function resTokenToRiskProx(uint256 resTokensAmount, bytes32 bucket) external view returns (uint256);
 }
 
-// File: contracts/interface/IMoCSettlement.sol
-
-pragma solidity ^0.5.8;
-
 interface IMoCSettlement {
     function getRedeemRequestAt(uint256 _index) external view returns (address payable, uint256);
 
@@ -2481,10 +2404,6 @@ interface IMoCSettlement {
 
     function nextSettlementBlock() external view returns (uint256);
 }
-
-// File: contracts/interface/IMoCExchange.sol
-
-pragma solidity ^0.5.8;
 
 interface IMoCExchange {
     function getMoCTokenBalance(address owner, address spender) external view
@@ -2517,12 +2436,6 @@ interface IMoCExchange {
     function redeemStableTokenWithPrice(address payable userAddress, uint256 amount, uint256 reservePrice) external
     returns (bool, uint256);
 }
-
-// File: contracts/base/MoCReserve.sol
-
-pragma solidity ^0.5.8;
-
-
 
 
 contract MoCReserve {
@@ -2650,9 +2563,6 @@ contract MoCReserve {
   uint256[50] private upgradeGap;
 }
 
-// File: moc-governance/contracts/Stopper/Stoppable.sol
-
-pragma solidity ^0.5.8;
 
 
 
@@ -2792,9 +2702,6 @@ contract Stoppable is Governed {
   uint256[50] private upgradeGap;
 }
 
-// File: contracts/interface/IMoCVendors.sol
-
-pragma solidity ^0.5.8;
 
 interface IMoCVendors {
     function resetTotalPaidInMoC() external;
@@ -2814,10 +2721,6 @@ interface IMoCVendors {
     function updatePaidMarkup(address account, uint256 mocAmount, uint256 resTokenAmount) external
     returns (bool);
 }
-
-// File: contracts/interface/IMoCInrate.sol
-
-pragma solidity ^0.5.8;
 
 interface IMoCInrate {
     // Transaction types
@@ -2867,35 +2770,12 @@ interface IMoCInrate {
     function setRiskProInterestBlockSpan(uint256 newBitProBlockSpan) external;
 }
 
-// File: contracts/interface/IMoC.sol
-
-pragma solidity ^0.5.8;
-
 interface IMoC {
 
     function sendToAddress(address receiver, uint256 tokenAmount) external returns(bool);
 
     function addReserves(uint256 tokenAmount) external;
 }
-
-// File: contracts/MoC.sol
-
-pragma solidity ^0.5.8;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 contract MoCEvents {
   event BucketLiquidation(bytes32 bucket);
@@ -3587,3 +3467,4 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMo
   // able to add more variables in them later
   uint256[50] private upgradeGap;
 }
+

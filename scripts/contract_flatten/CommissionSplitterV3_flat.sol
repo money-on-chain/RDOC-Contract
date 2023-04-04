@@ -178,13 +178,6 @@ contract Governed is Initializable {
 }
 
 
-interface IMoC {
-
-    function sendToAddress(address receiver, uint256 tokenAmount) external returns(bool);
-
-    function addReserves(uint256 tokenAmount) external;
-}
-
 /**
  * @dev Interface of the ERC20 standard as defined in the EIP. Does not include
  * the optional functions; to access them see `ERC20Detailed`.
@@ -405,110 +398,107 @@ contract ReentrancyGuard is Initializable {
 
 /**
   @dev Contract that split his balance between two addresses based on a
-  proportion defined by Governance. One of those addresses should
-  be a Money on Chain RRC20 contract.
+  proportion defined by Governance.
  */
-contract CommissionSplitter is Governed, ReentrancyGuard {
-  event SplitExecuted(uint256 commissionAmount, uint256 mocAmount, uint256 mocTokenAmount);
+contract CommissionSplitterV3 is Governed, ReentrancyGuard {
+
+  event SplitExecuted(uint256 outputAmount_1, uint256 outputAmount_2);
+
   // Math
   using SafeMath for uint256;
-  uint256 constant public PRECISION = 10 ** 18;
+  uint256 public constant PRECISION = 10**18;
 
-  // Final receiver address
-  address public commissionsAddress;
-  // Proportion of the balance to send to moc
-  uint256 public mocProportion;
+  // Collateral asset splitter
 
-  // Contracts
-  IMoC public moc;
   IERC20 public reserveToken;
 
-  IERC20 public mocToken;
-  address public mocTokenCommissionsAddress;
+  // Output_1 receiver address
+  address public outputAddress_1;
+
+  // Output_2 receiver address
+  address public outputAddress_2;
+
+  // Proportion of the balance to Output 1
+  uint256 public outputProportion_1;
 
   /**
     @dev Initialize commission splitter contract
-    @param _mocAddress the address of MoC contract
-    @param _commissionsAddress the address in which the remaining commissions (profit ones) are sent
-    @param _mocProportion the proportion of commission that moc will keep, it should have PRECISION precision
     @param _governor the address of the IGovernor contract
     @param _reserveToken the address of the ReserveToken contract
-    @param _mocToken the address of the MoC Token contract
-    @param _mocTokenCommissionsAddress the address of the MoC Token contract
+    @param _outputAddress_1 the address receiver #1
+    @param _outputAddress_2 the address receiver #2
+    @param _outputProportion_1 the proportion of commission will send to address #1, it should have PRECISION precision
    */
   function initialize(
-    IMoC _mocAddress,
-    address payable _commissionsAddress,
-    uint256 _mocProportion,
     IGovernor _governor,
-    address _reserveToken,
-    address _mocToken,
-    address _mocTokenCommissionsAddress
+    IERC20 _reserveToken,
+    address _outputAddress_1,
+    address _outputAddress_2,
+    uint256 _outputProportion_1
   ) public initializer {
-    _setMocProportion(_mocProportion);
-    moc = _mocAddress;
-    reserveToken = IERC20(_reserveToken);
-    commissionsAddress = _commissionsAddress;
-    mocToken = IERC20(_mocToken);
-    mocTokenCommissionsAddress = _mocTokenCommissionsAddress;
 
+    require(
+      _outputProportion_1 <= PRECISION,
+      "Output Proportion #1 should not be higher than precision"
+    );
+
+    reserveToken = IERC20(_reserveToken);
+    outputAddress_1 = _outputAddress_1;
+    outputAddress_2 = _outputAddress_2;
+    outputProportion_1 = _outputProportion_1;
     Governed.initialize(_governor);
   }
 
   /**
-    @dev Split current balance of the contract, and sends one part
-    to destination address and the other to MoC Reserves.
+  @dev Split current balance of the contract, and sends one part
+  to destination address #1 and the other to destination address #2.
    */
-  function split() public {
+  function split() public nonReentrant {
+
+    // Split collateral Assets
+
     uint256 currentBalance = reserveToken.balanceOf(address(this));
-    uint256 mocAmount = currentBalance.mul(mocProportion).div(PRECISION);
-    uint256 commissionAmount = currentBalance.sub(mocAmount);
+    uint256 outputAmount_1 = currentBalance.mul(outputProportion_1).div(PRECISION);
+    uint256 outputAmount_2 = currentBalance.sub(outputAmount_1);
 
-    _sendReservesToMoC(mocAmount);
-    if (commissionAmount > 0) {
-      reserveToken.transfer(commissionsAddress, commissionAmount);
+    // sends reserve token to output 1
+    if (outputAmount_1 > 0) {
+      reserveToken.transfer(outputAddress_1, outputAmount_1);
     }
 
-    uint256 mocTokenAmount = mocToken.balanceOf(address(this));
-    if (mocTokenAmount > 0) {
-      mocToken.transfer(mocTokenCommissionsAddress, mocTokenAmount);
+    // send reserve token to output 2
+    if (outputAmount_2 > 0) {
+      reserveToken.transfer(outputAddress_2, outputAmount_2);
     }
-    emit SplitExecuted(commissionAmount, mocAmount, mocTokenAmount);
+
+    emit SplitExecuted(outputAmount_1, outputAmount_2);
   }
 
   // Governance Setters
-  function setCommissionAddress(address payable _commissionsAddress) public onlyAuthorizedChanger {
-    require(_commissionsAddress != address(0), "CommissionAddress must not be 0x0");
-    commissionsAddress = _commissionsAddress;
+
+  function setOutputAddress_1(address payable _outputAddress_1)
+    public
+    onlyAuthorizedChanger
+  {
+    outputAddress_1 = _outputAddress_1;
   }
 
-  function setMocToken(address _mocToken) public onlyAuthorizedChanger {
-    require(_mocToken != address(0), "MocToken must not be 0x0");
-    mocToken = IERC20(_mocToken);
+  function setOutputAddress_2(address payable _outputAddress_2)
+    public
+    onlyAuthorizedChanger
+  {
+    outputAddress_2 = _outputAddress_2;
   }
 
-  function setMocTokenCommissionAddress(address _mocTokenCommissionsAddress) public onlyAuthorizedChanger {
-    require(_mocTokenCommissionsAddress != address(0), "MocTokenCommissionAddress must not be 0x0");
-    mocTokenCommissionsAddress = _mocTokenCommissionsAddress;
-  }
-
-  function setMocProportion(uint256 _mocProportion) public onlyAuthorizedChanger {
-    _setMocProportion(_mocProportion);
-  }
-
-  function _setMocProportion(uint256 _mocProportion) internal {
-    require(_mocProportion <= PRECISION, "Proportion should not be higher than precision");
-    mocProportion = _mocProportion;
-  }
-
-  /**
-    @dev Sends tokens to Money on chain reserves
-   */
-  function _sendReservesToMoC(uint256 amount) internal {
-    if (amount > 0) {
-      reserveToken.approve(address(moc), amount);
-      moc.addReserves(amount);
-    }
+  function setOutputProportion_1(uint256 _outputProportion_1)
+    public
+    onlyAuthorizedChanger
+  {
+    require(
+          _outputProportion_1 <= PRECISION,
+          "Output Proportion #1 should not be higher than precision"
+        );
+    outputProportion_1 = _outputProportion_1;
   }
 
 }
