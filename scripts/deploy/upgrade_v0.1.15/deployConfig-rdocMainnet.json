@@ -1,0 +1,57 @@
+{
+  "CommissionSplitterV2": {
+    "reserveToken": "0x2acc95758f8b5f583470ba265eb685a8f45fc9d5",
+    "outputMoC": "0xCfF3fcaeC2352C672C38d77cb1a064B7D50ce7e1",
+    "outputAddress_2": "0x4905f643db489d9561617638d31875b6bff79077",
+    "outputAddress_3": "0x728967DD751F5f21bF390eeE66527dBC17bD7E25",
+    "outputProportion_1": "250000000000000000",
+    "outputProportion_2": "500000000000000000",
+    "outputTokenGovernAddress_1": "0x4905f643db489d9561617638d31875b6bff79077",
+    "outputTokenGovernAddress_2": "0x09A84d61c1A10f1D5fb3267DFb00D16ca0DaCC30",
+    "outputProportionTokenGovern_1": "500000000000000000",
+    "tokenGovern": "0x9AC7fE28967B30E3A4e6e03286d715b42B453D10"
+  },
+  "CommissionSplitterV3": {
+    "reserveToken": "0x2acc95758f8b5f583470ba265eb685a8f45fc9d5",
+    "outputAddress_1": "0x4905f643db489d9561617638d31875b6bff79077",
+    "outputAddress_2": "0x728967DD751F5f21bF390eeE66527dBC17bD7E25",
+    "outputProportion_1": "500000000000000000"
+  },
+  "proxyAddresses": {
+    "CommissionSplitterV3": "",
+    "CommissionSplitterV2": ""
+  },
+  "implementationAddresses": {
+    "ProxyAdmin": "0x009C51E1f6feDcDB8014Ea9AE1E39B6dbF2AC0EC",
+    "UpgradeDelegator": "0x5cE577f6Ec969CE9a282838D350206C52A6F338C",
+    "Governor": "0x3b8853DF65AfBd94853E6D77ee0Ab5590F41bB08",
+    "CommissionSplitterV2": "",
+    "CommissionSplitterV3": ""
+  },
+  "FeeIncreaseProposal": {
+    "ROC": {
+      "MoCInrate": "0x1DaB07c4FD07d6eE1359a5198ACa2DEe64F371f3",
+      "riskProInterestAddress": "<CommissionSplitterV3>",
+      "commissionAddress": "<CommissionSplitterV2>",
+      "riskProRate": "191414800000000",
+      "commissionRates": {
+        "MINT_RISKPRO_FEES_RESERVE": 0.002,
+        "REDEEM_RISKPRO_FEES_RESERVE": 0.002,
+        "MINT_STABLETOKEN_FEES_RESERVE": 0.002,
+        "REDEEM_STABLETOKEN_FEES_RESERVE": 0.002,
+        "MINT_RISKPROX_FEES_RESERVE": 0.002,
+        "REDEEM_RISKPROX_FEES_RESERVE": 0.002,
+        "MINT_RISKPRO_FEES_MOC": 0.001,
+        "REDEEM_RISKPRO_FEES_MOC": 0.001,
+        "MINT_STABLETOKEN_FEES_MOC": 0.001,
+        "REDEEM_STABLETOKEN_FEES_MOC": 0.001,
+        "MINT_RISKPROX_FEES_MOC": 0.001,
+        "REDEEM_RISKPROX_FEES_MOC": 0.001
+      }
+    }
+  },
+  "changerAddresses": {
+    "FeeIncreaseProposal": ""
+  },
+  "governorOwnerAddress": "0x65a5681bE95d212F0c90eAd40170D8277de81169"
+}
