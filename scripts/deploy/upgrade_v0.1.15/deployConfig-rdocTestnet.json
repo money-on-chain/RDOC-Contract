@@ -1,0 +1,57 @@
+{
+    "CommissionSplitterV2": {
+      "reserveToken": "",
+      "outputMoC": "",
+      "outputAddress_2": "",
+      "outputAddress_3": "",
+      "outputProportion_1": "250000000000000000",
+      "outputProportion_2": "500000000000000000",
+      "outputTokenGovernAddress_1": "",
+      "outputTokenGovernAddress_2": "",
+      "outputProportionTokenGovern_1": "500000000000000000",
+      "tokenGovern": ""
+    },
+    "CommissionSplitterV3": {
+      "reserveToken": "",
+      "outputAddress_1": "",
+      "outputAddress_2": "",
+      "outputProportion_1": "500000000000000000"
+    },
+    "proxyAddresses": {
+      "CommissionSplitterV3": "",
+      "CommissionSplitterV2": ""
+    },
+    "implementationAddresses": {
+      "ProxyAdmin": "",
+      "UpgradeDelegator": "",
+      "Governor": "",
+      "CommissionSplitterV2": "",
+      "CommissionSplitterV3": ""
+    },
+    "FeeIncreaseProposal": {
+      "ROC": {
+        "MoCInrate": "",
+        "riskProInterestAddress": "",
+        "commissionAddress": "",
+        "riskProRate": "191414800000000",
+        "commissionRates": {
+          "MINT_RISKPRO_FEES_RESERVE": 0.002,
+          "REDEEM_RISKPRO_FEES_RESERVE": 0.002,
+          "MINT_STABLETOKEN_FEES_RESERVE": 0.002,
+          "REDEEM_STABLETOKEN_FEES_RESERVE": 0.002,
+          "MINT_RISKPROX_FEES_RESERVE": 0.002,
+          "REDEEM_RISKPROX_FEES_RESERVE": 0.002,
+          "MINT_RISKPRO_FEES_MOC": 0.001,
+          "REDEEM_RISKPRO_FEES_MOC": 0.001,
+          "MINT_STABLETOKEN_FEES_MOC": 0.001,
+          "REDEEM_STABLETOKEN_FEES_MOC": 0.001,
+          "MINT_RISKPROX_FEES_MOC": 0.001,
+          "REDEEM_RISKPROX_FEES_MOC": 0.001
+        }
+      }
+    },
+    "changerAddresses": {
+      "FeeIncreaseProposal": ""
+    },
+    "governorOwnerAddress": ""
+  }
