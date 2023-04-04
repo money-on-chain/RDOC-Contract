@@ -1,57 +1,57 @@
 {
-    "CommissionSplitterV2": {
-      "reserveToken": "0x19F64674D8A5B4E652319F5e239eFd3bc969A1fE",
-      "outputMoC": "0x7e2F245F7dc8e78576ECB13AEFc0a101E9BE1AD3",
-      "outputAddress_2": "0xf69287F5Ca3cC3C6d3981f2412109110cB8af076",
-      "outputAddress_3": "0x30d4433fF09757D33fFf99Cbe49C6384463bF551",
-      "outputProportion_1": "250000000000000000",
-      "outputProportion_2": "500000000000000000",
-      "outputTokenGovernAddress_1": "0xf69287F5Ca3cC3C6d3981f2412109110cB8af076",
-      "outputTokenGovernAddress_2": "0x1eDaDfd891793a5D1a011fFB82635C2Bbedc2511",
-      "outputProportionTokenGovern_1": "500000000000000000",
-      "tokenGovern": "0x45a97b54021a3F99827641AFe1BFAE574431e6ab"
-    },
-    "CommissionSplitterV3": {
-      "reserveToken": "0x19F64674D8A5B4E652319F5e239eFd3bc969A1fE",
-      "outputAddress_1": "0xf69287F5Ca3cC3C6d3981f2412109110cB8af076",
-      "outputAddress_2": "0x30d4433fF09757D33fFf99Cbe49C6384463bF551",
-      "outputProportion_1": "500000000000000000"
-    },
-    "proxyAddresses": {
-      "CommissionSplitterV3": "",
-      "CommissionSplitterV2": ""
-    },
-    "implementationAddresses": {
-      "ProxyAdmin": "0x3CE255E0A842884837Db76b5025d53475eFa18fd",
-      "UpgradeDelegator": "0x546AFdf647d0B5c73323366B090Ebe6C0C4D9b2C",
-      "Governor": "0x7b716178771057195bB511f0B1F7198EEE62Bc22",
-      "CommissionSplitterV2": "",
-      "CommissionSplitterV3": ""
-    },
-    "FeeIncreaseProposal": {
-      "ROC": {
-        "MoCInrate": "0x4C54053845F4f219AddB43ef3A7d4478E89a2A47",
-        "riskProInterestAddress": "<CommissionSplitterV3>",
-        "commissionAddress": "<CommissionSplitterV2>",
-        "riskProRate": "196200000000000",
-        "commissionRates": {
-          "MINT_RISKPRO_FEES_RESERVE": 0.002,
-          "REDEEM_RISKPRO_FEES_RESERVE": 0.002,
-          "MINT_STABLETOKEN_FEES_RESERVE": 0.002,
-          "REDEEM_STABLETOKEN_FEES_RESERVE": 0.002,
-          "MINT_RISKPROX_FEES_RESERVE": 0.002,
-          "REDEEM_RISKPROX_FEES_RESERVE": 0.002,
-          "MINT_RISKPRO_FEES_MOC": 0.0015,
-          "REDEEM_RISKPRO_FEES_MOC": 0.0015,
-          "MINT_STABLETOKEN_FEES_MOC": 0.0015,
-          "REDEEM_STABLETOKEN_FEES_MOC": 0.0015,
-          "MINT_RISKPROX_FEES_MOC": 0.0015,
-          "REDEEM_RISKPROX_FEES_MOC": 0.0015
-        }
+  "CommissionSplitterV2": {
+    "reserveToken": "0x19F64674D8A5B4E652319F5e239eFd3bc969A1fE",
+    "outputMoC": "0x7e2F245F7dc8e78576ECB13AEFc0a101E9BE1AD3",
+    "outputAddress_2": "0xf69287F5Ca3cC3C6d3981f2412109110cB8af076",
+    "outputAddress_3": "0x30d4433fF09757D33fFf99Cbe49C6384463bF551",
+    "outputProportion_1": "250000000000000000",
+    "outputProportion_2": "500000000000000000",
+    "outputTokenGovernAddress_1": "0xf69287F5Ca3cC3C6d3981f2412109110cB8af076",
+    "outputTokenGovernAddress_2": "0x1eDaDfd891793a5D1a011fFB82635C2Bbedc2511",
+    "outputProportionTokenGovern_1": "500000000000000000",
+    "tokenGovern": "0x45a97b54021a3F99827641AFe1BFAE574431e6ab"
+  },
+  "CommissionSplitterV3": {
+    "reserveToken": "0x19F64674D8A5B4E652319F5e239eFd3bc969A1fE",
+    "outputAddress_1": "0xf69287F5Ca3cC3C6d3981f2412109110cB8af076",
+    "outputAddress_2": "0x30d4433fF09757D33fFf99Cbe49C6384463bF551",
+    "outputProportion_1": "500000000000000000"
+  },
+  "proxyAddresses": {
+    "CommissionSplitterV3": "0x7fC75AEb9542D416762C9C34E11d3126Fd66FB41",
+    "CommissionSplitterV2": "0x652FD7b78aCd4d0b9A14dF3Ae40918EFf6770Efd"
+  },
+  "implementationAddresses": {
+    "ProxyAdmin": "0x3CE255E0A842884837Db76b5025d53475eFa18fd",
+    "UpgradeDelegator": "0x546AFdf647d0B5c73323366B090Ebe6C0C4D9b2C",
+    "Governor": "0x7b716178771057195bB511f0B1F7198EEE62Bc22",
+    "CommissionSplitterV2": "0x7D0Ab4c5c162837a4b4f03723b8deCd04702A246",
+    "CommissionSplitterV3": "0x05e278702483a97e50Afbada7D82Bd3d83ad78E7"
+  },
+  "FeeIncreaseProposal": {
+    "ROC": {
+      "MoCInrate": "0x4C54053845F4f219AddB43ef3A7d4478E89a2A47",
+      "riskProInterestAddress": "<CommissionSplitterV3>",
+      "commissionAddress": "<CommissionSplitterV2>",
+      "riskProRate": "196200000000000",
+      "commissionRates": {
+        "MINT_RISKPRO_FEES_RESERVE": 0.002,
+        "REDEEM_RISKPRO_FEES_RESERVE": 0.002,
+        "MINT_STABLETOKEN_FEES_RESERVE": 0.002,
+        "REDEEM_STABLETOKEN_FEES_RESERVE": 0.002,
+        "MINT_RISKPROX_FEES_RESERVE": 0.002,
+        "REDEEM_RISKPROX_FEES_RESERVE": 0.002,
+        "MINT_RISKPRO_FEES_MOC": 0.0015,
+        "REDEEM_RISKPRO_FEES_MOC": 0.0015,
+        "MINT_STABLETOKEN_FEES_MOC": 0.0015,
+        "REDEEM_STABLETOKEN_FEES_MOC": 0.0015,
+        "MINT_RISKPROX_FEES_MOC": 0.0015,
+        "REDEEM_RISKPROX_FEES_MOC": 0.0015
       }
-    },
-    "changerAddresses": {
-      "FeeIncreaseProposal": ""
-    },
-    "governorOwnerAddress": "0xDfD27488c552E3B3E48d35cf2940f93ec9b75415"
-  }
+    }
+  },
+  "changerAddresses": {
+    "FeeIncreaseProposal": ""
+  },
+  "governorOwnerAddress": "0xDfD27488c552E3B3E48d35cf2940f93ec9b75415"
+}
