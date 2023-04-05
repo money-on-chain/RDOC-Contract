@@ -18,19 +18,19 @@ module.exports = async callback => {
 
     console.log('Contract storage');
 
-    if (contractInfo.reserveToken === config.CommissionSplitterV3.reserveToken) {
+    if (contractInfo.reserveToken.toLowerCase() === config.CommissionSplitterV3.reserveToken.toLowerCase()) {
       console.log('OK. 1. reserveToken: ', contractInfo.reserveToken);
     } else {
       console.log('ERROR. 1. reserveToken: ', contractInfo.reserveToken);
     }
 
-    if (contractInfo.outputAddress_1 === config.CommissionSplitterV3.outputAddress_1) {
+    if (contractInfo.outputAddress_1.toLowerCase() === config.CommissionSplitterV3.outputAddress_1.toLowerCase()) {
       console.log('OK. 1. outputAddress_1: ', contractInfo.outputAddress_1);
     } else {
       console.log('ERROR. 1. outputAddress_1: ', contractInfo.outputAddress_1);
     }
 
-    if (contractInfo.outputAddress_2 === config.CommissionSplitterV3.outputAddress_2) {
+    if (contractInfo.outputAddress_2.toLowerCase() === config.CommissionSplitterV3.outputAddress_2.toLowerCase()) {
       console.log('OK. 2. outputAddress_2: ', contractInfo.outputAddress_2);
     } else {
       console.log('ERROR. 2. outputAddress_2: ', contractInfo.outputAddress_2);
