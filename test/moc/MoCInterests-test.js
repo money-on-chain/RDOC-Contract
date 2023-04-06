@@ -148,7 +148,7 @@ contract('MoC : MoCExchange', function([owner, userAccount, vendorAccount]) {
     redeemScenarios.forEach(s => {
       const onMinting = false;
       let params;
-      /*describe(`WHEN the user have 4.99959195 RiskProx AND ${s.params.freeStableTokenRedeem.nStableTokens} FreeStableTokens are redeemed AND a user wants to redeem ${s.params.nReserve} ReserveTokens value in RiskProx`, function() {
+      /* describe(`WHEN the user have 4.99959195 RiskProx AND ${s.params.freeStableTokenRedeem.nStableTokens} FreeStableTokens are redeemed AND a user wants to redeem ${s.params.nReserve} ReserveTokens value in RiskProx`, function() {
         beforeEach(async function() {
           await mocHelper.mintRiskPro(userAccount, 18, vendorAccount);
           await mocHelper.mintStableToken(userAccount, 80000, vendorAccount);
@@ -205,7 +205,7 @@ contract('MoC : MoCExchange', function([owner, userAccount, vendorAccount]) {
             { significantDigits: 15 }
           );
         });
-      });*/
+      }); */
     });
   });
 });

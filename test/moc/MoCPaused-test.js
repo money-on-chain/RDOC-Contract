@@ -12,10 +12,10 @@ const assertAllMintReedemMocHelperPausedFunctions = (userAccount, vendorAccount)
   const testFunctions = [
     { name: 'mintRiskPro', args: [userAccount, 10, vendorAccount] },
     { name: 'mintStableToken', args: [userAccount, 10000, vendorAccount] },
-    /*{
+    /* {
       name: 'mintRiskProx',
       args: [userAccount, BUCKET_X2, toContractBN(10), vendorAccount, toContractBN(9000)]
-    },*/
+    }, */
     { name: 'redeemFreeStableToken', args: [{ userAccount, stableTokenAmount: 3, vendorAccount }] },
     { name: 'redeemRiskPro', args: [userAccount, 10, vendorAccount] }
   ];

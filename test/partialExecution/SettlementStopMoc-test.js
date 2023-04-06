@@ -8,8 +8,8 @@ const ACCOUNTS_QUANTITY = 10;
 
 const testFunctionPromises = vendorAccount => {
   const testFunctions = [
-    //{ name: 'mintRiskProxVendors', args: [BUCKET_X2, 0, vendorAccount] },
-    //{ name: 'redeemRiskProxVendors', args: [BUCKET_X2, 0, vendorAccount] },
+    // { name: 'mintRiskProxVendors', args: [BUCKET_X2, 0, vendorAccount] },
+    // { name: 'redeemRiskProxVendors', args: [BUCKET_X2, 0, vendorAccount] },
     { name: 'redeemStableTokenRequest', args: [0] },
     { name: 'alterRedeemRequestAmount', args: [true, 1] }
   ];

@@ -36,7 +36,7 @@ contract('MoC : RiskProx operations does not modify global indicators', function
       initialValues.maxStableToken = await this.mocState.globalMaxStableToken();
       initialValues.maxRiskPro = await this.mocState.globalMaxRiskPro();
     });
-    /*describe('WHEN user mints 5 RiskProx2', function() {
+    /* describe('WHEN user mints 5 RiskProx2', function() {
       beforeEach(async function() {
         await mocHelper.mintRiskProxAmount(userAccount, BUCKET_X2, 5, vendorAccount);
       });
@@ -71,6 +71,6 @@ contract('MoC : RiskProx operations does not modify global indicators', function
           });
         });
       });
-    });*/
+    }); */
   });
 });

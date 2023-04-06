@@ -24,7 +24,7 @@ contract('MoC', function([owner, vendorAccount]) {
       await mocHelper.mintStableTokenAmount(userAccount, 1000000, vendorAccount);
     });
 
-    /*describe('WHEN a user mints RiskProx in sequence', function() {
+    /* describe('WHEN a user mints RiskProx in sequence', function() {
       [1, 10, 5].forEach(function(nReserve) {
         it('THEN maxRiskProx in ReserveTokens should drop in every mint', async function() {
           // Max at the start
@@ -41,6 +41,6 @@ contract('MoC', function([owner, vendorAccount]) {
           );
         });
       });
-    });*/
+    }); */
   });
 });
