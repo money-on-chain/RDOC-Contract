@@ -62,7 +62,7 @@ const shouldRevertBasicFunctions = (userAccount, vendorAccount) => {
 const initializeScenario = async (userAccount, vendorAccount) => {
   await mocHelper.mintRiskProAmount(userAccount, 100, vendorAccount);
   await mocHelper.mintStableTokenAmount(userAccount, 10000, vendorAccount);
-  //await mocHelper.mintRiskProxAmount(userAccount, BUCKET_X2, 10, vendorAccount);
+  // await mocHelper.mintRiskProxAmount(userAccount, BUCKET_X2, 10, vendorAccount);
 };
 
 /** The goal of this test is to check the behaviour on transfer
