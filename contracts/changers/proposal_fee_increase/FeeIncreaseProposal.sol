@@ -33,9 +33,9 @@ contract FeeIncreaseProposal is ChangeContract, Ownable {
     require(_commissionAddress != address(0), "Wrong Commission Address");
     require(_riskProInterestAddress != address(0), "Wrong RiskPro Interest target Address");
     require(
-          _riskProRate <= PRECISION,
-          "Wrong riskProProRate should not be higher than precision"
-        );
+      _riskProRate <= PRECISION,
+      "Wrong riskProProRate should not be higher than precision"
+    );
 
     mocInrate = _mocInrate;
     commissionAddress = _commissionAddress;
