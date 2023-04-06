@@ -118,7 +118,7 @@ contract('MoC : MoCExchange', function([owner, userAccount, vendorAccount]) {
         );
       });
 
-      /*scenarios.forEach(async s => {
+      /* scenarios.forEach(async s => {
         describe(`WHEN a user sends ReserveTokens to mint ${s.params.nRiskProx} RiskProx`, function() {
           let initialBalance;
           beforeEach(async function() {
@@ -190,7 +190,7 @@ contract('MoC : MoCExchange', function([owner, userAccount, vendorAccount]) {
             );
           });
         });
-      });*/
+      }); */
     });
   });
 });

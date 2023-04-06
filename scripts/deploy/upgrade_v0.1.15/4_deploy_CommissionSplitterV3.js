@@ -48,13 +48,8 @@ module.exports = async callback => {
       commissionSplitterV3Address
     );
 
-    await CommissionSplitterV3Deployed.methods.initialize(
-        governor,
-        reserveToken,
-        outputAddress_1,
-        outputAddress_2,
-        outputProportion_1
-      )
+    await CommissionSplitterV3Deployed.methods
+      .initialize(governor, reserveToken, outputAddress_1, outputAddress_2, outputProportion_1)
       .send({ from: owner, gas: 1e6 })
       .on('transactionHash', hash => console.log('TxHash:', hash))
       .on('confirmation', confirmationNumber => console.log('Tx confirmation:', confirmationNumber))
@@ -77,7 +72,6 @@ module.exports = async callback => {
     config.proxyAddresses.CommissionSplitterV3 =
       proxies.proxies['rdoc-contract/CommissionSplitterV3'][0].address;
     saveConfig(config, configPath);
-
   } catch (error) {
     callback(error);
   }

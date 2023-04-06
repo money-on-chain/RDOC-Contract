@@ -88,9 +88,9 @@ module.exports = async callback => {
         .toString()})`
     );
     console.log(
-      `REDEEM_STABLETOKEN_FEES_RESERVE: ${contractInfo.REDEEM_STABLETOKEN_FEES_RESERVE} (${BigNumber(
+      `REDEEM_STABLETOKEN_FEES_RESERVE: ${
         contractInfo.REDEEM_STABLETOKEN_FEES_RESERVE
-      )
+      } (${BigNumber(contractInfo.REDEEM_STABLETOKEN_FEES_RESERVE)
         .div(PRECISION)
         .toString()})`
     );

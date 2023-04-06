@@ -60,7 +60,8 @@ module.exports = async callback => {
       commissionSplitterV2Address
     );
 
-    await CommissionSplitterV2Deployed.methods.initialize(
+    await CommissionSplitterV2Deployed.methods
+      .initialize(
         governor,
         reserveToken,
         outputMoC,
@@ -95,7 +96,6 @@ module.exports = async callback => {
     config.proxyAddresses.CommissionSplitterV2 =
       proxies.proxies['rdoc-contract/CommissionSplitterV2'][0].address;
     saveConfig(config, configPath);
-
   } catch (error) {
     callback(error);
   }

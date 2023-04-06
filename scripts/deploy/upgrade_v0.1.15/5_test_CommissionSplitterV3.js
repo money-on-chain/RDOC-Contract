@@ -18,25 +18,36 @@ module.exports = async callback => {
 
     console.log('Contract storage');
 
-    if (contractInfo.reserveToken.toLowerCase() === config.CommissionSplitterV3.reserveToken.toLowerCase()) {
+    if (
+      contractInfo.reserveToken.toLowerCase() ===
+      config.CommissionSplitterV3.reserveToken.toLowerCase()
+    ) {
       console.log('OK. 1. reserveToken: ', contractInfo.reserveToken);
     } else {
       console.log('ERROR. 1. reserveToken: ', contractInfo.reserveToken);
     }
 
-    if (contractInfo.outputAddress_1.toLowerCase() === config.CommissionSplitterV3.outputAddress_1.toLowerCase()) {
+    if (
+      contractInfo.outputAddress_1.toLowerCase() ===
+      config.CommissionSplitterV3.outputAddress_1.toLowerCase()
+    ) {
       console.log('OK. 1. outputAddress_1: ', contractInfo.outputAddress_1);
     } else {
       console.log('ERROR. 1. outputAddress_1: ', contractInfo.outputAddress_1);
     }
 
-    if (contractInfo.outputAddress_2.toLowerCase() === config.CommissionSplitterV3.outputAddress_2.toLowerCase()) {
+    if (
+      contractInfo.outputAddress_2.toLowerCase() ===
+      config.CommissionSplitterV3.outputAddress_2.toLowerCase()
+    ) {
       console.log('OK. 2. outputAddress_2: ', contractInfo.outputAddress_2);
     } else {
       console.log('ERROR. 2. outputAddress_2: ', contractInfo.outputAddress_2);
     }
 
-    if (contractInfo.outputProportion_1.toString() === config.CommissionSplitterV3.outputProportion_1) {
+    if (
+      contractInfo.outputProportion_1.toString() === config.CommissionSplitterV3.outputProportion_1
+    ) {
       console.log('OK. 3. outputProportion_1: ', contractInfo.outputProportion_1.toString());
     } else {
       console.log('ERROR. 3. outputProportion_1: ', contractInfo.outputProportion_1.toString());

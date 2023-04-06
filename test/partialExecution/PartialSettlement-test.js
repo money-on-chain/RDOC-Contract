@@ -245,11 +245,11 @@ contract('MoC: Partial Settlement execution', function([owner, vendorAccount, ..
               final.stable,
               'User stableToken balance is not correct'
             );
-            /*mocHelper.assertBig(
+            /* mocHelper.assertBig(
               initial.riskPro2x,
               final.riskPro2x,
               'User reserveToken2x balance is not correct'
-            );*/
+            ); */
             mocHelper.assertBig(
               initial.reserve,
               final.reserve,
