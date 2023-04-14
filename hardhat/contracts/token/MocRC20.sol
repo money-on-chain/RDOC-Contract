@@ -14,8 +14,8 @@ import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils
  * @dev ERC20 like token that allows roles allowed contracts to mint and burn (destroyed) any token.
  */
 contract MocRC20 is IMocRC20, AccessControlEnumerableUpgradeable, ERC20Upgradeable, UUPSUpgradeable, Governed {
-    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
-    bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
+    bytes32 private constant MINTER_ROLE = keccak256("MINTER_ROLE");
+    bytes32 private constant BURNER_ROLE = keccak256("BURNER_ROLE");
 
     error NotUniqueRole(bytes32 role);
 
