@@ -34,8 +34,8 @@ contract MocRC20 is IMocRC20, AccessControlEnumerableUpgradeable, ERC20Upgradeab
         IGovernor governor_
     ) external virtual initializer {
         __MocRC20_init(name_, symbol_, admin_, governor_);
-        _setupRole(MINTER_ROLE, admin_);
-        _setupRole(BURNER_ROLE, admin_);
+        _grantRole(MINTER_ROLE, admin_);
+        _grantRole(BURNER_ROLE, admin_);
     }
 
     /**
@@ -53,7 +53,7 @@ contract MocRC20 is IMocRC20, AccessControlEnumerableUpgradeable, ERC20Upgradeab
         __AccessControlEnumerable_init();
         __UUPSUpgradeable_init();
         __Governed_init(address(governor_));
-        _setupRole(DEFAULT_ADMIN_ROLE, admin_);
+        _grantRole(DEFAULT_ADMIN_ROLE, admin_);
     }
 
     /**
