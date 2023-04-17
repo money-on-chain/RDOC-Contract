@@ -96,7 +96,7 @@ All the contracts that use StableToken variable will be upgraded. Those are:
 - [MocState.sol](../contracts/MoCState.sol)
 - [MoCSettlement.sol](../contracts/MoCSettlement.sol)
 
-The changer that will do all the upgrades in an atomic ways is the following one:
+The changer that will execute all these upgrades in an atomic way is the following one:
 - [StableTokenMigrationChanger.sol](../contracts/changers/StableTokenMigrationChanger.sol)
 
 For each of them a new function is added `function migrateStableToken(address newStableTokenAddress_)` for the migration purpose and an event is emitted when it happens `event StableTokenMigrated(address oldStableTokenAddress_, address newStableTokenAddress_)`.
@@ -117,7 +117,7 @@ npm run typechain
 npm run compile
 npm run tests
 ```
-Using openzeppelin upgrade tools it is verifying that the upgraded contracts do not have a storage layout collision
+This tests, using openzeppelin upgrade tools, verify that the upgraded contracts do not have any storage layout collision.
 
 ### Step 2: Deploy the New StableToken Smart Contract
 The next step is to deploy the new StableToken smart contract. This involves the following:
@@ -143,9 +143,9 @@ npx hardhat deploy --network targetNetwork
 ```
 
 ### Step 3: Deploy new MoC protocol implementations
-Once the new StableToken smart contract has been deployed, it is needed to deploy the new contracts implementation to those that will be upgraded.
+Once the new StableToken smart contract has been deployed, we need to deploy contracts that will be upgraded new implementation.
 
-- create a file named `RDOC-Contract-Internal/scripts/deploy/upgrade_v0.1.16/deployConfig-targetNetwork.json` with all current addresses used in the targetNetwork, for example[deployConfig-devTestnet.json](../scripts/deploy/upgrade_v0.1.16/deployConfig-devTestnet.json)
+- create a file named `RDOC-Contract-Internal/scripts/deploy/upgrade_v0.1.16/deployConfig-targetNetwork.json` with all current addresses used in the targetNetwork, for example: [deployConfig-devTestnet.json](../scripts/deploy/upgrade_v0.1.16/deployConfig-devTestnet.json)
 - Add deployed addresses in Step 2. StableTokenV2(proxy) and TokenMigrator addresses in that file
 ```
 "implementationAddresses": {
