@@ -56,6 +56,12 @@ contract MocRC20 is IMocRC20, AccessControlEnumerableUpgradeable, ERC20Upgradeab
         _setupRole(DEFAULT_ADMIN_ROLE, admin_);
     }
 
+    /**
+     * @inheritdoc UUPSUpgradeable
+     * @dev checks that the changer that will do the upgrade is currently authorized by governance to makes
+     * changes within the system
+     * @param newImplementation new implementation contract address(not used)
+     */
     /* solhint-disable-next-line no-empty-blocks */
     function _authorizeUpgrade(address newImplementation) internal override onlyAuthorizedChanger {}
 
