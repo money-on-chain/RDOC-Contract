@@ -25,7 +25,7 @@ contract('MoCRiskProxManager: RiskProx Address tracking ', function([
     await mocHelper.registerVendor(vendorAccount, 0, owner);
   });
 
-  /*describe('GIVEN a new user mints RiskProx', function() {
+  /* describe('GIVEN a new user mints RiskProx', function() {
     beforeEach(async function() {
       await mocHelper.mintRiskProAmount(owner, 30, vendorAccount);
       await mocHelper.mintStableTokenAmount(owner, 50000, vendorAccount);
@@ -91,5 +91,5 @@ contract('MoCRiskProxManager: RiskProx Address tracking ', function([
         });
       });
     });
-  });*/
+  }); */
 });

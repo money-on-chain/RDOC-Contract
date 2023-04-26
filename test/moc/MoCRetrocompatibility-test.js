@@ -74,7 +74,7 @@ contract('MoC: Retrocompatibility', function([owner, userAccount]) {
       mocHelper.assertBigReserve(balance, 0, 'userAccount StableToken balance was not 0');
     });
   });
-  /*describe('GIVEN since the user wants to mint and redeem RiskProx with the retrocompatible functions', function() {
+  /* describe('GIVEN since the user wants to mint and redeem RiskProx with the retrocompatible functions', function() {
     it('WHEN a user tries to mint RiskProxs, THEN operation is successful', async function() {
       // Mint RiskPros to be able to mint StableToken
       await mocHelper.mintRiskPro(userAccount, 100);
@@ -103,5 +103,5 @@ contract('MoC: Retrocompatibility', function([owner, userAccount]) {
       const balance = await mocHelper.getRiskProxBalance(BUCKET_X2, userAccount);
       mocHelper.assertBigReserve(balance, 0, 'userAccount RiskProx balance was not 0');
     });
-  });*/
+  }); */
 });
