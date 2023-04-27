@@ -245,6 +245,8 @@ returns(uint256)
 
 ### maxRiskProxResTokenValue
 
+> ⚠ This has been deprecated since the [Proposal to remove leveraged positions](https://forum.moneyonchain.com/t/removal-of-leveraged-tokens-rif-on-chain/322) from the protocol was **approved**, however it is necessary to maintain the contracts and their documentation for legacy support.
+
 ```js
 function maxRiskProxResTokenValue(uint256 nStableToken, uint256 peg, uint256 reservePrice, uint256 lev) public view
 returns(uint256)
