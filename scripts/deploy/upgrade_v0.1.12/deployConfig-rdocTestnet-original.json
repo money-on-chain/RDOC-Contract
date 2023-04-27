@@ -19,11 +19,12 @@
     "ProxyAdmin": "0xffb65F6E24806B7e1A988EeD1Ad07BB2654fF695",
     "UpgradeDelegator": "0xCDAbFbF334A5F6BCe900D2f73470D1e6722365d8",
     "Governor": "0x4eAC4518e81B3A5198aADAb998D2610B46aAA609",
-    "MoCToken": "0x45A97b54021A3F99827641AFE1bFae574431E6ab",
+    "MoCToken": "0x45a97b54021a3F99827641AFe1BFAE574431e6ab",
     "MoCPriceProvider": "0x8DCE78BbD4D757EF7777Be113277cf5A35283b1E",
     "MoCVendors": "",
     "MoCHelperLib": "",
-    "CommissionSplitter": ""
+    "CommissionSplitter": "",
+    "MocReserve": "0x19F64674D8A5B4E652319F5e239eFd3bc969A1fE"
   },
   "valuesToAssign": {
     "commissionRates": {
@@ -43,7 +44,9 @@
     "liquidationEnabled": false,
     "protected": "1.5",
     "vendorGuardianAddress": "0xf69287F5Ca3cC3C6d3981f2412109110cB8af076",
-    "mocTokenCommissionsAddress": "0xb998C3Da8D24295406d308ea42c85c8acDa880Ba"
+    "mocTokenCommissionsAddress": "0xb998C3Da8D24295406d308ea42c85c8acDa880Ba",
+    "targetAddressCommissionPayment": "0x30d4433fF09757D33fFf99Cbe49C6384463bF551",
+    "mocProportion": "500000000000000000"
   },
   "changerAddresses": {
     "BatchChanger": ""

@@ -3,6 +3,7 @@ const testHelperBuilder = require('../mocHelper.js');
 let mocHelper;
 let BUCKET_X2;
 contract('MoC: RedeemRiskProx', function([owner, vendorAccount, ...accounts]) {
+  /*
   before(async function() {
     mocHelper = await testHelperBuilder({
       owner,
@@ -159,4 +160,5 @@ contract('MoC: RedeemRiskProx', function([owner, vendorAccount, ...accounts]) {
       });
     });
   });
+   */
 });

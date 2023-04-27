@@ -25,9 +25,11 @@ const shouldRevertBasicFunctions = (userAccount, vendorAccount) => {
   });
   describe('WHEN a blacklisted user tries to mint RiskProx', function() {
     it('THEN the transaction reverts', async function() {
+      /*
       const tx = mocHelper.mintRiskProxAmount(userAccount, BUCKET_X2, 1, vendorAccount);
 
       await expectRevert(tx, DEPOSIT_FAILED);
+       */
     });
   });
   describe('WHEN a blacklisted user tries to redeem RiskPro', function() {
@@ -60,7 +62,7 @@ const shouldRevertBasicFunctions = (userAccount, vendorAccount) => {
 const initializeScenario = async (userAccount, vendorAccount) => {
   await mocHelper.mintRiskProAmount(userAccount, 100, vendorAccount);
   await mocHelper.mintStableTokenAmount(userAccount, 10000, vendorAccount);
-  await mocHelper.mintRiskProxAmount(userAccount, BUCKET_X2, 10, vendorAccount);
+  // await mocHelper.mintRiskProxAmount(userAccount, BUCKET_X2, 10, vendorAccount);
 };
 
 /** The goal of this test is to check the behaviour on transfer

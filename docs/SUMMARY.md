@@ -53,9 +53,6 @@
         * [Outside Settlement: redeemFreeStableToken](integration/redeemFreeStableTokenVendors.md)
         * [On Liquidation State: redeemAllStableToken](integration/redeemAllStableToken.md)
         * [How-to](integration/redeeming-rdocs-howto.md)
-* [Getting RIF2X](integration/getting-rif2x.md)
-    * [Minting RIF2X](integration/minting-rif2x.md)
-    * [Redeeming RIF2X](integration/redeeming-rif2x.md)
 * [Commission fees values](integration/commission-fees-values.md)
 * [Vendors](integration/vendors.md)
 * [Fees calculation](integration/fees-calculation.md)
@@ -72,8 +69,7 @@
     * [Example code redeeming free RDOC](integration/example-code-redeeming-free-rdoc.md)
     * [Example code redeeming RDOC Request](integration/example-code-redeeming-rdoc-request.md)
     * [Example code redeeming all RDOC](integration/example-code-redeeming-all-rdoc.md)
-    * [Example code minting RIF2X](integration/example-code-minting-rif2x.md)
-    * [Example code redeeming RIF2X](integration/example-code-redeeming-rif2x.md)
+
 
 ## Smart contracts
 

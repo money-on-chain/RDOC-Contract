@@ -376,6 +376,8 @@ function initialize(address connectorAddress, address _governor, uint256 riskPro
 | _stableTmax | uint256 | Upgrade to support red stable inrate parameter | 
 
 ### getRiskProxTmin
+ 
+> ⚠ This has been deprecated since the [Proposal to remove leveraged positions](https://forum.moneyonchain.com/t/removal-of-leveraged-tokens-rif-on-chain/322) from the protocol was **approved**, however it is necessary to maintain the contracts and their documentation for legacy support.
 
 gets tMin param of RiskProx tokens
 
@@ -394,6 +396,8 @@ returns tMin of RiskProx
 | ------------- |------------- | -----|
 
 ### getRiskProxTmax
+ 
+> ⚠ This has been deprecated since the [Proposal to remove leveraged positions](https://forum.moneyonchain.com/t/removal-of-leveraged-tokens-rif-on-chain/322) from the protocol was **approved**, however it is necessary to maintain the contracts and their documentation for legacy support.
 
 gets tMax param of RiskProx tokens
 
@@ -412,6 +416,8 @@ returns tMax of RiskProx
 | ------------- |------------- | -----|
 
 ### getRiskProxPower
+ 
+> ⚠ This has been deprecated since the [Proposal to remove leveraged positions](https://forum.moneyonchain.com/t/removal-of-leveraged-tokens-rif-on-chain/322) from the protocol was **approved**, however it is necessary to maintain the contracts and their documentation for legacy support.
 
 gets power param of RiskProx tokens
 
@@ -450,6 +456,8 @@ returns power of riskProInterestBlockSpan
 | ------------- |------------- | -----|
 
 ### setRiskProxTmin
+ 
+> ⚠ This has been deprecated since the [Proposal to remove leveraged positions](https://forum.moneyonchain.com/t/removal-of-leveraged-tokens-rif-on-chain/322) from the protocol was **approved**, however it is necessary to maintain the contracts and their documentation for legacy support.
 
 sets tMin param of RiskProx tokens
 
@@ -464,6 +472,8 @@ function setRiskProxTmin(uint256 _btxcTmin) public nonpayable onlyAuthorizedChan
 | _btxcTmin | uint256 | tMin of RiskProx | 
 
 ### setRiskProxTmax
+ 
+> ⚠ This has been deprecated since the [Proposal to remove leveraged positions](https://forum.moneyonchain.com/t/removal-of-leveraged-tokens-rif-on-chain/322) from the protocol was **approved**, however it is necessary to maintain the contracts and their documentation for legacy support.
 
 sets tMax param of RiskProx tokens
 
@@ -478,6 +488,8 @@ function setRiskProxTmax(uint256 _btxcTax) public nonpayable onlyAuthorizedChang
 | _btxcTax | uint256 | tMax of RiskProx | 
 
 ### setRiskProxPower
+ 
+> ⚠ This has been deprecated since the [Proposal to remove leveraged positions](https://forum.moneyonchain.com/t/removal-of-leveraged-tokens-rif-on-chain/322) from the protocol was **approved**, however it is necessary to maintain the contracts and their documentation for legacy support.
 
 sets power param of RiskProx tokens
 
@@ -608,6 +620,8 @@ Interest rate value [using RatePrecsion]
 | ------------- |------------- | -----|
 
 ### riskProxInrateAvg
+ 
+> ⚠ This has been deprecated since the [Proposal to remove leveraged positions](https://forum.moneyonchain.com/t/removal-of-leveraged-tokens-rif-on-chain/322) from the protocol was **approved**, however it is necessary to maintain the contracts and their documentation for legacy support.
 
 Calculates an average interest rate between after and before mint/redeem
 

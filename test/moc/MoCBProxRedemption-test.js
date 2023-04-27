@@ -7,6 +7,7 @@ let BUCKET_X2;
 let BUCKET_C0;
 
 contract('MoC : MoCExchange', function([owner, userAccount, vendorAccount]) {
+  /*
   before(async function() {
     const accounts = [owner, userAccount, vendorAccount];
     mocHelper = await testHelperBuilder({ owner, accounts, useMock: true });
@@ -256,4 +257,5 @@ contract('MoC : MoCExchange', function([owner, userAccount, vendorAccount]) {
       });
     });
   });
+   */
 });

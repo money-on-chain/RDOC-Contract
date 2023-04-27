@@ -358,6 +358,8 @@ RiskPro ReserveTokens price [using reservePrecision]
 | nTP | uint256 | RiskPro amount [using mocPrecision] | 
 
 ### riskProxRiskProPrice
+ 
+> ⚠ This has been deprecated since the [Proposal to remove leveraged positions](https://forum.moneyonchain.com/t/removal-of-leveraged-tokens-rif-on-chain/322) from the protocol was **approved**, however it is necessary to maintain the contracts and their documentation for legacy support.
 
 Calculates RiskPro ReserveToken price: RiskProxInRiskPro = riskProxTecPrice / riskProPrice
 
@@ -680,6 +682,8 @@ resTokens to move [using reservePrecision]
 | lev | uint256 | L bucket leverage [using mocPrecision] | 
 
 ### maxRiskProxResTokenValue
+ 
+> ⚠ This has been deprecated since the [Proposal to remove leveraged positions](https://forum.moneyonchain.com/t/removal-of-leveraged-tokens-rif-on-chain/322) from the protocol was **approved**, however it is necessary to maintain the contracts and their documentation for legacy support.
 
 Max amount of ReserveTokens allowed to be used to mint riskProx: MaxriskProx = nStableToken/ (PEG*B*(lev-1))
 
