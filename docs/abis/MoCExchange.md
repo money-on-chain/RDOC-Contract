@@ -263,6 +263,8 @@ uint256[50] private upgradeGap;
 | vendorAccount | address |  | 
 
 ## RiskProxMint
+ 
+> ⚠ This has been deprecated since the [Proposal to remove leveraged positions](https://forum.moneyonchain.com/t/removal-of-leveraged-tokens-rif-on-chain/322) from the protocol was **approved**, however it is necessary to maintain the contracts and their documentation for legacy support.
 
 **Parameters**
 
@@ -527,6 +529,10 @@ The amount of ReserveTokens in sent for the redemption or 0 if send does not suc
 | destination | address | address to send the ReserveTokens | 
 
 ### mintRiskProx
+ 
+> ⚠ This has been deprecated since the [Proposal to remove leveraged positions](https://forum.moneyonchain.com/t/removal-of-leveraged-tokens-rif-on-chain/322) from the protocol was **approved**, however it is necessary to maintain the contracts and their documentation for legacy support.
+
+> ⚠ See the [approved technical proposal](https://forum.moneyonchain.com/t/technical-proposal-for-removal-of-leveraged-positions-in-rif-on-chain/326#mega-technical-proposal-for-removal-of-leveraged-positions-in-rif-on-chain-1) to understand how the behavior of this function has changed.
 
 BUCKET RiskProx minting. Mints RiskProx for the specified bucket
 
@@ -549,6 +555,8 @@ total ReserveTokens Spent (resTokensToMint more interest) and commission spent [
 | vendorAccount | address | Vendor address | 
 
 ### redeemRiskProx
+ 
+> ⚠ This has been deprecated since the [Proposal to remove leveraged positions](https://forum.moneyonchain.com/t/removal-of-leveraged-tokens-rif-on-chain/322) from the protocol was **approved**, however it is necessary to maintain the contracts and their documentation for legacy support.
 
 Sender burns his RiskProx, redeems the equivalent amount of RiskPros, return
 the "borrowed" StableTokens and recover pending interests
@@ -617,6 +625,8 @@ ResToken total value of the redemption [using reservePrecision]*
 | riskProxPrice | uint256 | Price of one RiskProx in ReserveTokens [using reservePrecision] | 
 
 ### redeemRiskProxInternal
+ 
+> ⚠ This has been deprecated since the [Proposal to remove leveraged positions](https://forum.moneyonchain.com/t/removal-of-leveraged-tokens-rif-on-chain/322) from the protocol was **approved**, however it is necessary to maintain the contracts and their documentation for legacy support.
 
 Internal function to avoid stack too deep errors
 
@@ -652,6 +662,10 @@ function mintRiskProInternal(address account, uint256 reserveTokenAmount, struct
 | vendorAccount | address |  | 
 
 ### mintRiskProxInternal
+ 
+> ⚠ This has been deprecated since the [Proposal to remove leveraged positions](https://forum.moneyonchain.com/t/removal-of-leveraged-tokens-rif-on-chain/322) from the protocol was **approved**, however it is necessary to maintain the contracts and their documentation for legacy support.
+
+> ⚠ See the [approved technical proposal](https://forum.moneyonchain.com/t/technical-proposal-for-removal-of-leveraged-positions-in-rif-on-chain/326#mega-technical-proposal-for-removal-of-leveraged-positions-in-rif-on-chain-1) to understand how the behavior of this function has changed.
 
 Internal function to avoid stack too deep errors
 

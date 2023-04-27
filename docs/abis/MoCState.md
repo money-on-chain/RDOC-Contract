@@ -749,6 +749,8 @@ maxRiskPro for redeem [using mocPrecision].
 | bucket | bytes32 | Name of the bucket used | 
 
 ### maxRiskProx
+ 
+> ⚠ This has been deprecated since the [Proposal to remove leveraged positions](https://forum.moneyonchain.com/t/removal-of-leveraged-tokens-rif-on-chain/322) from the protocol was **approved**, however it is necessary to maintain the contracts and their documentation for legacy support.
 
 GLOBAL max riskProx to mint
 
@@ -768,6 +770,8 @@ maxRiskProx [using mocPrecision]
 | bucket | bytes32 | Name of the bucket used | 
 
 ### maxRiskProxResTokenValue
+ 
+> ⚠ This has been deprecated since the [Proposal to remove leveraged positions](https://forum.moneyonchain.com/t/removal-of-leveraged-tokens-rif-on-chain/322) from the protocol was **approved**, however it is necessary to maintain the contracts and their documentation for legacy support.
 
 ⤾ overrides IMoCState.maxRiskProxResTokenValue
 
@@ -947,6 +951,8 @@ the RiskPro USD Price [using mocPrecision]
 | ------------- |------------- | -----|
 
 ### maxRiskProxRiskProValue
+ 
+> ⚠ This has been deprecated since the [Proposal to remove leveraged positions](https://forum.moneyonchain.com/t/removal-of-leveraged-tokens-rif-on-chain/322) from the protocol was **approved**, however it is necessary to maintain the contracts and their documentation for legacy support.
 
 GLOBAL max riskProx to mint
 
@@ -966,6 +972,8 @@ max RiskPro allowed to be spent to mint RiskProx [using reservePrecision]
 | bucket | bytes32 | Name of the bucket used | 
 
 ### riskProxRiskProPrice
+ 
+> ⚠ This has been deprecated since the [Proposal to remove leveraged positions](https://forum.moneyonchain.com/t/removal-of-leveraged-tokens-rif-on-chain/322) from the protocol was **approved**, however it is necessary to maintain the contracts and their documentation for legacy support.
 
 BUCKET RiskProx price in RiskPro
 
@@ -1547,6 +1555,8 @@ returns(uint256)
 | resTokensAmount | uint256 |  | 
 
 ### riskProxToResToken
+ 
+> ⚠ This has been deprecated since the [Proposal to remove leveraged positions](https://forum.moneyonchain.com/t/removal-of-leveraged-tokens-rif-on-chain/322) from the protocol was **approved**, however it is necessary to maintain the contracts and their documentation for legacy support.
 
 ⤾ overrides IMoCState.riskProxToResToken
 
@@ -1563,6 +1573,8 @@ returns(uint256)
 | bucket | bytes32 |  | 
 
 ### riskProxToResTokenHelper
+ 
+> ⚠ This has been deprecated since the [Proposal to remove leveraged positions](https://forum.moneyonchain.com/t/removal-of-leveraged-tokens-rif-on-chain/322) from the protocol was **approved**, however it is necessary to maintain the contracts and their documentation for legacy support.
 
 ```js
 function riskProxToResTokenHelper(uint256 riskProxAmount, bytes32 bucket) public view
@@ -1577,6 +1589,8 @@ returns(uint256)
 | bucket | bytes32 |  | 
 
 ### resTokenToRiskProx
+ 
+> ⚠ This has been deprecated since the [Proposal to remove leveraged positions](https://forum.moneyonchain.com/t/removal-of-leveraged-tokens-rif-on-chain/322) from the protocol was **approved**, however it is necessary to maintain the contracts and their documentation for legacy support.
 
 ⤾ overrides IMoCState.resTokenToRiskProx
 
