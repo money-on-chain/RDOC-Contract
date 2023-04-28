@@ -1,8 +1,8 @@
 pragma solidity ^0.5.8;
 
-import "./MoCSettlement_v0115.sol";
+import "../contracts/MoCSettlement.sol";
 
-contract MoCSettlement_v0116 is MoCSettlement_v0115 {
+contract MoCSettlement_v0116 is MoCSettlement {
 
   /************************************/
   /***** UPGRADE v0116       ***********/

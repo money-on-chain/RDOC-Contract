@@ -28,17 +28,17 @@ const deployFunc: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     });
     console.log(`StableToken deployed at ${deployStableTokenResult.address}`);
 
-    const deployMoCExchange_v0115Result = await deploy("MoCExchange_v0115", {
+    const deployMoCExchangeResult = await deploy("MoCExchange", {
       from: deployer,
       libraries: {
         MoCHelperLib: deployHelperLibResult.address,
       },
     });
-    console.log(`MoCExchange_v0115 deployed at ${deployMoCExchange_v0115Result.address}`);
+    console.log(`MoCExchange deployed at ${deployMoCExchangeResult.address}`);
 
     const deployAdminUpgradeabilityProxyResult = await deploy("MoCExchangeProxy", {
       contract: "AdminUpgradeabilityProxy",
-      args: [deployMoCExchange_v0115Result.address, deployProxyAdminResult.address, "0x"],
+      args: [deployMoCExchangeResult.address, deployProxyAdminResult.address, "0x"],
       from: deployer,
     });
     console.log(`MoCExchangeProxy deployed at ${deployAdminUpgradeabilityProxyResult.address}`);

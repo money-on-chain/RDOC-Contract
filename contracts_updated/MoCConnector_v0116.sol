@@ -1,11 +1,11 @@
 pragma solidity ^0.5.8;
 
-import "./MoCConnector_v0115.sol";
+import "../contracts/base/MoCConnector.sol";
 
 /**
   @dev Provides access control between all MoC Contracts
  */
-contract MoCConnector_v0116 is MoCConnector_v0115 {
+contract MoCConnector_v0116 is MoCConnector {
 
   /************************************/
   /***** UPGRADE v0116       ***********/

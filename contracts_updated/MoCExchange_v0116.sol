@@ -1,9 +1,9 @@
 pragma solidity ^0.5.8;
 pragma experimental ABIEncoderV2;
 
-import "./MoCExchange_v0115.sol";
+import "../contracts/MoCExchange.sol";
 
-contract MoCExchange_v0116 is MoCExchange_v0115 {
+contract MoCExchange_v0116 is MoCExchange {
   using Math for uint256;
   using SafeMath for uint256;
 

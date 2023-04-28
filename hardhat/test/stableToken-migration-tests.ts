@@ -4,11 +4,11 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { ContractTransaction } from "ethers";
 import { expect } from "chai";
 import {
-  MoC_v0115,
-  MoCConnector_v0115,
-  MoCExchange_v0115,
-  MoCState_v0115,
-  MoCSettlement_v0115,
+  MoC,
+  MoCConnector,
+  MoCExchange,
+  MoCState,
+  MoCSettlement,
   ReserveToken,
   StableToken,
   StableTokenMigrationChanger,
@@ -21,28 +21,23 @@ import {
   MoCSettlement_v0116__factory,
   MoCConnector_v0116__factory,
   MoC_v0116__factory,
-  MoC,
   AdminUpgradeabilityProxy__factory,
   MoC_v0116,
   MoCConnector_v0116,
-  MoCConnector,
   MoCExchange_v0116,
-  MoCExchange,
   MoCState_v0116,
-  MoCState,
   MoCSettlement_v0116,
-  MoCSettlement,
 } from "../typechain";
 import { fixtureDeployed } from "./fixture";
 import { Balance, deployContract, pEth } from "./helpers/utils";
 import { assertPrec } from "./helpers/assertHelper";
 
 describe("Feature: Stable Token migration", () => {
-  let mocProxy: MoC_v0115;
-  let mocConnectorProxy: MoCConnector_v0115;
-  let mocExchangeProxy: MoCExchange_v0115;
-  let mocStateProxy: MoCState_v0115;
-  let mocSettlementProxy: MoCSettlement_v0115;
+  let mocProxy: MoC;
+  let mocConnectorProxy: MoCConnector;
+  let mocExchangeProxy: MoCExchange;
+  let mocStateProxy: MoCState;
+  let mocSettlementProxy: MoCSettlement;
   let reserveToken: ReserveToken;
   let stableToken: StableToken;
   let stableTokenV2: StableTokenV2;
@@ -53,19 +48,14 @@ describe("Feature: Stable Token migration", () => {
   let alice: Address;
   let aliceSigner: SignerWithAddress;
   let signer: any;
-  let moc_v0115Factory: any;
   let moc_v0116Factory: any;
   let mocFactory: any;
-  let mocConnector_v0115Factory: any;
   let mocConnector_v0116Factory: any;
   let mocConnectorFactory: any;
-  let mocExchange_v0115Factory: any;
   let mocExchange_v0116Factory: any;
   let mocExchangeFactory: any;
-  let mocState_v0115Factory: any;
   let mocState_v0116Factory: any;
   let mocStateFactory: any;
-  let mocSettlement_v0115Factory: any;
   let mocSettlement_v0116Factory: any;
   let mocSettlementFactory: any;
   describe("GIVEN a Moc protocol deployed with collateral", () => {
@@ -73,11 +63,11 @@ describe("Feature: Stable Token migration", () => {
       ({ deployer, alice } = await getNamedAccounts());
       ({
         mocHelperAddress,
-        moc_v0115: mocProxy,
-        mocConnector_v0115: mocConnectorProxy,
-        mocExchange_v0115: mocExchangeProxy,
-        mocState_v0115: mocStateProxy,
-        mocSettlement_v0115: mocSettlementProxy,
+        moc: mocProxy,
+        mocConnector: mocConnectorProxy,
+        mocExchange: mocExchangeProxy,
+        mocState: mocStateProxy,
+        mocSettlement: mocSettlementProxy,
         upgradeDelegator,
         reserveToken,
         stableToken,
@@ -90,38 +80,26 @@ describe("Feature: Stable Token migration", () => {
       await mocProxy.mintRiskPro(pEth(100000));
 
       [
-        moc_v0115Factory,
         moc_v0116Factory,
         mocFactory,
-        mocConnector_v0115Factory,
         mocConnector_v0116Factory,
         mocConnectorFactory,
-        mocExchange_v0115Factory,
         mocExchange_v0116Factory,
         mocExchangeFactory,
-        mocState_v0115Factory,
         mocState_v0116Factory,
         mocStateFactory,
-        mocSettlement_v0115Factory,
         mocSettlement_v0116Factory,
         mocSettlementFactory,
       ] = await Promise.all([
-        ethers.getContractFactory("MoC_v0115"),
         ethers.getContractFactory("MoC_v0116"),
         ethers.getContractFactory("MoC"),
-        ethers.getContractFactory("MoCConnector_v0115"),
         ethers.getContractFactory("MoCConnector_v0116"),
         ethers.getContractFactory("MoCConnector"),
-        ethers.getContractFactory("MoCExchange_v0115", {
-          libraries: { MoCHelperLib: mocHelperAddress },
-        }),
+
         ethers.getContractFactory("MoCExchange_v0116", {
           libraries: { MoCHelperLib: mocHelperAddress },
         }),
         ethers.getContractFactory("MoCExchange", {
-          libraries: { MoCHelperLib: mocHelperAddress },
-        }),
-        ethers.getContractFactory("MoCState_v0115", {
           libraries: { MoCHelperLib: mocHelperAddress },
         }),
         ethers.getContractFactory("MoCState_v0116", {
@@ -130,15 +108,14 @@ describe("Feature: Stable Token migration", () => {
         ethers.getContractFactory("MoCState", {
           libraries: { MoCHelperLib: mocHelperAddress },
         }),
-        ethers.getContractFactory("MoCSettlement_v0115"),
         ethers.getContractFactory("MoCSettlement_v0116"),
         ethers.getContractFactory("MoCSettlement"),
       ]);
     });
     describe("WHEN validate MoC contract upgrades", () => {
-      it("THEN upgrade MoC_v0115 to MoC_v0116 is compatible", async () => {
+      it("THEN upgrade MoC to MoC_v0116 is compatible", async () => {
         // forces the import of an existing proxy to be used with this plugin
-        await upgrades.forceImport(mocProxy.address, moc_v0115Factory);
+        await upgrades.forceImport(mocProxy.address, mocFactory);
         // validates an implementation
         await upgrades.validateImplementation(moc_v0116Factory);
         // compares the current implementation to the new implementation to check for storage layout compatibility errors
@@ -154,9 +131,9 @@ describe("Feature: Stable Token migration", () => {
       });
     });
     describe("WHEN validate MoCConnector contract upgrades", () => {
-      it("THEN upgrade MoCConnector_v0115 to MoCConnector_v0116 is compatible", async () => {
+      it("THEN upgrade MoCConnector to MoCConnector_v0116 is compatible", async () => {
         // forces the import of an existing proxy to be used with this plugin
-        await upgrades.forceImport(mocConnectorProxy.address, mocConnector_v0115Factory);
+        await upgrades.forceImport(mocConnectorProxy.address, mocConnectorFactory);
         // validates an implementation
         await upgrades.validateImplementation(mocConnector_v0116Factory);
         // compares the current implementation to the new implementation to check for storage layout compatibility errors
@@ -172,9 +149,9 @@ describe("Feature: Stable Token migration", () => {
       });
     });
     describe("WHEN validate MoCExchange contract upgrades", () => {
-      it("THEN upgrade MoCExchange_v0115 to MoCExchange_v0116 is compatible", async () => {
+      it("THEN upgrade MoCExchange to MoCExchange_v0116 is compatible", async () => {
         // forces the import of an existing proxy to be used with this plugin
-        await upgrades.forceImport(mocExchangeProxy.address, mocExchange_v0115Factory);
+        await upgrades.forceImport(mocExchangeProxy.address, mocExchangeFactory);
         // validates an implementation
         await upgrades.validateImplementation(mocExchange_v0116Factory, {
           // https://github.com/OpenZeppelin/openzeppelin-upgrades/issues/52
@@ -202,9 +179,9 @@ describe("Feature: Stable Token migration", () => {
       });
     });
     describe("WHEN validate MoCState contract upgrades", () => {
-      it("THEN upgrade MoCState_v0115 to MoCState_v0116 is compatible", async () => {
+      it("THEN upgrade MoCState to MoCState_v0116 is compatible", async () => {
         // forces the import of an existing proxy to be used with this plugin
-        await upgrades.forceImport(mocStateProxy.address, mocState_v0115Factory);
+        await upgrades.forceImport(mocStateProxy.address, mocStateFactory);
         // validates an implementation
         await upgrades.validateImplementation(mocState_v0116Factory, {
           // https://github.com/OpenZeppelin/openzeppelin-upgrades/issues/52
@@ -232,9 +209,9 @@ describe("Feature: Stable Token migration", () => {
       });
     });
     describe("WHEN validate MoCSettlement contract upgrades", () => {
-      it("THEN upgrade MoCSettlement_v0115 to MoCSettlement_v0116 is compatible", async () => {
+      it("THEN upgrade MoCSettlement to MoCSettlement_v0116 is compatible", async () => {
         // forces the import of an existing proxy to be used with this plugin
-        await upgrades.forceImport(mocSettlementProxy.address, mocSettlement_v0115Factory);
+        await upgrades.forceImport(mocSettlementProxy.address, mocSettlementFactory);
         // validates an implementation
         await upgrades.validateImplementation(mocSettlement_v0116Factory);
         // compares the current implementation to the new implementation to check for storage layout compatibility errors
@@ -290,70 +267,51 @@ describe("Feature: Stable Token migration", () => {
             assertPrec(diff, 100);
           });
         });
-        describe("AND MoC v0116, MoC and StableTokenMigrationChanger are deployed", () => {
+        describe("AND StableTokenV2Changer is executed", () => {
           let changer: StableTokenMigrationChanger;
+          let mocImp: Address;
+          let mocConnectorImp: Address;
+          let mocExchangeImp: Address;
+          let mocStateImp: Address;
+          let mocSettlementImp: Address;
           let moc_v0116: MoC_v0116;
-          let moc: MoC;
           let mocConnector_v0116: MoCConnector_v0116;
-          let mocConnector: MoCConnector;
           let mocExchange_v0116: MoCExchange_v0116;
-          let mocExchange: MoCExchange;
           let mocState_v0116: MoCState_v0116;
-          let mocState: MoCState;
           let mocSettlement_v0116: MoCSettlement_v0116;
-          let mocSettlement: MoCSettlement;
           beforeEach(async () => {
+            [mocImp, mocConnectorImp, mocExchangeImp, mocStateImp, mocSettlementImp] = await Promise.all(
+              [mocProxy, mocConnectorProxy, mocExchangeProxy, mocStateProxy, mocSettlementProxy].map(proxy =>
+                upgradeDelegator.getProxyImplementation(proxy.address),
+              ),
+            );
             // deploy MoC
             moc_v0116 = await moc_v0116Factory.deploy();
-            moc = await mocFactory.deploy();
-
             // deploy MoCConnector
             mocConnector_v0116 = await mocConnector_v0116Factory.deploy();
-            mocConnector = await mocConnectorFactory.deploy();
-
             // deploy MoCExchange
             mocExchange_v0116 = await mocExchange_v0116Factory.deploy();
-            mocExchange = await mocExchangeFactory.deploy();
-
             // deploy MoCState
             mocState_v0116 = await mocState_v0116Factory.deploy();
-            mocState = await mocStateFactory.deploy();
-
             // deploy MoCSettlement
             mocSettlement_v0116 = await mocSettlement_v0116Factory.deploy();
-            mocSettlement = await mocSettlementFactory.deploy();
 
             changer = await deployContract("StableTokenMigrationChanger", StableTokenMigrationChanger__factory, [
-              upgradeDelegator.address,
-              stableTokenV2.address,
-              tokenMigrator.address,
-              [
-                {
-                  proxy: mocProxy.address,
-                  middleTermImplementation: moc_v0116.address,
-                  newImplementation: moc.address,
-                },
-                {
-                  proxy: mocConnectorProxy.address,
-                  middleTermImplementation: mocConnector_v0116.address,
-                  newImplementation: mocConnector.address,
-                },
-                {
-                  proxy: mocExchangeProxy.address,
-                  middleTermImplementation: mocExchange_v0116.address,
-                  newImplementation: mocExchange.address,
-                },
-                {
-                  proxy: mocStateProxy.address,
-                  middleTermImplementation: mocState_v0116.address,
-                  newImplementation: mocState.address,
-                },
-                {
-                  proxy: mocSettlementProxy.address,
-                  middleTermImplementation: mocSettlement_v0116.address,
-                  newImplementation: mocSettlement.address,
-                },
-              ],
+              {
+                upgradeDelegator: upgradeDelegator.address,
+                stableTokenV2: stableTokenV2.address,
+                tokenMigrator: tokenMigrator.address,
+                mocProxy: mocProxy.address,
+                mocAtomicImp: moc_v0116.address,
+                mocConnectorProxy: mocConnectorProxy.address,
+                mocConnectorAtomicImp: mocConnector_v0116.address,
+                mocExchangeProxy: mocExchangeProxy.address,
+                mocExchangeAtomicImp: mocExchange_v0116.address,
+                mocStateProxy: mocStateProxy.address,
+                mocStateAtomicImp: mocState_v0116.address,
+                mocSettlementProxy: mocSettlementProxy.address,
+                mocSettlementAtomicImp: mocSettlement_v0116.address,
+              },
             ]);
           });
           describe("WHEN changer is executed", () => {
@@ -368,7 +326,7 @@ describe("Feature: Stable Token migration", () => {
                   signer,
                 );
                 await expect(tx).to.emit(mocProxyAsAdminUpgradeabilityProxy, "Upgraded").withArgs(moc_v0116.address);
-                await expect(tx).to.emit(mocProxyAsAdminUpgradeabilityProxy, "Upgraded").withArgs(moc.address);
+                await expect(tx).to.emit(mocProxyAsAdminUpgradeabilityProxy, "Upgraded").withArgs(mocImp);
               });
             });
             describe("WHEN check MocConnector Upgrade events", () => {
@@ -382,7 +340,7 @@ describe("Feature: Stable Token migration", () => {
                   .withArgs(mocConnector_v0116.address);
                 await expect(tx)
                   .to.emit(mocConnectorProxyAsAdminUpgradeabilityProxy, "Upgraded")
-                  .withArgs(mocConnector.address);
+                  .withArgs(mocConnectorImp);
               });
             });
             describe("WHEN check MocExchange Upgrade events", () => {
@@ -396,7 +354,7 @@ describe("Feature: Stable Token migration", () => {
                   .withArgs(mocExchange_v0116.address);
                 await expect(tx)
                   .to.emit(mocExchangeProxyAsAdminUpgradeabilityProxy, "Upgraded")
-                  .withArgs(mocExchange.address);
+                  .withArgs(mocExchangeImp);
               });
             });
             describe("WHEN check MocState Upgrade events", () => {
@@ -408,9 +366,7 @@ describe("Feature: Stable Token migration", () => {
                 await expect(tx)
                   .to.emit(mocStateProxyAsAdminUpgradeabilityProxy, "Upgraded")
                   .withArgs(mocState_v0116.address);
-                await expect(tx)
-                  .to.emit(mocStateProxyAsAdminUpgradeabilityProxy, "Upgraded")
-                  .withArgs(mocState.address);
+                await expect(tx).to.emit(mocStateProxyAsAdminUpgradeabilityProxy, "Upgraded").withArgs(mocStateImp);
               });
             });
             describe("WHEN check MocSettlement Upgrade events", () => {
@@ -424,7 +380,7 @@ describe("Feature: Stable Token migration", () => {
                   .withArgs(mocSettlement_v0116.address);
                 await expect(tx)
                   .to.emit(mocSettlementProxyAsAdminUpgradeabilityProxy, "Upgraded")
-                  .withArgs(mocSettlement.address);
+                  .withArgs(mocSettlementImp);
               });
             });
             it("THEN a StableTokenMigrated event is emitted by MoC", async () => {
