@@ -40,65 +40,61 @@ contract StableTokenMigrationChanger is ChangeContract {
   address public mocSettlementCurrentImp;
   address public mocSettlementAtomicImp;
 
-  // to avoid stack too deep error
-  struct ConstructorParams {
-    UpgradeDelegator upgradeDelegator;
-    address stableTokenV2;
-    address tokenMigrator;
-    AdminUpgradeabilityProxy mocProxy;
-    address mocAtomicImp;
-    AdminUpgradeabilityProxy mocConnectorProxy;
-    address mocConnectorAtomicImp;
-    AdminUpgradeabilityProxy mocExchangeProxy;
-    address mocExchangeAtomicImp;
-    AdminUpgradeabilityProxy mocStateProxy;
-    address mocStateAtomicImp;
-    AdminUpgradeabilityProxy mocSettlementProxy;
-    address mocSettlementAtomicImp;
+  /**
+    @notice Constructor
+    @param _upgradeDelegator Address of the upgradeDelegator in charge of that proxy
+    @param _stableTokenV2 Address of the new Stable Token to migrate
+    @param _tokenMigrator Address of the Token Migrator contract who recives Stable Token V1 
+        and makes the swaps to Stable Token V2
+    @param _mocProxy MoC proxy address
+    @param _mocAtomicImp MoC atomic implementation address
+    @param _mocConnectorAtomicImp MoCConnector atomic implementation address
+    @param _mocExchangeAtomicImp MoCExchange atomic implementation address
+    @param _mocStateAtomicImp MoCState atomic implementation address
+    @param _mocSettlementAtomicImp MoCSettlement atomic implementation address
+  */
+  constructor(
+    UpgradeDelegator _upgradeDelegator,
+    address _stableTokenV2,
+    address _tokenMigrator,
+    AdminUpgradeabilityProxy _mocProxy,
+    address _mocAtomicImp,
+    address _mocConnectorAtomicImp,
+    address _mocExchangeAtomicImp,
+    address _mocStateAtomicImp,
+    address _mocSettlementAtomicImp) public {
+    upgradeDelegator = _upgradeDelegator;
+    stableTokenV2 = _stableTokenV2;
+    tokenMigrator = _tokenMigrator;
+    // MoC
+    mocProxy = _mocProxy;
+    mocCurrentImp = upgradeDelegator.getProxyImplementation(_mocProxy);
+    mocAtomicImp = _mocAtomicImp;
+    // MocConnector
+    MoCConnector mocConnector = MoC(address(_mocProxy)).connector();
+    mocConnectorProxy = castToAdminUpgradeabilityProxy(address(mocConnector));
+    mocConnectorCurrentImp = upgradeDelegator.getProxyImplementation(mocConnectorProxy);
+    mocConnectorAtomicImp = _mocConnectorAtomicImp;
+    // MocExchange
+    mocExchangeProxy = castToAdminUpgradeabilityProxy(mocConnector.mocExchange());
+    mocExchangeCurrentImp = upgradeDelegator.getProxyImplementation(mocExchangeProxy);
+    mocExchangeAtomicImp = _mocExchangeAtomicImp;
+    // MocState
+    mocStateProxy = castToAdminUpgradeabilityProxy(mocConnector.mocState());
+    mocStateCurrentImp = upgradeDelegator.getProxyImplementation(mocStateProxy);
+    mocStateAtomicImp = _mocStateAtomicImp;
+    // MocSettlement
+    mocSettlementProxy = castToAdminUpgradeabilityProxy(mocConnector.mocSettlement());
+    mocSettlementCurrentImp = upgradeDelegator.getProxyImplementation(mocSettlementProxy);
+    mocSettlementAtomicImp = _mocSettlementAtomicImp;
   }
 
   /**
-    @notice Constructor
-    @param _constructorParams constructor parameters
-      upgradeDelegator Address of the upgradeDelegator in charge of that proxy
-      stableTokenV2 Address of the new Stable Token to migrate
-      tokenMigrator Address of the Token Migrator contract who recives Stable Token V1 
-        and makes the swaps to Stable Token V2
-      mocProxy MoC proxy address
-      mocAtomicImp MoC atomic implementation address
-      mocConnectorProxy MoCConnector proxy address
-      mocConnectorAtomicImp MoCConnector atomic implementation address
-      mocExchangeProxy MoCExchange proxy address
-      mocExchangeAtomicImp MoCExchange atomic implementation address
-      mocStateProxy MoCState proxy address
-      mocStateAtomicImp MoCState atomic implementation address
-      mocSettlementProxy MoCSettlement proxy address
-      mocSettlementAtomicImp MoCSettlement atomic implementation address
-  */
-  constructor(ConstructorParams memory _constructorParams) public {
-    upgradeDelegator = _constructorParams.upgradeDelegator;
-    stableTokenV2 = _constructorParams.stableTokenV2;
-    tokenMigrator = _constructorParams.tokenMigrator;
-    // MoC
-    mocProxy = _constructorParams.mocProxy;
-    mocCurrentImp = upgradeDelegator.getProxyImplementation(_constructorParams.mocProxy);
-    mocAtomicImp = _constructorParams.mocAtomicImp;
-    // MocConnector
-    mocConnectorProxy = _constructorParams.mocConnectorProxy;
-    mocConnectorCurrentImp = upgradeDelegator.getProxyImplementation(_constructorParams.mocConnectorProxy);
-    mocConnectorAtomicImp = _constructorParams.mocConnectorAtomicImp;
-    // MocExchange
-    mocExchangeProxy = _constructorParams.mocExchangeProxy;
-    mocExchangeCurrentImp = upgradeDelegator.getProxyImplementation(_constructorParams.mocExchangeProxy);
-    mocExchangeAtomicImp = _constructorParams.mocExchangeAtomicImp;
-    // MocState
-    mocStateProxy = _constructorParams.mocStateProxy;
-    mocStateCurrentImp = upgradeDelegator.getProxyImplementation(_constructorParams.mocStateProxy);
-    mocStateAtomicImp = _constructorParams.mocStateAtomicImp;
-    // MocSettlement
-    mocSettlementProxy = _constructorParams.mocSettlementProxy;
-    mocSettlementCurrentImp = upgradeDelegator.getProxyImplementation(_constructorParams.mocSettlementProxy);
-    mocSettlementAtomicImp = _constructorParams.mocSettlementAtomicImp;
+   * @notice cast non payable address to AdminUpgradebilityProxy
+   * @param _address address to cast
+   */
+  function castToAdminUpgradeabilityProxy(address _address) internal returns (AdminUpgradeabilityProxy proxy) {
+    return AdminUpgradeabilityProxy(address(uint160(_address)));
   }
 
   /**

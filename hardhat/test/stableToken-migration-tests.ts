@@ -297,21 +297,15 @@ describe("Feature: Stable Token migration", () => {
             mocSettlement_v0116 = await mocSettlement_v0116Factory.deploy();
 
             changer = await deployContract("StableTokenMigrationChanger", StableTokenMigrationChanger__factory, [
-              {
-                upgradeDelegator: upgradeDelegator.address,
-                stableTokenV2: stableTokenV2.address,
-                tokenMigrator: tokenMigrator.address,
-                mocProxy: mocProxy.address,
-                mocAtomicImp: moc_v0116.address,
-                mocConnectorProxy: mocConnectorProxy.address,
-                mocConnectorAtomicImp: mocConnector_v0116.address,
-                mocExchangeProxy: mocExchangeProxy.address,
-                mocExchangeAtomicImp: mocExchange_v0116.address,
-                mocStateProxy: mocStateProxy.address,
-                mocStateAtomicImp: mocState_v0116.address,
-                mocSettlementProxy: mocSettlementProxy.address,
-                mocSettlementAtomicImp: mocSettlement_v0116.address,
-              },
+              upgradeDelegator.address,
+              stableTokenV2.address,
+              tokenMigrator.address,
+              mocProxy.address,
+              moc_v0116.address,
+              mocConnector_v0116.address,
+              mocExchange_v0116.address,
+              mocState_v0116.address,
+              mocSettlement_v0116.address,
             ]);
           });
           describe("WHEN changer is executed", () => {

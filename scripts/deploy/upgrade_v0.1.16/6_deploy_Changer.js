@@ -11,21 +11,17 @@ module.exports = async callback => {
     const config = getConfig(network, configPath);
 
     console.log('StableTokenMigrationChanger Deploy');
-    const stableTokenMigrationChanger = await StableTokenMigrationChanger.new({
-      upgradeDelegator: config.implementationAddresses.UpgradeDelegator,
-      stableTokenV2: config.implementationAddresses.StableTokenV2,
-      tokenMigrator: config.implementationAddresses.TokenMigrator,
-      mocProxy: config.proxyAddresses.MoC,
-      mocAtomicImp: config.implementationAddresses.MoC_v0116,
-      mocConnectorProxy: config.proxyAddresses.MoCConnector,
-      mocConnectorAtomicImp: config.implementationAddresses.MoCConnector_v0116,
-      mocExchangeProxy: config.proxyAddresses.MoCExchange,
-      mocExchangeAtomicImp: config.implementationAddresses.MoCExchange_v0116,
-      mocStateProxy: config.proxyAddresses.MoCState,
-      mocStateAtomicImp: config.implementationAddresses.MoCState_v0116,
-      mocSettlementProxy: config.proxyAddresses.MoCSettlement,
-      mocSettlementAtomicImp: config.implementationAddresses.MoCSettlement_v0116
-    });
+    const stableTokenMigrationChanger = await StableTokenMigrationChanger.new(
+      config.implementationAddresses.UpgradeDelegator,
+      config.implementationAddresses.StableTokenV2,
+      config.implementationAddresses.TokenMigrator,
+      config.proxyAddresses.MoC,
+      config.implementationAddresses.MoC_v0116,
+      config.implementationAddresses.MoCConnector_v0116,
+      config.implementationAddresses.MoCExchange_v0116,
+      config.implementationAddresses.MoCState_v0116,
+      config.implementationAddresses.MoCSettlement_v0116
+    );
     console.log('StableTokenMigrationChanger address: ', stableTokenMigrationChanger.address);
 
     // Save changer address to config file
