@@ -19,6 +19,8 @@ contract MoCConnector_v0116 is MoCConnector {
   */
   function migrateStableToken(address newStableTokenAddress_) public {
     emit StableTokenMigrated(stableToken, newStableTokenAddress_);
+    // remove stableToken from the whitelist
+    remove(stableToken);
     stableToken = newStableTokenAddress_;
   }
 }

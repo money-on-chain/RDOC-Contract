@@ -114,6 +114,17 @@ contract StableTokenMigrationChanger is ChangeContract {
     @dev IMPORTANT: This function should not be overriden
    */
   function _upgrade() internal {
+    // MoC
+    upgradeDelegator.upgrade(mocProxy, mocAtomicImp);
+    // MocConnector
+    upgradeDelegator.upgrade(mocConnectorProxy, mocConnectorAtomicImp);
+    // MocExchange
+    upgradeDelegator.upgrade(mocExchangeProxy, mocExchangeAtomicImp);
+    // MocState
+    upgradeDelegator.upgrade(mocStateProxy, mocStateAtomicImp);
+    // MocSettlement
+    upgradeDelegator.upgrade(mocSettlementProxy, mocSettlementAtomicImp);
+    
     MoC_v0116(address(mocProxy)).migrateStableToken(stableTokenV2);
     MoCConnector_v0116(address(mocConnectorProxy)).migrateStableToken(stableTokenV2);
     MoCExchange_v0116(address(mocExchangeProxy)).migrateStableToken(stableTokenV2, tokenMigrator);
@@ -139,16 +150,6 @@ contract StableTokenMigrationChanger is ChangeContract {
     @dev This function can be overriden by child changers to upgrade contracts that require some preparation before the upgrade
    */
   function _beforeUpgrade() internal {
-    // MoC
-    upgradeDelegator.upgrade(mocProxy, mocAtomicImp);
-    // MocConnector
-    upgradeDelegator.upgrade(mocConnectorProxy, mocConnectorAtomicImp);
-    // MocExchange
-    upgradeDelegator.upgrade(mocExchangeProxy, mocExchangeAtomicImp);
-    // MocState
-    upgradeDelegator.upgrade(mocStateProxy, mocStateAtomicImp);
-    // MocSettlement
-    upgradeDelegator.upgrade(mocSettlementProxy, mocSettlementAtomicImp);
   }
 
   /**
