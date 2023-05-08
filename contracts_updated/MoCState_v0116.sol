@@ -1,9 +1,9 @@
 pragma solidity ^0.5.8;
 pragma experimental ABIEncoderV2;
 
-import "./MoCState_v0115.sol";
+import "../contracts/MoCState.sol";
 
-contract MoCState_v0116 is MoCState_v0115 {
+contract MoCState_v0116 is MoCState {
 
   /************************************/
   /***** UPGRADE v0116       ***********/

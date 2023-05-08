@@ -15,33 +15,12 @@ module.exports = async callback => {
       config.implementationAddresses.UpgradeDelegator,
       config.implementationAddresses.StableTokenV2,
       config.implementationAddresses.TokenMigrator,
-      [
-        {
-          proxy: config.proxyAddresses.MoC,
-          middleTermImplementation: config.implementationAddresses.MoC_v0116,
-          newImplementation: config.implementationAddresses.MoC
-        },
-        {
-          proxy: config.proxyAddresses.MoCConnector,
-          middleTermImplementation: config.implementationAddresses.MoCConnector_v0116,
-          newImplementation: config.implementationAddresses.MoCConnector
-        },
-        {
-          proxy: config.proxyAddresses.MoCExchange,
-          middleTermImplementation: config.implementationAddresses.MoCExchange_v0116,
-          newImplementation: config.implementationAddresses.MoCExchange
-        },
-        {
-          proxy: config.proxyAddresses.MoCState,
-          middleTermImplementation: config.implementationAddresses.MoCState_v0116,
-          newImplementation: config.implementationAddresses.MoCState
-        },
-        {
-          proxy: config.proxyAddresses.MoCSettlement,
-          middleTermImplementation: config.implementationAddresses.MoCSettlement_v0116,
-          newImplementation: config.implementationAddresses.MoCSettlement
-        }
-      ]
+      config.proxyAddresses.MoC,
+      config.implementationAddresses.MoC_v0116,
+      config.implementationAddresses.MoCConnector_v0116,
+      config.implementationAddresses.MoCExchange_v0116,
+      config.implementationAddresses.MoCState_v0116,
+      config.implementationAddresses.MoCSettlement_v0116
     );
     console.log('StableTokenMigrationChanger address: ', stableTokenMigrationChanger.address);
 

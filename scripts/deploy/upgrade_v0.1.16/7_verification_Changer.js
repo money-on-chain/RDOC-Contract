@@ -16,38 +16,30 @@ module.exports = async callback => {
     changerInfo.stableTokenV2 = await changer.stableTokenV2();
     changerInfo.tokenMigrator = await changer.tokenMigrator();
 
-    let proxy;
-    let middleTermImplementation;
-    let newImplementation;
     // MoC
-    ({ proxy, middleTermImplementation, newImplementation } = await changer.upgradesAddresses(0));
-    changerInfo.mocProxy = proxy;
-    changerInfo.mocMiddleTermImplementation = middleTermImplementation;
-    changerInfo.mocNewImplementation = newImplementation;
+    changerInfo.mocProxy = await changer.mocProxy();
+    changerInfo.mocCurrentImplementation = await changer.mocCurrentImp();
+    changerInfo.mocAtomicImplementation = await changer.mocAtomicImp();
 
     // MoCConnector
-    ({ proxy, middleTermImplementation, newImplementation } = await changer.upgradesAddresses(1));
-    changerInfo.mocConnectorProxy = proxy;
-    changerInfo.mocConnectorMiddleTermImplementation = middleTermImplementation;
-    changerInfo.mocConnectorNewImplementation = newImplementation;
+    changerInfo.mocConnectorProxy = await changer.mocConnectorProxy();
+    changerInfo.mocConnectorCurrentImplementation = await changer.mocConnectorCurrentImp();
+    changerInfo.mocConnectorAtomicImplementation = await changer.mocConnectorAtomicImp();
 
     // MoCExchange
-    ({ proxy, middleTermImplementation, newImplementation } = await changer.upgradesAddresses(2));
-    changerInfo.mocExchangeProxy = proxy;
-    changerInfo.mocExchangeMiddleTermImplementation = middleTermImplementation;
-    changerInfo.mocExchangeNewImplementation = newImplementation;
+    changerInfo.mocExchangeProxy = await changer.mocExchangeProxy();
+    changerInfo.mocExchangeCurrentImplementation = await changer.mocExchangeCurrentImp();
+    changerInfo.mocExchangeAtomicImplementation = await changer.mocExchangeAtomicImp();
 
     // MoCState
-    ({ proxy, middleTermImplementation, newImplementation } = await changer.upgradesAddresses(3));
-    changerInfo.mocStateProxy = proxy;
-    changerInfo.mocStateMiddleTermImplementation = middleTermImplementation;
-    changerInfo.mocStateNewImplementation = newImplementation;
+    changerInfo.mocStateProxy = await changer.mocStateProxy();
+    changerInfo.mocStateCurrentImplementation = await changer.mocStateCurrentImp();
+    changerInfo.mocStateAtomicImplementation = await changer.mocStateAtomicImp();
 
     // MoCSettlement
-    ({ proxy, middleTermImplementation, newImplementation } = await changer.upgradesAddresses(4));
-    changerInfo.mocSettlementProxy = proxy;
-    changerInfo.mocSettlementMiddleTermImplementation = middleTermImplementation;
-    changerInfo.mocSettlementNewImplementation = newImplementation;
+    changerInfo.mocSettlementProxy = await changer.mocSettlementProxy();
+    changerInfo.mocSettlementCurrentImplementation = await changer.mocSettlementCurrentImp();
+    changerInfo.mocSettlementAtomicImplementation = await changer.mocSettlementAtomicImp();
 
     console.log('Changer contract parameters');
 
@@ -76,24 +68,24 @@ module.exports = async callback => {
       console.log('ERROR! Proxy MoC.sol is not the same ', changerInfo.mocProxy);
     }
 
-    if (changerInfo.mocMiddleTermImplementation === config.implementationAddresses.MoC_v0116) {
+    if (changerInfo.mocAtomicImplementation === config.implementationAddresses.MoC_v0116) {
       console.log(
         'OK. Implementation MoC_v0116.sol contract: ',
-        changerInfo.mocMiddleTermImplementation
+        changerInfo.mocAtomicImplementation
       );
     } else {
       console.log(
-        'ERROR! Implementation MoC_021.sol is not the same ',
+        'ERROR! Implementation MoC_v0116.sol is not the same ',
         changerInfo.mocMiddleTermImplementation
       );
     }
 
-    if (changerInfo.mocNewImplementation === config.implementationAddresses.MoC) {
-      console.log('OK. Implementation MoC.sol contract: ', changerInfo.mocNewImplementation);
+    if (changerInfo.mocCurrentImplementation === config.implementationAddresses.MoC) {
+      console.log('OK. Implementation MoC.sol contract: ', changerInfo.mocCurrentImplementation);
     } else {
       console.log(
         'ERROR! Implementation MoC.sol is not the same ',
-        changerInfo.mocNewImplementation
+        changerInfo.mocCurrentImplementation
       );
     }
 
@@ -105,29 +97,31 @@ module.exports = async callback => {
     }
 
     if (
-      changerInfo.mocConnectorMiddleTermImplementation ===
+      changerInfo.mocConnectorAtomicImplementation ===
       config.implementationAddresses.MoCConnector_v0116
     ) {
       console.log(
         'OK. Implementation MoCConnector_v0116.sol contract: ',
-        changerInfo.mocConnectorMiddleTermImplementation
+        changerInfo.mocConnectorAtomicImplementation
       );
     } else {
       console.log(
-        'ERROR! Implementation MoCConnector_021.sol is not the same ',
-        changerInfo.mocConnectorMiddleTermImplementation
+        'ERROR! Implementation MoCConnector_v0116.sol is not the same ',
+        changerInfo.mocConnectorAtomicImplementation
       );
     }
 
-    if (changerInfo.mocConnectorNewImplementation === config.implementationAddresses.MoCConnector) {
+    if (
+      changerInfo.mocConnectorCurrentImplementation === config.implementationAddresses.MoCConnector
+    ) {
       console.log(
         'OK. Implementation MoCConnector.sol contract: ',
-        changerInfo.mocConnectorNewImplementation
+        changerInfo.mocConnectorCurrentImplementation
       );
     } else {
       console.log(
         'ERROR! Implementation MoCConnector.sol is not the same ',
-        changerInfo.mocConnectorNewImplementation
+        changerInfo.mocConnectorCurrentImplementation
       );
     }
 
@@ -139,29 +133,31 @@ module.exports = async callback => {
     }
 
     if (
-      changerInfo.mocExchangeMiddleTermImplementation ===
+      changerInfo.mocExchangeAtomicImplementation ===
       config.implementationAddresses.MoCExchange_v0116
     ) {
       console.log(
         'OK. Implementation MoCExchange_v0116.sol contract: ',
-        changerInfo.mocExchangeMiddleTermImplementation
+        changerInfo.mocExchangeAtomicImplementation
       );
     } else {
       console.log(
-        'ERROR! Implementation MoCExchange_021.sol is not the same ',
-        changerInfo.mocExchangeMiddleTermImplementation
+        'ERROR! Implementation MoCExchange_v0116.sol is not the same ',
+        changerInfo.mocExchangeAtomicImplementation
       );
     }
 
-    if (changerInfo.mocExchangeNewImplementation === config.implementationAddresses.MoCExchange) {
+    if (
+      changerInfo.mocExchangeCurrentImplementation === config.implementationAddresses.MoCExchange
+    ) {
       console.log(
         'OK. Implementation MoCExchange.sol contract: ',
-        changerInfo.mocExchangeNewImplementation
+        changerInfo.mocExchangeCurrentImplementation
       );
     } else {
       console.log(
         'ERROR! Implementation MoCExchange.sol is not the same ',
-        changerInfo.mocExchangeNewImplementation
+        changerInfo.mocExchangeCurrentImplementation
       );
     }
 
@@ -173,28 +169,28 @@ module.exports = async callback => {
     }
 
     if (
-      changerInfo.mocStateMiddleTermImplementation === config.implementationAddresses.MoCState_v0116
+      changerInfo.mocStateAtomicImplementation === config.implementationAddresses.MoCState_v0116
     ) {
       console.log(
         'OK. Implementation MoCState_v0116.sol contract: ',
-        changerInfo.mocStateMiddleTermImplementation
+        changerInfo.mocStateAtomicImplementation
       );
     } else {
       console.log(
-        'ERROR! Implementation MoCState_021.sol is not the same ',
-        changerInfo.mocStateMiddleTermImplementation
+        'ERROR! Implementation MoCState_v0116.sol is not the same ',
+        changerInfo.mocStateAtomicImplementation
       );
     }
 
-    if (changerInfo.mocStateNewImplementation === config.implementationAddresses.MoCState) {
+    if (changerInfo.mocStateCurrentImplementation === config.implementationAddresses.MoCState) {
       console.log(
         'OK. Implementation MoCState.sol contract: ',
-        changerInfo.mocStateNewImplementation
+        changerInfo.mocStateCurrentImplementation
       );
     } else {
       console.log(
         'ERROR! Implementation MoCState.sol is not the same ',
-        changerInfo.mocStateNewImplementation
+        changerInfo.mocStateCurrentImplementation
       );
     }
 
@@ -209,31 +205,32 @@ module.exports = async callback => {
     }
 
     if (
-      changerInfo.mocSettlementMiddleTermImplementation ===
+      changerInfo.mocSettlementAtomicImplementation ===
       config.implementationAddresses.MoCSettlement_v0116
     ) {
       console.log(
         'OK. Implementation MoCSettlement_v0116.sol contract: ',
-        changerInfo.mocSettlementMiddleTermImplementation
+        changerInfo.mocSettlementAtomicImplementation
       );
     } else {
       console.log(
-        'ERROR! Implementation MoCSettlement_021.sol is not the same ',
-        changerInfo.mocSettlementMiddleTermImplementation
+        'ERROR! Implementation MoCSettlement_v0116.sol is not the same ',
+        changerInfo.mocSettlementAtomicImplementation
       );
     }
 
     if (
-      changerInfo.mocSettlementNewImplementation === config.implementationAddresses.MoCSettlement
+      changerInfo.mocSettlementCurrentImplementation ===
+      config.implementationAddresses.MoCSettlement
     ) {
       console.log(
         'OK. Implementation MoCSettlement.sol contract: ',
-        changerInfo.mocSettlementNewImplementation
+        changerInfo.mocSettlementCurrentImplementation
       );
     } else {
       console.log(
         'ERROR! Implementation MoCSettlement.sol is not the same ',
-        changerInfo.mocSettlementNewImplementation
+        changerInfo.mocSettlementCurrentImplementation
       );
     }
   } catch (error) {

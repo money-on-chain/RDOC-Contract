@@ -4,19 +4,19 @@ import { Address } from "hardhat-deploy/types";
 import {
   CommissionSplitter,
   CommissionSplitter__factory,
-  MoC_v0115,
-  MoC_v0115__factory,
-  MoCConnector_v0115,
-  MoCConnector_v0115__factory,
+  MoC,
+  MoC__factory,
+  MoCConnector,
+  MoCConnector__factory,
   MoCInrate,
   MoCInrate__factory,
   MoCPriceProviderMock__factory,
   MoCRiskProxManager,
   MoCRiskProxManager__factory,
-  MoCSettlement_v0115,
-  MoCSettlement_v0115__factory,
-  MoCState_v0115,
-  MoCState_v0115__factory,
+  MoCSettlement,
+  MoCSettlement__factory,
+  MoCState,
+  MoCState__factory,
   MoCToken,
   MoCToken__factory,
   MoCVendors,
@@ -36,8 +36,8 @@ import {
   TokenMigrator__factory,
   UpgradeDelegator,
   UpgradeDelegator__factory,
-  MoCExchange_v0115,
-  MoCExchange_v0115__factory,
+  MoCExchange,
+  MoCExchange__factory,
   ProxyAdmin__factory,
   ProxyAdmin,
 } from "../typechain";
@@ -46,11 +46,11 @@ import { deployContract, deployTransparentProxy, baseParams, pEth } from "./help
 export const fixtureDeployed = memoizee(
   (): (() => Promise<{
     mocHelperAddress: Address;
-    moc_v0115: MoC_v0115;
-    mocConnector_v0115: MoCConnector_v0115;
-    mocExchange_v0115: MoCExchange_v0115;
-    mocState_v0115: MoCState_v0115;
-    mocSettlement_v0115: MoCSettlement_v0115;
+    moc: MoC;
+    mocConnector: MoCConnector;
+    mocExchange: MoCExchange;
+    mocState: MoCState;
+    mocSettlement: MoCSettlement;
     mocInrate: MoCInrate;
     mocVendors: MoCVendors;
     riskProxManager: MoCRiskProxManager;
@@ -76,24 +76,19 @@ export const fixtureDeployed = memoizee(
       const mocHelperLib = await deployments.getOrNull("MoCHelperLib");
       if (!mocHelperLib) throw new Error("No MoCHelperLib deployed.");
 
-      const mocConnector_v0115: MoCConnector_v0115 = await deployTransparentProxy(
-        "MoCConnector_v0115",
+      const mocConnector: MoCConnector = await deployTransparentProxy(
+        "MoCConnector",
         proxyAdmin.address,
-        MoCConnector_v0115__factory,
+        MoCConnector__factory,
       );
-      const moc_v0115: MoC_v0115 = await deployTransparentProxy("MoC_v0115", proxyAdmin.address, MoC_v0115__factory);
-      const mocState_v0115: MoCState_v0115 = await deployTransparentProxy(
-        "MoCState_v0115",
+      const moc: MoC = await deployTransparentProxy("MoC", proxyAdmin.address, MoC__factory);
+      const mocState: MoCState = await deployTransparentProxy("MoCState", proxyAdmin.address, MoCState__factory, {
+        libraries: { MoCHelperLib: mocHelperLib.address },
+      });
+      const mocSettlement: MoCSettlement = await deployTransparentProxy(
+        "MoCSettlement",
         proxyAdmin.address,
-        MoCState_v0115__factory,
-        {
-          libraries: { MoCHelperLib: mocHelperLib.address },
-        },
-      );
-      const mocSettlement_v0115: MoCSettlement_v0115 = await deployTransparentProxy(
-        "MoCSettlement_v0115",
-        proxyAdmin.address,
-        MoCSettlement_v0115__factory,
+        MoCSettlement__factory,
       );
       const mocInrate: MoCInrate = await deployTransparentProxy("MoCInrate", proxyAdmin.address, MoCInrate__factory, {
         libraries: { MoCHelperLib: mocHelperLib.address },
@@ -104,12 +99,9 @@ export const fixtureDeployed = memoizee(
         MoCVendors__factory,
       );
 
-      const deployedMocExchange_v0115 = await deployments.getOrNull("MoCExchangeProxy");
-      if (!deployedMocExchange_v0115) throw new Error("No MoCExchangeProxy deployed.");
-      const mocExchange_v0115: MoCExchange_v0115 = MoCExchange_v0115__factory.connect(
-        deployedMocExchange_v0115.address,
-        signer,
-      );
+      const deployedMocExchange = await deployments.getOrNull("MoCExchangeProxy");
+      if (!deployedMocExchange) throw new Error("No MoCExchangeProxy deployed.");
+      const mocExchange: MoCExchange = MoCExchange__factory.connect(deployedMocExchange.address, signer);
 
       const riskProxManager: MoCRiskProxManager = await deployTransparentProxy(
         "MoCRiskProxManager",
@@ -146,30 +138,30 @@ export const fixtureDeployed = memoizee(
         [],
       );
 
-      await mocConnector_v0115.initialize(
-        moc_v0115.address,
+      await mocConnector.initialize(
+        moc.address,
         stableToken.address,
         riskProToken.address,
         riskProxManager.address,
-        mocState_v0115.address,
-        mocSettlement_v0115.address,
-        mocExchange_v0115.address,
+        mocState.address,
+        mocSettlement.address,
+        mocExchange.address,
         mocInrate.address,
         deployer,
         reserveToken.address,
       );
-      await moc_v0115["initialize(address,address,address,bool)"](
-        mocConnector_v0115.address,
+      await moc["initialize(address,address,address,bool)"](
+        mocConnector.address,
         governorMock.address,
         stopper.address,
         baseParams.startStoppable,
       );
       await stopper.initialize(deployer);
-      await mocExchange_v0115.initialize(mocConnector_v0115.address);
-      await mocState_v0115[
+      await mocExchange.initialize(mocConnector.address);
+      await mocState[
         "initialize((address,address,address,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,address,address,address,bool,uint256))"
       ]({
-        connectorAddress: mocConnector_v0115.address,
+        connectorAddress: mocConnector.address,
         governor: governorMock.address,
         priceProvider: priceProvider.address,
         liq: baseParams.liq, // mocPrecision
@@ -189,7 +181,7 @@ export const fixtureDeployed = memoizee(
       await mocInrate[
         "initialize(address,address,uint256,uint256,uint256,uint256,uint256,address,address,uint256,uint256,uint256)"
       ](
-        mocConnector_v0115.address,
+        mocConnector.address,
         governorMock.address,
         baseParams.riskProxTmin,
         baseParams.riskProxPower,
@@ -204,18 +196,18 @@ export const fixtureDeployed = memoizee(
         baseParams.stableTmax,
       );
       await riskProxManager["initialize(address,address,uint256,uint256)"](
-        mocConnector_v0115.address,
+        mocConnector.address,
         governorMock.address,
         baseParams.c0Cobj,
         baseParams.x2Cobj,
       );
-      await mocSettlement_v0115["initialize(address,address,uint256)"](
-        mocConnector_v0115.address,
+      await mocSettlement["initialize(address,address,uint256)"](
+        mocConnector.address,
         governorMock.address,
         baseParams.settlementBlockSpan,
       );
       await mocCommissionSplitter["initialize(address,address,uint256,address,address,address,address)"](
-        moc_v0115.address,
+        moc.address,
         deployer,
         baseParams.mocProportion,
         governorMock.address,
@@ -225,16 +217,16 @@ export const fixtureDeployed = memoizee(
       );
       await upgradeDelegator["initialize(address,address)"](governorMock.address, proxyAdmin.address);
       await mocVendors["initialize(address,address,address)"](
-        mocConnector_v0115.address,
+        mocConnector.address,
         governorMock.address,
         deployer /*vendorGuardian*/,
       );
 
       await reserveToken.claim(pEth(100000000000));
       await reserveToken.connect(await ethers.getSigner(alice)).claim(pEth(100000000000));
-      await transferOwnershipAndMinting(riskProToken, mocExchange_v0115.address);
-      await transferOwnershipAndMinting(stableToken, mocExchange_v0115.address);
-      await transferPausingRole(riskProToken, moc_v0115.address);
+      await transferOwnershipAndMinting(riskProToken, mocExchange.address);
+      await transferOwnershipAndMinting(stableToken, mocExchange.address);
+      await transferPausingRole(riskProToken, moc.address);
       await proxyAdmin.transferOwnership(upgradeDelegator.address);
 
       const deployedStableTokenV2 = await deployments.getOrNull("StableTokenV2Proxy");
@@ -247,11 +239,11 @@ export const fixtureDeployed = memoizee(
 
       return {
         mocHelperAddress: mocHelperLib.address,
-        moc_v0115,
-        mocConnector_v0115,
-        mocExchange_v0115,
-        mocState_v0115,
-        mocSettlement_v0115,
+        moc,
+        mocConnector,
+        mocExchange,
+        mocState,
+        mocSettlement,
         mocInrate,
         mocVendors,
         riskProxManager,
