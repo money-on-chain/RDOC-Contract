@@ -46,6 +46,12 @@ contract('MoC', function([owner, userAccount, vendorAccount]) {
       beforeEach(async function() {
         await mocHelper.mintRiskPro(userAccount, 1, vendorAccount);
       });
+      describe('WHEN he tries to mint StableToken with a higher gas price than the limit', function() {
+        it('THEN transaction reverts because uses a higher gas price', async function() {
+          const tx = mocHelper.moc.mintStableToken(1000, { gasPrice: '21000000001' });
+          await expectRevert(tx, 'gas price is above the max allowed');
+        });
+      });
       describe('WHEN a user tries to mint 10000 StableTokens', function() {
         let prevReserveTokenBalance;
         beforeEach(async function() {
