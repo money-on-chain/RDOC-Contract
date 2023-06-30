@@ -145,7 +145,7 @@ npx hardhat deploy --network targetNetwork
 ### Step 3: Deploy new MoC protocol implementations
 Once the new StableToken smart contract has been deployed, we need to deploy contracts that will be upgraded new implementation.
 
-- create a file named `RDOC-Contract-Internal/scripts/deploy/upgrade_v0.1.16/deployConfig-targetNetwork.json` with all current addresses used in the targetNetwork, for example: [deployConfig-devTestnet.json](../scripts/deploy/upgrade_v0.1.16/deployConfig-devTestnet.json)
+- create a file named `RDOC-Contract-Internal/scripts/deploy/upgrade_v0.1.17/deployConfig-targetNetwork.json` with all current addresses used in the targetNetwork, for example: [deployConfig-devTestnet.json](../scripts/deploy/upgrade_v0.1.17/deployConfig-devTestnet.json)
 - Add deployed addresses in Step 2. StableTokenV2(proxy) and TokenMigrator addresses in that file
 ```
 "implementationAddresses": {
@@ -156,7 +156,7 @@ Once the new StableToken smart contract has been deployed, we need to deploy con
 ```
 - Run the upgrade.
 ```
-sh ./scripts/deploy/upgrade_v0.1.16/0_deploy.sh targetNetwork
+sh ./scripts/deploy/upgrade_v0.1.17/0_deploy.sh targetNetwork
 ```
 That script will do the following steps:
 1. deploy MoC_v0116 and MoC implementations
@@ -209,7 +209,7 @@ A json file will be generated with all the deployed addresses
 DOC-Contract-Internal/scripts/deploy/upgrade_v0.1.12/deployConfig-development.json
 
 copy that file to
-RDOC-Contract-Internal/scripts/deploy/upgrade_v0.1.16/deployConfig-development.json
+RDOC-Contract-Internal/scripts/deploy/upgrade_v0.1.17/deployConfig-development.json
 
 Set in hardhat.config.base, network development the 3 needed addresses:
 ````
@@ -232,7 +232,7 @@ npx hardhat deploy --network development
 ```
 
 Add StableTokenV2(proxy) and TokenMigrator addresses in
-RDOC-Contract-Internal/scripts/deploy/upgrade_v0.1.16/deployConfig-development.json
+RDOC-Contract-Internal/scripts/deploy/upgrade_v0.1.17/deployConfig-development.json
 ```
 "implementationAddresses": {
     ...
@@ -267,7 +267,7 @@ npx hardhat mint-StableTokens --network development --amount 1000000000000000000
 Now, you can make the upgrade to migrate tokens
 in root run
 ```
-sh ./scripts/deploy/upgrade_v0.1.16/0_deploy.sh
+sh ./scripts/deploy/upgrade_v0.1.17/0_deploy.sh
 ```
 
 Go again to hardhat folder

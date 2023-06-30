@@ -150,11 +150,12 @@ export const fixtureDeployed = memoizee(
         deployer,
         reserveToken.address,
       );
-      await moc["initialize(address,address,address,bool)"](
+      await moc["initialize(address,address,address,bool,uint256)"](
         mocConnector.address,
         governorMock.address,
         stopper.address,
         baseParams.startStoppable,
+        21000000000, // max gas price
       );
       await stopper.initialize(deployer);
       await mocExchange.initialize(mocConnector.address);
