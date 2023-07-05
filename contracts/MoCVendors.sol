@@ -128,7 +128,7 @@ contract MoCVendors is MoCVendorsEvents, MoCBase, MoCLibConnection, Governed, IM
   /**
     @dev Allows to unregister a vendor
     @param account Vendor address
-    @return false if vendor was unregistered successfully; otherwise false
+    @return false if vendor was unregistered successfully; otherwise true
   */
   function unregisterVendor(address account) public onlyVendorGuardian() returns (bool isActive) {
     uint8 i = 0;
