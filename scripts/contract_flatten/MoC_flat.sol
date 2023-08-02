@@ -2989,8 +2989,10 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMo
     @param resTokensToMint Amount in ReserveTokens to mint
     @param vendorAccount Vendor address
   */
-  function mintStableTokenVendors(uint256 resTokensToMint, address vendorAccount)
-  public {
+  function mintStableTokenVendors(uint256 resTokensToMint, address vendorAccount) public
+  /* Remove modifiers to save some contract size */
+  // whenNotPaused() transitionState() atLeastState(IMoCState.States.AboveCobj) isValidGasPrice()
+  {
     /** UPDATE V0117: 02/08/2023 - Mint Stable token is temporary disabled **/
     revert("Mint Stable token is temporary disabled.");
   }

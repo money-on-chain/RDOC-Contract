@@ -22,3 +22,11 @@ And we’ll do it this way instead of just removing the function to prevent thir
 
 The change is simple and only affects the Moc.sol contract in Rif on chain implementation.
 
+
+**Changer**: [Changer contract at 0x412153EAfDC0Aaaf0c8135A1a748F8859A29C622](https://explorer.rsk.co/address/0x412153EAfDC0Aaaf0c8135A1a748F8859A29C622?__ctab=Code).
+
+
+| Contract | Proxy                                               | Implementation                                                                                                           |  
+|:---------|:----------------------------------------------------|:-------------------------------------------------------------------------------------------------------------------------|
+| MoC      | [0xCfF3fcaeC2352C672C38d77cb1a064B7D50ce7e1](https://explorer.rsk.co/address/0xCfF3fcaeC2352C672C38d77cb1a064B7D50ce7e1)   | [0x62f9bd2F7094dD923e268ec7A9B6297D0cC1f92e](https://explorer.rsk.co/address/0x62f9bd2F7094dD923e268ec7A9B6297D0cC1f92e) |
+
