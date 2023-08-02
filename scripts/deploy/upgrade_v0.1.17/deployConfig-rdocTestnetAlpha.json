@@ -1,0 +1,15 @@
+{
+  "proxyAddresses": {
+    "MoC": "0x4512f4C1d984bbf8B7f7404EddFb1881cFA79EfD"
+  },
+  "implementationAddresses": {
+    "MoC": "0x530C0bE7C87ed282D9c9b9196ddee943de95c67e",
+    "ProxyAdmin": "0xffb65F6E24806B7e1A988EeD1Ad07BB2654fF695",
+    "UpgradeDelegator": "0xCDAbFbF334A5F6BCe900D2f73470D1e6722365d8",
+    "Governor": "0x7b716178771057195bB511f0B1F7198EEE62Bc22"
+  },
+  "changerAddresses": {
+    "Changer": "0x0E11254680753cFB17C0c2914Bfe9dE5B7F7b23F"
+  },
+  "governorOwnerAddress": "0x7D124cC0f59aDA5793AD8edA9eD1836cB7e797a3"
+}
