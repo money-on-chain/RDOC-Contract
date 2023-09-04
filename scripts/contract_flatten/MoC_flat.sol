@@ -2435,6 +2435,12 @@ interface IMoCExchange {
 
     function redeemStableTokenWithPrice(address payable userAddress, uint256 amount, uint256 reservePrice) external
     returns (bool, uint256);
+
+    function setMaxAbsoluteOperation(uint256 maxAbsoluteOperation_) external;
+
+    function setMaxOperationalDifference(uint256 maxOperationalDifference_) external;
+
+    function setDecayBlockSpan(uint256 decayBlockSpan_) external;
 }
 
 
@@ -3028,25 +3034,12 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMo
     @param vendorAccount Vendor address
   */
   function redeemRiskProxVendors(bytes32 bucket, uint256 riskProxAmount, address vendorAccount) public
-  whenNotPaused() whenSettlementReady() availableBucket(bucket) notBaseBucket(bucket)
-  transitionState() bucketStateTransition(bucket) {
-    /** UPDATE V0110: 24/09/2020 - Upgrade to support multiple commission rates **/
-    (uint256 totalResTokensRedeemed,
-    uint256 reserveTokenCommission,
-    uint256 mocCommission,
-    uint256 reserveTokenMarkup,
-    uint256 mocMarkup) = mocExchange.redeemRiskProx(msg.sender, bucket, riskProxAmount, vendorAccount);
-
-    redeemWithCommission(
-      msg.sender,
-      reserveTokenCommission,
-      mocCommission,
-      vendorAccount,
-      reserveTokenMarkup,
-      mocMarkup,
-      totalResTokensRedeemed
-    );
-    /** END UPDATE V0110: 24/09/2020 - Upgrade to support multiple commission rates **/
+  /* Remove modifiers to save some contract size */
+  // whenNotPaused() whenSettlementReady() availableBucket(bucket) notBaseBucket(bucket)
+  // transitionState() bucketStateTransition(bucket) 
+  {
+    /** UPDATE V0114: 07/02/2023 - Removal of leveraged positions. Please take a look at http://bit.ly/3XPiKUA **/
+    revert("Redeem Leveraged position is disabled. See: http://bit.ly/3XPiKUA");
   }
 
   /**
@@ -3477,20 +3470,55 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMo
   }
 
   /**
-   * @notice allows the pauser or an authorized changer to update the gas price limit
-   *  The pauser is a multisig that could be used in this case to speed up the max gas price
-   *  change if it is necessary
+    * @notice only executed by the pauser or an authorized changer
+    *  The pauser is a multisig that could be used in some cases to speed up a
+    *  change if it is necessary
+    */
+  modifier onlyAuthorizedChangerOrPauser() {
+    require(stopper == msg.sender || governor.isAuthorizedChanger(msg.sender), "not authorized changer or stopper");
+    _;
+  }
+
+  /**
+   * @notice update the gas price limit
    * @param maxGasPrice_ new gas price limit
    */
-  function setMaxGasPrice(uint256 maxGasPrice_) external {
-    require(stopper == msg.sender || governor.isAuthorizedChanger(msg.sender), "not authorized changer or stopper");
+  function setMaxGasPrice(uint256 maxGasPrice_) external onlyAuthorizedChangerOrPauser() {
     maxGasPrice = maxGasPrice_;
   }
 
   uint256 public maxGasPrice;
 
+  ////////////////////
+  // Flux Capacitor //
+  ////////////////////
+
+  /**
+   * @notice update the max absolute operation allowed
+   * @param maxAbsoluteOperation_ new max absolute operation allowed
+   */
+  function setMaxAbsoluteOperation(uint256 maxAbsoluteOperation_) external onlyAuthorizedChangerOrPauser() {
+    mocExchange.setMaxAbsoluteOperation(maxAbsoluteOperation_);
+  }
+
+  /**
+   * @notice update the max operational difference allowed
+   * @param maxOperationalDifference_ new max operational difference allowed
+   */
+  function setMaxOperationalDifference(uint256 maxOperationalDifference_) external onlyAuthorizedChangerOrPauser() {
+   mocExchange.setMaxOperationalDifference(maxOperationalDifference_);
+  }
+
+  /**
+   * @notice update the decay block span
+   * @param decayBlockSpan_ new decay block span
+   */
+  function setDecayBlockSpan(uint256 decayBlockSpan_) external onlyAuthorizedChangerOrPauser() {
+    mocExchange.setDecayBlockSpan(decayBlockSpan_);
+  }
+
   // Leave a gap betweeen inherited contracts variables in order to be
   // able to add more variables in them later
-  uint256[49] private upgradeGap;
+  uint256[49] private __gap;
 }
 

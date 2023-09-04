@@ -50,13 +50,13 @@ const shouldRevertBasicFunctions = (userAccount, vendorAccount) => {
       await expectRevert(tx, WITHDRAWAL_FAILED);
     });
   });
-  describe('WHEN a blacklisted user tries to redeem RiskProx', function() {
-    it('THEN the transaction reverts', async function() {
-      const tx = mocHelper.redeemRiskProx(userAccount, BUCKET_X2, 1, vendorAccount);
-
-      await expectRevert(tx, WITHDRAWAL_FAILED);
-    });
-  });
+  // describe('WHEN a blacklisted user tries to redeem RiskProx', function() {
+  //   it('THEN the transaction reverts', async function() {
+  //     leverage tokens are disabled
+  //     const tx = mocHelper.redeemRiskProx(userAccount, BUCKET_X2, 1, vendorAccount);
+  //     await expectRevert(tx, WITHDRAWAL_FAILED);
+  //   });
+  // });
 };
 
 const initializeScenario = async (userAccount, vendorAccount) => {

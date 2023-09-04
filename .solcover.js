@@ -6,7 +6,7 @@ module.exports = {
     skipFiles: [
         'Migrations.sol',
         'mocks',
-        'interface',
+        'interfaces',
         'contracts_updated',
         'changers/productive',
         'test-contracts',

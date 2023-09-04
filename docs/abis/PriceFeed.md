@@ -6,7 +6,7 @@ original_id: PriceFeed
 
 # PriceFeed.sol
 
-View Source: [contracts/interface/PriceFeed.sol](../../contracts/interface/PriceFeed.sol)
+View Source: [contracts/interfaces/PriceFeed.sol](../../contracts/interfaces/PriceFeed.sol)
 
 **↘ Derived Contracts: [MoCPriceProviderMock](MoCPriceProviderMock.md), [PriceProviderMock](PriceProviderMock.md)**
 

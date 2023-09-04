@@ -4,14 +4,14 @@ pragma experimental ABIEncoderV2;
 import "./MoCLibConnection.sol";
 import "./token/RiskProToken.sol";
 import "./token/StableToken.sol";
-import "./interface/IMoCInrate.sol";
+import "./interfaces/IMoCInrate.sol";
 import "./base/MoCBase.sol";
 import "./token/MoCToken.sol";
 import "./MoCRiskProxManager.sol";
 import "openzeppelin-solidity/contracts/math/Math.sol";
-import "./interface/IMoC.sol";
-import "./interface/IMoCExchange.sol";
-import "./interface/IMoCState.sol";
+import "./interfaces/IMoC.sol";
+import "./interfaces/IMoCExchange.sol";
+import "./interfaces/IMoCState.sol";
 
 contract MoCExchangeEvents {
   event RiskProMint(
@@ -400,6 +400,10 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
 
       (details.commission) = calculateCommissionsWithPrices(params);
 
+      uint256 reserveTokenToRedeem = details.finalReserveTokenAmount.sub(details.commission.reserveTokenCommission).sub(details.commission.reserveTokenMarkup);
+      // reverts if not allowed by accumulators
+      _updateAccumulatorsOnRedeem(reserveTokenToRedeem);
+
       /** END UPDATE V0110: 24/09/2020 - Upgrade to support multiple commission rates **/
 
       doStableTokenRedeem(account, details.finalStableTokenAmount, stableTokensReserveTokenValue);
@@ -407,7 +411,7 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
 
       redeemFreeStableTokenInternal(account, details, vendorAccount);
 
-      return (details.finalReserveTokenAmount.sub(details.commission.reserveTokenCommission).sub(details.commission.reserveTokenMarkup), details.commission.reserveTokenCommission, details.commission.mocCommission, details.commission.reserveTokenMarkup, details.commission.mocMarkup);
+      return (reserveTokenToRedeem, details.commission.reserveTokenCommission, details.commission.mocCommission, details.commission.reserveTokenMarkup, details.commission.mocMarkup);
     }
   }
 
@@ -434,6 +438,8 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
         ? resTokensToMint
         : mocLibConfig.stableTokensResTokensValue(details.stableTokenAmount, mocState.peg(), resTokenPrice);
 
+      // reverts if not allowed by accumulators
+      _updateAccumulatorsOnMint(details.totalCost);
       // Mint Token
       stableToken.mint(account, details.stableTokenAmount);
 
@@ -485,6 +491,9 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
 
     details.reserveTokenToRedeem = details.totalReserveToken.sub(
       details.commission.reserveTokenCommission).sub(details.commission.reserveTokenMarkup);
+    
+    // reverts if not allowed by accumulators
+    _updateAccumulatorsOnRedeem(details.reserveTokenToRedeem);
 
     bool result = moc.sendToAddress(userAddress, details.reserveTokenToRedeem);
 
@@ -560,50 +569,8 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
     onlyWhitelisted(msg.sender)
     returns (uint256, uint256, uint256, uint256, uint256)
   {
-    if (resTokensToMint > 0) {
-      RiskProxMintStruct memory details;
-
-      details.lev = mocState.leverage(bucket);
-
-      details.finalReserveTokenToMint = Math.min(
-        resTokensToMint,
-        mocState.maxRiskProxResTokenValue(bucket)
-      );
-
-      // Get interest and the adjusted RiskProAmount
-      details.reserveTokenInterestAmount = mocInrate.calcMintInterestValues(
-        bucket,
-        details.finalReserveTokenToMint
-      );
-
-      // pay interest
-      riskProxManager.payInrate(BUCKET_C0, details.reserveTokenInterestAmount);
-
-      details.riskProxToMint = mocState.resTokenToRiskProx(details.finalReserveTokenToMint, bucket);
-
-      riskProxManager.assignRiskProx(bucket, account, details.riskProxToMint, details.finalReserveTokenToMint);
-      moveExtraFundsToBucket(BUCKET_C0, bucket, details.finalReserveTokenToMint, details.lev);
-
-      // Calculate leverage after mint
-      details.lev = mocState.leverage(bucket);
-
-      /** UPDATE V0110: 24/09/2020 - Upgrade to support multiple commission rates **/
-      CommissionParamsStruct memory params;
-      params.account = account;
-      params.amount = details.finalReserveTokenToMint;
-      params.txTypeFeesMOC = mocInrate.MINT_RISKPROX_FEES_MOC();
-      params.txTypeFeesReserveToken = mocInrate.MINT_RISKPROX_FEES_RESERVE();
-      params.vendorAccount = vendorAccount;
-
-      (details.commission) = calculateCommissionsWithPrices(params);
-
-      mintRiskProxInternal(account, bucket, details, vendorAccount);
-      /** END UPDATE V0110: 24/09/2020 - Upgrade to support multiple commission rates **/
-
-      return (details.finalReserveTokenToMint.add(details.reserveTokenInterestAmount), details.commission.reserveTokenCommission, details.commission.mocCommission, details.commission.reserveTokenMarkup, details.commission.mocMarkup);
-    }
-
-    return (0, 0, 0, 0, 0);
+    /** UPDATE V0114: 07/02/2023 - Removal of leveraged positions. Please take a look at http://bit.ly/3XPiKUA **/
+    revert("Mint Leveraged position is disabled. See: http://bit.ly/3XPiKUA");
   }
 
   /**
@@ -621,65 +588,8 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
     uint256 riskProxAmount,
     address vendorAccount
   ) public onlyWhitelisted(msg.sender) returns (uint256, uint256, uint256, uint256, uint256) {
-    // Revert could cause not evaluating state changing
-    if (riskProxManager.riskProxBalanceOf(bucket, account) == 0) {
-      return (0, 0, 0, 0, 0);
-    }
-
-    RiskProxRedeemStruct memory details;
-    details.riskProxPrice = mocState.bucketRiskProTecPrice(bucket);
-    // Calculate leverage before the redeem
-    details.bucketLev = mocState.leverage(bucket);
-    // Get redeemable value
-    details.riskProxToRedeem = Math.min(riskProxAmount, riskProxManager.riskProxBalanceOf(bucket, account));
-    details.resTokenToRedeem = mocLibConfig.riskProResTokensValuet(details.riskProxToRedeem, details.riskProxPrice);
-    // Pay interests
-    // Update 2020-03-31
-    // No recover interest in BTCX Redemption
-    // details.resTokenInterests = recoverInterests(bucket, details.resTokenToRedeem);
-    details.resTokenInterests = 0;
-
-    // Burn RiskProx
-    burnRiskProxFor(
-      bucket,
-      account,
-      details.riskProxToRedeem,
-      details.riskProxPrice
-    );
-
-    if (riskProxManager.getBucketNRiskPro(bucket) == 0) {
-      // If there is no RiskProx left, empty bucket for rounding remnant
-      riskProxManager.emptyBucket(bucket, BUCKET_C0);
-    } else {
-      // Move extra value from L bucket to C0
-      moveExtraFundsToBucket(bucket, BUCKET_C0, details.resTokenToRedeem, details.bucketLev);
-    }
-
-    /** UPDATE V0110: 24/09/2020 - Upgrade to support multiple commission rates **/
-    CommissionParamsStruct memory params;
-    params.account = account;
-    params.amount = details.resTokenToRedeem;
-    params.txTypeFeesMOC = mocInrate.REDEEM_RISKPROX_FEES_MOC();
-    params.txTypeFeesReserveToken = mocInrate.REDEEM_RISKPROX_FEES_RESERVE();
-    params.vendorAccount = vendorAccount;
-
-    (details.commission) = calculateCommissionsWithPrices(params);
-
-    /** END UPDATE V0110: 24/09/2020 - Upgrade to support multiple commission rates **/
-
-    details.reserveTokenTotalWithoutCommission = details.resTokenToRedeem.sub(
-      details.commission.reserveTokenCommission).sub(details.commission.reserveTokenMarkup);
-    details.totalReserveTokenRedeemed = details.reserveTokenTotalWithoutCommission.add(details.resTokenInterests);
-
-    redeemRiskProxInternal(account, bucket, riskProxAmount, details, vendorAccount);
-
-    return (
-      details.totalReserveTokenRedeemed,
-      details.commission.reserveTokenCommission,
-      details.commission.mocCommission,
-      details.commission.reserveTokenMarkup,
-      details.commission.mocMarkup
-    );
+    /** UPDATE V0114: 07/02/2023 - Removal of leveraged positions. Please take a look at http://bit.ly/3XPiKUA **/
+    revert("Redeem Leveraged position is disabled. See: http://bit.ly/3XPiKUA");
   }
 
   /**
@@ -1040,7 +950,217 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
 
   /** END UPDATE V0110: 24/09/2020 **/
 
+  ////////////////////
+  // Flux Capacitor //
+  ////////////////////
+
+  uint256 internal constant PRECISION = 10 ** 18;
+  uint256 internal constant ONE = 10 ** 18;
+
+  /**
+   * @notice returns the absolute unsigned value of a signed value
+   * @dev from openzeppelin SignedMath.sol
+   */
+  function _abs(int256 n) internal pure returns (uint256) {
+      // must be unchecked in order to support `n = type(int256).min`
+      return uint256(n >= 0 ? n : -n);
+    }
+
+  /**
+   * @notice returns lineal decay factor
+   * @param blocksAmount_ amount of blocks to ask for the decay
+   * @return newAbsoluteAccumulator absolute accumulator updated by lineal decay factor [N]
+   * @return newDifferentialAccumulator differential accumulator updated by lineal decay factor [N]
+   */
+  function _calcAccWithDecayFactor(uint256 blocksAmount_) internal view returns(uint256 newAbsoluteAccumulator, int256 newDifferentialAccumulator) {
+    // [N] = [N] - [N]
+    uint256 blocksElapsed =  block.number + blocksAmount_ - lastOperationBlockNumber; // unchecked 
+    // [PREC] = [N] * [PREC] / [N]
+    uint256 blocksRatio = (blocksElapsed * PRECISION) / decayBlockSpan; // unchecked
+    if(blocksRatio >= ONE) return (0, 0);
+    uint256 decayFactor = ONE - blocksRatio; // unchecked 
+    // [N] = [N] * [PREC] / [PREC]
+    newAbsoluteAccumulator = (absoluteAccumulator * decayFactor) / PRECISION; // unchecked
+    // [N] = [N] * [PREC] / [PREC] 
+    newDifferentialAccumulator = (differentialAccumulator * int256(decayFactor)) / int256(PRECISION); // unchecked 
+    return (newAbsoluteAccumulator, newDifferentialAccumulator);
+  }
+
+  /**
+   * @notice update accumulators during a mint operation
+   *  reverts if not allowed
+   * @param reserveAmountToOperate_ reserve amount used to mint
+   */
+  function _updateAccumulatorsOnMint(uint256 reserveAmountToOperate_) internal {
+    (uint256 newAbsoluteAccumulator, int256 newDifferentialAccumulator) = _calcAccWithDecayFactor(0);
+    newAbsoluteAccumulator += reserveAmountToOperate_; // unchecked
+    newDifferentialAccumulator += int256(reserveAmountToOperate_); // unchecked
+    // cannot underflow, always newDifferentialAccumulator <= newAbsoluteAccumulator
+    uint256 operationalDifference = newAbsoluteAccumulator - _abs(newDifferentialAccumulator);
+    require(newAbsoluteAccumulator <= maxAbsoluteOperation, "max absolute operation reached");
+    require(operationalDifference <= maxOperationalDifference, "max operational difference reached");
+    // update storage
+    absoluteAccumulator = newAbsoluteAccumulator;
+    differentialAccumulator = newDifferentialAccumulator;
+    lastOperationBlockNumber = block.number;
+  }
+
+  /**
+   * @notice update accumulators during a redeem operation
+   *  reverts if not allowed
+   * @param reserveAmountToOperate_ reserve amount used for redeem
+   */
+  function _updateAccumulatorsOnRedeem(uint256 reserveAmountToOperate_) internal {
+    (uint256 newAbsoluteAccumulator, int256 newDifferentialAccumulator) = _calcAccWithDecayFactor(0);
+    newAbsoluteAccumulator += reserveAmountToOperate_; // unchecked
+    newDifferentialAccumulator -= int256(reserveAmountToOperate_); // unchecked
+    // cannot underflow, always newDifferentialAccumulator <= newAbsoluteAccumulator
+    uint256 operationalDifference = newAbsoluteAccumulator - _abs(newDifferentialAccumulator);
+    require(newAbsoluteAccumulator <= maxAbsoluteOperation, "max absolute operation reached");
+    require(operationalDifference <= maxOperationalDifference, "max operational difference reached");
+    // update storage
+    absoluteAccumulator = newAbsoluteAccumulator;
+    differentialAccumulator = newDifferentialAccumulator;
+    lastOperationBlockNumber = block.number;
+  }
+
+  /**
+   * @notice internal common function used to calc max reserved allowed to mint or redeem
+   *  stable tokens due to accumulators
+   * @param newAbsoluteAccumulator_ absolute accumulator updated by lineal decay factor [N]
+   * @param a_ on mint = AA - DA ; on redeem = AA + DA
+   * @param b_ on mint = AA + DA ; on redeem = AA - DA
+   * @return maxResAllowed minimum regarding maxAbsoluteOperation and maxOperationalDifference
+   */
+  function _calcMaxReserveAllowedToOperate(uint256 newAbsoluteAccumulator_, uint256 a_, uint256 b_) internal view returns (uint256 maxResAllowed) {
+    if(newAbsoluteAccumulator_ >= maxAbsoluteOperation) return 0;
+    uint256 absoluteAccAllowed =  maxAbsoluteOperation - newAbsoluteAccumulator_;
+
+    if(a_ <= maxOperationalDifference) return absoluteAccAllowed;
+    if(b_ >= maxOperationalDifference) return 0;
+    uint256 differentialAccAllowed = (maxOperationalDifference - b_) / 2;
+    return Math.min(absoluteAccAllowed, differentialAccAllowed);
+  }
+
+  /**
+   * @notice gets the max amount of reserve token allowed to operate to mint stable tokens with, restricted by accumulators
+   * @param newAbsoluteAccumulator_ absolute accumulator updated by lineal decay factor [N]
+   * @param newDifferentialAccumulator_ differential accumulator updated by lineal decay factor [N]
+   * @return maxResAllowed minimum regarding maxAbsoluteOperation and maxOperationalDifference
+   */
+  function _maxReserveAllowedToMint(uint256 newAbsoluteAccumulator_, int256 newDifferentialAccumulator_) internal view returns (uint256 maxResAllowed) {
+    // X = mint amount
+    // (AA + X) - |DA + X| <= MODA && X >= 0
+    // 1) if DA + X >= 0 ---> AA + X - DA - X <= MODA ---> AA - DA <= MODA 
+    // 2) if DA + X < 0 ---> X <= (MODA - (AA + DA)) / 2
+
+    // AA >= |DA|
+    uint256 a = uint256(int256(newAbsoluteAccumulator_) - newDifferentialAccumulator_);
+    uint256 b = uint256(int256(newAbsoluteAccumulator_) + newDifferentialAccumulator_);
+    return _calcMaxReserveAllowedToOperate(newAbsoluteAccumulator_, a, b);
+  }
+
+  /**
+   * @notice gets the max amount of reserve token allowed to operate to mint stable tokens with on the last block, restricted by accumulators
+   * @return maxResAllowed minimum regarding maxAbsoluteOperation and maxOperationalDifference
+   */
+  function lastMaxReserveAllowedToMint() external view returns (uint256 maxResAllowed) {
+    (uint256 newAbsoluteAccumulator, int256 newDifferentialAccumulator) = _calcAccWithDecayFactor(0);
+    return _maxReserveAllowedToMint(newAbsoluteAccumulator, newDifferentialAccumulator);
+  }
+
+  /**
+   * @notice gets the max amount of reserve token allowed to operate to mint stable tokens with, restricted by accumulators
+   * @return maxResAllowed minimum regarding maxAbsoluteOperation and maxOperationalDifference
+   */
+  function maxReserveAllowedToMint() external view returns (uint256 maxResAllowed) {
+    (uint256 newAbsoluteAccumulator, int256 newDifferentialAccumulator) = _calcAccWithDecayFactor(1);
+    return _maxReserveAllowedToMint(newAbsoluteAccumulator, newDifferentialAccumulator);
+  }
+
+  /**
+   * @notice gets the max amount of reserve token allowed to operate to redeem stable tokens with, restricted by accumulators
+   * @param newAbsoluteAccumulator_ absolute accumulator updated by lineal decay factor [N]
+   * @param newDifferentialAccumulator_ differential accumulator updated by lineal decay factor [N]
+   * @return maxResAllowed minimum regarding maxAbsoluteOperation and maxOperationalDifference
+   */
+  function _maxReserveAllowedToRedeem(uint256 newAbsoluteAccumulator_, int256 newDifferentialAccumulator_) internal view returns (uint256 maxResAllowed) {
+    // X = redeem amount
+    // (AA + X) - |DA - X| <= MODA && X >= 0
+    // 1) if DA - X < 0 ---> AA + X + DA - X <= MODA ---> AA + DA <= MODA 
+    // 2) if DA - X >= 0 ---> X <= (MODA - (AA - DA)) / 2
+
+    // AA >= |DA|
+    uint256 a = uint256(int256(newAbsoluteAccumulator_) + newDifferentialAccumulator_);
+    uint256 b = uint256(int256(newAbsoluteAccumulator_) - newDifferentialAccumulator_);
+    return _calcMaxReserveAllowedToOperate(newAbsoluteAccumulator_, a, b);
+  }
+
+  /**
+   * @notice gets the max amount of reserve token allowed to operate to redeem stable tokens with on the last block, restricted by accumulators
+   * @return maxResAllowed minimum regarding maxAbsoluteOperation and maxOperationalDifference
+   */
+  function lastMaxReserveAllowedToRedeem() external view returns (uint256 maxResAllowed) {
+    (uint256 newAbsoluteAccumulator, int256 newDifferentialAccumulator) = _calcAccWithDecayFactor(0);
+    return _maxReserveAllowedToRedeem(newAbsoluteAccumulator, newDifferentialAccumulator);
+  }
+
+  /**
+   * @notice gets the max amount of reserve token allowed to operate to redeem stable tokens with, restricted by accumulators
+   * @return maxResAllowed minimum regarding maxAbsoluteOperation and maxOperationalDifference
+   */
+  function maxReserveAllowedToRedeem() external view returns (uint256 maxResAllowed) {
+    (uint256 newAbsoluteAccumulator, int256 newDifferentialAccumulator) = _calcAccWithDecayFactor(1);
+    return _maxReserveAllowedToRedeem(newAbsoluteAccumulator, newDifferentialAccumulator);
+  }
+
+  /**
+   * @notice update the max absolute operation allowed
+   * @dev this contract is not governed, so change is done throught MoC contract
+   * @param maxAbsoluteOperation_ new max absolute operation allowed
+   */
+  function setMaxAbsoluteOperation(uint256 maxAbsoluteOperation_) external onlyWhitelisted(msg.sender) {
+    maxAbsoluteOperation = maxAbsoluteOperation_;
+  }
+
+  /**
+   * @notice update the max operational difference allowed
+   * @dev this contract is not governed, so change is done throught MoC contract
+   * @param maxOperationalDifference_ new max operational difference allowed
+   */
+  function setMaxOperationalDifference(uint256 maxOperationalDifference_) external onlyWhitelisted(msg.sender) {
+    maxOperationalDifference = maxOperationalDifference_;
+  }
+
+  /**
+   * @notice update the decay block span
+   * @dev this contract is not governed, so change is done throught MoC contract
+   * @param decayBlockSpan_ new decay block span
+   */
+  function setDecayBlockSpan(uint256 decayBlockSpan_) external onlyWhitelisted(msg.sender) {
+    decayBlockSpan = decayBlockSpan_;
+    // only for flux capacitor initialization
+    if(lastOperationBlockNumber == 0) {
+      lastOperationBlockNumber = block.number;
+    }
+  }
+
+  // accumulator increasead by minting and redeeming stable token operations
+  uint256 public absoluteAccumulator;
+  // accumulator increasead by minting and decreased by redeeming stable token operations
+  int256 public differentialAccumulator;
+  // last block number where an operation was submitted
+  uint256 public lastOperationBlockNumber;
+  // absolute maximum transaction allowed for a certain number of blocks
+  // if absoluteAccumulator is above this value the operation will be rejected
+  uint256 public maxAbsoluteOperation;
+  // differential maximum transaction allowed for a certain number of blocks
+  // if operationalDifference is above this value the operation will be rejected
+  uint256 public maxOperationalDifference;
+  // number of blocks that have to elapse for the linear decay factor to be 0
+  uint256 public decayBlockSpan;
+
   // Leave a gap betweeen inherited contracts variables in order to be
   // able to add more variables in them later
-  uint256[50] private upgradeGap;
+  uint256[44] private __gap;
 }

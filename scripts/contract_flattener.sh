@@ -17,7 +17,9 @@ CONTRACTS=(
     "contracts/changers/proposal_fee_increase/FeeIncreaseProposal.sol"
     "contracts/changers/BatchChanger.sol"
     "contracts/changers/UpgraderChanger.sol"
+    "contracts/changers/FluxCapacitorChanger.sol"
     "zos-lib/contracts/upgradeability/AdminUpgradeabilityProxy.sol"
+    "contracts/governance/StopperV2.sol"
 )
 
 # Working directory: the root of the project

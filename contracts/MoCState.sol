@@ -2,7 +2,7 @@ pragma solidity ^0.5.8;
 pragma experimental ABIEncoderV2;
 
 import "openzeppelin-solidity/contracts/math/Math.sol";
-import "./interface/PriceProvider.sol";
+import "./interfaces/PriceProvider.sol";
 import "./MoCEMACalculator.sol";
 import "./base/MoCBase.sol";
 import "./MoCLibConnection.sol";
@@ -10,10 +10,10 @@ import "./MoCRiskProxManager.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "./token/RiskProToken.sol";
 import "./token/MoCToken.sol";
-import "./interface/IMoCSettlement.sol";
+import "./interfaces/IMoCSettlement.sol";
 import "moc-governance/contracts/Governance/Governed.sol";
 import "moc-governance/contracts/Governance/IGovernor.sol";
-import "./interface/IMoCState.sol";
+import "./interfaces/IMoCState.sol";
 
 contract MoCState is MoCLibConnection, MoCBase, MoCEMACalculator, IMoCState {
   using Math for uint256;
