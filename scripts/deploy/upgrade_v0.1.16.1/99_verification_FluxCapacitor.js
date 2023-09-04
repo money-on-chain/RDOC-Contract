@@ -34,47 +34,63 @@ module.exports = async callback => {
     fluxInfo.lastOperationBlockNumber = await moCExchange.lastOperationBlockNumber();
 
     /**
-    * @notice gets the max amount of reserve token allowed to operate to mint stable tokens with on the last block, restricted by accumulators
-    * @return maxResAllowed minimum regarding maxAbsoluteOperation and maxOperationalDifference
-    */
+     * @notice gets the max amount of reserve token allowed to operate to mint stable tokens with on the last block, restricted by accumulators
+     * @return maxResAllowed minimum regarding maxAbsoluteOperation and maxOperationalDifference
+     */
 
     fluxInfo.lastMaxReserveAllowedToMint = await moCExchange.lastMaxReserveAllowedToMint();
 
     /**
      * @notice gets the max amount of reserve token allowed to operate to mint stable tokens with, restricted by accumulators
      * @return maxResAllowed minimum regarding maxAbsoluteOperation and maxOperationalDifference
-    */
+     */
     fluxInfo.maxReserveAllowedToMint = await moCExchange.maxReserveAllowedToMint();
 
     /**
-    * @notice gets the max amount of reserve token allowed to operate to redeem stable tokens with, restricted by accumulators
-    * @return maxResAllowed minimum regarding maxAbsoluteOperation and maxOperationalDifference
-    */
+     * @notice gets the max amount of reserve token allowed to operate to redeem stable tokens with, restricted by accumulators
+     * @return maxResAllowed minimum regarding maxAbsoluteOperation and maxOperationalDifference
+     */
 
     fluxInfo.maxReserveAllowedToRedeem = await moCExchange.maxReserveAllowedToRedeem();
 
-
     /**
-   * @notice gets the max amount of reserve token allowed to operate to redeem stable tokens with on the last block, restricted by accumulators
-   * @return maxResAllowed minimum regarding maxAbsoluteOperation and maxOperationalDifference
-   */
+     * @notice gets the max amount of reserve token allowed to operate to redeem stable tokens
+     * with on the last block, restricted by accumulators
+     * @return maxResAllowed minimum regarding maxAbsoluteOperation and maxOperationalDifference
+     */
 
     fluxInfo.lastMaxReserveAllowedToRedeem = await moCExchange.lastMaxReserveAllowedToRedeem();
 
-
-    console.log("Flux Capacitors Getters")
-    console.log("=======================")
+    console.log('Flux Capacitors Getters');
+    console.log('=======================');
     console.log('maxAbsoluteOperation: ', fromPrecision(fluxInfo.maxAbsoluteOperation).toString());
-    console.log('maxOperationalDifference: ', fromPrecision(fluxInfo.maxOperationalDifference).toString());
+    console.log(
+      'maxOperationalDifference: ',
+      fromPrecision(fluxInfo.maxOperationalDifference).toString()
+    );
     console.log('decayBlockSpan: ', fluxInfo.decayBlockSpan.toString());
     console.log('absoluteAccumulator: ', fromPrecision(fluxInfo.absoluteAccumulator).toString());
-    console.log('differentialAccumulator: ', fromPrecision(fluxInfo.differentialAccumulator).toString());
+    console.log(
+      'differentialAccumulator: ',
+      fromPrecision(fluxInfo.differentialAccumulator).toString()
+    );
     console.log('lastOperationBlockNumber: ', fluxInfo.lastOperationBlockNumber.toString());
-    console.log('lastMaxReserveAllowedToMint: ', fromPrecision(fluxInfo.lastMaxReserveAllowedToMint).toString());
-    console.log('maxReserveAllowedToMint: ', fromPrecision(fluxInfo.maxReserveAllowedToMint).toString());
-    console.log('maxReserveAllowedToRedeem: ', fromPrecision(fluxInfo.maxReserveAllowedToRedeem).toString());
-    console.log('lastMaxReserveAllowedToRedeem: ', fromPrecision(fluxInfo.lastMaxReserveAllowedToRedeem).toString());
-
+    console.log(
+      'lastMaxReserveAllowedToMint: ',
+      fromPrecision(fluxInfo.lastMaxReserveAllowedToMint).toString()
+    );
+    console.log(
+      'maxReserveAllowedToMint: ',
+      fromPrecision(fluxInfo.maxReserveAllowedToMint).toString()
+    );
+    console.log(
+      'maxReserveAllowedToRedeem: ',
+      fromPrecision(fluxInfo.maxReserveAllowedToRedeem).toString()
+    );
+    console.log(
+      'lastMaxReserveAllowedToRedeem: ',
+      fromPrecision(fluxInfo.lastMaxReserveAllowedToRedeem).toString()
+    );
   } catch (error) {
     callback(error);
   }

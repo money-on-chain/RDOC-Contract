@@ -13,6 +13,7 @@ import "./interfaces/IMoC.sol";
 import "./interfaces/IMoCExchange.sol";
 import "./interfaces/IMoCState.sol";
 
+
 contract MoCExchangeEvents {
   event RiskProMint(
     address indexed account,
@@ -26,11 +27,7 @@ contract MoCExchangeEvents {
     uint256 mocMarkup,
     address vendorAccount
   );
-  event RiskProWithDiscountMint(
-    uint256 riskProTecPrice,
-    uint256 riskProDiscountPrice,
-    uint256 amount
-  );
+  event RiskProWithDiscountMint(uint256 riskProTecPrice, uint256 riskProDiscountPrice, uint256 amount);
   event RiskProRedeem(
     address indexed account,
     uint256 amount,
@@ -154,8 +151,7 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
    @param spender address of token spender
    @return MoC balance of owner and MoC allowance of spender
   */
-  function getMoCTokenBalance(address owner, address spender) public view
-  returns (uint256 mocBalance, uint256 mocAllowance) {
+  function getMoCTokenBalance(address owner, address spender) public view returns (uint256 mocBalance, uint256 mocAllowance) {
     mocBalance = 0;
     mocAllowance = 0;
 
@@ -175,9 +171,7 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
    @param params Params defined in CommissionParamsStruct
    @return Commissions calculated in MoC price and ReserveToken price; and ReserveToken and MoC prices
   */
-  function calculateCommissionsWithPrices(CommissionParamsStruct memory params)
-  public view
-  returns (CommissionReturnStruct memory ret) {
+  function calculateCommissionsWithPrices(CommissionParamsStruct memory params) public view returns (CommissionReturnStruct memory ret) {
     ret.reserveTokenPrice = mocState.getReserveTokenPrice();
     ret.mocPrice = mocState.getMoCPrice();
     require(ret.reserveTokenPrice > 0, "Reserve Token price zero");
@@ -223,13 +217,13 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
   }
 
   /**
-  * @dev Reserve token equivalent for the amount of riskPro given applying the spotDiscountRate
-  * @param riskProAmount amount of RiskPro [using mocPrecision]
-  * @param riskProTecPrice price of RiskPro without discounts [using mocPrecision]
-  * @param riskProDiscountRate RiskPro discounts [using mocPrecision]
-  * @return Reserve token amount
-  */
-  function riskProDiscToResToken(uint256 riskProAmount, uint256 riskProTecPrice, uint256 riskProDiscountRate) internal view returns(uint256) {
+   * @dev Reserve token equivalent for the amount of riskPro given applying the spotDiscountRate
+   * @param riskProAmount amount of RiskPro [using mocPrecision]
+   * @param riskProTecPrice price of RiskPro without discounts [using mocPrecision]
+   * @param riskProDiscountRate RiskPro discounts [using mocPrecision]
+   * @return Reserve token amount
+   */
+  function riskProDiscToResToken(uint256 riskProAmount, uint256 riskProTecPrice, uint256 riskProDiscountRate) internal view returns (uint256) {
     uint256 totalResTokenValue = mocLibConfig.totalRiskProInResTokens(riskProAmount, riskProTecPrice);
     return mocLibConfig.applyDiscountRate(totalResTokenValue, riskProDiscountRate);
   }
@@ -257,23 +251,12 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
       details.discountPrice = mocState.riskProDiscountPrice();
       details.riskProDiscountAmount = mocLibConfig.maxRiskProWithResTokens(reserveTokenAmount, details.discountPrice);
 
-      details.finalRiskProAmount = Math.min(
-        details.riskProDiscountAmount,
-        mocState.maxRiskProWithDiscount()
-      );
+      details.finalRiskProAmount = Math.min(details.riskProDiscountAmount, mocState.maxRiskProWithDiscount());
       details.reserveTokenValue = details.finalRiskProAmount == details.riskProDiscountAmount
         ? reserveTokenAmount
-        : riskProDiscToResToken(
-          details.finalRiskProAmount,
-          details.riskProRegularPrice,
-          mocState.riskProSpotDiscountRate()
-        );
+        : riskProDiscToResToken(details.finalRiskProAmount, details.riskProRegularPrice, mocState.riskProSpotDiscountRate());
 
-      emit RiskProWithDiscountMint(
-        details.riskProRegularPrice,
-        details.discountPrice,
-        details.finalRiskProAmount
-      );
+      emit RiskProWithDiscountMint(details.riskProRegularPrice, details.discountPrice, details.finalRiskProAmount);
     }
 
     if (reserveTokenAmount != details.reserveTokenValue) {
@@ -341,15 +324,11 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
     riskProToken.burn(account, details.riskProFinalAmount);
 
     // Update Buckets
-    riskProxManager.substractValuesFromBucket(
-      BUCKET_C0,
-      totalReserveToken,
-      0,
-      details.riskProFinalAmount
-    );
+    riskProxManager.substractValuesFromBucket(BUCKET_C0, totalReserveToken, 0, details.riskProFinalAmount);
 
-    details.reserveTokenTotalWithoutCommission = totalReserveToken.sub(
-      details.commission.reserveTokenCommission).sub(details.commission.reserveTokenMarkup);
+    details.reserveTokenTotalWithoutCommission = totalReserveToken.sub(details.commission.reserveTokenCommission).sub(
+      details.commission.reserveTokenMarkup
+    );
 
     redeemRiskProInternal(account, details, vendorAccount);
 
@@ -378,10 +357,7 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
       return (0, 0, 0, 0, 0);
     } else {
       FreeStableTokenRedeemStruct memory details;
-      details.finalStableTokenAmount = Math.min(
-        stableTokenAmount,
-        Math.min(mocState.freeStableToken(), stableToken.balanceOf(account))
-      );
+      details.finalStableTokenAmount = Math.min(stableTokenAmount, Math.min(mocState.freeStableToken(), stableToken.balanceOf(account)));
       uint256 stableTokensReserveTokenValue = mocState.stableTokensToResToken(details.finalStableTokenAmount);
 
       details.reserveTokenInterestAmount = mocInrate.calcStableTokenRedInterestValues(
@@ -400,7 +376,9 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
 
       (details.commission) = calculateCommissionsWithPrices(params);
 
-      uint256 reserveTokenToRedeem = details.finalReserveTokenAmount.sub(details.commission.reserveTokenCommission).sub(details.commission.reserveTokenMarkup);
+      uint256 reserveTokenToRedeem = details.finalReserveTokenAmount.sub(details.commission.reserveTokenCommission).sub(
+        details.commission.reserveTokenMarkup
+      );
       // reverts if not allowed by accumulators
       _updateAccumulatorsOnRedeem(reserveTokenToRedeem);
 
@@ -411,7 +389,13 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
 
       redeemFreeStableTokenInternal(account, details, vendorAccount);
 
-      return (reserveTokenToRedeem, details.commission.reserveTokenCommission, details.commission.mocCommission, details.commission.reserveTokenMarkup, details.commission.mocMarkup);
+      return (
+        reserveTokenToRedeem,
+        details.commission.reserveTokenCommission,
+        details.commission.mocCommission,
+        details.commission.reserveTokenMarkup,
+        details.commission.mocMarkup
+      );
     }
   }
 
@@ -460,7 +444,13 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
 
       /** END UPDATE V0110: 24/09/2020 - Upgrade to support multiple commission rates **/
 
-      return (details.totalCost, details.commission.reserveTokenCommission, details.commission.mocCommission, details.commission.reserveTokenMarkup, details.commission.mocMarkup);
+      return (
+        details.totalCost,
+        details.commission.reserveTokenCommission,
+        details.commission.mocCommission,
+        details.commission.reserveTokenMarkup,
+        details.commission.mocMarkup
+      );
     }
 
     return (0, 0, 0, 0, 0);
@@ -473,11 +463,11 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
    @param reservePrice resToken price [using mocPrecision]
    @return true and commission spent if resTokens send was completed, false if fails.
   */
-  function redeemStableTokenWithPrice(
-    address userAddress,
-    uint256 amount,
-    uint256 reservePrice
-  ) public onlyWhitelisted(msg.sender) returns (bool, uint256) {
+  function redeemStableTokenWithPrice(address userAddress, uint256 amount, uint256 reservePrice)
+    public
+    onlyWhitelisted(msg.sender)
+    returns (bool, uint256)
+  {
     StableTokenRedeemStruct memory details;
 
     details.totalReserveToken = mocLibConfig.stableTokensResTokensValue(amount, mocState.peg(), reservePrice); // stable token to reserve token
@@ -485,13 +475,16 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
     /** UPDATE V0110: 24/09/2020 - Upgrade to support multiple commission rates **/
     // Check commission rate in Reserve according to transaction type
     details.commission.reserveTokenCommission = mocInrate.calcCommissionValue(
-      details.totalReserveToken, mocInrate.REDEEM_STABLETOKEN_FEES_RESERVE());
+      details.totalReserveToken,
+      mocInrate.REDEEM_STABLETOKEN_FEES_RESERVE()
+    );
     details.commission.reserveTokenMarkup = 0;
     /** END UPDATE V0110: 24/09/2020 - Upgrade to support multiple commission rates **/
 
-    details.reserveTokenToRedeem = details.totalReserveToken.sub(
-      details.commission.reserveTokenCommission).sub(details.commission.reserveTokenMarkup);
-    
+    details.reserveTokenToRedeem = details.totalReserveToken.sub(details.commission.reserveTokenCommission).sub(
+      details.commission.reserveTokenMarkup
+    );
+
     // reverts if not allowed by accumulators
     _updateAccumulatorsOnRedeem(details.reserveTokenToRedeem);
 
@@ -519,36 +512,18 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
    @param destination address to send the ReserveTokens
    @return The amount of ReserveTokens in sent for the redemption or 0 if send does not succed
   */
-  function redeemAllStableToken(address origin, address destination)
-    public
-    onlyWhitelisted(msg.sender)
-    returns (uint256)
-  {
+  function redeemAllStableToken(address origin, address destination) public onlyWhitelisted(msg.sender) returns (uint256) {
     uint256 userStableTokenBalance = stableToken.balanceOf(origin);
     if (userStableTokenBalance == 0) return 0;
 
     uint256 liqPrice = mocState.getLiquidationPrice();
     // [USD * ReserveTokens / USD]
-    uint256 totalResTokens = mocLibConfig.stableTokensResTokensValue(
-      userStableTokenBalance,
-      mocState.peg(),
-      liqPrice
-    ); //stable tokens to reserve tokens
+    // stable tokens to reserve tokens
+    uint256 totalResTokens = mocLibConfig.stableTokensResTokensValue(userStableTokenBalance, mocState.peg(), liqPrice);
     // If send fails we don't burn the tokens
     if (moc.sendToAddress(destination, totalResTokens)) {
       stableToken.burn(origin, userStableTokenBalance);
-      emit StableTokenRedeem(
-        origin,
-        userStableTokenBalance,
-        totalResTokens,
-        0,
-        liqPrice,
-        0,
-        0,
-        0,
-        0,
-        address(0)
-      );
+      emit StableTokenRedeem(origin, userStableTokenBalance, totalResTokens, 0, liqPrice, 0, 0, 0, 0, address(0));
 
       return totalResTokens;
     } else {
@@ -582,12 +557,11 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
    @param vendorAccount Vendor address
    @return the actual amount of resTokens to redeem and the resTokens commission for them [using reservePresicion]
   */
-  function redeemRiskProx(
-    address payable account,
-    bytes32 bucket,
-    uint256 riskProxAmount,
-    address vendorAccount
-  ) public onlyWhitelisted(msg.sender) returns (uint256, uint256, uint256, uint256, uint256) {
+  function redeemRiskProx(address payable account, bytes32 bucket, uint256 riskProxAmount, address vendorAccount)
+    public
+    onlyWhitelisted(msg.sender)
+    returns (uint256, uint256, uint256, uint256, uint256)
+  {
     /** UPDATE V0114: 07/02/2023 - Removal of leveraged positions. Please take a look at http://bit.ly/3XPiKUA **/
     revert("Redeem Leveraged position is disabled. See: http://bit.ly/3XPiKUA");
   }
@@ -601,19 +575,13 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
     @param riskProxPrice Price of one RiskProx in ReserveTokens [using reservePrecision]
     @return result of the ReserveTokens sending transaction
   */
-  function forceRedeemRiskProx(
-    bytes32 bucket,
-    address payable account,
-    uint256 riskProxAmount,
-    uint256 riskProxPrice
-  ) public onlyWhitelisted(msg.sender) returns (bool) {
+  function forceRedeemRiskProx(bytes32 bucket, address payable account, uint256 riskProxAmount, uint256 riskProxPrice)
+    public
+    onlyWhitelisted(msg.sender)
+    returns (bool)
+  {
     // Do burning part of the redemption
-    uint256 totalAmount = burnRiskProxFor(
-      bucket,
-      account,
-      riskProxAmount,
-      riskProxPrice
-    );
+    uint256 totalAmount = burnRiskProxFor(bucket, account, riskProxAmount, riskProxPrice);
 
     // Send transaction can only fail for external code
     // if transaction fails, user will lost his ReserveTokens and RiskProx
@@ -628,17 +596,13 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
     @param riskProxPrice Price of one RiskProx in ReserveTokens [using reservePrecision]
     @return ResToken total value of the redemption [using reservePrecision]
   **/
-  function burnRiskProxFor(
-    bytes32 bucket,
-    address payable account,
-    uint256 riskProxAmount,
-    uint256 riskProxPrice
-  ) public onlyWhitelisted(msg.sender) returns (uint256) {
+  function burnRiskProxFor(bytes32 bucket, address payable account, uint256 riskProxAmount, uint256 riskProxPrice)
+    public
+    onlyWhitelisted(msg.sender)
+    returns (uint256)
+  {
     // Calculate total ReserveTokens
-    uint256 totalAmount = mocLibConfig.riskProResTokensValuet(
-      riskProxAmount,
-      riskProxPrice
-    );
+    uint256 totalAmount = mocLibConfig.riskProResTokensValuet(riskProxAmount, riskProxPrice);
     riskProxManager.removeRiskProx(bucket, account, riskProxAmount, totalAmount);
 
     return totalAmount;
@@ -780,7 +744,8 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
    @dev Internal function to avoid stack too deep errors
   */
   function redeemStableTokenWithPriceInternal(address account, uint256 amount, StableTokenRedeemStruct memory details, address vendorAccount)
-  internal {
+    internal
+  {
     emit StableTokenRedeem(
       account, //userAddress,
       amount,
@@ -805,30 +770,14 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
     @param totalReserveToken Amount of ReserveTokens moving between buckets [using reservePrecision]
     @param lev lev of the L bucket [using mocPrecision]
   */
-  function moveExtraFundsToBucket(
-    bytes32 bucketFrom,
-    bytes32 bucketTo,
-    uint256 totalReserveToken,
-    uint256 lev
-  ) internal {
+  function moveExtraFundsToBucket(bytes32 bucketFrom, bytes32 bucketTo, uint256 totalReserveToken, uint256 lev) internal {
     uint256 resTokensToMove = mocLibConfig.bucketTransferAmount(totalReserveToken, lev);
     uint256 stableTokensToMove = mocState.resTokenToStableToken(resTokensToMove);
 
-    uint256 resTokensToMoveFinal = Math.min(
-      resTokensToMove,
-      riskProxManager.getBucketNReserve(bucketFrom)
-    );
-    uint256 stableTokensToMoveFinal = Math.min(
-      stableTokensToMove,
-      riskProxManager.getBucketNStableToken(bucketFrom)
-    );
+    uint256 resTokensToMoveFinal = Math.min(resTokensToMove, riskProxManager.getBucketNReserve(bucketFrom));
+    uint256 stableTokensToMoveFinal = Math.min(stableTokensToMove, riskProxManager.getBucketNStableToken(bucketFrom));
 
-    riskProxManager.moveResTokensAndStableTokens(
-      bucketFrom,
-      bucketTo,
-      resTokensToMoveFinal,
-      stableTokensToMoveFinal
-    );
+    riskProxManager.moveResTokensAndStableTokens(bucketFrom, bucketTo, resTokensToMoveFinal, stableTokensToMoveFinal);
   }
 
   /**
@@ -837,21 +786,13 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
    @param resTokenToRedeem Total ReserveTokens value of the redemption [using mocPrecision]
    @return Interests [using reservePrecision]
   */
-  function recoverInterests(bytes32 bucket, uint256 resTokenToRedeem)
-    internal
-    returns (uint256)
-  {
-    uint256 resTokenInterests = mocInrate.calcFinalRedeemInterestValue(
-      bucket,
-      resTokenToRedeem
-    );
+  function recoverInterests(bytes32 bucket, uint256 resTokenToRedeem) internal returns (uint256) {
+    uint256 resTokenInterests = mocInrate.calcFinalRedeemInterestValue(bucket, resTokenToRedeem);
 
     return riskProxManager.recoverInrate(BUCKET_C0, resTokenInterests);
   }
 
-  function doStableTokenRedeem(address userAddress, uint256 stableTokenAmount, uint256 totalReserveToken)
-    internal
-  {
+  function doStableTokenRedeem(address userAddress, uint256 stableTokenAmount, uint256 totalReserveToken) internal {
     stableToken.burn(userAddress, stableTokenAmount);
     riskProxManager.substractValuesFromBucket(BUCKET_C0, totalReserveToken, stableTokenAmount, 0);
   }
@@ -865,7 +806,6 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
     mocInrate = IMoCInrate(connector.mocInrate());
   }
 
-
   /************************************/
   /***** UPGRADE v0110      ***********/
   /************************************/
@@ -874,7 +814,7 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
   /** Upgrade to support multiple commission rates **/
   /** Structs **/
 
-  struct RiskProxRedeemStruct{
+  struct RiskProxRedeemStruct {
     uint256 totalReserveTokenRedeemed;
     uint256 reserveTokenTotalWithoutCommission;
     uint256 resTokenInterests;
@@ -885,7 +825,7 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
     CommissionReturnStruct commission;
   }
 
-  struct RiskProxMintStruct{
+  struct RiskProxMintStruct {
     uint256 riskProxToMint;
     uint256 finalReserveTokenToMint;
     uint256 reserveTokenInterestAmount;
@@ -893,20 +833,20 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
     CommissionReturnStruct commission;
   }
 
-  struct RiskProRedeemStruct{
+  struct RiskProRedeemStruct {
     uint256 riskProFinalAmount;
     uint256 reserveTokenTotalWithoutCommission;
     CommissionReturnStruct commission;
   }
 
-  struct FreeStableTokenRedeemStruct{
+  struct FreeStableTokenRedeemStruct {
     uint256 finalStableTokenAmount;
     uint256 finalReserveTokenAmount;
     uint256 reserveTokenInterestAmount;
     CommissionReturnStruct commission;
   }
 
-  struct RiskProMintStruct{
+  struct RiskProMintStruct {
     uint256 riskProRegularPrice;
     uint256 reserveTokenValue;
     uint256 discountPrice;
@@ -917,14 +857,14 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
     CommissionReturnStruct commission;
   }
 
-  struct StableTokenMintStruct{
+  struct StableTokenMintStruct {
     uint256 stableTokens;
     uint256 stableTokenAmount;
     uint256 totalCost;
     CommissionReturnStruct commission;
   }
 
-  struct CommissionParamsStruct{
+  struct CommissionParamsStruct {
     address account; // Address of the user doing the transaction
     uint256 amount; // Amount from which commissions are calculated
     uint8 txTypeFeesMOC; // Transaction type if fees are paid in MoC
@@ -932,7 +872,7 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
     address vendorAccount; // Vendor address
   }
 
-  struct CommissionReturnStruct{
+  struct CommissionReturnStruct {
     uint256 reserveTokenCommission;
     uint256 mocCommission;
     uint256 reserveTokenPrice;
@@ -941,7 +881,7 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
     uint256 mocMarkup;
   }
 
-  struct StableTokenRedeemStruct{
+  struct StableTokenRedeemStruct {
     uint256 reserveTotal;
     uint256 reserveTokenToRedeem;
     uint256 totalReserveToken;
@@ -954,17 +894,17 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
   // Flux Capacitor //
   ////////////////////
 
-  uint256 internal constant PRECISION = 10 ** 18;
-  uint256 internal constant ONE = 10 ** 18;
+  uint256 internal constant PRECISION = 10**18;
+  uint256 internal constant ONE = 10**18;
 
   /**
    * @notice returns the absolute unsigned value of a signed value
    * @dev from openzeppelin SignedMath.sol
    */
   function _abs(int256 n) internal pure returns (uint256) {
-      // must be unchecked in order to support `n = type(int256).min`
-      return uint256(n >= 0 ? n : -n);
-    }
+    // must be unchecked in order to support `n = type(int256).min`
+    return uint256(n >= 0 ? n : -n);
+  }
 
   /**
    * @notice returns lineal decay factor
@@ -972,17 +912,21 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
    * @return newAbsoluteAccumulator absolute accumulator updated by lineal decay factor [N]
    * @return newDifferentialAccumulator differential accumulator updated by lineal decay factor [N]
    */
-  function _calcAccWithDecayFactor(uint256 blocksAmount_) internal view returns(uint256 newAbsoluteAccumulator, int256 newDifferentialAccumulator) {
+  function _calcAccWithDecayFactor(uint256 blocksAmount_)
+    internal
+    view
+    returns (uint256 newAbsoluteAccumulator, int256 newDifferentialAccumulator)
+  {
     // [N] = [N] - [N]
-    uint256 blocksElapsed =  block.number + blocksAmount_ - lastOperationBlockNumber; // unchecked 
+    uint256 blocksElapsed = block.number + blocksAmount_ - lastOperationBlockNumber; // unchecked
     // [PREC] = [N] * [PREC] / [N]
     uint256 blocksRatio = (blocksElapsed * PRECISION) / decayBlockSpan; // unchecked
-    if(blocksRatio >= ONE) return (0, 0);
-    uint256 decayFactor = ONE - blocksRatio; // unchecked 
+    if (blocksRatio >= ONE) return (0, 0);
+    uint256 decayFactor = ONE - blocksRatio; // unchecked
     // [N] = [N] * [PREC] / [PREC]
     newAbsoluteAccumulator = (absoluteAccumulator * decayFactor) / PRECISION; // unchecked
-    // [N] = [N] * [PREC] / [PREC] 
-    newDifferentialAccumulator = (differentialAccumulator * int256(decayFactor)) / int256(PRECISION); // unchecked 
+    // [N] = [N] * [PREC] / [PREC]
+    newDifferentialAccumulator = (differentialAccumulator * int256(decayFactor)) / int256(PRECISION); // unchecked
     return (newAbsoluteAccumulator, newDifferentialAccumulator);
   }
 
@@ -1032,12 +976,16 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
    * @param b_ on mint = AA + DA ; on redeem = AA - DA
    * @return maxResAllowed minimum regarding maxAbsoluteOperation and maxOperationalDifference
    */
-  function _calcMaxReserveAllowedToOperate(uint256 newAbsoluteAccumulator_, uint256 a_, uint256 b_) internal view returns (uint256 maxResAllowed) {
-    if(newAbsoluteAccumulator_ >= maxAbsoluteOperation) return 0;
-    uint256 absoluteAccAllowed =  maxAbsoluteOperation - newAbsoluteAccumulator_;
+  function _calcMaxReserveAllowedToOperate(uint256 newAbsoluteAccumulator_, uint256 a_, uint256 b_)
+    internal
+    view
+    returns (uint256 maxResAllowed)
+  {
+    if (newAbsoluteAccumulator_ >= maxAbsoluteOperation) return 0;
+    uint256 absoluteAccAllowed = maxAbsoluteOperation - newAbsoluteAccumulator_;
 
-    if(a_ <= maxOperationalDifference) return absoluteAccAllowed;
-    if(b_ >= maxOperationalDifference) return 0;
+    if (a_ <= maxOperationalDifference) return absoluteAccAllowed;
+    if (b_ >= maxOperationalDifference) return 0;
     uint256 differentialAccAllowed = (maxOperationalDifference - b_) / 2;
     return Math.min(absoluteAccAllowed, differentialAccAllowed);
   }
@@ -1048,10 +996,14 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
    * @param newDifferentialAccumulator_ differential accumulator updated by lineal decay factor [N]
    * @return maxResAllowed minimum regarding maxAbsoluteOperation and maxOperationalDifference
    */
-  function _maxReserveAllowedToMint(uint256 newAbsoluteAccumulator_, int256 newDifferentialAccumulator_) internal view returns (uint256 maxResAllowed) {
+  function _maxReserveAllowedToMint(uint256 newAbsoluteAccumulator_, int256 newDifferentialAccumulator_)
+    internal
+    view
+    returns (uint256 maxResAllowed)
+  {
     // X = mint amount
     // (AA + X) - |DA + X| <= MODA && X >= 0
-    // 1) if DA + X >= 0 ---> AA + X - DA - X <= MODA ---> AA - DA <= MODA 
+    // 1) if DA + X >= 0 ---> AA + X - DA - X <= MODA ---> AA - DA <= MODA
     // 2) if DA + X < 0 ---> X <= (MODA - (AA + DA)) / 2
 
     // AA >= |DA|
@@ -1084,10 +1036,14 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
    * @param newDifferentialAccumulator_ differential accumulator updated by lineal decay factor [N]
    * @return maxResAllowed minimum regarding maxAbsoluteOperation and maxOperationalDifference
    */
-  function _maxReserveAllowedToRedeem(uint256 newAbsoluteAccumulator_, int256 newDifferentialAccumulator_) internal view returns (uint256 maxResAllowed) {
+  function _maxReserveAllowedToRedeem(uint256 newAbsoluteAccumulator_, int256 newDifferentialAccumulator_)
+    internal
+    view
+    returns (uint256 maxResAllowed)
+  {
     // X = redeem amount
     // (AA + X) - |DA - X| <= MODA && X >= 0
-    // 1) if DA - X < 0 ---> AA + X + DA - X <= MODA ---> AA + DA <= MODA 
+    // 1) if DA - X < 0 ---> AA + X + DA - X <= MODA ---> AA + DA <= MODA
     // 2) if DA - X >= 0 ---> X <= (MODA - (AA - DA)) / 2
 
     // AA >= |DA|
@@ -1140,7 +1096,7 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
   function setDecayBlockSpan(uint256 decayBlockSpan_) external onlyWhitelisted(msg.sender) {
     decayBlockSpan = decayBlockSpan_;
     // only for flux capacitor initialization
-    if(lastOperationBlockNumber == 0) {
+    if (lastOperationBlockNumber == 0) {
       lastOperationBlockNumber = block.number;
     }
   }

@@ -3,17 +3,17 @@ pragma solidity ^0.5.8;
 import "openzeppelin-eth/contracts/ownership/Ownable.sol";
 import "moc-governance/contracts/Stopper/Stoppable.sol";
 
+
 /**
   @title Stopper
-  @notice The contract in charge of handling the stoppability and maximum gas Price limit 
+  @notice The contract in charge of handling the stoppability and maximum gas Price limit
     of the contract that define this contract as its stopper.
   @dev both pausing or setting a really low maxGasPrice has the same effect on the protocol,
-    is prevents anyone from using it. And it also requires the same level of reactivity, 
-    as a sudden network gasPrice spike, would require immediate maxGasPrice adjustment to compensate, 
+    is prevents anyone from using it. And it also requires the same level of reactivity,
+    as a sudden network gasPrice spike, would require immediate maxGasPrice adjustment to compensate,
     as it would a pause. Stopper, holds owner account responsible for both this two features.
  */
 contract StopperV2 is Ownable {
-
   /**
     @notice Pause activeContract if it is stoppable
     @param activeContract Contract to be paused
@@ -54,7 +54,7 @@ contract StopperV2 is Ownable {
    * @param maxOperationalDifference_ new max operational difference allowed
    */
   function setMaxOperationalDifference(FluxControlled fluxControlledContract, uint256 maxOperationalDifference_) external onlyOwner {
-   fluxControlledContract.setMaxOperationalDifference(maxOperationalDifference_);
+    fluxControlledContract.setMaxOperationalDifference(maxOperationalDifference_);
   }
 
   /**
@@ -71,6 +71,7 @@ contract StopperV2 is Ownable {
   uint256[50] private upgradeGap;
 }
 
+
 interface GasPriceLimited {
   /**
    * @notice set new gas price limit
@@ -78,6 +79,7 @@ interface GasPriceLimited {
    */
   function setMaxGasPrice(uint256 maxGasPrice_) external;
 }
+
 
 interface FluxControlled {
   function setMaxAbsoluteOperation(uint256 maxAbsoluteOperation_) external;
