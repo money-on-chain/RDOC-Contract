@@ -44,7 +44,7 @@ describe("Feature: MoC FluxCapacitorChanger - mainnet fork", () => {
       upgradeDelegatorAddress = mocMainnetConfig.implementationAddresses.UpgradeDelegator;
       mocHelperLibAddress = mocMainnetConfig.implementationAddresses.MoCHelperLib;
       governor = Governor__factory.connect(mocMainnetConfig.implementationAddresses.Governor, signer);
-      stopper = StopperV2__factory.connect(mocMainnetConfig.governanceImplementationAddresses.Stopper, signer);
+      stopper = StopperV2__factory.connect(await moc.stopper(), signer);
       await helpers.impersonateAccount(governorOwnerAddress);
       governorOwnerSigner = await ethers.getSigner(governorOwnerAddress);
 
