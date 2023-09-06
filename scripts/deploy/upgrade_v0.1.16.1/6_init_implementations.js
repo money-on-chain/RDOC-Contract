@@ -28,11 +28,11 @@ module.exports = async callback => {
     console.log('Init MoC.Sol Implementation');
     const mocImpl = await MoC.at(config.implementationAddresses.MoC);
     await mocImpl.initialize(
-        contractInfo.connector,
-        contractInfo.governor,
-        contractInfo.stopper,
-        false,
-        "65820000"
+      contractInfo.connector,
+      contractInfo.governor,
+      contractInfo.stopper,
+      false,
+      '65820000'
     );
 
     console.log('Init MoCExchange.Sol Implementation');
@@ -44,7 +44,6 @@ module.exports = async callback => {
     await stopperV2Impl.initialize(owner);
 
     console.log('Init done!');
-
   } catch (error) {
     callback(error);
   }
