@@ -1,4 +1,3 @@
-import { Address } from "hardhat-deploy/types";
 import { ContractTransaction } from "ethers";
 import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
@@ -15,36 +14,33 @@ import {
   MoCExchange__factory,
   ReserveToken,
   ReserveToken__factory,
+  FluxCapacitorChanger__factory,
 } from "../../../typechain";
 import { pEth } from "../../helpers/utils";
-import { deployChanger } from "./deployChanger";
 const helpers = require("@nomicfoundation/hardhat-network-helpers");
 const mocMainnetConfig = require("../../../../scripts/deploy/upgrade_v0.1.16.1/deployConfig-rdocMainnet.json");
 
+let moc: MoC;
+let mocExchange: MoCExchange;
+let reserveToken: ReserveToken;
+let governor: Governor;
+let governorOwnerSigner: SignerWithAddress;
+let stopper: StopperV2;
+let multisig: SignerWithAddress;
+let rifHolder: SignerWithAddress;
+let signer: any;
+let snapshot: any;
+const governorOwnerAddress = mocMainnetConfig.governorOwnerAddress;
+const rifHolderAddress = "0xCfF3fcaeC2352C672C38d77cb1a064B7D50ce7e1";
+const maxAbsoluteOperation = mocMainnetConfig.valuesToAssign.maxAbsoluteOperation;
+
 describe("Feature: MoC FluxCapacitorChanger - mainnet fork", () => {
-  let moc: MoC;
-  let mocExchange: MoCExchange;
-  let reserveToken: ReserveToken;
-  let upgradeDelegatorAddress: Address;
-  let mocHelperLibAddress: Address;
-  let governor: Governor;
-  let governorOwnerSigner: SignerWithAddress;
-  let stopper: StopperV2;
-  let multisig: SignerWithAddress;
-  let rifHolder: SignerWithAddress;
-  let signer: any;
-  let snapshot: any;
-  const governorOwnerAddress = mocMainnetConfig.governorOwnerAddress;
-  const rifHolderAddress = "0xCfF3fcaeC2352C672C38d77cb1a064B7D50ce7e1";
-  const maxAbsoluteOperation = mocMainnetConfig.valuesToAssign.maxAbsoluteOperation;
-  describe("GIVEN a MoC protocol deployed in mainnet", () => {
+  describe("GIVEN a MoC protocol and FC changer deployed in mainnet", () => {
     before(async () => {
       snapshot = await helpers.takeSnapshot();
       signer = ethers.provider.getSigner();
       moc = MoC__factory.connect(mocMainnetConfig.proxyAddresses.MoC, signer);
       reserveToken = ReserveToken__factory.connect(await moc.reserveToken(), signer);
-      upgradeDelegatorAddress = mocMainnetConfig.implementationAddresses.UpgradeDelegator;
-      mocHelperLibAddress = mocMainnetConfig.implementationAddresses.MoCHelperLib;
       governor = Governor__factory.connect(mocMainnetConfig.implementationAddresses.Governor, signer);
       stopper = StopperV2__factory.connect(await moc.stopper(), signer);
       await helpers.impersonateAccount(governorOwnerAddress);
@@ -71,22 +67,10 @@ describe("Feature: MoC FluxCapacitorChanger - mainnet fork", () => {
     describe("AND FluxCapacitorChanger is executed", async () => {
       let changer: FluxCapacitorChanger;
       before(async () => {
-        ({ changer } = await deployChanger(
-          mocHelperLibAddress,
-          upgradeDelegatorAddress,
-          moc.address,
-          mocMainnetConfig.valuesToAssign.maxAbsoluteOperation,
-          mocMainnetConfig.valuesToAssign.maxOperationalDifference,
-          mocMainnetConfig.valuesToAssign.decayBlockSpan,
-        ));
+        // Real changer to be used on prod
+        changer = FluxCapacitorChanger__factory.connect(mocMainnetConfig.changerAddresses.FluxCapacitorChanger, signer);
         mocExchange = MoCExchange__factory.connect(await changer.mocExchangeProxy(), signer);
         await governor.connect(governorOwnerSigner).executeChange(changer.address, { gasPrice: 65820000 });
-      });
-      describe("WHEN validate addresses", function () {
-        it("THEN they are ok", async () => {
-          expect(await changer.mocProxy()).to.be.equal(moc.address);
-          expect(await changer.upgradeDelegator()).to.be.equal(upgradeDelegatorAddress);
-        });
       });
       describe("WHEN a holder tries to mint stable tokens above the max limit allowed", function () {
         it("THEN transaction reverts because max absolute operation reached", async function () {
