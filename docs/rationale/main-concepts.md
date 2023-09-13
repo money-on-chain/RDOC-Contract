@@ -4,17 +4,17 @@
 
 A bucket (MoCBucket struct) is a Tokens/RIF grouping abstraction that represents certain state and follows certain rules.
 It's identified by a name (currently `C0`).
-It has a "balance" of RIF, RDOC, and RIFPro.
+It has a "balance" of RIF, USDRIF, and RIFPro.
 Balance accounting between buckets is articulated by a series of Smart Contracts that constitute the RoC ecosystem.
 
 ## Coverage
 
-Is the ratio between the RIF locked (backing RDOCs) and the total amount of RIF, be it in a particular bucket or the whole system (usually referred as global).
-Locked RIF amount is a result of the amount of RDOCs and their price in RIF (RIF/USD rate).
+Is the ratio between the RIF locked (backing USDRIF) and the total amount of RIF, be it in a particular bucket or the whole system (usually referred as global).
+Locked RIF amount is a result of the amount of USDRIF and their price in RIF (RIF/USD rate).
 
 ## Tokens
 
-### RDOC
+### USDRIF
 
 Its value is pegged to one dollar, in the sense that the SC (using [Oracle's](main-concepts.md#oracle) rif/usd price) will always return the equivalent amount of `rif` to satisfy that convertibility. It's targeted towards users seeking to avoid crypto's market volatility.
 It's implemented as an ERC20 token, it can be traded freely, but minted/burned only by the RoC system.

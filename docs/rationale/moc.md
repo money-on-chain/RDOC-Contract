@@ -5,7 +5,7 @@
 - Inherits from: MoCEvents, MoCLibConnection, MoCBase, Stoppable
 
   MoC is the main contract of the RoC ecosystem, it's the entry point of almost every public interaction with it and it articulates the main logic and relations between the rest of the contracts.
-  It is also the _only one_ that receives RIF and holds the actual value of the system. The only methods that correspond with the actual two ways of adding "value" to the system minting RIFPro and RDOC: - `function mintRiskProVendors() public transitionState() { ... }` - `function mintStableTokenVendors() public transitionState() atLeastState(MoCState.States.AboveCobj) { ... }`
+  It is also the _only one_ that receives RIF and holds the actual value of the system. The only methods that correspond with the actual two ways of adding "value" to the system minting RIFPro and USDRIF: - `function mintRiskProVendors() public transitionState() { ... }` - `function mintStableTokenVendors() public transitionState() atLeastState(MoCState.States.AboveCobj) { ... }`
   You'll also notice that many of it's methods just "redirects" to a more specif contract, abstracting it from the `msg.sender`; for example:
 
 ```sol

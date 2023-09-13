@@ -4,7 +4,7 @@ System state is ruled by the global [Coverage](main-concepts.md#coverage) value,
 
 - Above coverage
 
-  Healthy state of the system. Every Token can be minted, and every Token (besides non-free RDOCs) can be redeemed.
+  Healthy state of the system. Every Token can be minted, and every Token (besides non-free USDRIF) can be redeemed.
 
 - Below coverage
 
@@ -17,13 +17,13 @@ System state is ruled by the global [Coverage](main-concepts.md#coverage) value,
 
 - Liquidated
 
-  If the former measures fail and the coverage falls below last threshold (currently 1.04) and liquidation is enabled, the contracts are locked allowing _only_ the redemption of remaining RDOCs at the last available price.
-  Although RDOC Tokens can still be transferred freely, RIFPro Token on the other hand is permanently paused, as it has lost all of its value.
+  If the former measures fail and the coverage falls below last threshold (currently 1.04) and liquidation is enabled, the contracts are locked allowing _only_ the redemption of remaining USDRIF at the last available price.
+  Although USDRIF Tokens can still be transferred freely, RIFPro Token on the other hand is permanently paused, as it has lost all of its value.
   This state is irreversible, once the liquidation state is achieved on the contract, there is no coming back even if the price and/or coverage recovers.
 
 ## Protected mode
 
-Additionally, the system can enter a protected mode when coverage falls below a certain threshold (currently 1.5), in which case neither RIFPros can no longer be minted nor free RDOCs can be redeemed. In case the price and/or coverage recovers, the system can go back to another state.
+Additionally, the system can enter a protected mode when coverage falls below a certain threshold (currently 1.5), in which case neither RIFPros can no longer be minted nor free USDRIF can be redeemed. In case the price and/or coverage recovers, the system can go back to another state.
 
 To know if the contract is in protected mode you can ask the **MocState** for the **protected** and the **globalCoverage()** values, if coverage is less than the protected threshold, the contract is in protected mode.
 

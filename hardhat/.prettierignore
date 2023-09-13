@@ -13,6 +13,7 @@ docs/
 contracts/crytic-export/
 .gitlab/
 .vscode/
+.openzeppelin/
 export/
 
 # files

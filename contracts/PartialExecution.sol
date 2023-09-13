@@ -169,7 +169,7 @@ contract PartialExecution is PartialExecutionData {
   }
 
   /**
-   @dev Creates a task
+   @dev Executes a task
    @param taskId Id of the task
    @param steps Step count to execute
    @return The amount of steps consumed in the execution

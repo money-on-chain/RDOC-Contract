@@ -29,7 +29,7 @@ return
 ```
 Using network 'rdocMainnet'.
 
-Configuration path:  /home/martin/Proyectos/RDOC_Contract/scripts/deploy/upgrade_v0.1.12/deployConfig-rdocMainnet.json
+Configuration path:  RDOC_Contract/scripts/deploy/upgrade_v0.1.12/deployConfig-rdocMainnet.json
 BatchChanger Deploy at: 0xC1f1021360E8a04ef63575203964D6fb8815108A
 Length Data:  24
 Length Target:  24

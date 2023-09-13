@@ -16,6 +16,32 @@ import "hardhat-storage-layout";
 
 dotenvConfig({ path: resolve(__dirname, "./.env") });
 
+type DeployParameters = {
+  stableTokenV2Params: {
+    name: string;
+    symbol: string;
+  };
+  mocAddresses: {
+    mocExchange: string;
+    governor: string;
+    stableTokenV1: string;
+  };
+  // gas limit applied for each tx during deployment
+  // Hardhat gas limit config cannot be used because we are using ethers.js library. https://github.com/NomicFoundation/hardhat/pull/2406
+  gasLimit: number;
+};
+declare module "hardhat/types/config" {
+  export interface HardhatNetworkUserConfig {
+    deployParameters: DeployParameters;
+  }
+  export interface HardhatNetworkConfig {
+    deployParameters: DeployParameters;
+  }
+  export interface HttpNetworkConfig {
+    deployParameters: DeployParameters;
+  }
+}
+
 // Ensure that we have all the environment variables we need.
 let mnemonic: string;
 if (!process.env.MNEMONIC) {
@@ -63,10 +89,36 @@ const config: HardhatUserConfig = {
         mnemonic,
         accountsBalance: "100000000000000000000000000000000000",
       },
+      deployParameters: {
+        stableTokenV2Params: {
+          name: "Local US Dollar",
+          symbol: "dUSDRIF",
+        },
+        mocAddresses: {
+          // random addresses
+          mocExchange: "0xf984d6f2afcf057984034ac06f2a2182cb62ce5c",
+          governor: "0x94b25b38DB7cF2138E8327Fc54543a117fC20E72",
+          stableTokenV1: "0xb4776c2bd17df529b98ea31661d9d852eabdd217",
+        },
+        gasLimit: 6800000,
+      },
       tags: ["local"],
     },
     development: {
       url: "http://127.0.0.1:8545",
+      deployParameters: {
+        stableTokenV2Params: {
+          name: "Dev US Dollar",
+          symbol: "dUSDRIF",
+        },
+        mocAddresses: {
+          // addresses deployed locally
+          mocExchange: "0x2984673887d3966d8cb97A00577fe796d8DB3D02",
+          governor: "0x6A5a8B49eC1B2647d1E4b342408f5216773Cb39b",
+          stableTokenV1: "0x95a51870C1F502baFdFC25c5a1224a2322ea968C",
+        },
+        gasLimit: 6800000,
+      },
       tags: ["dev"],
     },
     devTestnet: {
@@ -75,6 +127,18 @@ const config: HardhatUserConfig = {
       },
       chainId: 31,
       url: "https://public-node.testnet.rsk.co",
+      deployParameters: {
+        stableTokenV2Params: {
+          name: "Dev US Dollar",
+          symbol: "dUSDRIF",
+        },
+        mocAddresses: {
+          mocExchange: "0xdeb20E752Ae0c8060C2B44Ee00c9dd70f433f7A1",
+          governor: "0x9Ec59F3c1DA316F9222506bb35D06C3fa9f39fa6",
+          stableTokenV1: "0x2347b03b8bC723A3d66F49a91b3aDd79b1DefeB4",
+        },
+        gasLimit: 6800000,
+      },
       tags: ["testnet"],
     },
     rdocTestnetAlpha: {
@@ -83,6 +147,18 @@ const config: HardhatUserConfig = {
       },
       chainId: 31,
       url: "https://public-node.testnet.rsk.co",
+      deployParameters: {
+        stableTokenV2Params: {
+          name: "Alpha US Dollar",
+          symbol: "tUSDRIF",
+        },
+        mocAddresses: {
+          mocExchange: "",
+          governor: "",
+          stableTokenV1: "",
+        },
+        gasLimit: 6800000,
+      },
       tags: ["testnet"],
     },
     rdocTestnet: {
@@ -91,6 +167,18 @@ const config: HardhatUserConfig = {
       },
       chainId: 31,
       url: "https://public-node.testnet.rsk.co",
+      deployParameters: {
+        stableTokenV2Params: {
+          name: "Test US Dollar",
+          symbol: "tUSDRIF",
+        },
+        mocAddresses: {
+          mocExchange: "",
+          governor: "",
+          stableTokenV1: "",
+        },
+        gasLimit: 6800000,
+      },
       tags: ["testnet"],
     },
     rdocMainnet: {
@@ -99,6 +187,18 @@ const config: HardhatUserConfig = {
       },
       chainId: 30,
       url: "https://public-node.rsk.co",
+      deployParameters: {
+        stableTokenV2Params: {
+          name: "RIF US Dollar",
+          symbol: "USDRIF",
+        },
+        mocAddresses: {
+          mocExchange: "",
+          governor: "",
+          stableTokenV1: "",
+        },
+        gasLimit: 6800000,
+      },
       tags: ["mainnet"],
     },
   },

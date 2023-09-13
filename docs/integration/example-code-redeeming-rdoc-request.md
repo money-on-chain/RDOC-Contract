@@ -1,6 +1,6 @@
-# Example code redeeming RDOC Request
+# Example code redeeming USDRIF Request
 
-In the following example we will show how to invoke redeemStableTokenRequest using RIF On Chain contract. This method can recieve any amount of RDOC to redeem, but this will be processed on the next settlement. Check the [RDOC redeemption section](redeeming-rdocs.md) for more details.
+In the following example we will show how to invoke redeemStableTokenRequest using RIF On Chain contract. This method can receive any amount of USDRIF to redeem, but this will be processed on the next settlement. Check the [USDRIF redeemption section](redeeming-rdocs.md) for more details.
 
 We will use **truffle** and **testnet** network.
 You can find code examples into _/examples_ dir.

@@ -42,7 +42,7 @@ contract MoCEMACalculator is Governed {
   }
 
   /**
-   * @param blockSpan Defines how many blocks should pass between BMA calculations
+   * @param blockSpan Defines how many blocks should pass between EMA calculations
    **/
   function setEmaCalculationBlockSpan(uint256 blockSpan) public onlyAuthorizedChanger() {
     emaCalculationBlockSpan = blockSpan;

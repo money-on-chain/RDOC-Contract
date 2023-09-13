@@ -1,7 +1,7 @@
 import { time } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { GovernorMock, MoC, MoCExchange, StopperV2 } from "../../typechain";
-import { fixtureDeployed } from "../fixture";
+import { fixtureDeployed } from "./fixture";
 describe("Feature: Flux Capacitor setters", () => {
   let moc: MoC;
   let mocExchange: MoCExchange;

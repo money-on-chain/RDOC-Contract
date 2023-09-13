@@ -45,9 +45,9 @@
 * [Getting RIFPros](integration/getting-rifpros.md)
     * [Minting RIFPros](integration/minting-rifpros.md)
     * [Redeeming RIFPros](integration/redeeming-rifpros.md)
-* [Getting RDOCs](integration/getting-rdocs.md)
-    * [Minting RDOCs](integration/minting-rdocs.md)
-    * [Redeeming RDOCs](integration/redeeming-rdocs.md)
+* [Getting USDRIF](integration/getting-rdocs.md)
+    * [Minting USDRIF](integration/minting-rdocs.md)
+    * [Redeeming USDRIF](integration/redeeming-rdocs.md)
         * [On Settlement: redeemStableTokenRequest](integration/redeemStableTokenRequest.md)
         * [On Settlement: alterRedeemRequestAmount](integration/alterRedeemRequestAmount.md)
         * [Outside Settlement: redeemFreeStableToken](integration/redeemFreeStableTokenVendors.md)
@@ -65,10 +65,10 @@
     * [Example code minting RIFPros without Truffle](integration/example-code-minting-rifpros-without-truffle.md)
     * [Example code redeeming RIFPros](integration/example-code-redeeming-rifpros.md)
     * [Example code redeeming RIFPros without Truffle](integration/example-code-redeeming-rifpros-without-truffle.md)
-    * [Example code minting RDOC](integration/example-code-minting-rdoc.md)
-    * [Example code redeeming free RDOC](integration/example-code-redeeming-free-rdoc.md)
-    * [Example code redeeming RDOC Request](integration/example-code-redeeming-rdoc-request.md)
-    * [Example code redeeming all RDOC](integration/example-code-redeeming-all-rdoc.md)
+    * [Example code minting USDRIF](integration/example-code-minting-rdoc.md)
+    * [Example code redeeming free USDRIF](integration/example-code-redeeming-free-rdoc.md)
+    * [Example code redeeming USDRIF Request](integration/example-code-redeeming-rdoc-request.md)
+    * [Example code redeeming all USDRIF](integration/example-code-redeeming-all-rdoc.md)
 
 
 ## Smart contracts

@@ -96,6 +96,7 @@ const shouldExecuteChanges = currentNetwork =>
   currentNetwork === 'development' ||
   currentNetwork === 'coverage' ||
   currentNetwork === 'rskRegtestLocal' ||
+  currentNetwork === 'devTestnet' ||
   currentNetwork === 'prueba';
 
 module.exports = {

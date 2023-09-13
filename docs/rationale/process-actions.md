@@ -4,7 +4,7 @@
 
 If the RIF/USD price drops drastically, an none of the incentive mechanisms along the coverage dropping prevents it to cross the liquidation threshold (currently: coverage < 1.04) the system will enter the liquidation state and the liquidation function will be available to be executed.
 Although there is an specific method to evaluate liquidation (`evalLiquidation`), to guarantee this process is executed, the same logic is evaluated and, if needed, executed in every MoC state changing method. For example, mintStableTokenVendors, redeemRiskProVendors, etc or even settlement itself; every that has the `transitionState` modifier actually.
-Liquidation process will invalidate the RIFPro Token (it cannot be transfer any more) as a precaution measure as it has no more RIF backing it, it has no value. Users can redeem all of their RDOCs at once, valued at the liquidation price.
+Liquidation process will invalidate the RIFPro Token (it cannot be transfer any more) as a precaution measure as it has no more RIF backing it, it has no value. Users can redeem all of their USDRIF at once, valued at the liquidation price.
 
 ## Commission splitting
 

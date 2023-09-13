@@ -1,9 +1,9 @@
 import { time, mine } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { MoC, MoCExchange, MoCInrate, ReserveToken } from "../../typechain";
-import { fixtureDeployed } from "../fixture";
 import { assertPrec } from "../helpers/assertHelper";
 import { CONSTANTS, pEth } from "../helpers/utils";
+import { fixtureDeployed } from "./fixture";
 describe("Feature: Flux Capacitor functionality", () => {
   let moc: MoC;
   let mocExchange: MoCExchange;

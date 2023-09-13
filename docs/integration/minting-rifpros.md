@@ -47,7 +47,7 @@ To know if this is the case you can ask to **MoC** if it's **paused()**.
 
 #### The MoC contract is in protected mode:
 
-In case global coverage falls below the protected threshold, the contract will enter the protected mode. If this state occurs, no more RDOCs will be available for minting. You can find more information about this mode [here](../rationale/system-states.md#protected-mode).
+In case global coverage falls below the protected threshold, the contract will enter the protected mode. If this state occurs, no more USDRIF will be available for minting. You can find more information about this mode [here](../rationale/system-states.md#protected-mode).
 
 #### You allowed too few funds:
 
