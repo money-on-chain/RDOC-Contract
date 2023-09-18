@@ -2,7 +2,7 @@ pragma solidity ^0.5.8;
 
 import "moc-governance/contracts/Governance/Governed.sol";
 import "moc-governance/contracts/Governance/IGovernor.sol";
-import "../interface/IMoC.sol";
+import "../interfaces/IMoC.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "openzeppelin-eth/contracts/utils/ReentrancyGuard.sol";

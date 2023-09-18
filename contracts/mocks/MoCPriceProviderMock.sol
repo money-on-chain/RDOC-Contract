@@ -1,7 +1,7 @@
 pragma solidity ^0.5.8;
 
-import "../interface/PriceFeed.sol";
-import "../interface/PriceProvider.sol";
+import "../interfaces/PriceFeed.sol";
+import "../interfaces/PriceProvider.sol";
 
 contract MoCPriceProviderMock is PriceFeed, PriceProvider {
   bytes32 mocPrice;

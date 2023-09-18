@@ -28,7 +28,8 @@ const assertAllMintReedemMocHelperPausedFunctions = (userAccount, vendorAccount)
 
 const assertAllMocPausedFunctions = (owner, userAccount, vendorAccount) => {
   const testFunctions = [
-    { name: 'redeemRiskProxVendors', args: [BUCKET_X2, 3, vendorAccount] },
+    // leverage tokens are disabled
+    // { name: 'redeemRiskProxVendors', args: [BUCKET_X2, 3, vendorAccount] },
     { name: 'alterRedeemRequestAmount', args: [false, 100] },
     { name: 'runSettlement', args: [1] },
     { name: 'dailyInratePayment', args: [{ from: owner }] },

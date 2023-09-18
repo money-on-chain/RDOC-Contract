@@ -458,8 +458,8 @@ For more technical information you can see our [ABI documentation](../abis/abi-d
 - _settlementDays_: Amount of days in between settlement to allowed executions
 - _gas_: Gas to use on MoC.sol contract deploy.
 - _startStoppable_: If set to true, the MoC contract can be stopped after the deployment. If set to false, before pausing the contract you should make it stoppable with governance(this together with the blockage of the governance system can result in a blockage of the pausing system too).
-- _oracle_: Moc Price Provider compatible address (see `contracts/interface/PriceProvider.sol`). You can deploy this contract using the `oracle` project or (in development) the mock: `contracts/mocks/PriceProviderMock.sol` (which is deployed on development migration by default).
-- _mocOracle_: MoCToken Price Provider compatible address (see `contracts/interface/PriceProvider.sol`). You can deploy this contract in development using the mock: `contracts/mocks/MoCPriceProviderMock.sol` (which is deployed on development migration by default).
+- _oracle_: Moc Price Provider compatible address (see `contracts/interfaces/PriceProvider.sol`). You can deploy this contract using the `oracle` project or (in development) the mock: `contracts/mocks/PriceProviderMock.sol` (which is deployed on development migration by default).
+- _mocOracle_: MoCToken Price Provider compatible address (see `contracts/interfaces/PriceProvider.sol`). You can deploy this contract in development using the mock: `contracts/mocks/MoCPriceProviderMock.sol` (which is deployed on development migration by default).
 - _governor_: Address of the Governor contract
 - _stopper_: Address of the Stopper contract
 - _proxyAdmin_: Address of the Proxy Admin contract
