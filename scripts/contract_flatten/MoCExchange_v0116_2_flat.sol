@@ -3706,4 +3706,3 @@ contract MoCExchange_v0116_2 is MoCExchange {
     stableToken.mint(bridgeAddress_, totalSupply);
   }
 }
-
