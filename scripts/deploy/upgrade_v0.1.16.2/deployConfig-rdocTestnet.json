@@ -16,17 +16,22 @@
     "UpgradeDelegator": "0xCDAbFbF334A5F6BCe900D2f73470D1e6722365d8",
     "Governor": "0x7b716178771057195bB511f0B1F7198EEE62Bc22",
     "MoCHelperLib": "0x8423251a8F7876C013bde454123e19acC8158f5B",
-    "StableTokenV2": "0x8dbf326e12a9fF37ED6DDF75adA548C2640A6482",
-    "TokenMigrator": "0x31a3bE652Cf737FCC48bc1807c348fCFC8723Ba8",
-    "MoC_v0116": "0x9a5d34CA3B6A0aD80B7BC9E52ab108a11a1c583F",
-    "MoCConnector_v0116": "0xF048f87c2A68CdFAc2bb4e5E0069301bF4975A88",
-    "MoCExchange_v0116": "0xD5A9de4C90Ebb9F6b8839b6FE16eDeA8b2752860",
-    "MoCState_v0116": "0x1cE7F2d6DDcAC14C6e0Be9868cbbCf99DECBfbbE",
-    "MoCSettlement_v0116": "0xF4a21F148Bbfc44E1FB8A3398025fe9D5B515115"
+    "StableTokenV2": "0xeBCBd50Ea8C4434d57B076c327CEa480b2B1968D",
+    "TokenMigrator": "0x4362Df81aa768AC19F6FDdf010bBe23dF8E2bB27",
+    "MoC_v0116": "",
+    "MoCConnector_v0116": "",
+    "MoCExchange_v0116": "",
+    "MoCState_v0116": "",
+    "MoCSettlement_v0116": "",
+    "MoC_v0116_2": "0xC3E553d38A7BAa8e218D4cf2A5c64Ee0b4e96830",
+    "MoCConnector_v0116_2": "0xe4FceAe19678feD61d15d143b77DFc31b9771bfe",
+    "MoCExchange_v0116_2": "0xB883052507EEb1A89Bf3512fb4a7E9885F7B2607",
+    "MoCState_v0116_2": "0x7f07B3a8A8bd9e40BbB3ee77D589C6fa1B91f7F4",
+    "MoCSettlement_v0116_2": "0x2555A6e71C42EeE28aE82e1148Ef98Bc147EfCce"
   },
   "valuesToAssign": {},
   "changerAddresses": {
-    "StableTokenMigrationChanger": "0x7869a67E089b446AD8ea32307e9652952AB5df09"
+    "StableTokenMigrationChanger": "0xe8767ACF1A1D447b3535b61feE29e190C92f3603"
   },
   "governorOwnerAddress": "0x165138c5a2888fB5230Ebf5ec277F0d2E5611d03"
 }
