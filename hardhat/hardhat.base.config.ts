@@ -142,7 +142,9 @@ const config: HardhatUserConfig = {
       tags: ["testnet"],
     },
     rdocTestnetAlpha: {
-      accounts: [`0x${process.env.MNEMONIC}`],
+      accounts: {
+        mnemonic,
+      },
       chainId: 31,
       url: "https://public-node.testnet.rsk.co",
       deployParameters: {
@@ -160,7 +162,9 @@ const config: HardhatUserConfig = {
       tags: ["testnet"],
     },
     rdocTestnet: {
-      accounts: [`0x${process.env.MNEMONIC}`],
+      accounts: {
+        mnemonic,
+      },
       chainId: 31,
       url: "https://public-node.testnet.rsk.co",
       deployParameters: {
@@ -178,7 +182,9 @@ const config: HardhatUserConfig = {
       tags: ["testnet"],
     },
     rdocMainnet: {
-      accounts: [`0x${process.env.MNEMONIC}`],
+      accounts: {
+        mnemonic,
+      },
       chainId: 30,
       url: "https://public-node.rsk.co",
       deployParameters: {
