@@ -142,9 +142,7 @@ const config: HardhatUserConfig = {
       tags: ["testnet"],
     },
     rdocTestnetAlpha: {
-      accounts: {
-        mnemonic,
-      },
+      accounts: [`0x${process.env.MNEMONIC}`],
       chainId: 31,
       url: "https://public-node.testnet.rsk.co",
       deployParameters: {
@@ -153,18 +151,16 @@ const config: HardhatUserConfig = {
           symbol: "tUSDRIF",
         },
         mocAddresses: {
-          mocExchange: "",
-          governor: "",
-          stableTokenV1: "",
+          mocExchange: "0x9608F72B879CfbF6c6B9eD4EE768d339140B8074",
+          governor: "0x7b716178771057195bB511f0B1F7198EEE62Bc22",
+          stableTokenV1: "0x7fb303D9806A72563C46aad8d874b301419c374b",
         },
         gasLimit: 6800000,
       },
       tags: ["testnet"],
     },
     rdocTestnet: {
-      accounts: {
-        mnemonic,
-      },
+      accounts: [`0x${process.env.MNEMONIC}`],
       chainId: 31,
       url: "https://public-node.testnet.rsk.co",
       deployParameters: {
@@ -173,18 +169,16 @@ const config: HardhatUserConfig = {
           symbol: "tUSDRIF",
         },
         mocAddresses: {
-          mocExchange: "",
-          governor: "",
-          stableTokenV1: "",
+          mocExchange: "0x7d5804E33B015b43159e61188526C93cfdA746f6",
+          governor: "0x7b716178771057195bB511f0B1F7198EEE62Bc22",
+          stableTokenV1: "0xC3De9F38581f83e281f260d0DdbaAc0e102ff9F8",
         },
         gasLimit: 6800000,
       },
       tags: ["testnet"],
     },
     rdocMainnet: {
-      accounts: {
-        mnemonic,
-      },
+      accounts: [`0x${process.env.MNEMONIC}`],
       chainId: 30,
       url: "https://public-node.rsk.co",
       deployParameters: {
@@ -193,9 +187,9 @@ const config: HardhatUserConfig = {
           symbol: "USDRIF",
         },
         mocAddresses: {
-          mocExchange: "",
-          governor: "",
-          stableTokenV1: "",
+          mocExchange: "0x9497d2AEcd0757Dd4fcb4d5F2131293570FaD305",
+          governor: "0x3b8853DF65AfBd94853E6D77ee0Ab5590F41bB08",
+          stableTokenV1: "0x2d919F19D4892381D58edeBeca66D5642Cef1a1f",
         },
         gasLimit: 6800000,
       },
@@ -228,6 +222,7 @@ const config: HardhatUserConfig = {
             enabled: true,
             runs: 200,
           },
+          evmVersion: "london",
           outputSelection: {
             "*": {
               "*": ["storageLayout"],
