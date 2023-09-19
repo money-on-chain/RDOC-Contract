@@ -1,0 +1,26 @@
+{
+  "proxyAddresses": {
+    "MoC": "0x7e2F245F7dc8e78576ECB13AEFc0a101E9BE1AD3",
+    "MoCExchange": "0x7d5804E33B015b43159e61188526C93cfdA746f6"
+  },
+  "implementationAddresses": {
+    "MoC": "",
+    "MoCHelperLib": "0x8423251a8F7876C013bde454123e19acC8158f5B",
+    "UpgradeDelegator": "0xCDAbFbF334A5F6BCe900D2f73470D1e6722365d8",
+    "Governor": "0x7b716178771057195bB511f0B1F7198EEE62Bc22",
+    "MoCExchange": ""
+  },
+  "governanceImplementationAddresses": {
+    "UpgradeDelegator": "0xCDAbFbF334A5F6BCe900D2f73470D1e6722365d8",
+    "Stopper": ""
+  },
+  "valuesToAssign": {
+    "maxAbsoluteOperation": 1000000,
+    "maxOperationalDifference": 200000,
+    "decayBlockSpan": 720
+  },
+  "changerAddresses": {
+    "FluxCapacitorChanger": ""
+  },
+  "governorOwnerAddress": "0x7D124cC0f59aDA5793AD8edA9eD1836cB7e797a3"
+}
