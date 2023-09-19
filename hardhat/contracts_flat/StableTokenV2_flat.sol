@@ -101,8 +101,13 @@ interface IERC20Upgradeable {
      *
      * Emits a {Transfer} event.
      */
-    function transferFrom(address from, address to, uint256 amount) external returns (bool);
+    function transferFrom(
+        address from,
+        address to,
+        uint256 amount
+    ) external returns (bool);
 }
+
 
 // File contracts/interfaces/IMocRC20.sol
 
@@ -126,6 +131,7 @@ interface IMocRC20 is IERC20Upgradeable {
     function burn(address to, uint256 amount) external;
 }
 
+
 // File contracts/interfaces/IChangeContract.sol
 
 pragma solidity 0.8.16;
@@ -145,6 +151,7 @@ interface IChangeContract {
    */
     function execute() external;
 }
+
 
 // File contracts/interfaces/IGovernor.sol
 
@@ -173,6 +180,7 @@ interface IGovernor {
    */
     function isAuthorizedChanger(address changer_) external view returns (bool);
 }
+
 
 // File @openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol@v4.8.0
 
@@ -237,7 +245,7 @@ library AddressUpgradeable {
     function sendValue(address payable recipient, uint256 amount) internal {
         require(address(this).balance >= amount, "Address: insufficient balance");
 
-        (bool success, ) = recipient.call{ value: amount }("");
+        (bool success, ) = recipient.call{value: amount}("");
         require(success, "Address: unable to send value, recipient may have reverted");
     }
 
@@ -288,7 +296,11 @@ library AddressUpgradeable {
      *
      * _Available since v3.1._
      */
-    function functionCallWithValue(address target, bytes memory data, uint256 value) internal returns (bytes memory) {
+    function functionCallWithValue(
+        address target,
+        bytes memory data,
+        uint256 value
+    ) internal returns (bytes memory) {
         return functionCallWithValue(target, data, value, "Address: low-level call with value failed");
     }
 
@@ -305,7 +317,7 @@ library AddressUpgradeable {
         string memory errorMessage
     ) internal returns (bytes memory) {
         require(address(this).balance >= value, "Address: insufficient balance for call");
-        (bool success, bytes memory returndata) = target.call{ value: value }(data);
+        (bool success, bytes memory returndata) = target.call{value: value}(data);
         return verifyCallResultFromTarget(target, success, returndata, errorMessage);
     }
 
@@ -391,6 +403,7 @@ library AddressUpgradeable {
     }
 }
 
+
 // File @openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol@v4.8.0
 
 // OpenZeppelin Contracts (last updated v4.8.0) (proxy/utils/Initializable.sol)
@@ -475,8 +488,7 @@ abstract contract Initializable {
     modifier initializer() {
         bool isTopLevelCall = !_initializing;
         require(
-            (isTopLevelCall && _initialized < 1) ||
-                (!AddressUpgradeable.isContract(address(this)) && _initialized == 1),
+            (isTopLevelCall && _initialized < 1) || (!AddressUpgradeable.isContract(address(this)) && _initialized == 1),
             "Initializable: contract is already initialized"
         );
         _initialized = 1;
@@ -557,9 +569,11 @@ abstract contract Initializable {
     }
 }
 
+
 // File contracts/governance/Governed.sol
 
 pragma solidity 0.8.16;
+
 
 /**
   @title Governed
@@ -622,6 +636,7 @@ abstract contract Governed is Initializable {
      */
     uint256[50] private __gap;
 }
+
 
 // File @openzeppelin/contracts-upgradeable/access/IAccessControlUpgradeable.sol@v4.8.0
 
@@ -713,6 +728,7 @@ interface IAccessControlUpgradeable {
     function renounceRole(bytes32 role, address account) external;
 }
 
+
 // File @openzeppelin/contracts-upgradeable/access/IAccessControlEnumerableUpgradeable.sol@v4.8.0
 
 // OpenZeppelin Contracts v4.4.1 (access/IAccessControlEnumerable.sol)
@@ -743,6 +759,7 @@ interface IAccessControlEnumerableUpgradeable is IAccessControlUpgradeable {
      */
     function getRoleMemberCount(bytes32 role) external view returns (uint256);
 }
+
 
 // File @openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol@v4.8.0
 
@@ -1124,6 +1141,7 @@ library EnumerableSetUpgradeable {
     }
 }
 
+
 // File @openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol@v4.8.0
 
 // OpenZeppelin Contracts v4.4.1 (utils/Context.sol)
@@ -1141,10 +1159,11 @@ pragma solidity ^0.8.0;
  * This contract is only required for intermediate, library-like contracts.
  */
 abstract contract ContextUpgradeable is Initializable {
-    function __Context_init() internal onlyInitializing {}
+    function __Context_init() internal onlyInitializing {
+    }
 
-    function __Context_init_unchained() internal onlyInitializing {}
-
+    function __Context_init_unchained() internal onlyInitializing {
+    }
     function _msgSender() internal view virtual returns (address) {
         return msg.sender;
     }
@@ -1160,6 +1179,7 @@ abstract contract ContextUpgradeable is Initializable {
      */
     uint256[50] private __gap;
 }
+
 
 // File @openzeppelin/contracts-upgradeable/utils/introspection/IERC165Upgradeable.sol@v4.8.0
 
