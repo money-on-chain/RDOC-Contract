@@ -142,6 +142,7 @@ const config: HardhatUserConfig = {
       tags: ["testnet"],
     },
     rdocTestnetAlpha: {
+      // accounts: [`0x${process.env.MNEMONIC}`],
       accounts: {
         mnemonic,
       },
@@ -162,6 +163,7 @@ const config: HardhatUserConfig = {
       tags: ["testnet"],
     },
     rdocTestnet: {
+      // accounts: [`0x${process.env.MNEMONIC}`],
       accounts: {
         mnemonic,
       },
@@ -182,6 +184,7 @@ const config: HardhatUserConfig = {
       tags: ["testnet"],
     },
     rdocMainnet: {
+      // accounts: [`0x${process.env.MNEMONIC}`],
       accounts: {
         mnemonic,
       },
