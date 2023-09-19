@@ -83,7 +83,7 @@ const config: HardhatUserConfig = {
     hardhat: {
       forking: {
         url: "https://public-node.rsk.co",
-        blockNumber: 5601500,
+        blockNumber: 5650800,
       },
       accounts: {
         mnemonic,
