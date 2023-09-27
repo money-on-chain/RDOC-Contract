@@ -249,7 +249,7 @@ FeedFactory:    0x54878866F5324B56AEE9B6619a1e1A213B2fCC30
 
 MoCMedianizer is our oracle contract write down this address: 0x504EfCadFB020d6bBaeC8a5c5BB21453719d0E00
 
-### Deploy RDOC Main Contract
+### Deploy Main Stable Token Contract
 
 Finally deploy main contract
 
@@ -345,7 +345,7 @@ Give us..., write down because adressess of the contracts
 
 ## Price Feeder
 
-To run your own price feeder on RDOC. Take a look on repository (page)[https://github.com/money-on-chain/price-feeder/tree/develop]
+To run your own price feeder on USDRIF. Take a look on repository (page)[https://github.com/money-on-chain/price-feeder/tree/develop]
 
 Clone price feeder repository
 
@@ -384,7 +384,7 @@ Then run
 python price_feeder.py --config=config_rdoc.json --network=local
 ```
 
-### Pricefeeder Deployment Tutorial using Docker: example RDOC Testnet
+### Pricefeeder Deployment Tutorial using Docker: example USDRIF Testnet
 
 I'm going to use docker method.
 
@@ -458,8 +458,8 @@ For more technical information you can see our [ABI documentation](../abis/abi-d
 - _settlementDays_: Amount of days in between settlement to allowed executions
 - _gas_: Gas to use on MoC.sol contract deploy.
 - _startStoppable_: If set to true, the MoC contract can be stopped after the deployment. If set to false, before pausing the contract you should make it stoppable with governance(this together with the blockage of the governance system can result in a blockage of the pausing system too).
-- _oracle_: Moc Price Provider compatible address (see `contracts/interface/PriceProvider.sol`). You can deploy this contract using the `oracle` project or (in development) the mock: `contracts/mocks/PriceProviderMock.sol` (which is deployed on development migration by default).
-- _mocOracle_: MoCToken Price Provider compatible address (see `contracts/interface/PriceProvider.sol`). You can deploy this contract in development using the mock: `contracts/mocks/MoCPriceProviderMock.sol` (which is deployed on development migration by default).
+- _oracle_: Moc Price Provider compatible address (see `contracts/interfaces/PriceProvider.sol`). You can deploy this contract using the `oracle` project or (in development) the mock: `contracts/mocks/PriceProviderMock.sol` (which is deployed on development migration by default).
+- _mocOracle_: MoCToken Price Provider compatible address (see `contracts/interfaces/PriceProvider.sol`). You can deploy this contract in development using the mock: `contracts/mocks/MoCPriceProviderMock.sol` (which is deployed on development migration by default).
 - _governor_: Address of the Governor contract
 - _stopper_: Address of the Stopper contract
 - _proxyAdmin_: Address of the Proxy Admin contract

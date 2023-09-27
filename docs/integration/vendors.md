@@ -8,9 +8,9 @@ Please contact the [Money on Chain team](https://moneyonchain.com/) if you wish 
 
 ## Staking
 
-Upon registration, vendors must add stake using the function `addStake(uint256 staking)` defined in the [MoCVendors contract ABI interface](../abis/MoCVendors.md#addstake). This allows the vendor to receive the profits in MoC token when an user perform a mint/redeem operation through vendor's integration.
+Upon registration, vendors must add stake using the function `addStake(uint256 staking)` defined in the [MoCVendors contract ABI interfaces](../abis/MoCVendors.md#addstake). This allows the vendor to receive the profits in MoC token when an user perform a mint/redeem operation through vendor's integration.
 
-A vendor can change the amount of stake in the system using the function `removeStake(uint256 staking)` defined in the [MoCVendors contract ABI interface](../abis/MoCVendors.md#removestake).
+A vendor can change the amount of stake in the system using the function `removeStake(uint256 staking)` defined in the [MoCVendors contract ABI interfaces](../abis/MoCVendors.md#removestake).
 
 ## Unregistration
 

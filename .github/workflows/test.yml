@@ -6,6 +6,10 @@ on:
     branches:
       - master
 
+env:
+  INFURA_API_KEY: "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"
+  MNEMONIC: "lab direct float merit wall huge wheat loyal maple cup battle butter"
+
 jobs:
   build:
     name: Test contracts
@@ -28,3 +32,22 @@ jobs:
       - run: npm run solium
       - run: npm run eslint
       - run: npm test
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16.15.0'
+      - name: Setup Hardhat
+        working-directory: hardhat
+        run: npm ci
+      - name: Compile Hardhat Legacy
+        working-directory: hardhat
+        run: npm run compile-legacy
+      - name: Compile Hardhat
+        working-directory: hardhat
+        run: npm run compile-hh
+      - name: Run Hardhat linters
+        working-directory: hardhat
+        run: npm run lint
+      - name: Run Hardhat tests
+        working-directory: hardhat
+        run: npm run test

@@ -5,11 +5,11 @@ import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "moc-governance/contracts/Governance/Governed.sol";
 import "./MoCLibConnection.sol";
 import "./base/MoCBase.sol";
-import "./interface/IMoC.sol";
+import "./interfaces/IMoC.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
-import "./interface/IMoCExchange.sol";
-import "./interface/IMoCState.sol";
-import "./interface/IMoCVendors.sol";
+import "./interfaces/IMoCExchange.sol";
+import "./interfaces/IMoCState.sol";
+import "./interfaces/IMoCVendors.sol";
 
 contract MoCVendorsEvents {
   event VendorRegistered(
@@ -128,7 +128,7 @@ contract MoCVendors is MoCVendorsEvents, MoCBase, MoCLibConnection, Governed, IM
   /**
     @dev Allows to unregister a vendor
     @param account Vendor address
-    @return false if vendor was unregistered successfully; otherwise false
+    @return false if vendor was unregistered successfully; otherwise true
   */
   function unregisterVendor(address account) public onlyVendorGuardian() returns (bool isActive) {
     uint8 i = 0;

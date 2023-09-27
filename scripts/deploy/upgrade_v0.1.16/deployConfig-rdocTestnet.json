@@ -1,0 +1,8 @@
+{
+  "proxyAddresses": {
+    "MoC": "0x7e2F245F7dc8e78576ECB13AEFc0a101E9BE1AD3"
+  },
+  "implementationAddresses": {
+    "MoC": "0x9481B8895D98ec6f639984Ec06326Daf0bB09faA"
+  }
+}

@@ -21,7 +21,7 @@ const MoCConnector = artifacts.require('./contracts/base/MoCConnector.sol');
 const Governor = artifacts.require('moc-governance/contracts/Governance/Governor.sol');
 const ProxyAdmin = artifacts.require('ProxyAdmin');
 const UpgradeDelegator = artifacts.require('UpgradeDelegator');
-const Stopper = artifacts.require('moc-governance/contracts/Stopper/Stopper.sol');
+const Stopper = artifacts.require('./contracts/governance/StopperV2.sol');
 const MocStateChanger = artifacts.require('./contracts/MocStateChanger.sol');
 const MocInrateChanger = artifacts.require('./contracts/MocInrateChanger.sol');
 const MoCSettlementChanger = artifacts.require('./contracts/MoCSettlementChanger.sol');
@@ -43,7 +43,7 @@ const RiskProxManagerProxy = Contracts.getFromLocal('MoCRiskProxManager');
 const MoCSettlementProxy = Contracts.getFromLocal('MoCSettlement');
 const MoCConnectorProxy = Contracts.getFromLocal('MoCConnector');
 const GovernorProxy = Contracts.getFromLocal('Governor');
-const StopperProxy = Contracts.getFromLocal('Stopper');
+const StopperProxy = Contracts.getFromLocal('StopperV2');
 const ReserveToken = artifacts.require('./contracts/test-contracts/ReserveToken.sol');
 const CommissionSplitterProxy = Contracts.getFromLocal('CommissionSplitter');
 
@@ -318,7 +318,13 @@ const createContracts = params => async ({ owner, useMock }) => {
     mocVendors.address, // pass other address as parameter because MoCBurnout is deprecated
     reserveToken.address
   );
-  await moc.initialize(mocConnector.address, governor.address, stopper.address, startStoppable);
+  await moc.initialize(
+    mocConnector.address,
+    governor.address,
+    stopper.address,
+    startStoppable,
+    21000000000 // max gas price
+  );
   await stopper.initialize(owner);
   await mocExchange.initialize(mocConnector.address);
   // Making sure to call the correct initialize function
@@ -382,6 +388,11 @@ const createContracts = params => async ({ owner, useMock }) => {
   await project.changeProxyAdmin(stopperProxy.address, proxyAdmin.address);
   await project.changeProxyAdmin(commissionSplitter.address, proxyAdmin.address);
   await project.changeProxyAdmin(mocVendorsProxy.address, proxyAdmin.address);
+
+  // initialize flux capacitor with high values to no be considered for truffle tests
+  await stopper.setMaxAbsoluteOperation(moc.address, toContract(100000000000000 * 10 ** 18));
+  await stopper.setMaxOperationalDifference(moc.address, toContract(100000000000000 * 10 ** 18));
+  await stopper.setDecayBlockSpan(moc.address, 2880);
 
   return {
     commissionSplitter,

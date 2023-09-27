@@ -1,12 +1,12 @@
-# Example code redeeming Free RDOC
+# Example code redeeming Free USDRIF
 
-In the following example we will show how to invoke redeemFreeStableTokenVendors from RIF On Chain contract. This method allows to redeem RDOC outside the settlement and they are limited by user balance. Check the [RDOC redeemption section](redeeming-rdocs.md) for more details.
+In the following example we will show how to invoke redeemFreeStableTokenVendors from RIF On Chain contract. This method allows to redeem USDRIF outside the settlement and they are limited by user balance. Check the [USDRIF redeemption section](redeeming-rdocs.md) for more details.
 
 We will learn how to:
 
-- Get the maximum amount of RDOC available to redeem.
-- Get RDOC balance of an account.
-- Redeem RDOC.
+- Get the maximum amount of USDRIF available to redeem.
+- Get USDRIF balance of an account.
+- Redeem USDRIF.
 
 You can find code examples into _/examples_ dir.
 We will use **truffle** and **testnet** network.
@@ -97,7 +97,7 @@ const execute = async () => {
   const redeemFreeStableToken = async (stableTokenAmount, vendorAccount) => {
     const weiAmount = web3.utils.toWei(stableTokenAmount, 'ether');
 
-    console.log(`Calling redeem RDOC request, account: ${from}, amount: ${weiAmount}.`);
+    console.log(`Calling redeem USDRIF request, account: ${from}, amount: ${weiAmount}.`);
     moc.methods
       .redeemFreeStableTokenVendors(weiAmount, vendorAccount)
       .send({ from, gasPrice }, function(error, transactionHash) {
@@ -119,8 +119,8 @@ const execute = async () => {
   const finalStableTokenAmount = Math.min(freeStableToken, userStableTokenBalance);
   const vendorAccount = '<vendor-address>';
 
-  console.log('User RDOC balance: ', userStableTokenBalance.toString());
-  console.log('=== Max Available RDOC to redeem: ', finalStableTokenAmount);
+  console.log('User USDRIF balance: ', userStableTokenBalance.toString());
+  console.log('=== Max Available USDRIF to redeem: ', finalStableTokenAmount);
 
   // Call redeem
   await redeemFreeStableToken(stableTokenAmount, vendorAccount);

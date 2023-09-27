@@ -8,12 +8,12 @@ The exact percentage of the commission is set in the variable **commissionRatesB
 | --- | --- |
 | `MINT_RISKPRO_FEES_RESERVE` | Mint RIFPRO with fees in RIF |
 | `REDEEM_RISKPRO_FEES_RESERVE` | Redeem RIFPRO with fees in RIF |
-| `MINT_STABLETOKEN_FEES_RESERVE` | Mint RDOC with fees in RIF |
-| `REDEEM_STABLETOKEN_FEES_RESERVE` | Redeem RDOC with fees in RIF |
+| `MINT_STABLETOKEN_FEES_RESERVE` | Mint USDRIF with fees in RIF |
+| `REDEEM_STABLETOKEN_FEES_RESERVE` | Redeem USDRIF with fees in RIF |
 | `MINT_RISKPRO_FEES_MOC` | Mint RIFPRO with fees in MoC |
 | `REDEEM_RISKPRO_FEES_MOC` | Redeem RIFPRO with fees in MoC |
-| `MINT_STABLETOKEN_FEES_MOC` | Mint RDOC with fees in MoC |
-| `REDEEM_STABLETOKEN_FEES_MOC` | Redeem RDOC with fees in MoC |
+| `MINT_STABLETOKEN_FEES_MOC` | Mint USDRIF with fees in MoC |
+| `REDEEM_STABLETOKEN_FEES_MOC` | Redeem USDRIF with fees in MoC |
 
 
 Note that these commissions have also a precision of 18 decimals, i.e. a 1 \* 10^15 in that parameter means that 0.1% is being charged as a commission.

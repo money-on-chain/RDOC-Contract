@@ -4,14 +4,14 @@ import "openzeppelin-solidity/contracts/math/Math.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "./base/MoCBase.sol";
 import "./token/StableToken.sol";
-import "./interface/IMoCState.sol";
-import "./interface/IMoCExchange.sol";
+import "./interfaces/IMoCState.sol";
+import "./interfaces/IMoCExchange.sol";
 import "./MoCRiskProxManager.sol";
 import "./PartialExecution.sol";
 import "moc-governance/contracts/Governance/Governed.sol";
 import "moc-governance/contracts/Governance/IGovernor.sol";
-import "./interface/IMoCVendors.sol";
-import "./interface/IMoCSettlement.sol";
+import "./interfaces/IMoCVendors.sol";
+import "./interfaces/IMoCSettlement.sol";
 
 contract MoCSettlementEvents {
   event RedeemRequestAlter(address indexed redeemer, bool isAddition, uint256 delta);
@@ -105,6 +105,25 @@ IMoCSettlement
     initializeContracts();
     initializeValues(_governor, _blockSpan);
   }
+
+  /************************************/
+  /***** UPGRADE v0116_2       ***********/
+  /************************************/
+  
+  // DEPRECATED. 
+  // This function was used atomically in upgrade v0115 to migrate stableTokenV1 to stableTokenV2
+  // After that, it is removed in this contract version to cannot be called more than once.
+  //
+  // event StableTokenMigrated(address oldStableTokenAddress_, address newStableTokenAddress_);
+  //
+  // /**
+  //   @dev Migrates to a new stable token contract
+  //   @param newStableTokenAddress_ new stable token contract address
+  // */
+  // function migrateStableToken(address newStableTokenAddress_) public {
+  //   emit StableTokenMigrated(address(stableToken), newStableTokenAddress_);  
+  //   stableToken = StableToken(newStableTokenAddress_);
+  // }
 
   /**
    *  @dev Set the blockspan configuration blockspan of settlement

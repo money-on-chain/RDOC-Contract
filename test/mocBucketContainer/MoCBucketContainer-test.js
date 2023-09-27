@@ -43,12 +43,15 @@ contract('MoCBucketContainer', function([owner, account2, vendorAccount]) {
         await mocHelper.mintStableTokenAmount(account2, 10000, vendorAccount);
       });
       it('THEN mintRiskProx must revert', async function() {
-        await expectRevert(mocHelper.mintRiskProx(account2, bucketC0, 1), NOT_BUCKET_BASE);
+        await expectRevert(
+          mocHelper.mintRiskProx(account2, bucketC0, 1),
+          'Mint Leveraged position is disabled. See: http://bit.ly/3XPiKUA'
+        );
       });
       it('THEN redeemRiskProx must revert', async function() {
         await expectRevert(
           mocHelper.redeemRiskProx(account2, bucketC0, 0.5, vendorAccount),
-          NOT_BUCKET_BASE
+          'Redeem Leveraged position is disabled. See: http://bit.ly/3XPiKUA.'
         );
       });
       it('THEN evalBucketLiquidation must revert', async function() {
@@ -59,13 +62,13 @@ contract('MoCBucketContainer', function([owner, account2, vendorAccount]) {
       it('THEN mintRiskProx must revert', async function() {
         await expectRevert(
           mocHelper.mintRiskProx(account2, bucketH8, 1, vendorAccount),
-          BUCKET_NOT_AVAILABLE
+          'Mint Leveraged position is disabled. See: http://bit.ly/3XPiKUA'
         );
       });
       it('THEN redeemRiskProx must revert', async function() {
         await expectRevert(
           mocHelper.redeemRiskProx(account2, bucketH8, 0.5, vendorAccount),
-          BUCKET_NOT_AVAILABLE
+          'Redeem Leveraged position is disabled. See: http://bit.ly/3XPiKUA.'
         );
       });
       it('THEN evalBucketLiquidation must revert', async function() {

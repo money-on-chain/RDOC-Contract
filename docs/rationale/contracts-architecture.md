@@ -1,6 +1,6 @@
 # Contracts architecture
 
-RoC system is a network of cooperative contracts working together to ultimately provide an US dollar pegged ERC20 Token (RDOC). In this sense, be can categorize then into 4 categories:
+RoC system is a network of cooperative contracts working together to ultimately provide an US dollar pegged ERC20 Token (USDRIF). In this sense, be can categorize then into 4 categories:
 
 - _RoC state Contracts_: They keep RoC state variables and logic (MoC, MoCState, MoCBucketContainer, MoCSettlement)
 - _RoC pure logic Contracts & Libraries_: Functional extensions of the above merely to have responsibility separation and contracts size (aka deploy fee) low. (MoCHelperLib, MoCLibConnection, MoCConverter, MoCExchange, MoCConnector, MoCRiskProxManager, MoCInrate, MoCWhitelist, MoCBase)

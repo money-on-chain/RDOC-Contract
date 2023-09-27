@@ -1,5 +1,6 @@
 {
   "coverage": {
+    "maxGasPrice": 21000000000,
     "initialPrice": 10000,
     "initialEma": 10000,
     "dayBlockSpan": 20,
@@ -45,6 +46,7 @@
     }
   },
   "development": {
+    "maxGasPrice": 21000000000,
     "initialPrice": 7800,
     "initialEma": 7800,
     "dayBlockSpan": 2880,
@@ -90,6 +92,7 @@
     }
   },
   "mocTestnet": {
+    "maxGasPrice": 65820000,
     "reserveToken": "0x19F64674D8A5B4E652319F5e239eFd3bc969A1fE",
     "commissionSplitter": "",
     "oracle": "0x9d4b2c05818A0086e641437fcb64ab6098c7BbEc",
@@ -142,6 +145,7 @@
     }
   },
   "mocMainnet": {
+    "maxGasPrice": 65820000,
     "reserveToken": "0x2acc95758f8b5f583470ba265eb685a8f45fc9d5",
     "commissionSplitter": "",
     "oracle": "0x504EfCadFB020d6bBaeC8a5c5BB21453719d0E00",
@@ -177,6 +181,51 @@
     "vendorGuardianAddress": "",
     "governorOwnerAddress": "",
     "mocTokenCommissionsAddress": "0xC61820bFB8F87391d62Cd3976dDc1d35e0cf7128",
+    "commissionRates": {
+      "MINT_RISKPRO_FEES_RESERVE": 0.001,
+      "REDEEM_RISKPRO_FEES_RESERVE": 0.001,
+      "MINT_STABLETOKEN_FEES_RESERVE": 0.001,
+      "REDEEM_STABLETOKEN_FEES_RESERVE": 0.001,
+      "MINT_RISKPROX_FEES_RESERVE": 0.001,
+      "REDEEM_RISKPROX_FEES_RESERVE": 0.001,
+      "MINT_RISKPRO_FEES_MOC": 0.001,
+      "REDEEM_RISKPRO_FEES_MOC": 0.001,
+      "MINT_STABLETOKEN_FEES_MOC": 0.001,
+      "REDEEM_STABLETOKEN_FEES_MOC": 0.001,
+      "MINT_RISKPROX_FEES_MOC": 0.001,
+      "REDEEM_RISKPROX_FEES_MOC": 0.001
+    }
+  },
+  "devTestnet": {
+    "initialPrice": 7800,
+    "initialEma": 7800,
+    "dayBlockSpan": 2880,
+    "settlementDays": 90,
+    "gas": 99999999,
+    "startStoppable": true,
+    "riskProxTmin": 0.000133681,
+    "riskProxPower": 4,
+    "riskProxTmax": 0.004,
+    "riskProHolderRate": 0.000047945,
+    "daysRiskProHolderExecutePayment": 7,
+    "targetAddressRiskProInterest": "",
+    "targetAddressCommissionPayment": "0x27598400A96D4EE85f86b0931e49cBc02adD6dF0",
+    "stableTmin": 0.000133681,
+    "stablePower": 4,
+    "stableTmax": 0.004,
+    "c0Cobj": 4,
+    "x2Cobj": 2,
+    "liq": 1.04,
+    "utpdu": 2,
+    "maxDiscRate": 0.5,
+    "smoothFactor": 0.01653,
+    "maxMintRiskPro": 10000,
+    "mocProportion": "500000000000000000",
+    "liquidationEnabled": false,
+    "protected": 1.5,
+    "vendorGuardianAddress": "",
+    "governorOwnerAddress": "",
+    "mocTokenCommissionsAddress": "",
     "commissionRates": {
       "MINT_RISKPRO_FEES_RESERVE": 0.001,
       "REDEEM_RISKPRO_FEES_RESERVE": 0.001,

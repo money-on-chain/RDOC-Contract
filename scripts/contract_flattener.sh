@@ -17,7 +17,17 @@ CONTRACTS=(
     "contracts/changers/proposal_fee_increase/FeeIncreaseProposal.sol"
     "contracts/changers/BatchChanger.sol"
     "contracts/changers/UpgraderChanger.sol"
+    "contracts/changers/FluxCapacitorChanger.sol"
     "zos-lib/contracts/upgradeability/AdminUpgradeabilityProxy.sol"
+    "contracts/governance/StopperV2.sol"
+    "contracts_updated/MoC_v0116_2.sol"
+    "contracts_updated/MoCConnector_v0116_2.sol"
+    "contracts_updated/MoCExchange_v0116_2.sol"
+    "contracts_updated/MoCState_v0116_2.sol"
+    "contracts_updated/MoCSettlement_v0116_2.sol"
+    "contracts/changers/StableTokenMigrationChanger.sol"
+
+
 )
 
 # Working directory: the root of the project

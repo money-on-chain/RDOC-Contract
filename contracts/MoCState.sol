@@ -2,7 +2,7 @@ pragma solidity ^0.5.8;
 pragma experimental ABIEncoderV2;
 
 import "openzeppelin-solidity/contracts/math/Math.sol";
-import "./interface/PriceProvider.sol";
+import "./interfaces/PriceProvider.sol";
 import "./MoCEMACalculator.sol";
 import "./base/MoCBase.sol";
 import "./MoCLibConnection.sol";
@@ -10,10 +10,10 @@ import "./MoCRiskProxManager.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "./token/RiskProToken.sol";
 import "./token/MoCToken.sol";
-import "./interface/IMoCSettlement.sol";
+import "./interfaces/IMoCSettlement.sol";
 import "moc-governance/contracts/Governance/Governed.sol";
 import "moc-governance/contracts/Governance/IGovernor.sol";
-import "./interface/IMoCState.sol";
+import "./interfaces/IMoCState.sol";
 
 contract MoCState is MoCLibConnection, MoCBase, MoCEMACalculator, IMoCState {
   using Math for uint256;
@@ -101,6 +101,25 @@ contract MoCState is MoCLibConnection, MoCBase, MoCEMACalculator, IMoCState {
       params.protected);
     initializeMovingAverage(params.ema, params.smoothFactor, params.emaBlockSpan);
   }
+
+  /************************************/
+  /***** UPGRADE v0116_2       ***********/
+  /************************************/
+  
+  // DEPRECATED. 
+  // This function was used atomically in upgrade v0115 to migrate stableTokenV1 to stableTokenV2
+  // After that, it is removed in this contract version to cannot be called more than once.
+  //
+  // event StableTokenMigrated(address oldStableTokenAddress_, address newStableTokenAddress_);
+  //
+  // /**
+  //   @dev Migrates to a new stable token contract
+  //   @param newStableTokenAddress_ new stable token contract address
+  // */
+  // function migrateStableToken(address newStableTokenAddress_) public {
+  //   emit StableTokenMigrated(address(stableToken), newStableTokenAddress_);  
+  //   stableToken = IERC20(newStableTokenAddress_);
+  // }
 
   /**
    @dev Sets the max discount rate.

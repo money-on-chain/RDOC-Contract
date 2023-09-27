@@ -4,22 +4,24 @@ import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "./MoCLibConnection.sol";
 import "./token/RiskProToken.sol";
 import "./MoCRiskProxManager.sol";
-import "./interface/IMoCState.sol";
-import "./interface/IMoCSettlement.sol";
-import "./interface/IMoCExchange.sol";
+import "./interfaces/IMoCState.sol";
+import "./interfaces/IMoCSettlement.sol";
+import "./interfaces/IMoCExchange.sol";
 import "./base/MoCBase.sol";
 import "./base/MoCReserve.sol";
 import "moc-governance/contracts/Stopper/Stoppable.sol";
 import "moc-governance/contracts/Governance/IGovernor.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
-import "./interface/IMoCVendors.sol";
-import "./interface/IMoCInrate.sol";
-import "./interface/IMoC.sol";
+import "./interfaces/IMoCVendors.sol";
+import "./interfaces/IMoCInrate.sol";
+import "./interfaces/IMoC.sol";
+
 
 contract MoCEvents {
   event BucketLiquidation(bytes32 bucket);
   event ContractLiquidated(address mocAddress);
 }
+
 
 contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMoC {
   using SafeMath for uint256;
@@ -49,13 +51,12 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMo
     @param governorAddress Governor contract address
     @param stopperAddress Stopper contract address
     @param startStoppable Indicates if the contract starts being unstoppable or not
+    @param maxGasPrice_ gas price limit to mint and redeem operations
   */
-  function initialize(
-    address connectorAddress,
-    address governorAddress,
-    address stopperAddress,
-    bool startStoppable
-  ) public initializer {
+  function initialize(address connectorAddress, address governorAddress, address stopperAddress, bool startStoppable, uint256 maxGasPrice_)
+    public
+    initializer
+  {
     initializePrecisions();
     initializeBase(connectorAddress);
     //initializeContracts
@@ -69,7 +70,27 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMo
     setReserveToken(connector.reserveToken());
     //initializeGovernanceContracts
     Stoppable.initialize(stopperAddress, IGovernor(governorAddress), startStoppable);
+    maxGasPrice = maxGasPrice_;
   }
+
+  /************************************/
+  /***** UPGRADE v0116_2       ***********/
+  /************************************/
+  
+  // DEPRECATED. 
+  // This function was used atomically in upgrade v0115 to migrate stableTokenV1 to stableTokenV2
+  // After that, it is removed in this contract version to cannot be called more than once.
+  //
+  // event StableTokenMigrated(address oldStableTokenAddress_, address newStableTokenAddress_);
+  //
+  // /**
+  //   @dev Migrates to a new stable token contract
+  //   @param newStableTokenAddress_ new stable token contract address
+  // */
+  // function migrateStableToken(address newStableTokenAddress_) public {
+  //   emit StableTokenMigrated(stableToken, newStableTokenAddress_);  
+  //   stableToken = newStableTokenAddress_;
+  // }
 
   /****************************INTERFACE*******************************************/
 
@@ -88,7 +109,7 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMo
     @param index queue position to get
     @return redeemer's address and amount he submitted
   */
-  function getRedeemRequestAt(uint256 index) public view returns(address, uint256) {
+  function getRedeemRequestAt(uint256 index) public view returns (address, uint256) {
     return settlement.getRedeemRequestAt(index);
   }
 
@@ -96,7 +117,7 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMo
     @dev Returns current redeem queue size
     @return redeem queue size
    */
-  function redeemQueueSize() public view returns(uint256) {
+  function redeemQueueSize() public view returns (uint256) {
     return settlement.redeemQueueSize();
   }
 
@@ -109,11 +130,10 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMo
     return settlement.stableTokenAmountToRedeem(redeemer);
   }
 
-
   /**
-  * @dev Creates or updates the amount of a StableToken redeem Request from the msg.sender
-  * @param stableTokenAmount Amount of StableTokens to redeem on settlement [using mocPrecision]
-  */
+   * @dev Creates or updates the amount of a StableToken redeem Request from the msg.sender
+   * @param stableTokenAmount Amount of StableTokens to redeem on settlement [using mocPrecision]
+   */
   function redeemStableTokenRequest(uint256 stableTokenAmount) public whenNotPaused() whenSettlementReady() {
     settlement.addRedeemRequest(stableTokenAmount, msg.sender);
   }
@@ -142,8 +162,7 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMo
     @dev Retrocompatible function.
     @param resTokensToMint Amount in ReserveToken to mint
    */
-  function mintRiskPro(uint256 resTokensToMint)
-  public {
+  function mintRiskPro(uint256 resTokensToMint) public {
     mintRiskProVendors(resTokensToMint, address(0));
   }
 
@@ -153,24 +172,22 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMo
     @param vendorAccount Vendor address
    */
   function mintRiskProVendors(uint256 resTokensToMint, address vendorAccount)
-  public
-  whenNotPaused() transitionState() notInProtectionMode() {
+    public
+    whenNotPaused()
+    transitionState()
+    notInProtectionMode()
+    isValidGasPrice()
+  {
     /** UPDATE V0110: 24/09/2020 - Upgrade to support multiple commission rates **/
-    (uint256 totalResTokensSpent,
-    uint256 reserveTokenCommission,
-    uint256 mocCommission,
-    uint256 reserveTokenMarkup,
-    uint256 mocMarkup) = mocExchange.mintRiskPro(msg.sender, resTokensToMint, vendorAccount);
+    (
+      uint256 totalResTokensSpent,
+      uint256 reserveTokenCommission,
+      uint256 mocCommission,
+      uint256 reserveTokenMarkup,
+      uint256 mocMarkup
+    ) = mocExchange.mintRiskPro(msg.sender, resTokensToMint, vendorAccount);
 
-    transferCommissions(
-      msg.sender,
-      totalResTokensSpent,
-      reserveTokenCommission,
-      mocCommission,
-      vendorAccount,
-      reserveTokenMarkup,
-      mocMarkup
-    );
+    transferCommissions(msg.sender, totalResTokensSpent, reserveTokenCommission, mocCommission, vendorAccount, reserveTokenMarkup, mocMarkup);
     /** END UPDATE V0110: 24/09/2020 - Upgrade to support multiple commission rates **/
   }
 
@@ -178,8 +195,7 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMo
     @dev Redeems RiskPro Tokens and pays the comissions of the operation (retrocompatible function).
     @param riskProAmount Amout in RiskPro
   */
-  function redeemRiskPro(uint256 riskProAmount)
-  public {
+  function redeemRiskPro(uint256 riskProAmount) public {
     redeemRiskProVendors(riskProAmount, address(0));
   }
 
@@ -189,24 +205,17 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMo
     @param vendorAccount Vendor address
   */
   function redeemRiskProVendors(uint256 riskProAmount, address vendorAccount)
-  public
-  whenNotPaused() transitionState() atLeastState(IMoCState.States.AboveCobj) {
+    public
+    whenNotPaused()
+    transitionState()
+    atLeastState(IMoCState.States.AboveCobj)
+    isValidGasPrice()
+  {
     /** UPDATE V0110: 24/09/2020 - Upgrade to support multiple commission rates **/
-    (uint256 resTokensAmount,
-    uint256 reserveTokenCommission,
-    uint256 mocCommission,
-    uint256 reserveTokenMarkup,
-    uint256 mocMarkup) = mocExchange.redeemRiskPro(msg.sender, riskProAmount, vendorAccount);
+    (uint256 resTokensAmount, uint256 reserveTokenCommission, uint256 mocCommission, uint256 reserveTokenMarkup, uint256 mocMarkup) = mocExchange
+      .redeemRiskPro(msg.sender, riskProAmount, vendorAccount);
 
-    redeemWithCommission(
-      msg.sender,
-      reserveTokenCommission,
-      mocCommission,
-      vendorAccount,
-      reserveTokenMarkup,
-      mocMarkup,
-      resTokensAmount
-    );
+    redeemWithCommission(msg.sender, reserveTokenCommission, mocCommission, vendorAccount, reserveTokenMarkup, mocMarkup, resTokensAmount);
     /** END UPDATE V0110: 24/09/2020 - Upgrade to support multiple commission rates **/
   }
 
@@ -215,8 +224,7 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMo
     @dev Retrocompatible function.
     @param resTokensToMint Amount in ReserveToken to mint
   */
-  function mintStableToken(uint256 resTokensToMint)
-  public {
+  function mintStableToken(uint256 resTokensToMint) public {
     mintStableTokenVendors(resTokensToMint, address(0));
   }
 
@@ -226,24 +234,22 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMo
     @param vendorAccount Vendor address
   */
   function mintStableTokenVendors(uint256 resTokensToMint, address vendorAccount)
-  public
-  whenNotPaused() transitionState() atLeastState(IMoCState.States.AboveCobj) {
+    public
+    whenNotPaused()
+    transitionState()
+    atLeastState(IMoCState.States.AboveCobj)
+    isValidGasPrice()
+  {
     /** UPDATE V0110: 24/09/2020 - Upgrade to support multiple commission rates **/
-    (uint256 totalResTokensSpent,
-    uint256 reserveTokenCommission,
-    uint256 mocCommission,
-    uint256 reserveTokenMarkup,
-    uint256 mocMarkup) = mocExchange.mintStableToken(msg.sender, resTokensToMint, vendorAccount);
+    (
+      uint256 totalResTokensSpent,
+      uint256 reserveTokenCommission,
+      uint256 mocCommission,
+      uint256 reserveTokenMarkup,
+      uint256 mocMarkup
+    ) = mocExchange.mintStableToken(msg.sender, resTokensToMint, vendorAccount);
 
-    transferCommissions(
-      msg.sender,
-      totalResTokensSpent,
-      reserveTokenCommission,
-      mocCommission,
-      vendorAccount,
-      reserveTokenMarkup,
-      mocMarkup
-    );
+    transferCommissions(msg.sender, totalResTokensSpent, reserveTokenCommission, mocCommission, vendorAccount, reserveTokenMarkup, mocMarkup);
     /** END UPDATE V0110: 24/09/2020 - Upgrade to support multiple commission rates **/
   }
 
@@ -263,26 +269,14 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMo
     @param riskProxAmount Amount in RiskProx
     @param vendorAccount Vendor address
   */
-  function redeemRiskProxVendors(bytes32 bucket, uint256 riskProxAmount, address vendorAccount) public
-  whenNotPaused() whenSettlementReady() availableBucket(bucket) notBaseBucket(bucket)
-  transitionState() bucketStateTransition(bucket) {
-    /** UPDATE V0110: 24/09/2020 - Upgrade to support multiple commission rates **/
-    (uint256 totalResTokensRedeemed,
-    uint256 reserveTokenCommission,
-    uint256 mocCommission,
-    uint256 reserveTokenMarkup,
-    uint256 mocMarkup) = mocExchange.redeemRiskProx(msg.sender, bucket, riskProxAmount, vendorAccount);
-
-    redeemWithCommission(
-      msg.sender,
-      reserveTokenCommission,
-      mocCommission,
-      vendorAccount,
-      reserveTokenMarkup,
-      mocMarkup,
-      totalResTokensRedeemed
-    );
-    /** END UPDATE V0110: 24/09/2020 - Upgrade to support multiple commission rates **/
+  function redeemRiskProxVendors(bytes32 bucket, uint256 riskProxAmount, address vendorAccount)
+    public
+  /* Remove modifiers to save some contract size */
+  // whenNotPaused() whenSettlementReady() availableBucket(bucket) notBaseBucket(bucket)
+  // transitionState() bucketStateTransition(bucket)
+  {
+    /** UPDATE V0114: 07/02/2023 - Removal of leveraged positions. Please take a look at http://bit.ly/3XPiKUA **/
+    revert("Redeem Leveraged position is disabled. See: http://bit.ly/3XPiKUA");
   }
 
   /**
@@ -301,9 +295,12 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMo
     @param resTokensToMint amount to mint on ReserveToken
     @param vendorAccount Vendor address
   */
-  function mintRiskProxVendors(bytes32 bucket, uint256 resTokensToMint, address vendorAccount) public
-  whenNotPaused() whenSettlementReady() availableBucket(bucket) notBaseBucket(bucket)
-  transitionState() bucketStateTransition(bucket) {
+  function mintRiskProxVendors(bytes32 bucket, uint256 resTokensToMint, address vendorAccount)
+    public
+  /* Remove modifiers to save some contract size */
+  // whenNotPaused() whenSettlementReady() availableBucket(bucket) notBaseBucket(bucket)
+  // transitionState() bucketStateTransition(bucket)
+  {
     /** UPDATE V0114: 07/02/2023 - Removal of leveraged positions. Please take a look at http://bit.ly/3XPiKUA **/
     revert("Mint Leveraged position is disabled. See: http://bit.ly/3XPiKUA");
   }
@@ -313,8 +310,7 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMo
     @dev Retrocompatible function.
     @param stableTokenAmount Amount of StableTokens to redeem.
   */
-  function redeemFreeStableToken(uint256 stableTokenAmount)
-  public {
+  function redeemFreeStableToken(uint256 stableTokenAmount) public {
     redeemFreeStableTokenVendors(stableTokenAmount, address(0));
   }
 
@@ -324,24 +320,17 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMo
     @param vendorAccount Vendor address
   */
   function redeemFreeStableTokenVendors(uint256 stableTokenAmount, address vendorAccount)
-  public
-  whenNotPaused() transitionState() notInProtectionMode() {
+    public
+    whenNotPaused()
+    transitionState()
+    notInProtectionMode()
+    isValidGasPrice()
+  {
     /** UPDATE V0110: 24/09/2020 - Upgrade to support multiple commission rates **/
-    (uint256 resTokensAmount,
-    uint256 reserveTokenCommission,
-    uint256 mocCommission,
-    uint256 reserveTokenMarkup,
-    uint256 mocMarkup) = mocExchange.redeemFreeStableToken(msg.sender, stableTokenAmount, vendorAccount);
+    (uint256 resTokensAmount, uint256 reserveTokenCommission, uint256 mocCommission, uint256 reserveTokenMarkup, uint256 mocMarkup) = mocExchange
+      .redeemFreeStableToken(msg.sender, stableTokenAmount, vendorAccount);
 
-    redeemWithCommission(
-      msg.sender,
-      reserveTokenCommission,
-      mocCommission,
-      vendorAccount,
-      reserveTokenMarkup,
-      mocMarkup,
-      resTokensAmount
-    );
+    redeemWithCommission(msg.sender, reserveTokenCommission, mocCommission, vendorAccount, reserveTokenMarkup, mocMarkup, resTokensAmount);
     /** END UPDATE V0110: 24/09/2020 - Upgrade to support multiple commission rates **/
   }
 
@@ -416,7 +405,7 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMo
     @dev Indicates if settlement is enabled
     @return Returns true if blockSpan number of blocks has passed since last execution; otherwise false
   */
-  function isSettlementEnabled() public view returns(bool) {
+  function isSettlementEnabled() public view returns (bool) {
     return settlement.isSettlementEnabled();
   }
 
@@ -425,7 +414,7 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMo
     @param bucket Name of bucket.
     @return true if bucket liquidation is reached, false otherwise
   */
-  function isBucketLiquidationReached(bytes32 bucket) public view returns(bool) {
+  function isBucketLiquidationReached(bytes32 bucket) public view returns (bool) {
     if (mocState.coverage(bucket) <= mocState.liq()) {
       return true;
     }
@@ -514,21 +503,17 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMo
     address vendorAccount,
     uint256 reserveTokenMarkup,
     uint256 mocMarkup
-  )
-  internal {
+  ) internal {
     // Need to update general State
     mocState.addToReserves(totalResTokensSpent);
     require(
-      deposit(
-        totalResTokensSpent.add(reserveTokenCommission).add(reserveTokenMarkup),
-        sender
-      ), "Token deposit failed on RRC20 Reserve token transfer"
+      deposit(totalResTokensSpent.add(reserveTokenCommission).add(reserveTokenMarkup), sender),
+      "Token deposit failed on RRC20 Reserve token transfer"
     );
 
     transferMocCommission(sender, mocCommission, vendorAccount, mocMarkup);
 
     transferReserveTokenCommission(vendorAccount, reserveTokenCommission, reserveTokenMarkup);
-
   }
 
   /**
@@ -539,12 +524,7 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMo
     @param mocMarkup vendor markup in MoC
   */
   // solium-disable-next-line security/no-assign-params
-  function transferMocCommission(
-    address sender,
-    uint256 mocCommission,
-    address vendorAccount,
-    uint256 mocMarkup
-  ) internal {
+  function transferMocCommission(address sender, uint256 mocCommission, address vendorAccount, uint256 mocMarkup) internal {
     uint256 totalMoCFee = mocCommission.add(mocMarkup);
     // If commission and markup are paid in MoC
     if (totalMoCFee > 0) {
@@ -582,15 +562,13 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMo
     uint256 reserveTokenMarkup,
     uint256 mocMarkup,
     uint256 reserveTokenAmount
-  )
-   internal {
+  ) internal {
     safeWithdraw(sender, reserveTokenAmount);
     mocState.substractFromReserves(reserveTokenAmount.add(reserveTokenCommission).add(reserveTokenMarkup));
 
     transferMocCommission(sender, mocCommission, vendorAccount, mocMarkup);
 
     transferReserveTokenCommission(vendorAccount, reserveTokenCommission, reserveTokenMarkup);
-
   }
 
   /**
@@ -600,7 +578,6 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMo
     @param reserveTokenMarkup vendor markup in ReserveToken
   */
   function transferReserveTokenCommission(address vendorAccount, uint256 reserveTokenCommission, uint256 reserveTokenMarkup) internal {
-
     uint256 totalResTokenFee = reserveTokenCommission.add(reserveTokenMarkup);
     //(uint256 reserveTokenMarkupInMoC, , ) = mocExchange.convertToMoCPrice(reserveTokenMarkup);
 
@@ -630,6 +607,7 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMo
     safeWithdraw(receiver, tokenAmount);
     mocState.substractFromReserves(tokenAmount);
   }
+
   /**
     @dev Extracts tokens from the reserve
     @param receiver Account from which the tokens will be taken
@@ -648,8 +626,6 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMo
     require(deposit(tokenAmount, receiver), "Token deposit failed on RRC20 Reserve token transfer");
     mocState.addToReserves(tokenAmount);
   }
-
-
 
   /***** STATE MODIFIERS *****/
   modifier whenSettlementReady() {
@@ -692,17 +668,70 @@ contract MoC is MoCEvents, MoCReserve, MoCLibConnection, MoCBase, Stoppable, IMo
     _;
   }
 
-  modifier transitionState()
-  {
+  modifier transitionState() {
     mocState.nextState();
     if (mocState.state() == IMoCState.States.Liquidated) {
       liquidate();
-    }
-    else
-      _;
+    } else _;
+  }
+
+  /**
+   * @notice validate that the given gas price is less or equal to the gas price limit
+   */
+  modifier isValidGasPrice() {
+    require(tx.gasprice <= maxGasPrice, "gas price is above the max allowed");
+    _;
+  }
+
+  /**
+   * @notice only executed by the pauser or an authorized changer
+   *  The pauser is a multisig that could be used in some cases to speed up a
+   *  change if it is necessary
+   */
+  modifier onlyAuthorizedChangerOrPauser() {
+    require(stopper == msg.sender || governor.isAuthorizedChanger(msg.sender), "not authorized changer or stopper");
+    _;
+  }
+
+  /**
+   * @notice update the gas price limit
+   * @param maxGasPrice_ new gas price limit
+   */
+  function setMaxGasPrice(uint256 maxGasPrice_) external onlyAuthorizedChangerOrPauser() {
+    maxGasPrice = maxGasPrice_;
+  }
+
+  uint256 public maxGasPrice;
+
+  ////////////////////
+  // Flux Capacitor //
+  ////////////////////
+
+  /**
+   * @notice update the max absolute operation allowed
+   * @param maxAbsoluteOperation_ new max absolute operation allowed
+   */
+  function setMaxAbsoluteOperation(uint256 maxAbsoluteOperation_) external onlyAuthorizedChangerOrPauser() {
+    mocExchange.setMaxAbsoluteOperation(maxAbsoluteOperation_);
+  }
+
+  /**
+   * @notice update the max operational difference allowed
+   * @param maxOperationalDifference_ new max operational difference allowed
+   */
+  function setMaxOperationalDifference(uint256 maxOperationalDifference_) external onlyAuthorizedChangerOrPauser() {
+    mocExchange.setMaxOperationalDifference(maxOperationalDifference_);
+  }
+
+  /**
+   * @notice update the decay block span
+   * @param decayBlockSpan_ new decay block span
+   */
+  function setDecayBlockSpan(uint256 decayBlockSpan_) external onlyAuthorizedChangerOrPauser() {
+    mocExchange.setDecayBlockSpan(decayBlockSpan_);
   }
 
   // Leave a gap betweeen inherited contracts variables in order to be
   // able to add more variables in them later
-  uint256[50] private upgradeGap;
+  uint256[49] private __gap;
 }

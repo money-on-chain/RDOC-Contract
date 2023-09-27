@@ -1,0 +1,12 @@
+diff --git a/node_modules/hardhat/internal/core/jsonrpc/types/output/decodeJsonRpcResponse.js b/node_modules/hardhat/internal/core/jsonrpc/types/output/decodeJsonRpcResponse.js
+index 2d83dfc..31d652b 100644
+--- a/node_modules/hardhat/internal/core/jsonrpc/types/output/decodeJsonRpcResponse.js
++++ b/node_modules/hardhat/internal/core/jsonrpc/types/output/decodeJsonRpcResponse.js
+@@ -8,6 +8,7 @@ const errors_1 = require("../../../providers/errors");
+  * This function decodes an RPC out type, throwing InvalidResponseError if it's not valid.
+  */
+ function decodeJsonRpcResponse(value, codec) {
++    if (value === "0x0" && codec.name === 'DATA') value = "0x00";
+     const result = codec.decode(value);
+     if (result.isLeft()) {
+         throw new errors_1.InvalidResponseError(`Invalid JSON-RPC response's result.

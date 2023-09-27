@@ -1,4 +1,4 @@
-# Redeeming RDOCs on Settlement: alterRedeemRequestAmount
+# Redeeming USDRIF on Settlement: alterRedeemRequestAmount
 
 `alterRedeemRequestAmount(bool isAddition, uint256 delta) public`
 
@@ -12,13 +12,13 @@ There is only at most one redeem request per user during a settlement. A new ree
 
 ### The delta parameter
 
-It is the amount that the contract will be used to update a RDOCs redeem request amount.
-This parameter uses a precision of the type **reservePrecision** that contains 18 decimal places and can be greater than user's balance at request time, allowing to, for example, redeem all future user's RDOCs.
+It is the amount that the contract will be used to update a USDRIF redeem request amount.
+This parameter uses a precision of the type **reservePrecision** that contains 18 decimal places and can be greater than user's balance at request time, allowing to, for example, redeem all future user's USDRIF.
 If isAddition is false and the **delta** param is greater than the total amount of the redeem request, then the total amount of the request will be set to 0.
 
 ### Gas limit and gas price
 
-These two values are a parameter of the transaction, this is not used in the contract and is generally managed by your wallet (you should read about them if you are developing and do not know exactly what they are), but you should take them into account when trying to redeem some RDOCs.
+These two values are a parameter of the transaction, this is not used in the contract and is generally managed by your wallet (you should read about them if you are developing and do not know exactly what they are), but you should take them into account when trying to redeem some USDRIF.
 
 ## Possible failures
 
