@@ -249,7 +249,7 @@ FeedFactory:    0x54878866F5324B56AEE9B6619a1e1A213B2fCC30
 
 MoCMedianizer is our oracle contract write down this address: 0x504EfCadFB020d6bBaeC8a5c5BB21453719d0E00
 
-### Deploy RDOC Main Contract
+### Deploy Main Stable Token Contract
 
 Finally deploy main contract
 
@@ -345,7 +345,7 @@ Give us..., write down because adressess of the contracts
 
 ## Price Feeder
 
-To run your own price feeder on RDOC. Take a look on repository (page)[https://github.com/money-on-chain/price-feeder/tree/develop]
+To run your own price feeder on USDRIF. Take a look on repository (page)[https://github.com/money-on-chain/price-feeder/tree/develop]
 
 Clone price feeder repository
 
@@ -384,7 +384,7 @@ Then run
 python price_feeder.py --config=config_rdoc.json --network=local
 ```
 
-### Pricefeeder Deployment Tutorial using Docker: example RDOC Testnet
+### Pricefeeder Deployment Tutorial using Docker: example USDRIF Testnet
 
 I'm going to use docker method.
 

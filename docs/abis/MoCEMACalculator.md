@@ -146,7 +146,7 @@ function setEmaCalculationBlockSpan(uint256 blockSpan) public nonpayable onlyAut
 
 | Name        | Type           | Description  |
 | ------------- |------------- | -----|
-| blockSpan | uint256 | Defines how many blocks should pass between BMA calculations* | 
+| blockSpan | uint256 | Defines how many blocks should pass between EMA calculations* | 
 
 ### shouldCalculateEma
 

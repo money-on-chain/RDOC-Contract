@@ -13,7 +13,9 @@ docs/
 contracts/crytic-export/
 .gitlab/
 .vscode/
+.openzeppelin/
 export/
+contracts_flat/
 
 # files
 coverage.json

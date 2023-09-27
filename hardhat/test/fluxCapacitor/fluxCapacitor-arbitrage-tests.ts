@@ -2,9 +2,9 @@ import { expect } from "chai";
 import { getNamedAccounts } from "hardhat";
 import { Address } from "hardhat-deploy/types";
 import { MoC, MoCInrate, PriceProviderMock, ReserveToken } from "../../typechain";
-import { fixtureDeployed } from "../fixture";
 import { assertPrec } from "../helpers/assertHelper";
 import { Balance, CONSTANTS, pEth } from "../helpers/utils";
+import { fixtureDeployed } from "./fixture";
 describe("Feature: Arbitrage", () => {
   let moc: MoC;
   let mocInrate: MoCInrate;

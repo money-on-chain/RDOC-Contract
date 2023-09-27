@@ -1,16 +1,16 @@
-# Redeeming RDOCs on Liquidation State:: redeemAllStableToken
+# Redeeming USDRIF on Liquidation State:: redeemAllStableToken
 
 `function redeemAllStableToken() public`
 
-Allows redeeming on liquidation state, user RDOCs get burned, and the user receives the equivalent RIFs according to the liquidation price which is the relation between the RDOCs total supply and the amount of RIF available to distribute.
+Allows redeeming on liquidation state, user USDRIF get burned, and the user receives the equivalent RIFs according to the liquidation price which is the relation between the USDRIF total supply and the amount of RIF available to distribute.
 The liquidation price can be queried with the view `getLiquidationPrice()` of the contract **MocState**.
-If sending RIF fails then the system does not burn the RDOC tokens.
+If sending RIF fails then the system does not burn the USDRIF tokens.
 
 ## Parameters of the operation
 
 ### Gas limit and gas price
 
-These two values are a parameter of the transaction, this is not used in the contract and is generally managed by your wallet (you should read about them if you are developing and do not know exactly what they are), but you should take them into account when trying to redeem some RDOCs.
+These two values are a parameter of the transaction, this is not used in the contract and is generally managed by your wallet (you should read about them if you are developing and do not know exactly what they are), but you should take them into account when trying to redeem some USDRIF.
 
 ## Possible failures
 

@@ -60,6 +60,7 @@ const makeUtils = async (artifacts, networkName, config, owner, deployer) => {
     switch (networkName) {
       case 'coverage':
       case 'development':
+      case 'devTestnet':
         return (await PriceProviderMock.deployed()).address;
       default:
         return config.oracle;
@@ -71,6 +72,7 @@ const makeUtils = async (artifacts, networkName, config, owner, deployer) => {
       case 'regtest':
       case 'coverage':
       case 'development':
+      case 'devTestnet':
         return (await MoCPriceProviderMock.deployed()).address;
       default:
         return config.mocOracle;
@@ -81,6 +83,7 @@ const makeUtils = async (artifacts, networkName, config, owner, deployer) => {
     switch (networkName) {
       case 'coverage':
       case 'development':
+      case 'devTestnet':
         return (await Governor.deployed()).address;
       default:
         return config.governor;
@@ -91,6 +94,7 @@ const makeUtils = async (artifacts, networkName, config, owner, deployer) => {
     switch (networkName) {
       case 'coverage':
       case 'development':
+      case 'devTestnet':
         return (await Stopper.deployed()).address;
       default:
         return config.stopper;
@@ -101,6 +105,7 @@ const makeUtils = async (artifacts, networkName, config, owner, deployer) => {
     switch (networkName) {
       case 'coverage':
       case 'development':
+      case 'devTestnet':
         return (await ProxyAdmin.deployed()).address;
       default:
         return config.proxyAdmin;
@@ -665,6 +670,9 @@ const makeUtils = async (artifacts, networkName, config, owner, deployer) => {
 };
 
 const isDevelopment = currentNetwork =>
-  currentNetwork === 'development' || currentNetwork === 'coverage' || currentNetwork === 'regtest';
+  currentNetwork === 'development' ||
+  currentNetwork === 'coverage' ||
+  currentNetwork === 'regtest' ||
+  currentNetwork === 'devTestnet';
 
 module.exports = { makeUtils, isDevelopment };

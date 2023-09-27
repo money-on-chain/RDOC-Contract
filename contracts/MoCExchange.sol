@@ -138,6 +138,31 @@ contract MoCExchange is MoCExchangeEvents, MoCBase, MoCLibConnection {
   }
 
   /************************************/
+  /***** UPGRADE v0116_2       ***********/
+  /************************************/
+  
+  // DEPRECATED. 
+  // This function was used atomically in upgrade v0115 to migrate stableTokenV1 to stableTokenV2
+  // After that, it is removed in this contract version to cannot be called more than once.
+  //
+  // event StableTokenMigrated(address oldStableTokenAddress_, address newStableTokenAddress_);
+  //
+  // /**
+  //   @dev Migrates to a new stable token contract
+  //     Mints the new tokens to bridge contract in the same amount of the total supply of the old ones,
+  //     so that they can later be exchanged.
+  //     This contract must have minter and burner roles set on it
+  //   @param newStableTokenAddress_ new stable token contract address
+  //   @param bridgeAddress_ contract that will receive the new tokens and be able to distribute them
+  // */
+  // function migrateStableToken(address newStableTokenAddress_, address bridgeAddress_) public {
+  //   uint256 totalSupply = stableToken.totalSupply();
+  //   emit StableTokenMigrated(address(stableToken), newStableTokenAddress_);
+  //   stableToken = StableToken(newStableTokenAddress_);
+  //   stableToken.mint(bridgeAddress_, totalSupply);
+  // }
+
+  /************************************/
   /***** UPGRADE v0110      ***********/
   /************************************/
 

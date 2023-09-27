@@ -1,4 +1,4 @@
-# Redeeming RDOCs Outside Settlement: redeemFreeStableToken
+# Redeeming USDRIF Outside Settlement: redeemFreeStableToken
 
 `function redeemFreeStableTokenVendors(uint256 stableTokenAmount, address vendorAccount) public`
 
@@ -10,7 +10,7 @@ NOTE: there is a retrocompatibility function called `redeemFreeStableToken(uint2
 
 ### The stableTokenAmount parameter
 
-It is the amount that the contract will use to redeem free RDOCs.
+It is the amount that the contract will use to redeem free USDRIF.
 This parameter uses a precision of the type **reservePrecision** that contains 18 decimal places and is defined in **MoCLibConnection** contract.
 
 ### The vendorAccount parameter
@@ -22,7 +22,7 @@ RIF On Chain is a dynamic system that allows you to redeem a maximum amount of f
 
 The first part transforms the amount **stableTokenAmount** into an RIF amount, but 3 things can happen:
 
-- If the absolute maximum amount of allowed RDOCs is bigger than the user's balance in RDOCs, then the user's total balance will be used to transform it to RIF.
+- If the absolute maximum amount of allowed USDRIF is bigger than the user's balance in USDRIF, then the user's total balance will be used to transform it to RIF.
 
 ```
 stableTokenAmountToRedeem = Math.min(mocState.freeStableToken(), stableToken.balanceOf(account));
@@ -40,7 +40,7 @@ finalDocAmount = Math.min(stableTokenAmount, stableTokenAmountToRedeem);
 rdocRifValue <= stableTokensToResToken(finalDocAmount);
 ```
 
-The second part will be used to compute and pay the interests of the operation that depends on the abundance of RDOCs in the MOC system. The value can be obtained by invoking the function `calcStableTokenRedInterestValues(finalDocAmount, rdocRifValue)` of the contract **MocInrate** and also has an accuracy of 18 decimal places.
+The second part will be used to compute and pay the interests of the operation that depends on the abundance of USDRIF in the MOC system. The value can be obtained by invoking the function `calcStableTokenRedInterestValues(finalDocAmount, rdocRifValue)` of the contract **MocInrate** and also has an accuracy of 18 decimal places.
 
 The third part will be used to pay the commission, this part is a percentage of the previous part. The commission fees are explained in [this](commission-fees-values.md) section.
 
@@ -52,7 +52,7 @@ The fourth part returns the amount in RIF discounting the previously calculated 
 
 ### Gas limit and gas price
 
-These two values are a parameter of the transaction, this is not used in the contract and is generally managed by your wallet (you should read about them if you are developing and do not know exactly what they are), but you should take them into account when trying to redeem some RDOCs.
+These two values are a parameter of the transaction, this is not used in the contract and is generally managed by your wallet (you should read about them if you are developing and do not know exactly what they are), but you should take them into account when trying to redeem some USDRIF.
 
 ## Possible failures
 
@@ -64,11 +64,11 @@ If the system suffers some type of attack, the contract can be paused so that op
 
 ### The MoC contract is in protected mode:
 
-In case global coverage falls below the protected threshold, the contract will enter the protected mode. If this state occurs, no more RDOCs will be available for minting. You can find more information about this mode [here](../rationale/system-states.md#protected-mode).
+In case global coverage falls below the protected threshold, the contract will enter the protected mode. If this state occurs, no more USDRIF will be available for minting. You can find more information about this mode [here](../rationale/system-states.md#protected-mode).
 
 ### The MoC contract is liquidated:
 
-In the extraneous case where a coverage that barely covers the stable tokens funds is reached, the contract will liquidate all of its assets. If this state occurs, no more RDOCs will be available for minting.
+In the extraneous case where a coverage that barely covers the stable tokens funds is reached, the contract will liquidate all of its assets. If this state occurs, no more USDRIF will be available for minting.
 To know if the contract is liquidated you can ask the **MocState** for the **state**, this will return a 0 if liquidated (it is actually an enum).
 
 ### Not enough gas:

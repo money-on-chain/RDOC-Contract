@@ -106,6 +106,25 @@ IMoCSettlement
     initializeValues(_governor, _blockSpan);
   }
 
+  /************************************/
+  /***** UPGRADE v0116_2       ***********/
+  /************************************/
+  
+  // DEPRECATED. 
+  // This function was used atomically in upgrade v0115 to migrate stableTokenV1 to stableTokenV2
+  // After that, it is removed in this contract version to cannot be called more than once.
+  //
+  // event StableTokenMigrated(address oldStableTokenAddress_, address newStableTokenAddress_);
+  //
+  // /**
+  //   @dev Migrates to a new stable token contract
+  //   @param newStableTokenAddress_ new stable token contract address
+  // */
+  // function migrateStableToken(address newStableTokenAddress_) public {
+  //   emit StableTokenMigrated(address(stableToken), newStableTokenAddress_);  
+  //   stableToken = StableToken(newStableTokenAddress_);
+  // }
+
   /**
    *  @dev Set the blockspan configuration blockspan of settlement
    */

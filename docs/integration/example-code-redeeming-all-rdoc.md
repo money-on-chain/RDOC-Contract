@@ -1,6 +1,6 @@
-# Example code redeeming all RDOC
+# Example code redeeming all USDRIF
 
-In the following example we will show how to invoke redeemAllDoc using RIF On Chain contract. As a condition to do this the MoC contract must be paused(). Check the [RDOC redeemption section](redeeming-rdocs.md) for more details.
+In the following example we will show how to invoke redeemAllDoc using RIF On Chain contract. As a condition to do this the MoC contract must be paused(). Check the [USDRIF redeemption section](redeeming-rdocs.md) for more details.
 
 We will use **truffle** and **testnet** network.
 You can find code examples into _/examples_ dir.

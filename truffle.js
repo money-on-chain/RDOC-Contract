@@ -68,6 +68,13 @@ module.exports = {
       gasPrice: 69000000,
       skipDryRun: true
     },
+    devTestnet: {
+      provider: new HDWalletProvider(mnemonic, 'https://public-node.testnet.rsk.co'),
+      network_id: '31',
+      gas: 6700000,
+      gasPrice: 69000000,
+      skipDryRun: true
+    },
     rdocMainnet: {
       provider: new HDWalletProvider(mnemonic, 'https://public-node.rsk.co'),
       network_id: '30',

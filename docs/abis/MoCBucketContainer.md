@@ -268,7 +268,7 @@ returns(address payable[])
 
 ### getActiveAddressesCount
 
-Returns all the address that currently have riskProx position for this bucket
+Returns the number of addresses that currently have riskProx position for this bucket
 
 ```js
 function getActiveAddressesCount(bytes32 bucket) public view

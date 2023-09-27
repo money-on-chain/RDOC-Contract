@@ -88,6 +88,7 @@
     "test": "hardhat test --typecheck",
     "test-parallel": "hardhat test --typecheck --parallel",
     "test-gas-estimation": "hardhat test --typecheck --grep '/.*gas estimation.*/i'",
-    "report:gas": "REPORT_GAS=true hardhat test"
+    "report:gas": "REPORT_GAS=true hardhat test",
+    "contracts-flat": "bash contracts_flat.sh"
   }
 }
