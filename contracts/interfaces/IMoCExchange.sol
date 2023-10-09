@@ -30,4 +30,10 @@ interface IMoCExchange {
 
     function redeemStableTokenWithPrice(address payable userAddress, uint256 amount, uint256 reservePrice) external
     returns (bool, uint256);
+
+    function setMaxAbsoluteOperation(uint256 maxAbsoluteOperation_) external;
+
+    function setMaxOperationalDifference(uint256 maxOperationalDifference_) external;
+
+    function setDecayBlockSpan(uint256 decayBlockSpan_) external;
 }

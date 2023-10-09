@@ -1,7 +1,7 @@
 pragma solidity ^0.5.8;
 
 import "openzeppelin-solidity/contracts/math/Math.sol";
-import "./interface/PriceProvider.sol";
+import "./interfaces/PriceProvider.sol";
 import "./MoCEMACalculator.sol";
 import "./base/MoCBase.sol";
 import "./MoCLibConnection.sol";

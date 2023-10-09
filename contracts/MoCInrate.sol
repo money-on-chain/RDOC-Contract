@@ -3,11 +3,11 @@ pragma solidity ^0.5.8;
 import "moc-governance/contracts/Governance/Governed.sol";
 import "moc-governance/contracts/Governance/IGovernor.sol";
 import "./MoCLibConnection.sol";
-import "./interface/IMoCState.sol";
+import "./interfaces/IMoCState.sol";
 import "./MoCRiskProxManager.sol";
 import "./base/MoCBase.sol";
-import "./interface/IMoCVendors.sol";
-import "./interface/IMoCInrate.sol";
+import "./interfaces/IMoCVendors.sol";
+import "./interfaces/IMoCInrate.sol";
 
 contract MoCInrateEvents {
   event InrateDailyPay(uint256 amount, uint256 daysToSettlement, uint256 nReserveBucketC0);

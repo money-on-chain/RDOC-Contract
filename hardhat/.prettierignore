@@ -1,0 +1,24 @@
+# folders
+artifacts/
+build/
+cache/
+coverage/
+deployments/
+dist/
+lib/
+node_modules/
+typechain/
+profiles/
+docs/
+contracts/crytic-export/
+.gitlab/
+.vscode/
+export/
+
+# files
+coverage.json
+tsconfig.json
+README.md
+CONTRIBUTING.md
+LICENCE.md
+CHANGELOG.md

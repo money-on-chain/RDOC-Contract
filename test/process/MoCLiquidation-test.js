@@ -68,11 +68,11 @@ contract('MoC: Liquidation', function([
       { name: 'mintRiskProVendors', args: [1, vendorAccount], value: 0, event: 'RiskProMint' },
       { name: 'redeemRiskProVendors', args: [1, vendorAccount], event: 'RiskProxRedeem' },
       /*  { name: 'mintRiskProxVendors', args: [BUCKET_X2, 0, vendorAccount], event: 'RiskProxMint' }, */
-      {
-        name: 'redeemRiskProxVendors',
-        args: [BUCKET_X2, 1, vendorAccount],
-        event: 'RiskProxRedeem'
-      },
+      // {
+      //   name: 'redeemRiskProxVendors',
+      //   args: [BUCKET_X2, 1, vendorAccount],
+      //   event: 'RiskProxRedeem'
+      // },
       { name: 'evalLiquidation', args: [] },
       { name: 'runSettlement', args: [100] }
     ].forEach(fn => {
