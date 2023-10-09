@@ -74,7 +74,12 @@ contract('MoC: MoCExchange', function([owner, userAccount, vendorAccount]) {
         });
       });
     });
-
+    describe('WHEN he tries to mint RiskPro with a higher gas price than the limit', function() {
+      it('THEN transaction reverts because uses a higher gas price', async function() {
+        const tx = mocHelper.moc.mintRiskPro(1000, { gasPrice: '21000000001' });
+        await expectRevert(tx, 'gas price is above the max allowed');
+      });
+    });
     describe('GIVEN a user owns 10 RiskPros', function() {
       let userPreBalance;
       let initialRiskProBalance;

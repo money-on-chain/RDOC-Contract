@@ -267,6 +267,8 @@ function initialize(address connectorAddress, address governorAddress, address s
 | startStoppable | bool | Indicates if the contract starts being unstoppable or not | 
 
 ### riskProxBalanceOf
+ 
+> ⚠ This has been deprecated since the [Proposal to remove leveraged positions](https://forum.moneyonchain.com/t/removal-of-leveraged-tokens-rif-on-chain/322) from the protocol was **approved**, however it is necessary to maintain the contracts and their documentation for legacy support.
 
 Gets the RiskProx balance of an address
 
@@ -476,6 +478,8 @@ function mintStableTokenVendors(uint256 resTokensToMint, address vendorAccount) 
 | vendorAccount | address | Vendor address | 
 
 ### redeemRiskProx
+ 
+> ⚠ This has been deprecated since the [Proposal to remove leveraged positions](https://forum.moneyonchain.com/t/removal-of-leveraged-tokens-rif-on-chain/322) from the protocol was **approved**, however it is necessary to maintain the contracts and their documentation for legacy support.
 
 Redeems RiskProx Tokens and pays the comissions of the operation in ReserveToken (retrocompatible function).
 
@@ -491,6 +495,8 @@ function redeemRiskProx(bytes32 bucket, uint256 riskProxAmount) public nonpayabl
 | riskProxAmount | uint256 | Amount in RiskProx | 
 
 ### redeemRiskProxVendors
+ 
+> ⚠ This has been deprecated since the [Proposal to remove leveraged positions](https://forum.moneyonchain.com/t/removal-of-leveraged-tokens-rif-on-chain/322) from the protocol was **approved**, however it is necessary to maintain the contracts and their documentation for legacy support.
 
 Redeems RiskProx Tokens and pays the comissions of the operation in ReserveTokens
 
@@ -507,6 +513,10 @@ function redeemRiskProxVendors(bytes32 bucket, uint256 riskProxAmount, address v
 | vendorAccount | address | Vendor address | 
 
 ### mintRiskProx
+ 
+> ⚠ This has been deprecated since the [Proposal to remove leveraged positions](https://forum.moneyonchain.com/t/removal-of-leveraged-tokens-rif-on-chain/322) from the protocol was **approved**, however it is necessary to maintain the contracts and their documentation for legacy support.
+
+> ⚠ See the [approved technical proposal](https://forum.moneyonchain.com/t/technical-proposal-for-removal-of-leveraged-positions-in-rif-on-chain/326#mega-technical-proposal-for-removal-of-leveraged-positions-in-rif-on-chain-1) to understand how the behavior of this function has changed.
 
 BUCKET riskProx riskProx (retrocompatible function).
 
@@ -522,6 +532,10 @@ function mintRiskProx(bytes32 bucket, uint256 resTokensToMint) public nonpayable
 | resTokensToMint | uint256 | amount to mint on ReserveToken | 
 
 ### mintRiskProxVendors
+ 
+> ⚠ This has been deprecated since the [Proposal to remove leveraged positions](https://forum.moneyonchain.com/t/removal-of-leveraged-tokens-rif-on-chain/322) from the protocol was **approved**, however it is necessary to maintain the contracts and their documentation for legacy support.
+
+> ⚠ See the [approved technical proposal](https://forum.moneyonchain.com/t/technical-proposal-for-removal-of-leveraged-positions-in-rif-on-chain/326#mega-technical-proposal-for-removal-of-leveraged-positions-in-rif-on-chain-1) to understand how the behavior of this function has changed.
 
 BUCKET riskProx minting
 

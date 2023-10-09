@@ -4,11 +4,10 @@ RIF On Chain is a suite of smart contracts whose purpose is providing:
 
 - A RIF-collateralized stable-coin, Dollar On Chain, (RDOC)
 - A passive income hodler-targeted token, RIFPro (RIFP)
-- A leveraged RIF investment instrument (RIFX series).
 
 RIF On Chain runs on the [RSK network](https://www.rsk.co/) and uses the RIF token as reserve assets to back RIF On Chain. You can find more info on the RIF token and decentralized economies [here](https://www.rifos.org/).
 
-The rationale behind this is that deposits of RIF help collateralize the RDOCs, RIFPro absorbs the USD-RIF rate fluctuations, and RIF2X is leveraged borrowing value from RIFPro and RDOC holders, with a daily interest rate being paid to the former.
+The rationale behind this is that deposits of RIF help collateralize the RDOCs and RIFPro absorbs the USD-RIF rate fluctuations.
 
 RoC system is a network of cooperative smart contracts working together to ultimately provide a US dollar pegged ERC20 Token (RDOC). In this sense, the contracts we can categorize them into 4 categories:
 

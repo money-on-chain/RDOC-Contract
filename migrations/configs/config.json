@@ -1,5 +1,6 @@
 {
   "coverage": {
+    "maxGasPrice": 21000000000,
     "initialPrice": 10000,
     "initialEma": 10000,
     "dayBlockSpan": 20,
@@ -45,6 +46,7 @@
     }
   },
   "development": {
+    "maxGasPrice": 21000000000,
     "initialPrice": 7800,
     "initialEma": 7800,
     "dayBlockSpan": 2880,
@@ -90,6 +92,7 @@
     }
   },
   "mocTestnet": {
+    "maxGasPrice": 65820000,
     "reserveToken": "0x19F64674D8A5B4E652319F5e239eFd3bc969A1fE",
     "commissionSplitter": "",
     "oracle": "0x9d4b2c05818A0086e641437fcb64ab6098c7BbEc",
@@ -142,6 +145,7 @@
     }
   },
   "mocMainnet": {
+    "maxGasPrice": 65820000,
     "reserveToken": "0x2acc95758f8b5f583470ba265eb685a8f45fc9d5",
     "commissionSplitter": "",
     "oracle": "0x504EfCadFB020d6bBaeC8a5c5BB21453719d0E00",

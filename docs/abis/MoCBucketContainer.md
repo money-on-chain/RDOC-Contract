@@ -15,6 +15,8 @@ View Source: [contracts/MoCBucketContainer.sol](../../contracts/MoCBucketContain
 
 ## Structs
 ### RiskProxBalance
+ 
+> ⚠ This has been deprecated since the [Proposal to remove leveraged positions](https://forum.moneyonchain.com/t/removal-of-leveraged-tokens-rif-on-chain/322) from the protocol was **approved**, however it is necessary to maintain the contracts and their documentation for legacy support.
 
 ```js
 struct RiskProxBalance {
