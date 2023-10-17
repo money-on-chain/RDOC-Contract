@@ -11,6 +11,7 @@ import "openzeppelin-eth/contracts/utils/ReentrancyGuard.sol";
   @dev Contract that split his balance between two addresses based on a
   proportion defined by Governance.
  */
+// TODO: TBD new CommissionSplitter implementation and its migration. It shouldn't split commissions to MoCV2
 contract CommissionSplitterV2 is Governed, ReentrancyGuard {
 
   event SplitExecuted(

@@ -1,0 +1,21 @@
+{
+    "v1ProxyAddresses": {
+      "MoC": "0x24a1ab81e9c29a8bBc163b47D934557ce5050EE1",
+      "MoCConnector": "0x9cda3A4d998eAd1F26024fE1813D826B9766db16",
+      "MoCExchange": "0x5F2690fAe4A93f0Aa695577685d2e4f87283c27A",
+      "MoCSettlement": "0x8fAD58ed5Ca2fbf738D3b28fcEd1036710b643c6",
+      "MoCInrate": "0x7913BF7E4961070d352cE947Ac44a7EA8c8e3857",
+      "MoCState": "0xF7Cdc983bd666C7EAE8B6D55e24224Fc1e49066C",
+      "CommissionSplitter": "0xBC60771B3d33f11FdF0f14844CA0C260650de04B",
+      "MoCRiskProxManager": "0xDcdA0b1d11A31d6E5594b4f7F3350392F7135cC1"
+    },
+    "v2ProxyAddresses": {
+      "MoC": "0x902EA924e051d2DEAc285464f80F9F31200EdeE0"
+    },
+    "implementationAddresses": {
+      "UpgradeDelegator": "0xDAac006569d514CEAD6126baDBDdc91eEe174f1c",
+      "Governor": "0x1d332EB64eFcfCACb0ca28A5a626E01A2500FC22",
+      "MoCHelperLib": "0x3801999076bCeE0b47141011F5D45D330F42e312"
+    },
+    "governorOwnerAddress": "0x670160830068de3E174c49A8ded457030E8E4B65"
+  }

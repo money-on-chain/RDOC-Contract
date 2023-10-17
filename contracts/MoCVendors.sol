@@ -44,6 +44,7 @@ contract MoCVendorsEvents {
   );
 }
 
+// TODO: TBD MoCVendors V2 implementation and its migration
 contract MoCVendors is MoCVendorsEvents, MoCBase, MoCLibConnection, Governed, IMoCVendors {
   using Math for uint256;
   using SafeMath for uint256;

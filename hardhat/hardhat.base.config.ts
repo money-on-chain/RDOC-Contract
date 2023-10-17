@@ -83,7 +83,7 @@ const config: HardhatUserConfig = {
     hardhat: {
       forking: {
         url: "https://public-node.rsk.co",
-        blockNumber: 5650800,
+        blockNumber: 5731100,
       },
       accounts: {
         mnemonic,
@@ -245,6 +245,7 @@ const config: HardhatUserConfig = {
     outDir: "typechain",
     target: "ethers-v5",
     alwaysGenerateOverloads: false,
+    externalArtifacts: ["./dependencies/mocV2Imports/*.json"],
   },
   gasReporter: {
     enabled: process.env.REPORT_GAS ? true : false,

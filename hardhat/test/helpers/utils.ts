@@ -1,5 +1,16 @@
 import { ethers } from "hardhat";
 import { BigNumber } from "@ethersproject/bignumber";
+import MocRifCompiled from "../../dependencies/mocV2Imports/MocRif.json";
+import MocCoreExpansionCompiled from "../../dependencies/mocV2Imports/MocCoreExpansion.json";
+import MocVendorsCompiled from "../../dependencies/mocV2Imports/MocVendors.json";
+import {
+  MocRif,
+  MocCoreExpansion,
+  MocCoreExpansion__factory,
+  MocRif__factory,
+  MocVendors,
+  MocVendors__factory,
+} from "../../typechain";
 
 export const gasLimit = 6800000;
 export type Balance = BigNumber;
@@ -14,6 +25,32 @@ export const deployUUPSProxy = async (contract: string, typechain: any) => {
   const ProxyFactory = await ethers.getContractFactory("ERC1967Proxy");
   const proxy = await ProxyFactory.deploy(mocImplementation.address, "0x");
   return typechain.connect(proxy.address, ethers.provider.getSigner());
+};
+
+export const deployMocRifV2 = async (): Promise<{
+  mocRifV2: MocRif;
+  mocCoreExpansion: MocCoreExpansion;
+  mocVendorsV2: MocVendors;
+}> => {
+  const MocImplementationFactory = await ethers.getContractFactory(MocRifCompiled.abi, MocRifCompiled.bytecode);
+  const mocImplementation = await MocImplementationFactory.deploy();
+  const ProxyFactory = await ethers.getContractFactory("ERC1967Proxy");
+  const mocProxy = await ProxyFactory.deploy(mocImplementation.address, "0x");
+
+  const MocCoreExpansionFactory = await ethers.getContractFactory(
+    MocCoreExpansionCompiled.abi,
+    MocCoreExpansionCompiled.bytecode,
+  );
+  const mocCoreExpansion = await MocCoreExpansionFactory.deploy();
+
+  const MocVendorsFactory = await ethers.getContractFactory(MocVendorsCompiled.abi, MocVendorsCompiled.bytecode);
+  const mocVendors = await MocVendorsFactory.deploy();
+  const vendorsProxy = await ProxyFactory.deploy(mocVendors.address, "0x");
+  return {
+    mocRifV2: MocRif__factory.connect(mocProxy.address, ethers.provider.getSigner()),
+    mocCoreExpansion: MocCoreExpansion__factory.connect(mocCoreExpansion.address, ethers.provider.getSigner()),
+    mocVendorsV2: MocVendors__factory.connect(vendorsProxy.address, ethers.provider.getSigner()),
+  };
 };
 
 export const deployTransparentProxy = async (contract: string, proxyAdmin: string, typechain: any, libraries?: any) => {
@@ -71,7 +108,7 @@ export const baseParams = {
   stableTmin: pEth(0),
   stableTmax: pEth("0.0002611578760678"),
   stablePower: pEth(1),
-  mocProportion: 0, // pEth(0.01 * 10 ** 18), // mocPrecision
+  mocProportion: pEth(0.01), // mocPrecision
 
   liquidationEnabled: false,
   _protected: pEth(1.5), // mocPrecision

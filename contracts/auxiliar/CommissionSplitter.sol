@@ -12,6 +12,7 @@ import "openzeppelin-eth/contracts/utils/ReentrancyGuard.sol";
   proportion defined by Governance. One of those addresses should
   be a Money on Chain RRC20 contract.
  */
+// TODO: TBD new CommissionSplitter implementation and its migration. It shouldn't split commissions to MoCV2
 contract CommissionSplitter is Governed, ReentrancyGuard {
   event SplitExecuted(uint256 commissionAmount, uint256 mocAmount, uint256 mocTokenAmount);
   // Math
