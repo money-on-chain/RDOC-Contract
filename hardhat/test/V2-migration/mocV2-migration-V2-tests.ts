@@ -13,6 +13,7 @@ import {
   CommissionSplitter,
   MoCState,
   MocRif,
+  MocQueue,
   MoCInrate,
 } from "../../typechain";
 import { pEth } from "../helpers/utils";
@@ -32,6 +33,7 @@ describe("Feature: MoC V2 migration - V2 functionalities", () => {
   let alice: Address;
   let aliceSigner: SignerWithAddress;
   let mocRifV2: MocRif;
+  let mocQueue: MocQueue;
   let mocCommissionSplitter: CommissionSplitter;
   let mocInrateProxy: MoCInrate;
   describe("GIVEN a MoC Legacy protocol deployed", () => {
@@ -49,6 +51,7 @@ describe("Feature: MoC V2 migration - V2 functionalities", () => {
         mocState: mocStateProxy,
         mocInrate: mocInrateProxy,
         mocRifV2,
+        mocQueue,
       } = await fixtureDeployed()());
       aliceSigner = await ethers.getSigner(alice);
     });
@@ -107,7 +110,7 @@ describe("Feature: MoC V2 migration - V2 functionalities", () => {
         });
         describe("WHEN check StableToken available to mint", () => {
           it("THEN MocV1 and MocV2 have the same", async () => {
-            assertPrec(stableTokenAvailableBefore, await mocRifV2.getTPAvailableToMint(0));
+            assertPrec(stableTokenAvailableBefore, await mocRifV2.getTPAvailableToMint(stableToken.address));
           });
         });
         describe("WHEN check TP Ema", () => {
@@ -129,6 +132,8 @@ describe("Feature: MoC V2 migration - V2 functionalities", () => {
           beforeEach(async () => {
             await reserveToken.connect(aliceSigner).approve(mocRifV2.address, pEth(100000));
             await mocRifV2.connect(aliceSigner).mintTC(pEth(100), pEth(100000));
+            // execute last operation
+            await mocQueue.execute((await mocQueue.operIdCount()).sub(1));
           });
           it("THEN alice riskProToken balance is 1000000(from V1) + 100(from V2)", async () => {
             assertPrec(await riskProToken.balanceOf(alice), 1000100);
@@ -136,7 +141,10 @@ describe("Feature: MoC V2 migration - V2 functionalities", () => {
         });
         describe("WHEN alice redeems 100 TC using MocV2", () => {
           beforeEach(async () => {
+            await riskProToken.connect(aliceSigner).approve(mocRifV2.address, pEth(100));
             await mocRifV2.connect(aliceSigner).redeemTC(pEth(100), 0);
+            // execute last operation
+            await mocQueue.execute((await mocQueue.operIdCount()).sub(1));
           });
           it("THEN alice riskProToken balance is 1000000(from V1) - 100(from V2)", async () => {
             assertPrec(await riskProToken.balanceOf(alice), 999900);
@@ -145,7 +153,9 @@ describe("Feature: MoC V2 migration - V2 functionalities", () => {
         describe("WHEN alice mints 100 TP using MocV2", () => {
           beforeEach(async () => {
             await reserveToken.connect(aliceSigner).approve(mocRifV2.address, pEth(100000));
-            await mocRifV2.connect(aliceSigner).mintTP(0, pEth(100), pEth(100000));
+            await mocRifV2.connect(aliceSigner).mintTP(stableToken.address, pEth(100), pEth(100000));
+            // execute last operation
+            await mocQueue.execute((await mocQueue.operIdCount()).sub(1));
           });
           it("THEN alice stableToken balance is 1000000(from V1) + 100(from V2)", async () => {
             assertPrec(await stableToken.balanceOf(alice), 1000100);
@@ -153,7 +163,10 @@ describe("Feature: MoC V2 migration - V2 functionalities", () => {
         });
         describe("WHEN alice redeems 100 TP using MocV2", () => {
           beforeEach(async () => {
-            await mocRifV2.connect(aliceSigner).redeemTP(0, pEth(100), 0);
+            await stableToken.connect(aliceSigner).approve(mocRifV2.address, pEth(100));
+            await mocRifV2.connect(aliceSigner).redeemTP(stableToken.address, pEth(100), 0);
+            // execute last operation
+            await mocQueue.execute((await mocQueue.operIdCount()).sub(1));
           });
           it("THEN alice stableToken balance is 1000000(from V1) - 100(from V2)", async () => {
             assertPrec(await stableToken.balanceOf(alice), 999900);

@@ -85,6 +85,8 @@ const config: HardhatUserConfig = {
         url: "https://public-node.rsk.co",
         blockNumber: 5731100,
       },
+      // TODO: remove this
+      allowUnlimitedContractSize: true,
       accounts: {
         mnemonic,
         accountsBalance: "100000000000000000000000000000000000",
