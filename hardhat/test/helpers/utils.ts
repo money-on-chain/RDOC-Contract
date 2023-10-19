@@ -2,12 +2,18 @@ import { ethers } from "hardhat";
 import { BigNumber } from "@ethersproject/bignumber";
 import MocRifCompiled from "../../dependencies/mocV2Imports/MocRif.json";
 import MocCoreExpansionCompiled from "../../dependencies/mocV2Imports/MocCoreExpansion.json";
+import MocQueueCompiled from "../../dependencies/mocV2Imports/MocQueue.json";
+import MocMultiCollateralGuardCompiled from "../../dependencies/mocV2Imports/MocMultiCollateralGuard.json";
 import MocVendorsCompiled from "../../dependencies/mocV2Imports/MocVendors.json";
 import {
   MocRif,
   MocCoreExpansion,
   MocCoreExpansion__factory,
   MocRif__factory,
+  MocQueue,
+  MocQueue__factory,
+  MocMultiCollateralGuard,
+  MocMultiCollateralGuard__factory,
   MocVendors,
   MocVendors__factory,
 } from "../../typechain";
@@ -18,6 +24,7 @@ export type Balance = BigNumber;
 export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
 export const MINTER_ROLE = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("MINTER_ROLE"));
 export const BURNER_ROLE = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("BURNER_ROLE"));
+export const EXECUTOR_ROLE = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("EXECUTOR_ROLE"));
 
 export const deployUUPSProxy = async (contract: string, typechain: any) => {
   const MocImplementationFactory = await ethers.getContractFactory(contract);
@@ -30,6 +37,8 @@ export const deployUUPSProxy = async (contract: string, typechain: any) => {
 export const deployMocRifV2 = async (): Promise<{
   mocRifV2: MocRif;
   mocCoreExpansion: MocCoreExpansion;
+  mocQueue: MocQueue;
+  mocMultiCollateralGuard: MocMultiCollateralGuard;
   mocVendorsV2: MocVendors;
 }> => {
   const MocImplementationFactory = await ethers.getContractFactory(MocRifCompiled.abi, MocRifCompiled.bytecode);
@@ -43,12 +52,28 @@ export const deployMocRifV2 = async (): Promise<{
   );
   const mocCoreExpansion = await MocCoreExpansionFactory.deploy();
 
+  const MocQueueFactory = await ethers.getContractFactory(MocQueueCompiled.abi, MocQueueCompiled.bytecode);
+  const mocQueueImplementation = await MocQueueFactory.deploy();
+  const mocQueueProxy = await ProxyFactory.deploy(mocQueueImplementation.address, "0x");
+
+  const MocMultiCollateralGuardFactory = await ethers.getContractFactory(
+    MocMultiCollateralGuardCompiled.abi,
+    MocMultiCollateralGuardCompiled.bytecode,
+  );
+  const mocMultiCollateralGuardImplementation = await MocMultiCollateralGuardFactory.deploy();
+  const mocMultiCollateralGuardProxy = await ProxyFactory.deploy(mocMultiCollateralGuardImplementation.address, "0x");
+
   const MocVendorsFactory = await ethers.getContractFactory(MocVendorsCompiled.abi, MocVendorsCompiled.bytecode);
   const mocVendors = await MocVendorsFactory.deploy();
   const vendorsProxy = await ProxyFactory.deploy(mocVendors.address, "0x");
   return {
     mocRifV2: MocRif__factory.connect(mocProxy.address, ethers.provider.getSigner()),
     mocCoreExpansion: MocCoreExpansion__factory.connect(mocCoreExpansion.address, ethers.provider.getSigner()),
+    mocQueue: MocQueue__factory.connect(mocQueueProxy.address, ethers.provider.getSigner()),
+    mocMultiCollateralGuard: MocMultiCollateralGuard__factory.connect(
+      mocMultiCollateralGuardProxy.address,
+      ethers.provider.getSigner(),
+    ),
     mocVendorsV2: MocVendors__factory.connect(vendorsProxy.address, ethers.provider.getSigner()),
   };
 };

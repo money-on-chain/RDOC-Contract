@@ -91,37 +91,37 @@ describe("Feature: MoC V2 migration - V1 functionalities", () => {
             );
           });
         });
-        describe("WHEN alice mints 10 RiskPro in Moc V2 operating with MoC Legacy", () => {
+        describe("WHEN alice tries to mint 10 RiskPro in MoC V1", () => {
           it("THEN tx reverts because MoC contract is deprecated", async () => {
             await reserveToken.connect(aliceSigner).approve(mocProxy.address, pEth(10));
             await expectRevertContractDeprecated(mocProxy.connect(aliceSigner).mintRiskPro(pEth(10)));
           });
         });
-        describe("WHEN alice mints 10 RiskPro via vendor in Moc V2 operating with MoC Legacy", () => {
+        describe("WHEN alice tries to mint 10 RiskPro via vendor in MoC V1", () => {
           it("THEN tx reverts because MoC contract is deprecated", async () => {
             await reserveToken.connect(aliceSigner).approve(mocProxy.address, pEth(10));
             await expectRevertContractDeprecated(mocProxy.connect(aliceSigner).mintRiskProVendors(pEth(10), vendor));
           });
         });
-        describe("WHEN alice redeems 10 RiskPro in Moc V2 operating with MoC Legacy", () => {
+        describe("WHEN alice tries to redeem 10 RiskPro in Moc V1", () => {
           it("THEN tx reverts because MoC contract is deprecated", async () => {
             await riskProToken.connect(aliceSigner).approve(mocProxy.address, pEth(10));
             await expectRevertContractDeprecated(mocProxy.connect(aliceSigner).redeemRiskPro(pEth(10)));
           });
         });
-        describe("WHEN alice redeems 10 RiskPro via vendor in Moc V2 operating with MoC Legacy", () => {
+        describe("WHEN alice tries to redeem 10 RiskPro via vendor in Moc V1", () => {
           it("THEN tx reverts because MoC contract is deprecated", async () => {
             await riskProToken.connect(aliceSigner).approve(mocProxy.address, pEth(10));
             await expectRevertContractDeprecated(mocProxy.connect(aliceSigner).redeemRiskProVendors(pEth(10), vendor));
           });
         });
-        describe("WHEN alice mints 10 Stable tokens in Moc V2 operating with MoC Legacy", () => {
+        describe("WHEN alice tries to mint 10 Stable tokens in Moc V1", () => {
           it("THEN tx reverts because MoC contract is deprecated", async () => {
             await reserveToken.connect(aliceSigner).approve(mocProxy.address, pEth(10));
             await expectRevertContractDeprecated(mocProxy.connect(aliceSigner).mintStableToken(pEth(10)));
           });
         });
-        describe("WHEN alice mints 10 Stable tokens via vendor in Moc V2 operating with MoC Legacy", () => {
+        describe("WHEN alice tries to mint 10 Stable tokens via vendor in Moc V1", () => {
           it("THEN tx reverts because MoC contract is deprecated", async () => {
             await reserveToken.connect(aliceSigner).approve(mocProxy.address, pEth(10));
             await expectRevertContractDeprecated(
@@ -129,13 +129,13 @@ describe("Feature: MoC V2 migration - V1 functionalities", () => {
             );
           });
         });
-        describe("WHEN alice redeems 10 Stable tokens in Moc V2 operating with MoC Legacy", () => {
+        describe("WHEN alice tries to redeem 10 Stable tokens in Moc V1", () => {
           it("THEN tx reverts because MoC contract is deprecated", async () => {
             await stableToken.connect(aliceSigner).approve(mocProxy.address, pEth(10));
             await expectRevertContractDeprecated(mocProxy.connect(aliceSigner).redeemFreeStableToken(pEth(10)));
           });
         });
-        describe("WHEN alice redeems 10 Stable tokens via vendor in Moc V2 operating with MoC Legacy", () => {
+        describe("WHEN alice tries to redeem 10 Stable tokens via vendor in Moc V1", () => {
           it("THEN tx reverts because MoC contract is deprecated", async () => {
             await stableToken.connect(aliceSigner).approve(mocProxy.address, pEth(10));
             await expectRevertContractDeprecated(
@@ -143,7 +143,7 @@ describe("Feature: MoC V2 migration - V1 functionalities", () => {
             );
           });
         });
-        describe("WHEN 10 AC are injected to Moc V2 with MoC Legacy", () => {
+        describe("WHEN 10 AC are injected to Moc V1", () => {
           it("THEN tx reverts because MoC contract is deprecated", async () => {
             await reserveToken.approve(mocProxy.address, pEth(10));
             await expectRevertContractDeprecated(mocProxy.addReserves(pEth(10)));

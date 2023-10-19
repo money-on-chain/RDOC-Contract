@@ -38,6 +38,7 @@ import {
   ProxyAdmin__factory,
   ProxyAdmin,
   MocRif,
+  MocQueue,
   GovernorMock,
   GovernorMock__factory,
 } from "../../typechain";
@@ -48,6 +49,7 @@ import {
   pEth,
   deployMocRifV2,
   deployUUPSProxy,
+  EXECUTOR_ROLE,
 } from "../helpers/utils";
 
 export const fixtureDeployed = memoizee(
@@ -70,6 +72,7 @@ export const fixtureDeployed = memoizee(
     reserveToken: ReserveToken;
     stableTokenPriceProvider: PriceProviderMock;
     mocRifV2: MocRif;
+    mocQueue: MocQueue;
   }>) => {
     return deployments.createFixture(async ({ ethers }) => {
       await deployments.fixture();
@@ -245,7 +248,7 @@ export const fixtureDeployed = memoizee(
       await moc.setDecayBlockSpan(720);
 
       // deploy MocV2
-      const { mocRifV2, mocCoreExpansion, mocVendorsV2 } = await deployMocRifV2();
+      const { mocRifV2, mocCoreExpansion, mocQueue, mocMultiCollateralGuard, mocVendorsV2 } = await deployMocRifV2();
 
       await mocRifV2.initialize({
         initializeCoreParams: {
@@ -280,7 +283,17 @@ export const fixtureDeployed = memoizee(
           mocVendors: mocVendorsV2.address,
         },
         acTokenAddress: reserveToken.address!,
+        mocQueue: mocQueue.address,
       });
+
+      // initialize mocQueue
+      await mocQueue.initialize(governorMock.address, deployer);
+      await mocQueue.registerBucket(mocRifV2.address);
+      await mocQueue.grantRole(EXECUTOR_ROLE, deployer);
+
+      // initialize mocMultiCollateralGuard
+      await mocMultiCollateralGuard.addBucket(mocRifV2.address);
+      await mocRifV2.setMocMultiCollateralGuard(mocMultiCollateralGuard.address);
 
       await mocVendorsV2.initialize(deployer, governorMock.address, deployer);
       // set 5% markup to vendor
@@ -319,6 +332,7 @@ export const fixtureDeployed = memoizee(
         reserveToken,
         stableTokenPriceProvider,
         mocRifV2,
+        mocQueue,
       };
     });
   },
