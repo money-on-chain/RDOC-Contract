@@ -11,7 +11,6 @@ import {
   StableToken,
   MocRif,
   MocQueue,
-  MocMultiCollateralGuard,
   MocCoreExpansion,
   MoC__factory,
   MoCState__factory,
@@ -30,8 +29,13 @@ import {
   MoCInrate,
   MoCInrate__factory,
   TokenMigrator__factory,
+  FCMaxAbsoluteOpProvider,
+  FCMaxOpDifferenceProvider,
+  StopperV2,
+  StopperV2__factory,
+  MocVendors,
 } from "../../typechain";
-import { Balance, deployContract, deployMocRifV2, pEth, EXECUTOR_ROLE } from "../helpers/utils";
+import { Balance, deployContract, deployMocRifV2, pEth, EXECUTOR_ROLE, CONSTANTS } from "../helpers/utils";
 import { assertPrec } from "../helpers/assertHelper";
 import { deployChanger } from "./deployChanger";
 
@@ -51,12 +55,15 @@ describe("Feature: MoC V2 migration - mainnet fork", () => {
   let governor: Governor;
   let mocRifV2: MocRif;
   let mocQueue: MocQueue;
+  let stopper: StopperV2;
   let deployer: Address;
   let governorOwnerSigner: SignerWithAddress;
   let holderSigner: SignerWithAddress;
+  let multisig: SignerWithAddress;
   let signer: any;
   let holderStableTokenBalanceBefore: Balance;
   let holderRifProTokenBalanceBefore: Balance;
+  let vendorReserveTokenBalanceBefore: Balance;
   const governorOwnerAddress = "0x65a5681bE95d212F0c90eAd40170D8277de81169";
   const holderAddress = "0xFD5c1C3d086a9CC0f21beaB6ddE3900C9351FC59";
   const vendor = "0xd249E2275A6ed216432f167c3393f6F72e09eF49";
@@ -79,12 +86,16 @@ describe("Feature: MoC V2 migration - mainnet fork", () => {
       reserveToken = ReserveToken__factory.connect(mocMainnetAddresses.implementationAddresses.MocReserve, signer);
       mocToken = MoCToken__factory.connect(mocMainnetAddresses.implementationAddresses.MoCToken, signer);
       governor = Governor__factory.connect("0x3b8853DF65AfBd94853E6D77ee0Ab5590F41bB08", signer);
+      stopper = StopperV2__factory.connect("0x51072aC8Fe05Fcfdc14e02Bb3a0C7499Ad9eF140", signer);
       stableToken = StableToken__factory.connect("0x3A15461d8aE0F0Fb5Fa2629e9DA7D66A794a6e37", signer);
       riskProToken = RiskProToken__factory.connect("0xf4d27c56595Ed59B66cC7F03CFF5193e4bd74a61", signer);
       // deploy MocV2
       let mocCoreExpansion: MocCoreExpansion;
-      let mocMultiCollateralGuard: MocMultiCollateralGuard;
-      ({ mocRifV2, mocCoreExpansion, mocQueue, mocMultiCollateralGuard } = await deployMocRifV2());
+      let maxAbsoluteOpProvider: FCMaxAbsoluteOpProvider;
+      let maxOpDiffProvider: FCMaxOpDifferenceProvider;
+      let mocVendorsV2: MocVendors;
+      ({ mocRifV2, mocCoreExpansion, mocQueue, mocVendorsV2, maxAbsoluteOpProvider, maxOpDiffProvider } =
+        await deployMocRifV2(stopper.address));
       const governorMock = await deployContract("GovernorMock", GovernorMock__factory, []);
 
       await mocRifV2.initialize({
@@ -112,27 +123,43 @@ describe("Feature: MoC V2 migration - mainnet fork", () => {
             tcInterestCollectorAddress: await mocInrateProxy.getRiskProInterestAddress(),
             tcInterestRate: await mocInrateProxy.getRiskProRate(),
             tcInterestPaymentBlockSpan: await mocInrateProxy.getRiskProInterestBlockSpan(),
+            maxAbsoluteOpProviderAddress: maxAbsoluteOpProvider.address,
+            maxOpDiffProviderAddress: maxOpDiffProvider.address,
+            decayBlockSpan: 720,
           },
           governorAddress: governorMock.address,
           pauserAddress: deployer,
           mocCoreExpansion: mocCoreExpansion.address,
           emaCalculationBlockSpan: await mocStateProxy.getEmaCalculationBlockSpan(),
-          mocVendors: mocMainnetAddresses.proxyAddresses.MoCVendors,
+          mocVendors: mocVendorsV2.address,
         },
         acTokenAddress: reserveToken.address!,
         mocQueue: mocQueue.address,
       });
+
+      await mocVendorsV2.initialize(deployer, governorMock.address, deployer);
+      // set 10% markup to vendor
+      await mocVendorsV2.setVendorMarkup(vendor, pEth(0.1));
+
       // pause MocRifV2
       await mocRifV2.pause();
 
       // initialize mocQueue
-      await mocQueue.initialize(governorMock.address, deployer);
+      const minOperWaitingBlck = 1;
+      const execFeeParams = {
+        tcMintExecFee: CONSTANTS.EXEC_FEE,
+        tcRedeemExecFee: CONSTANTS.EXEC_FEE,
+        tpMintExecFee: CONSTANTS.EXEC_FEE,
+        tpRedeemExecFee: CONSTANTS.EXEC_FEE,
+        mintTCandTPExecFee: CONSTANTS.EXEC_FEE,
+        redeemTCandTPExecFee: CONSTANTS.EXEC_FEE,
+        swapTPforTPExecFee: CONSTANTS.EXEC_FEE,
+        swapTPforTCExecFee: CONSTANTS.EXEC_FEE,
+        swapTCforTPExecFee: CONSTANTS.EXEC_FEE,
+      };
+      await mocQueue.initialize(governorMock.address, deployer, minOperWaitingBlck, execFeeParams);
       await mocQueue.registerBucket(mocRifV2.address);
       await mocQueue.grantRole(EXECUTOR_ROLE, deployer);
-
-      // initialize mocMultiCollateralGuard
-      await mocMultiCollateralGuard.addBucket(mocRifV2.address);
-      await mocRifV2.setMocMultiCollateralGuard(mocMultiCollateralGuard.address);
 
       // add Legacy stableToken in MocV2
       await mocRifV2.addPeggedToken({
@@ -152,8 +179,16 @@ describe("Feature: MoC V2 migration - mainnet fork", () => {
       await helpers.impersonateAccount(holderAddress);
       holderSigner = await ethers.getSigner(holderAddress);
 
+      const multisigAddress = await stopper.owner();
+      await helpers.impersonateAccount(multisigAddress);
+      multisig = await ethers.getSigner(multisigAddress);
+
       await helpers.setBalance(holderAddress, pEth(10000000));
       await helpers.setBalance(governorOwnerAddress, pEth(10000000));
+      await helpers.setBalance(multisigAddress, pEth(10000000));
+
+      await stopper.connect(multisig).setMaxAbsoluteOperation(maxAbsoluteOpProvider.address, CONSTANTS.MAX_UINT256);
+      await stopper.connect(multisig).setMaxOperationalDifference(maxOpDiffProvider.address, CONSTANTS.MAX_UINT256);
     });
     describe("AND V2MigrationChanger is executed", async () => {
       let coverageBefore: BigNumber;
@@ -258,48 +293,128 @@ describe("Feature: MoC V2 migration - mainnet fork", () => {
         before(async () => {
           holderRifProTokenBalanceBefore = await riskProToken.balanceOf(holderAddress);
           await reserveToken.connect(holderSigner).approve(mocRifV2.address, pEth(10));
-          await mocRifV2.connect(holderSigner).mintTC(pEth(1), pEth(10));
-          // execute last operation
-          await mocQueue.execute((await mocQueue.operIdCount()).sub(1));
+          await mocRifV2.connect(holderSigner).mintTC(pEth(1), pEth(10), { value: CONSTANTS.EXEC_FEE });
+          await mocQueue.execute(deployer);
         });
         it("THEN holder riskProToken increases by 1", async () => {
           assertPrec((await riskProToken.balanceOf(holderAddress)).sub(holderRifProTokenBalanceBefore), 1);
+        });
+      });
+      describe("WHEN holder mints 1 TC via vendor using MocV2", () => {
+        before(async () => {
+          holderRifProTokenBalanceBefore = await riskProToken.balanceOf(holderAddress);
+          vendorReserveTokenBalanceBefore = await reserveToken.balanceOf(vendor);
+          await reserveToken.connect(holderSigner).approve(mocRifV2.address, pEth(10));
+          await mocRifV2
+            .connect(holderSigner)
+            .mintTCViaVendor(pEth(1), pEth(10), vendor, { value: CONSTANTS.EXEC_FEE });
+          await mocQueue.execute(deployer);
+        });
+        it("THEN holder riskProToken increases by 1", async () => {
+          assertPrec((await riskProToken.balanceOf(holderAddress)).sub(holderRifProTokenBalanceBefore), 1);
+        });
+        it("THEN vendor reserve token increases by 0.07 (10% of pTCac)", async () => {
+          // await mocRifV2.getPTCac() = 0.745749854285149551
+          assertPrec(
+            (await reserveToken.balanceOf(vendor)).sub(vendorReserveTokenBalanceBefore),
+            "0.074574985428514955",
+          );
         });
       });
       describe("WHEN holder redeems 1 TC using MocV2", () => {
         before(async () => {
           holderRifProTokenBalanceBefore = await riskProToken.balanceOf(holderAddress);
           await riskProToken.connect(holderSigner).approve(mocRifV2.address, pEth(1));
-          await mocRifV2.connect(holderSigner).redeemTC(pEth(1), 0);
-          // execute last operation
-          await mocQueue.execute((await mocQueue.operIdCount()).sub(1));
+          await mocRifV2.connect(holderSigner).redeemTC(pEth(1), 0, { value: CONSTANTS.EXEC_FEE });
+          await mocQueue.execute(deployer);
         });
         it("THEN holder riskProToken balance decrease by 1", async () => {
           assertPrec(holderRifProTokenBalanceBefore.sub(await riskProToken.balanceOf(holderAddress)), 1);
+        });
+      });
+      describe("WHEN holder redeems 1 TC via vendor using MocV2", () => {
+        before(async () => {
+          holderRifProTokenBalanceBefore = await riskProToken.balanceOf(holderAddress);
+          vendorReserveTokenBalanceBefore = await reserveToken.balanceOf(vendor);
+          await riskProToken.connect(holderSigner).approve(mocRifV2.address, pEth(1));
+          await mocRifV2.connect(holderSigner).redeemTCViaVendor(pEth(1), 0, vendor, { value: CONSTANTS.EXEC_FEE });
+          await mocQueue.execute(deployer);
+        });
+        it("THEN holder riskProToken balance decrease by 1", async () => {
+          assertPrec(holderRifProTokenBalanceBefore.sub(await riskProToken.balanceOf(holderAddress)), 1);
+        });
+        it("THEN vendor reserve token increases by 0.07 (10% of pTCac)", async () => {
+          // await mocRifV2.getPTCac() = 0.745749854285149551
+          assertPrec(
+            (await reserveToken.balanceOf(vendor)).sub(vendorReserveTokenBalanceBefore),
+            "0.074574985428514955",
+          );
         });
       });
       describe("WHEN holder mints 1 TP using MocV2", () => {
         before(async () => {
           holderStableTokenBalanceBefore = await stableToken.balanceOf(holderAddress);
           await reserveToken.connect(holderSigner).approve(mocRifV2.address, pEth(1000));
-          await mocRifV2.connect(holderSigner).mintTP(stableToken.address, pEth(1), pEth(1000));
-          // execute last operation
-          await mocQueue.execute((await mocQueue.operIdCount()).sub(1));
+          await mocRifV2
+            .connect(holderSigner)
+            .mintTP(stableToken.address, pEth(1), pEth(1000), { value: CONSTANTS.EXEC_FEE });
+          await mocQueue.execute(deployer);
         });
         it("THEN holder stableToken balance increase by 1", async () => {
           assertPrec((await stableToken.balanceOf(holderAddress)).sub(holderStableTokenBalanceBefore), 1);
+        });
+      });
+      describe("WHEN holder mints 1 TP via vendor susing MocV2", () => {
+        before(async () => {
+          holderStableTokenBalanceBefore = await stableToken.balanceOf(holderAddress);
+          vendorReserveTokenBalanceBefore = await reserveToken.balanceOf(vendor);
+          await reserveToken.connect(holderSigner).approve(mocRifV2.address, pEth(1000));
+          await mocRifV2
+            .connect(holderSigner)
+            .mintTPViaVendor(stableToken.address, pEth(1), pEth(1000), vendor, { value: CONSTANTS.EXEC_FEE });
+          await mocQueue.execute(deployer);
+        });
+        it("THEN holder stableToken balance increase by 1", async () => {
+          assertPrec((await stableToken.balanceOf(holderAddress)).sub(holderStableTokenBalanceBefore), 1);
+        });
+        it("THEN vendor reserve token increases by 1.43 (10% of 1/pACtp)", async () => {
+          // await mocRifV2.getPACtp(stableToken.address) = 0.069500000000000000
+          assertPrec(
+            (await reserveToken.balanceOf(vendor)).sub(vendorReserveTokenBalanceBefore),
+            "1.438848920863309352",
+          );
         });
       });
       describe("WHEN holder redeems 1 TP using MocV2", () => {
         before(async () => {
           holderStableTokenBalanceBefore = await stableToken.balanceOf(holderAddress);
           await stableToken.connect(holderSigner).approve(mocRifV2.address, pEth(1));
-          await mocRifV2.connect(holderSigner).redeemTP(stableToken.address, pEth(1), 0);
-          // execute last operation
-          await mocQueue.execute((await mocQueue.operIdCount()).sub(1));
+          await mocRifV2.connect(holderSigner).redeemTP(stableToken.address, pEth(1), 0, { value: CONSTANTS.EXEC_FEE });
+          await mocQueue.execute(deployer);
         });
         it("THEN alice stableToken balance decrease by 1", async () => {
           assertPrec(holderStableTokenBalanceBefore.sub(await stableToken.balanceOf(holderAddress)), 1);
+        });
+      });
+      describe("WHEN holder redeems 1 TP via vendor using MocV2", () => {
+        before(async () => {
+          holderStableTokenBalanceBefore = await stableToken.balanceOf(holderAddress);
+          vendorReserveTokenBalanceBefore = await reserveToken.balanceOf(vendor);
+          await stableToken.connect(holderSigner).approve(mocRifV2.address, pEth(1));
+          await mocRifV2
+            .connect(holderSigner)
+            .redeemTPViaVendor(stableToken.address, pEth(1), 0, vendor, { value: CONSTANTS.EXEC_FEE });
+          await mocQueue.execute(deployer);
+        });
+        it("THEN alice stableToken balance decrease by 1", async () => {
+          assertPrec(holderStableTokenBalanceBefore.sub(await stableToken.balanceOf(holderAddress)), 1);
+        });
+        it("THEN vendor reserve token increases by 1.43 (10% of 1/pACtp)", async () => {
+          // await mocRifV2.getPACtp(stableToken.address) = 0.069500000000000000
+          assertPrec(
+            (await reserveToken.balanceOf(vendor)).sub(vendorReserveTokenBalanceBefore),
+            "1.438848920863309352",
+          );
         });
       });
       describe("WHEN alice tries to mint 10 RiskPro in Moc V1", () => {
@@ -387,9 +502,8 @@ describe("Feature: MoC V2 migration - mainnet fork", () => {
               .approve(mocRifV2.address, stableTokenV1BalanceBefore);
             await mocRifV2
               .connect(stableTokenV1HolderSigner)
-              .redeemTP(stableTokenV1.address, stableTokenV1BalanceBefore, 0);
-            // execute last operation
-            await mocQueue.execute((await mocQueue.operIdCount()).sub(1));
+              .redeemTP(stableTokenV1.address, stableTokenV1BalanceBefore, 0, { value: CONSTANTS.EXEC_FEE });
+            await mocQueue.execute(deployer);
           });
           it("THEN balances didn't change because operation was rejected", async () => {
             const stableTokenV1BalanceAfter = await stableTokenV1
@@ -418,9 +532,8 @@ describe("Feature: MoC V2 migration - mainnet fork", () => {
                   .approve(mocRifV2.address, stableTokenV1BalanceBefore);
                 await mocRifV2
                   .connect(stableTokenV1HolderSigner)
-                  .redeemTP(stableToken.address, stableTokenV1BalanceBefore, 0);
-                // execute last operation
-                await mocQueue.execute((await mocQueue.operIdCount()).sub(1));
+                  .redeemTP(stableToken.address, stableTokenV1BalanceBefore, 0, { value: CONSTANTS.EXEC_FEE });
+                await mocQueue.execute(deployer);
               });
               it("THEN both stable tokens balance are 0 because operation succeeds", async () => {
                 const stableTokenV1BalanceAfter = await stableTokenV1

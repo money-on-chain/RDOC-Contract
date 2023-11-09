@@ -16,7 +16,7 @@ import {
   MocQueue,
   MoCInrate,
 } from "../../typechain";
-import { pEth } from "../helpers/utils";
+import { CONSTANTS, pEth } from "../helpers/utils";
 import { assertPrec } from "../helpers/assertHelper";
 import { fixtureDeployed } from "./fixture";
 import { deployChanger } from "./deployChanger";
@@ -31,6 +31,7 @@ describe("Feature: MoC V2 migration - V2 functionalities", () => {
   let riskProToken: RiskProToken;
   let upgradeDelegator: UpgradeDelegator;
   let alice: Address;
+  let deployer: Address;
   let aliceSigner: SignerWithAddress;
   let mocRifV2: MocRif;
   let mocQueue: MocQueue;
@@ -38,7 +39,7 @@ describe("Feature: MoC V2 migration - V2 functionalities", () => {
   let mocInrateProxy: MoCInrate;
   describe("GIVEN a MoC Legacy protocol deployed", () => {
     beforeEach(async () => {
-      ({ alice } = await getNamedAccounts());
+      ({ alice, deployer } = await getNamedAccounts());
       ({
         mocHelperAddress,
         moc: mocProxy,
@@ -131,9 +132,8 @@ describe("Feature: MoC V2 migration - V2 functionalities", () => {
         describe("WHEN alice mints 100 TC using MocV2", () => {
           beforeEach(async () => {
             await reserveToken.connect(aliceSigner).approve(mocRifV2.address, pEth(100000));
-            await mocRifV2.connect(aliceSigner).mintTC(pEth(100), pEth(100000));
-            // execute last operation
-            await mocQueue.execute((await mocQueue.operIdCount()).sub(1));
+            await mocRifV2.connect(aliceSigner).mintTC(pEth(100), pEth(100000), { value: CONSTANTS.EXEC_FEE });
+            await mocQueue.execute(deployer);
           });
           it("THEN alice riskProToken balance is 1000000(from V1) + 100(from V2)", async () => {
             assertPrec(await riskProToken.balanceOf(alice), 1000100);
@@ -142,9 +142,8 @@ describe("Feature: MoC V2 migration - V2 functionalities", () => {
         describe("WHEN alice redeems 100 TC using MocV2", () => {
           beforeEach(async () => {
             await riskProToken.connect(aliceSigner).approve(mocRifV2.address, pEth(100));
-            await mocRifV2.connect(aliceSigner).redeemTC(pEth(100), 0);
-            // execute last operation
-            await mocQueue.execute((await mocQueue.operIdCount()).sub(1));
+            await mocRifV2.connect(aliceSigner).redeemTC(pEth(100), 0, { value: CONSTANTS.EXEC_FEE });
+            await mocQueue.execute(deployer);
           });
           it("THEN alice riskProToken balance is 1000000(from V1) - 100(from V2)", async () => {
             assertPrec(await riskProToken.balanceOf(alice), 999900);
@@ -153,9 +152,10 @@ describe("Feature: MoC V2 migration - V2 functionalities", () => {
         describe("WHEN alice mints 100 TP using MocV2", () => {
           beforeEach(async () => {
             await reserveToken.connect(aliceSigner).approve(mocRifV2.address, pEth(100000));
-            await mocRifV2.connect(aliceSigner).mintTP(stableToken.address, pEth(100), pEth(100000));
-            // execute last operation
-            await mocQueue.execute((await mocQueue.operIdCount()).sub(1));
+            await mocRifV2
+              .connect(aliceSigner)
+              .mintTP(stableToken.address, pEth(100), pEth(100000), { value: CONSTANTS.EXEC_FEE });
+            await mocQueue.execute(deployer);
           });
           it("THEN alice stableToken balance is 1000000(from V1) + 100(from V2)", async () => {
             assertPrec(await stableToken.balanceOf(alice), 1000100);
@@ -164,9 +164,10 @@ describe("Feature: MoC V2 migration - V2 functionalities", () => {
         describe("WHEN alice redeems 100 TP using MocV2", () => {
           beforeEach(async () => {
             await stableToken.connect(aliceSigner).approve(mocRifV2.address, pEth(100));
-            await mocRifV2.connect(aliceSigner).redeemTP(stableToken.address, pEth(100), 0);
-            // execute last operation
-            await mocQueue.execute((await mocQueue.operIdCount()).sub(1));
+            await mocRifV2
+              .connect(aliceSigner)
+              .redeemTP(stableToken.address, pEth(100), 0, { value: CONSTANTS.EXEC_FEE });
+            await mocQueue.execute(deployer);
           });
           it("THEN alice stableToken balance is 1000000(from V1) - 100(from V2)", async () => {
             assertPrec(await stableToken.balanceOf(alice), 999900);

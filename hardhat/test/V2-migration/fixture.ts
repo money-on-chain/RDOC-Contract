@@ -29,8 +29,8 @@ import {
   RiskProToken__factory,
   StableTokenV2,
   StableTokenV2__factory,
-  Stopper,
-  Stopper__factory,
+  StopperV2,
+  StopperV2__factory,
   UpgradeDelegator,
   UpgradeDelegator__factory,
   MoCExchange,
@@ -50,6 +50,7 @@ import {
   deployMocRifV2,
   deployUUPSProxy,
   EXECUTOR_ROLE,
+  CONSTANTS,
 } from "../helpers/utils";
 
 export const fixtureDeployed = memoizee(
@@ -63,7 +64,7 @@ export const fixtureDeployed = memoizee(
     mocInrate: MoCInrate;
     mocVendors: MoCVendors;
     riskProxManager: MoCRiskProxManager;
-    stopper: Stopper;
+    stopper: StopperV2;
     mocCommissionSplitter: CommissionSplitter;
     upgradeDelegator: UpgradeDelegator;
     stableToken: StableTokenV2;
@@ -119,7 +120,7 @@ export const fixtureDeployed = memoizee(
         proxyAdmin.address,
         MoCRiskProxManager__factory,
       );
-      const stopper: Stopper = await deployTransparentProxy("Stopper", proxyAdmin.address, Stopper__factory);
+      const stopper: StopperV2 = await deployTransparentProxy("StopperV2", proxyAdmin.address, StopperV2__factory);
       const mocCommissionSplitter: CommissionSplitter = await deployTransparentProxy(
         "CommissionSplitter",
         proxyAdmin.address,
@@ -248,7 +249,8 @@ export const fixtureDeployed = memoizee(
       await moc.setDecayBlockSpan(720);
 
       // deploy MocV2
-      const { mocRifV2, mocCoreExpansion, mocQueue, mocMultiCollateralGuard, mocVendorsV2 } = await deployMocRifV2();
+      const { mocRifV2, mocCoreExpansion, mocQueue, mocVendorsV2, maxAbsoluteOpProvider, maxOpDiffProvider } =
+        await deployMocRifV2(stopper.address);
 
       await mocRifV2.initialize({
         initializeCoreParams: {
@@ -275,6 +277,9 @@ export const fixtureDeployed = memoizee(
             tcInterestCollectorAddress: deployer,
             tcInterestRate: baseParams.riskProRate,
             tcInterestPaymentBlockSpan: baseParams.dayBlockSpan * 7,
+            maxAbsoluteOpProviderAddress: maxAbsoluteOpProvider.address,
+            maxOpDiffProviderAddress: maxOpDiffProvider.address,
+            decayBlockSpan: 720,
           },
           governorAddress: governorMock.address,
           pauserAddress: deployer,
@@ -287,13 +292,21 @@ export const fixtureDeployed = memoizee(
       });
 
       // initialize mocQueue
-      await mocQueue.initialize(governorMock.address, deployer);
+      const minOperWaitingBlck = 1;
+      const execFeeParams = {
+        tcMintExecFee: CONSTANTS.EXEC_FEE,
+        tcRedeemExecFee: CONSTANTS.EXEC_FEE,
+        tpMintExecFee: CONSTANTS.EXEC_FEE,
+        tpRedeemExecFee: CONSTANTS.EXEC_FEE,
+        mintTCandTPExecFee: CONSTANTS.EXEC_FEE,
+        redeemTCandTPExecFee: CONSTANTS.EXEC_FEE,
+        swapTPforTPExecFee: CONSTANTS.EXEC_FEE,
+        swapTPforTCExecFee: CONSTANTS.EXEC_FEE,
+        swapTCforTPExecFee: CONSTANTS.EXEC_FEE,
+      };
+      await mocQueue.initialize(governorMock.address, deployer, minOperWaitingBlck, execFeeParams);
       await mocQueue.registerBucket(mocRifV2.address);
       await mocQueue.grantRole(EXECUTOR_ROLE, deployer);
-
-      // initialize mocMultiCollateralGuard
-      await mocMultiCollateralGuard.addBucket(mocRifV2.address);
-      await mocRifV2.setMocMultiCollateralGuard(mocMultiCollateralGuard.address);
 
       await mocVendorsV2.initialize(deployer, governorMock.address, deployer);
       // set 5% markup to vendor
@@ -312,6 +325,10 @@ export const fixtureDeployed = memoizee(
         tpEma: baseParams.reservePrice,
         tpEmaSf: baseParams.smoothingFactor,
       });
+
+      await stopper.setMaxAbsoluteOperation(maxAbsoluteOpProvider.address, CONSTANTS.MAX_UINT256);
+
+      await stopper.setMaxOperationalDifference(maxOpDiffProvider.address, CONSTANTS.MAX_UINT256);
 
       return {
         mocHelperAddress: mocHelperLib.address,

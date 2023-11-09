@@ -3,8 +3,10 @@ import { BigNumber } from "@ethersproject/bignumber";
 import MocRifCompiled from "../../dependencies/mocV2Imports/MocRif.json";
 import MocCoreExpansionCompiled from "../../dependencies/mocV2Imports/MocCoreExpansion.json";
 import MocQueueCompiled from "../../dependencies/mocV2Imports/MocQueue.json";
-import MocMultiCollateralGuardCompiled from "../../dependencies/mocV2Imports/MocMultiCollateralGuard.json";
 import MocVendorsCompiled from "../../dependencies/mocV2Imports/MocVendors.json";
+import FCMaxAbsoluteOpProviderCompiled from "../../dependencies/mocV2Imports/FCMaxAbsoluteOpProvider.json";
+import FCMaxOpDifferenceProviderCompiled from "../../dependencies/mocV2Imports/FCMaxOpDifferenceProvider.json";
+
 import {
   MocRif,
   MocCoreExpansion,
@@ -12,10 +14,12 @@ import {
   MocRif__factory,
   MocQueue,
   MocQueue__factory,
-  MocMultiCollateralGuard,
-  MocMultiCollateralGuard__factory,
   MocVendors,
   MocVendors__factory,
+  FCMaxAbsoluteOpProvider,
+  FCMaxAbsoluteOpProvider__factory,
+  FCMaxOpDifferenceProvider,
+  FCMaxOpDifferenceProvider__factory,
 } from "../../typechain";
 
 export const gasLimit = 6800000;
@@ -34,12 +38,15 @@ export const deployUUPSProxy = async (contract: string, typechain: any) => {
   return typechain.connect(proxy.address, ethers.provider.getSigner());
 };
 
-export const deployMocRifV2 = async (): Promise<{
+export const deployMocRifV2 = async (
+  stopperAddress: string,
+): Promise<{
   mocRifV2: MocRif;
   mocCoreExpansion: MocCoreExpansion;
   mocQueue: MocQueue;
-  mocMultiCollateralGuard: MocMultiCollateralGuard;
   mocVendorsV2: MocVendors;
+  maxAbsoluteOpProvider: FCMaxAbsoluteOpProvider;
+  maxOpDiffProvider: FCMaxOpDifferenceProvider;
 }> => {
   const MocImplementationFactory = await ethers.getContractFactory(MocRifCompiled.abi, MocRifCompiled.bytecode);
   const mocImplementation = await MocImplementationFactory.deploy();
@@ -56,25 +63,33 @@ export const deployMocRifV2 = async (): Promise<{
   const mocQueueImplementation = await MocQueueFactory.deploy();
   const mocQueueProxy = await ProxyFactory.deploy(mocQueueImplementation.address, "0x");
 
-  const MocMultiCollateralGuardFactory = await ethers.getContractFactory(
-    MocMultiCollateralGuardCompiled.abi,
-    MocMultiCollateralGuardCompiled.bytecode,
-  );
-  const mocMultiCollateralGuardImplementation = await MocMultiCollateralGuardFactory.deploy();
-  const mocMultiCollateralGuardProxy = await ProxyFactory.deploy(mocMultiCollateralGuardImplementation.address, "0x");
-
   const MocVendorsFactory = await ethers.getContractFactory(MocVendorsCompiled.abi, MocVendorsCompiled.bytecode);
   const mocVendors = await MocVendorsFactory.deploy();
   const vendorsProxy = await ProxyFactory.deploy(mocVendors.address, "0x");
+
+  const FCMaxAbsoluteOpProvider = await ethers.getContractFactory(
+    FCMaxAbsoluteOpProviderCompiled.abi,
+    FCMaxAbsoluteOpProviderCompiled.bytecode,
+  );
+  const maxAbsoluteOpProvider = await FCMaxAbsoluteOpProvider.deploy(stopperAddress);
+  const FCMaxOpDifferenceProvider = await ethers.getContractFactory(
+    FCMaxOpDifferenceProviderCompiled.abi,
+    FCMaxOpDifferenceProviderCompiled.bytecode,
+  );
+  const maxOpDiffProvider = await FCMaxOpDifferenceProvider.deploy(stopperAddress);
   return {
     mocRifV2: MocRif__factory.connect(mocProxy.address, ethers.provider.getSigner()),
     mocCoreExpansion: MocCoreExpansion__factory.connect(mocCoreExpansion.address, ethers.provider.getSigner()),
     mocQueue: MocQueue__factory.connect(mocQueueProxy.address, ethers.provider.getSigner()),
-    mocMultiCollateralGuard: MocMultiCollateralGuard__factory.connect(
-      mocMultiCollateralGuardProxy.address,
+    mocVendorsV2: MocVendors__factory.connect(vendorsProxy.address, ethers.provider.getSigner()),
+    maxAbsoluteOpProvider: FCMaxAbsoluteOpProvider__factory.connect(
+      maxAbsoluteOpProvider.address,
       ethers.provider.getSigner(),
     ),
-    mocVendorsV2: MocVendors__factory.connect(vendorsProxy.address, ethers.provider.getSigner()),
+    maxOpDiffProvider: FCMaxOpDifferenceProvider__factory.connect(
+      maxOpDiffProvider.address,
+      ethers.provider.getSigner(),
+    ),
   };
 };
 
@@ -107,6 +122,7 @@ export const CONSTANTS = {
   MAX_BALANCE: ethers.constants.MaxUint256.div((1e17).toString()),
   PRECISION: BigNumber.from((1e18).toString()),
   ONE: BigNumber.from((1e18).toString()),
+  EXEC_FEE: 100,
 };
 
 export const baseParams = {
