@@ -1,7 +1,7 @@
-# RDOC with Hardhat
+# ROC with Hardhat
 
 This project is a solution to implement new features (like USDRIF and V2 migrations) using Hardhat and latests solc and openzeppelin versions.
-To make the Legacy contracts's upgrades we are still using the current Truffle framework
+To make the Legacy contracts's upgrades we are still using the current Truffle framework.
 However, to test the migrations implementation we need to compile and deploy here the Legacy contracts using hardhat.
 
 ## Getting Started
@@ -37,16 +37,19 @@ npm install
 In order to get contract types you can generate those typings when compiling
 
 Compile Legacy contracts
+
 ```bash
 npm run compile-legacy
 ```
 
 Compile migration contracts
+
 ```bash
 npm run compile-hh
 ```
 
 Compile all
+
 ```bash
 npm run compile
 ```
@@ -87,10 +90,14 @@ We are requiring Chai which is an assertions library. These asserting functions 
 For more information we suggest reading waffle testing documentation [here](https://hardhat.org/guides/waffle-testing.html#testing).
 
 ## v0.1.16.2: Upgrade Process for StableToken migration
-See [StableTokenMigration](../scripts/deploy/upgrade_v0.1.16.2/StableTokenMigration.md)
+
+See [Stable Token Migration](../scripts/deploy/upgrade_v0.1.16.2/StableTokenMigration.md)
+
+_Note_: This migration was successfully executed on Mainnet on  Sep 26th 2023 by the approved [Proposal](https://forum.moneyonchain.com/t/technical-proposal-to-introduce-usdrif-token-in-rif-on-chain-protocol/375)
 
 ## v0.2.0: Upgrade Process for V2 protocol migration
-See [V2Migration](../scripts/deploy/upgrade_v0.2.0/V2Migration.md)
+
+See [V2 Migration](../scripts/deploy/upgrade_v0.2.0/V2Migration.md)
 
 ## Built With
 
@@ -110,4 +117,4 @@ To create a new release execute the script
 
 ## License
 
-See the [LICENSE](./LICENSE) file for details
+See the [LICENSE](./LICENSE) file for details.

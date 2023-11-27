@@ -1,4 +1,4 @@
-## Upgrade Process for StableToken V2
+# Upgrade Process for StableToken V2
 
 The upgrade process for the StableToken smart contract on the MoC platform requires careful planning and execution. To ensure a secure and seamless upgrade, it is essential to follow the steps outlined below.
 
@@ -17,7 +17,7 @@ The changer that will execute all these upgrades in an atomic way is the followi
 For each of them a new function is added `function migrateStableToken(address newStableTokenAddress_)` for the migration purpose and an event is emitted when it happens `event StableTokenMigrated(address oldStableTokenAddress_, address newStableTokenAddress_)`.
 Because we don't want this function be alive in the protocol after the migration to avoid re-execution, in the changer we are doing two upgrades. First, we upgrade them to a new implementation that includes the migration logic, and later we upgrade them again to another implementation without it.
 
-### Step 1: Prepare for the Upgrade
+## Step 1: Prepare for the Upgrade
 
 Before beginning the upgrade process, it is important to ensure that all necessary preparations have been made. This includes:
 
@@ -36,7 +36,7 @@ npm run tests
 
 This tests, using openzeppelin upgrade tools, verify that the upgraded contracts do not have any storage layout collision.
 
-### Step 2: Deploy the New StableToken Smart Contract
+## Step 2: Deploy the New StableToken Smart Contract
 
 The next step is to deploy the new StableToken smart contract. This involves the following:
 
@@ -63,7 +63,7 @@ npm run compile
 npx hardhat deploy --network targetNetwork   
 ```
 
-### Step 3: Deploy new MoC protocol implementations
+## Step 3: Deploy new MoC protocol implementations
 
 Once the new StableToken smart contract has been deployed, we need to deploy contracts that will be upgraded new implementation.
 
@@ -94,11 +94,11 @@ That script will do the following steps:
 6. deploy StableTokenMigrationChanger setting all the involved addresses
 7. verify that addresses set in the changer are ok corresponding with the json file provided
 
-### Step 4: Create and post the proposal
+## Step 4: Create and post the proposal
 
 After the changer is deployed and verified it is time to create the voting proposal to be voted by the community and if it is approved then be executed by the Governor.
 
-### Step 5: Update the MoC Platform
+## Step 5: Update the MoC Platform
 
 After the new proposal has been approved and executed, it is necessary to update the MoC platform. This involves the following:
 
@@ -106,7 +106,7 @@ After the new proposal has been approved and executed, it is necessary to update
 - Verify that the updated MoC platform is fully functional and that there are no conflicts or errors with the new StableToken smart contract implementation.
 - Create a feature to facilitate StableToken holders to migrate them to the new StableToken V2
 
-### Step 6: Monitor and Maintain the New StableToken Smart Contract
+## Step 6: Monitor and Maintain the New StableToken Smart Contract
 
 After the upgrade process is complete, it is important to monitor and maintain the new StableToken smart contract implementation. This includes the following:
 
