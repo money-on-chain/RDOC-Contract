@@ -15,6 +15,8 @@ import "../../contracts/MoCInrate.sol";
   @title V2MigrationChanger
  */
 contract V2MigrationChanger is ChangeContract {
+  bytes32 constant EXECUTOR_ROLE = keccak256("EXECUTOR_ROLE");
+
   struct UpgradesAddresses {
     AdminUpgradeabilityProxy proxy;
     address newImplementation;
@@ -23,6 +25,7 @@ contract V2MigrationChanger is ChangeContract {
   CommissionSplitter public commissionSplitter;
   IMoCV2 public mocV2;
   address public deprecatedImp;
+  address[] public authorizedExecutors;
 
   // MoC
   AdminUpgradeabilityProxy public mocProxy;
@@ -45,7 +48,7 @@ contract V2MigrationChanger is ChangeContract {
   uint256 nextEmaCalculation;
   uint256 nextTCInterestPayment;
 
-   /**
+  /**
     @notice Constructor
     @param _upgradeDelegator Address of the upgradeDelegator in charge of that proxy
     @param _commissionSplitter Address of the CommissionSplitter contract used to split commissions before
@@ -55,6 +58,7 @@ contract V2MigrationChanger is ChangeContract {
     @param _mocMigrator MoC atomic implementation address to execute the migration
     @param _mocExchangeMigrator MoCExchange atomic implementation address to execute the migration
     @param _deprecatedImp deprectaed contract implementation address
+    @param _authorizedExecutors array of authorized queue executors
   */
   constructor(
     UpgradeDelegator _upgradeDelegator,
@@ -63,12 +67,14 @@ contract V2MigrationChanger is ChangeContract {
     AdminUpgradeabilityProxy _mocProxy,
     address _mocMigrator,
     address _mocExchangeMigrator,
-    address _deprecatedImp
+    address _deprecatedImp,
+    address[] memory _authorizedExecutors
   ) public {
     upgradeDelegator = _upgradeDelegator;
     commissionSplitter = _commissionSplitter;
     mocV2 = IMoCV2(_mocV2);
     deprecatedImp = _deprecatedImp;
+    authorizedExecutors = _authorizedExecutors;
     // MoC
     mocProxy = _mocProxy;
     mocMigrator = _mocMigrator;
@@ -95,7 +101,6 @@ contract V2MigrationChanger is ChangeContract {
   function castToAdminUpgradeabilityProxy(address _address) internal returns (AdminUpgradeabilityProxy proxy) {
     return AdminUpgradeabilityProxy(address(uint160(_address)));
   }
-
 
   /**
     @notice Execute the changes.
@@ -132,6 +137,12 @@ contract V2MigrationChanger is ChangeContract {
     mocV2.setPauser(address(this));
     mocV2.unpause();
     mocV2.setPauser(pauser);
+
+    IMocQueueV2 rocQueue = IMocQueueV2(mocV2.mocQueue());
+    rocQueue.registerBucket(address(mocV2));
+    for (uint256 i = 0; i < authorizedExecutors.length; i++) {
+      rocQueue.grantRole(EXECUTOR_ROLE, authorizedExecutors[i]);
+    }
 
     // MoC
     upgradeDelegator.upgrade(mocProxy, deprecatedImp);
@@ -171,8 +182,7 @@ contract V2MigrationChanger is ChangeContract {
     @notice Intended to do the final tweaks after the upgrade, for example initialize the contract
     @dev This function can be overriden by child changers to upgrade contracts that require some changes after the upgrade
    */
-  function _afterUpgrade() internal {    
-  }
+  function _afterUpgrade() internal {}
 
   /**
     @notice Verify that most important configuration params are the same for both protocol versions
@@ -224,6 +234,8 @@ interface IMoCV2 {
 
   function tpTokens(uint256 index_) external view returns (address tpToken);
 
+  function mocQueue() external view returns (address mocQueue);
+
   function pegContainer(uint256 index_) external view returns (uint256 nTP, address priceProvider);
 
   function feeTokenPriceProvider() external view returns (address feeTokenpriceProvider);
@@ -251,4 +263,11 @@ interface IMoCV2 {
   function tcInterestRate() external view returns (uint256 tcInterestRate);
 
   function tcInterestPaymentBlockSpan() external view returns (uint256 tcInterestPaymentBlockSpan);
+}
+
+
+interface IMocQueueV2 {
+  function registerBucket(address bucket_) external;
+
+  function grantRole(bytes32 role, address account) external;
 }

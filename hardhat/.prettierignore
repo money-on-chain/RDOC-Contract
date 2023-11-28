@@ -16,6 +16,7 @@ contracts/crytic-export/
 .openzeppelin/
 export/
 contracts_flat/
+dependencies/mocV2Imports/
 
 # files
 coverage.json

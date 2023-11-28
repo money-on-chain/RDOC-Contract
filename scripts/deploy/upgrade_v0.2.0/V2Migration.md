@@ -43,6 +43,8 @@ npm run tests
 Along this tests, using openzeppelin upgrade tools, we verify that the upgraded contracts do not have any storage layout collision.
 There are also mainnet forking tests, that executed the migration on the rial forked mainnet instance of the protocol.
 
+Some of the tests required V2 ABIs to work, any change on V2 ABI should be imported here for the tests to be accurate, see [MoC V2 Imports](../../../hardhat/dependencies/mocV2Imports/README.md) for detail.
+
 ## Step 2: Deploy new MoC protocol implementations
 
 Rif on chain V2 protocol implementation lives in [rif-sc-protocol](https://github.com/money-on-chain/rif-sc-protocol) repository.

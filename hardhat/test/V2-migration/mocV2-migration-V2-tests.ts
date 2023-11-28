@@ -91,6 +91,7 @@ describe("Feature: MoC V2 migration - V2 functionalities", () => {
             mocCommissionSplitter.address,
             mocRifV2.address,
             mocProxy.address,
+            [deployer],
           );
           await changer.execute();
         });

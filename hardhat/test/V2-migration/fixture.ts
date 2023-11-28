@@ -49,7 +49,6 @@ import {
   pEth,
   deployMocRifV2,
   deployUUPSProxy,
-  EXECUTOR_ROLE,
   CONSTANTS,
 } from "../helpers/utils";
 
@@ -293,6 +292,7 @@ export const fixtureDeployed = memoizee(
 
       // initialize mocQueue
       const minOperWaitingBlck = 1;
+      const maxOperPerBlock = 10;
       const execFeeParams = {
         tcMintExecFee: CONSTANTS.EXEC_FEE,
         tcRedeemExecFee: CONSTANTS.EXEC_FEE,
@@ -304,9 +304,7 @@ export const fixtureDeployed = memoizee(
         swapTPforTCExecFee: CONSTANTS.EXEC_FEE,
         swapTCforTPExecFee: CONSTANTS.EXEC_FEE,
       };
-      await mocQueue.initialize(governorMock.address, deployer, minOperWaitingBlck, execFeeParams);
-      await mocQueue.registerBucket(mocRifV2.address);
-      await mocQueue.grantRole(EXECUTOR_ROLE, deployer);
+      await mocQueue.initialize(governorMock.address, deployer, minOperWaitingBlck, maxOperPerBlock, execFeeParams);
 
       await mocVendorsV2.initialize(deployer, governorMock.address, deployer);
       // set 5% markup to vendor

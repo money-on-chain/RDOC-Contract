@@ -17,6 +17,7 @@ export const deployChanger = async (
   commissionSplitter: Address,
   mocV2: Address,
   mocProxy: Address,
+  authorizedExecutor: Address[],
 ): Promise<{
   changer: V2MigrationChanger;
   mocMigrator: MoC_Migrator;
@@ -44,6 +45,7 @@ export const deployChanger = async (
     mocMigrator.address,
     mocExchangeMigrator.address,
     deprecated.address,
+    authorizedExecutor,
   ]);
   return {
     changer,

@@ -35,7 +35,7 @@ import {
   StopperV2__factory,
   MocVendors,
 } from "../../typechain";
-import { Balance, deployContract, deployMocRifV2, pEth, EXECUTOR_ROLE, CONSTANTS } from "../helpers/utils";
+import { Balance, deployContract, deployMocRifV2, pEth, CONSTANTS } from "../helpers/utils";
 import { assertPrec } from "../helpers/assertHelper";
 import { deployChanger } from "./deployChanger";
 
@@ -146,6 +146,7 @@ describe("Feature: MoC V2 migration - mainnet fork", () => {
 
       // initialize mocQueue
       const minOperWaitingBlck = 1;
+      const maxOperPerBlock = 10;
       const execFeeParams = {
         tcMintExecFee: CONSTANTS.EXEC_FEE,
         tcRedeemExecFee: CONSTANTS.EXEC_FEE,
@@ -157,9 +158,7 @@ describe("Feature: MoC V2 migration - mainnet fork", () => {
         swapTPforTCExecFee: CONSTANTS.EXEC_FEE,
         swapTCforTPExecFee: CONSTANTS.EXEC_FEE,
       };
-      await mocQueue.initialize(governorMock.address, deployer, minOperWaitingBlck, execFeeParams);
-      await mocQueue.registerBucket(mocRifV2.address);
-      await mocQueue.grantRole(EXECUTOR_ROLE, deployer);
+      await mocQueue.initialize(governorMock.address, deployer, minOperWaitingBlck, maxOperPerBlock, execFeeParams);
 
       // add Legacy stableToken in MocV2
       await mocRifV2.addPeggedToken({
@@ -221,6 +220,7 @@ describe("Feature: MoC V2 migration - mainnet fork", () => {
           mocCommissionSplitter.address,
           mocRifV2.address,
           mocProxy.address,
+          [deployer],
         );
         await governor.connect(governorOwnerSigner).executeChange(changer.address);
       });

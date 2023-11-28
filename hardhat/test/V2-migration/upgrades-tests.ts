@@ -78,6 +78,7 @@ describe("Feature: MoC V2 migration - upgrades", () => {
           mocCommissionSplitter.address,
           mocRifV2.address,
           mocProxy.address,
+          [deployer],
         ));
         tx = await changer.execute();
       });

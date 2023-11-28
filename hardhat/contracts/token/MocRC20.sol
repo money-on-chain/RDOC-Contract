@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.16;
+pragma solidity 0.8.20;
 
 import { IMocRC20 } from "../interfaces/IMocRC20.sol";
 import { IGovernor, Governed } from "../governance/Governed.sol";
