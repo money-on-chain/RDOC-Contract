@@ -313,17 +313,6 @@ export const fixtureDeployed = memoizee(
       // pause MocRifV2
       await mocRifV2.pause();
 
-      // add Legacy stableToken in MocV2
-      await mocRifV2.addPeggedToken({
-        tpTokenAddress: stableToken.address,
-        priceProviderAddress: stableTokenPriceProvider.address,
-        tpCtarg: baseParams.c0Cobj,
-        tpMintFee: pEth(0.1), // 10%,
-        tpRedeemFee: pEth(0.1), // 10%,
-        tpEma: baseParams.reservePrice,
-        tpEmaSf: baseParams.smoothingFactor,
-      });
-
       await stopper.setMaxAbsoluteOperation(maxAbsoluteOpProvider.address, CONSTANTS.MAX_UINT256);
 
       await stopper.setMaxOperationalDifference(maxOpDiffProvider.address, CONSTANTS.MAX_UINT256);

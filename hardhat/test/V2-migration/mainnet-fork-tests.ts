@@ -19,7 +19,6 @@ import {
   StableToken__factory,
   Governor__factory,
   Governor,
-  GovernorMock__factory,
   MoCToken__factory,
   MoCToken,
   RiskProToken__factory,
@@ -35,7 +34,7 @@ import {
   StopperV2__factory,
   MocVendors,
 } from "../../typechain";
-import { Balance, deployContract, deployMocRifV2, pEth, CONSTANTS } from "../helpers/utils";
+import { Balance, deployMocRifV2, pEth, CONSTANTS } from "../helpers/utils";
 import { assertPrec } from "../helpers/assertHelper";
 import { deployChanger } from "./deployChanger";
 
@@ -96,7 +95,6 @@ describe("Feature: MoC V2 migration - mainnet fork", () => {
       let mocVendorsV2: MocVendors;
       ({ mocRifV2, mocCoreExpansion, mocQueue, mocVendorsV2, maxAbsoluteOpProvider, maxOpDiffProvider } =
         await deployMocRifV2(stopper.address));
-      const governorMock = await deployContract("GovernorMock", GovernorMock__factory, []);
 
       await mocRifV2.initialize({
         initializeCoreParams: {
@@ -127,7 +125,7 @@ describe("Feature: MoC V2 migration - mainnet fork", () => {
             maxOpDiffProviderAddress: maxOpDiffProvider.address,
             decayBlockSpan: 720,
           },
-          governorAddress: governorMock.address,
+          governorAddress: governor.address,
           pauserAddress: deployer,
           mocCoreExpansion: mocCoreExpansion.address,
           emaCalculationBlockSpan: await mocStateProxy.getEmaCalculationBlockSpan(),
@@ -137,7 +135,7 @@ describe("Feature: MoC V2 migration - mainnet fork", () => {
         mocQueue: mocQueue.address,
       });
 
-      await mocVendorsV2.initialize(deployer, governorMock.address, deployer);
+      await mocVendorsV2.initialize(deployer, governor.address, deployer);
       // set 10% markup to vendor
       await mocVendorsV2.setVendorMarkup(vendor, pEth(0.1));
 
@@ -158,19 +156,7 @@ describe("Feature: MoC V2 migration - mainnet fork", () => {
         swapTPforTCExecFee: CONSTANTS.EXEC_FEE,
         swapTCforTPExecFee: CONSTANTS.EXEC_FEE,
       };
-      await mocQueue.initialize(governorMock.address, deployer, minOperWaitingBlck, maxOperPerBlock, execFeeParams);
-
-      // add Legacy stableToken in MocV2
-      await mocRifV2.addPeggedToken({
-        tpTokenAddress: stableToken.address,
-        priceProviderAddress: await mocStateProxy.getPriceProvider(),
-        tpCtarg: await mocStateProxy.cobj(),
-        tpMintFee: pEth(0.1), // 10%,
-        tpRedeemFee: pEth(0.1), // 10%,
-        tpEma: await mocStateProxy.getExponentalMovingAverage(),
-        tpEmaSf: await mocStateProxy.getSmoothingFactor(),
-      });
-      await mocRifV2.changeGovernor(governor.address);
+      await mocQueue.initialize(governor.address, deployer, minOperWaitingBlck, maxOperPerBlock, execFeeParams);
 
       await helpers.impersonateAccount(governorOwnerAddress);
       governorOwnerSigner = await ethers.getSigner(governorOwnerAddress);

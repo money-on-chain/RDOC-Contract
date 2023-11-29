@@ -85,6 +85,7 @@ describe("Feature: MoC V2 migration - V2 functionalities", () => {
           nextTCInterestPaymentBefore = (await mocInrateProxy.lastRiskProInterestBlock()).add(
             await mocInrateProxy.riskProInterestBlockSpan(),
           );
+
           const { changer } = await deployChanger(
             mocHelperAddress,
             upgradeDelegator.address,

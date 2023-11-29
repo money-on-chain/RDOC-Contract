@@ -11,6 +11,7 @@ import "../../contracts/V2_migration/MoCExchange_Migrator.sol";
 import "../../contracts/MoCState.sol";
 import "../../contracts/MoCInrate.sol";
 
+
 /**
   @title V2MigrationChanger
  */
@@ -129,6 +130,20 @@ contract V2MigrationChanger is ChangeContract {
     uint256 qTC = IERC20(mocConnector.riskProToken()).totalSupply();
     uint256 qTP = IERC20(mocConnector.stableToken()).totalSupply();
 
+    // Adds USDRIF Pegged Token to V2 protocol with same configuration
+    MoCState mocState = MoCState(address(mocStateProxy));
+    MoCInrate mocInrate = MoCInrate(address(mocInrateProxy));
+    IMoCV2.PeggedTokenParams memory peggedTokenParams = IMoCV2.PeggedTokenParams({
+      tpTokenAddress: address(mocConnector.stableToken()),
+      priceProviderAddress: address(mocState.getPriceProvider()),
+      tpCtarg: mocState.cobj(),
+      tpMintFee: mocInrate.commissionRatesByTxType(mocInrate.MINT_STABLETOKEN_FEES_RESERVE()),
+      tpRedeemFee: mocInrate.commissionRatesByTxType(mocInrate.REDEEM_STABLETOKEN_FEES_RESERVE()),
+      tpEma: mocState.getLastEmaCalculation(),
+      tpEmaSf: mocState.getSmoothingFactor()
+    });
+    mocV2.addPeggedToken(peggedTokenParams);
+
     mocV2.migrateFromV1(qAC, qTC, qTP, tpEma, nextEmaCalculation, nextTCInterestPayment);
     MoC_Migrator(address(mocProxy)).migrateToV2(address(mocV2));
     MoCExchange_Migrator(address(mocExchangeProxy)).migrateToV2(address(mocV2));
@@ -143,7 +158,6 @@ contract V2MigrationChanger is ChangeContract {
     for (uint256 i = 0; i < authorizedExecutors.length; i++) {
       rocQueue.grantRole(EXECUTOR_ROLE, authorizedExecutors[i]);
     }
-
     // MoC
     upgradeDelegator.upgrade(mocProxy, deprecatedImp);
     // MocExchange
@@ -197,22 +211,12 @@ contract V2MigrationChanger is ChangeContract {
     require(address(mocConnector.reserveToken()) == mocV2.acToken(), "wrong param: reserve token address");
     // assert riskProToken address
     require(address(mocConnector.riskProToken()) == mocV2.tcToken(), "wrong param: riskPro token address");
-    // assert stableToken address
-    require(address(mocConnector.stableToken()) == mocV2.tpTokens(0), "wrong param: stable token address");
-    // assert stableToken price provider address
-    (, address priceProvider) = mocV2.pegContainer(0);
-    require(address(mocState.getPriceProvider()) == priceProvider, "wrong param: price provider address");
     // assert MoC Token price provider address
     require(address(mocState.getMoCPriceProvider()) == mocV2.feeTokenPriceProvider(), "wrong param: price provider address");
     // assert protected threshlod
     require(mocState.getProtected() == mocV2.protThrld(), "wrong param: protected threshold");
     // assert liquidation threshold
     require(mocState.liq() == mocV2.liqThrld(), "wrong param: liquidation threshold");
-    // assert stableToken target coverage
-    require(mocState.cobj() == mocV2.tpCtarg(0), "wrong param: target coverage");
-    // assert stableToken ema smoothing factor
-    (, uint256 smoothingFactor) = mocV2.tpEma(0);
-    require(mocState.getSmoothingFactor() == smoothingFactor, "wrong param: smoothing factor");
     require(mocInrate.riskProInterestAddress() == mocV2.tcInterestCollectorAddress(), "wrong param: TC interest collector address");
     require(mocInrate.riskProRate() == mocV2.tcInterestRate(), "wrong param: TC interest rate");
     require(mocInrate.riskProInterestBlockSpan() == mocV2.tcInterestPaymentBlockSpan(), "wrong param: TC interest block span");
@@ -223,6 +227,23 @@ contract V2MigrationChanger is ChangeContract {
 
 
 interface IMoCV2 {
+  struct PeggedTokenParams {
+    // Pegged Token contract address to add
+    address tpTokenAddress;
+    // priceProviderAddress Pegged Token price provider contract address
+    address priceProviderAddress;
+    // Pegged Token target coverage [PREC]
+    uint256 tpCtarg;
+    // additional fee pct applied on mint [PREC]
+    uint256 tpMintFee;
+    // additional fee pct applied on redeem [PREC]
+    uint256 tpRedeemFee;
+    // initial Pegged Token exponential moving average [PREC]
+    uint256 tpEma;
+    // Pegged Token smoothing factor [PREC]
+    uint256 tpEmaSf;
+  }
+
   function migrateFromV1(uint256 qAC_, uint256 qTC_, uint256 qTP_, uint256 tpEma_, uint256 nextEmaCalculation_, uint256 nextTCInterestPayment_)
     external;
 
@@ -263,6 +284,8 @@ interface IMoCV2 {
   function tcInterestRate() external view returns (uint256 tcInterestRate);
 
   function tcInterestPaymentBlockSpan() external view returns (uint256 tcInterestPaymentBlockSpan);
+
+  function addPeggedToken(PeggedTokenParams calldata peggedTokenParams_) external;
 }
 
 
