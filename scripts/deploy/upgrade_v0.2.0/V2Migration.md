@@ -55,15 +55,18 @@ Once the new V2 smart contracts have been deployed, we need to deploy the contra
 
 - On V1, create a file named `./scripts/deploy/upgrade_v0.2.0/deployConfig-<targetNetwork>.json` with all current V1 addresses used in the `targetNetwork`, for example: [deployConfig-example-development.json](./deployConfig-example-development.json)
 
-- Add MoCV2(proxy) address to that file
+- Add MoCV2(proxy) address to that file, along the executors addresses to be whitelisted as queue authorized executors.
 
 ```json
-v1ProxyAddresses: {
- ...
-},
-v2ProxyAddresses: {
-  "MoC": "0xEeAd3374........3131Ea5477",
-},
+{
+  "v1ProxyAddresses": {
+    "MoC": "0xAfEd4485........2121Ea5488",
+  },
+  "v2ProxyAddresses": {
+    "MoC": "0xEeAd3374........3131Ea5477",
+  },
+  "authorizedExecutors": ["0xFdBc5593........1313a5466"]
+}
 ```
 
 - Deploy all upgrade necessary contracts.
@@ -105,13 +108,13 @@ After the upgrade process is complete, it is important to monitor and maintain t
 
 ## How to execute migration locally
 
-In root
+Run a Node, we suggest ganache. In root, run:
 
 ```sh
 npm run ganache-cli
 ```
 
-In another terminal
+In another terminal, deploy the latest version of V1 protocol to simulate a running instance.
 
 ```sh
 nvm use
@@ -119,17 +122,19 @@ npm run truffle-compile
 npm run deploy-reset-development
 ```
 
-A json file will be generated with all the deployed addresses
-`./scripts/deploy/deployments/deployConfig-development.json`
+A json file will be generated with all the deployed addresses, in the corresponding version folder:
+`./scripts/deploy/upgrade_v0.y.z/deployConfig-development.json`
 
 copy that file to
-`./scripts/deploy/upgrade_v0.2.0/deployConfig-development.json` and rename proxyAddresses with v1ProxyAddresses
+`./scripts/deploy/upgrade_v0.2.0/deployConfig-development.json` and rename proxyAddresses with v1ProxyAddresses. You can also delete `valuesToAssign` field, as it's not needed.
 
-Move to [rif-sc-protocol](https://github.com/money-on-chain/rif-sc-protocol) repository
+_Note_: To reproduce a live environment, we recommend generating some traffic on V1, minting some RiskPro tokens along some Stable tokens.
 
-Set in `hardhat.config.base`, network development MoCV1 address:
+Now, move to [rif-sc-protocol](https://github.com/money-on-chain/rif-sc-protocol) repository, to continue with V2 deployment.
 
-```json
+In `hardhat.config.base` configuration file, under `development` network, copy the MoCV1 proxy address that we just deployed:
+
+```ts
   development: {
       ...
       // address deployed locally
@@ -143,18 +148,21 @@ npm run compile
 npm run deploy-development
 ```
 
-Add MoCV2(proxy) address in
+This deploy would output the MocRiff V2(proxy) address, copy it into V1 here:
 `./scripts/deploy/upgrade_v0.2.0/deployConfig-development.json`
 
 ```json
+{
   "v2ProxyAddresses": {
-    ...
     "MoC": "0xEeAd3374........3131Ea5477",
   },
+  ...
+}
 ```
 
-In V1 root, run the following command to start the deploy
+In V1 root, run the following commands to start the deploy
 
 ```sh
-sh ./scripts/deploy/upgrade_v0.2.0/0_deploy.sh development
+cd scripts/deploy/upgrade_v0.2.0/
+sh ./0_deploy.sh development
 ```

@@ -45,7 +45,6 @@ contract V2MigrationChanger is ChangeContract {
   // MocRiskProxManager
   AdminUpgradeabilityProxy public mocRiskProxManagerProxy;
 
-  uint256 tpEma;
   uint256 nextEmaCalculation;
   uint256 nextTCInterestPayment;
 
@@ -139,12 +138,12 @@ contract V2MigrationChanger is ChangeContract {
       tpCtarg: mocState.cobj(),
       tpMintFee: mocInrate.commissionRatesByTxType(mocInrate.MINT_STABLETOKEN_FEES_RESERVE()),
       tpRedeemFee: mocInrate.commissionRatesByTxType(mocInrate.REDEEM_STABLETOKEN_FEES_RESERVE()),
-      tpEma: mocState.getLastEmaCalculation(),
+      tpEma: mocState.getExponentalMovingAverage(),
       tpEmaSf: mocState.getSmoothingFactor()
     });
     mocV2.addPeggedToken(peggedTokenParams);
 
-    mocV2.migrateFromV1(qAC, qTC, qTP, tpEma, nextEmaCalculation, nextTCInterestPayment);
+    mocV2.migrateFromV1(qAC, qTC, qTP, nextEmaCalculation, nextTCInterestPayment);
     MoC_Migrator(address(mocProxy)).migrateToV2(address(mocV2));
     MoCExchange_Migrator(address(mocExchangeProxy)).migrateToV2(address(mocV2));
     // unpause MocV2 and set the real pauser address
@@ -182,13 +181,11 @@ contract V2MigrationChanger is ChangeContract {
     MoCState mocState = MoCState(address(mocStateProxy));
     MoCInrate mocInrate = MoCInrate(address(mocInrateProxy));
     // we need to get these values before the upgrade because mocState will be deprecated
-    tpEma = mocState.getExponentalMovingAverage();
     nextEmaCalculation = mocState.lastEmaCalculation() + mocState.emaCalculationBlockSpan();
     nextTCInterestPayment = mocInrate.lastRiskProInterestBlock() + mocInrate.riskProInterestBlockSpan();
     // CommissionSplitter holds all the platform fees and then splits them one part for a custom address and another
     // is re-inyected to MoC protocol, so we need to split them to transfer all the balance after the upgrade
     commissionSplitter.split();
-    // TODO: commissionSpliterV2 and V3 ??
     verifyMigrationCompatibility();
   }
 
@@ -244,7 +241,7 @@ interface IMoCV2 {
     uint256 tpEmaSf;
   }
 
-  function migrateFromV1(uint256 qAC_, uint256 qTC_, uint256 qTP_, uint256 tpEma_, uint256 nextEmaCalculation_, uint256 nextTCInterestPayment_)
+  function migrateFromV1(uint256 qAC_, uint256 qTC_, uint256 qTP_, uint256 nextEmaCalculation_, uint256 nextTCInterestPayment_)
     external;
 
   function governor() external view returns (address governor);
@@ -266,8 +263,6 @@ interface IMoCV2 {
   function liqThrld() external view returns (uint256 liqThrld);
 
   function tpCtarg(uint256 index_) external view returns (uint256 tpCtarg);
-
-  function tpEma(uint256 index_) external view returns (uint256 ema, uint256 sf);
 
   function getCglb() external view returns (uint256 cglob);
 

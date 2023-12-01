@@ -17,5 +17,6 @@
       "Governor": "0x1d332EB64eFcfCACb0ca28A5a626E01A2500FC22",
       "MoCHelperLib": "0x3801999076bCeE0b47141011F5D45D330F42e312"
     },
-    "governorOwnerAddress": "0x670160830068de3E174c49A8ded457030E8E4B65"
+    "governorOwnerAddress": "0x670160830068de3E174c49A8ded457030E8E4B65",
+    "authorizedExecutors": []
   }

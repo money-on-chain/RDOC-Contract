@@ -44,32 +44,32 @@ module.exports = async callback => {
     if (changerInfo.upgradeDelegator === config.implementationAddresses.UpgradeDelegator) {
       console.log('OK. Upgrade Delegator: ', changerInfo.upgradeDelegator);
     } else {
-      console.log('ERROR! Upgrade Delegator is not the same ', changerInfo.upgradeDelegator);
+      console.error('ERROR! Upgrade Delegator is not the same ', changerInfo.upgradeDelegator);
     }
 
     if (changerInfo.commissionSplitter === config.v1ProxyAddresses.CommissionSplitter) {
       console.log('OK. CommissionSplitter: ', changerInfo.commissionSplitter);
     } else {
-      console.log('ERROR! CommissionSplitter is not the same ', changerInfo.commissionSplitter);
+      console.error('ERROR! CommissionSplitter is not the same ', changerInfo.commissionSplitter);
     }
 
     if (changerInfo.mocV2 === config.v2ProxyAddresses.MoC) {
       console.log('OK. MoCV2: ', changerInfo.mocV2);
     } else {
-      console.log('ERROR! MoCV2 is not the same ', changerInfo.mocV2);
+      console.error('ERROR! MoCV2 is not the same ', changerInfo.mocV2);
     }
 
     // MoC
     if (changerInfo.mocProxy === config.v1ProxyAddresses.MoC) {
       console.log('OK. Proxy MoC.sol contract: ', changerInfo.mocProxy);
     } else {
-      console.log('ERROR! Proxy MoC.sol is not the same ', changerInfo.mocProxy);
+      console.error('ERROR! Proxy MoC.sol is not the same ', changerInfo.mocProxy);
     }
 
     if (changerInfo.mocMigrator === config.implementationAddresses.MoC_Migrator) {
       console.log('OK. Implementation MoC_Migrator.sol contract: ', changerInfo.mocMigrator);
     } else {
-      console.log(
+      console.error(
         'ERROR! Implementation MoC_Migrator.sol is not the same ',
         changerInfo.mocMigrator
       );
@@ -79,7 +79,7 @@ module.exports = async callback => {
     if (changerInfo.mocExchangeProxy === config.v1ProxyAddresses.MoCExchange) {
       console.log('OK. Proxy MoCExchange.sol contract: ', changerInfo.mocExchangeProxy);
     } else {
-      console.log('ERROR! Proxy MoCExchange.sol is not the same ', changerInfo.mocExchangeProxy);
+      console.error('ERROR! Proxy MoCExchange.sol is not the same ', changerInfo.mocExchangeProxy);
     }
 
     if (changerInfo.mocExchangeMigrator === config.implementationAddresses.MoCExchange_Migrator) {
@@ -88,7 +88,7 @@ module.exports = async callback => {
         changerInfo.mocExchangeMigrator
       );
     } else {
-      console.log(
+      console.error(
         'ERROR! Implementation MoCExchange_Migrator.sol is not the same ',
         changerInfo.mocExchangeMigrator
       );
@@ -98,14 +98,14 @@ module.exports = async callback => {
     if (changerInfo.mocStateProxy === config.v1ProxyAddresses.MoCState) {
       console.log('OK. Proxy MoCState.sol contract: ', changerInfo.mocStateProxy);
     } else {
-      console.log('ERROR! Proxy MoCState.sol is not the same ', changerInfo.mocStateProxy);
+      console.error('ERROR! Proxy MoCState.sol is not the same ', changerInfo.mocStateProxy);
     }
 
     // MoCSettlement
     if (changerInfo.mocSettlementProxy === config.v1ProxyAddresses.MoCSettlement) {
       console.log('OK. Proxy MoCSettlement.sol contract: ', changerInfo.mocSettlementProxy);
     } else {
-      console.log(
+      console.error(
         'ERROR! Proxy MoCSettlement.sol is not the same ',
         changerInfo.mocSettlementProxy
       );
@@ -115,7 +115,7 @@ module.exports = async callback => {
     if (changerInfo.mocInrateProxy === config.v1ProxyAddresses.MoCInrate) {
       console.log('OK. Proxy MoCInrate.sol contract: ', changerInfo.mocInrateProxy);
     } else {
-      console.log('ERROR! Proxy MoCInrate.sol is not the same ', changerInfo.mocInrateProxy);
+      console.error('ERROR! Proxy MoCInrate.sol is not the same ', changerInfo.mocInrateProxy);
     }
 
     // MoCRiskProxManager
@@ -125,7 +125,7 @@ module.exports = async callback => {
         changerInfo.mocRiskProxManagerProxy
       );
     } else {
-      console.log(
+      console.error(
         'ERROR! Proxy MoCRiskProxManager.sol is not the same ',
         changerInfo.mocRiskProxManagerProxy
       );
@@ -138,11 +138,21 @@ module.exports = async callback => {
         changerInfo.deprecatedImplementation
       );
     } else {
-      console.log(
+      console.error(
         'ERROR! Implementation Deprecated.sol is not the same ',
         changerInfo.deprecatedImplementation
       );
     }
+
+    // Authorized
+    await config.authorizedExecutors.forEach(async (authorizedExecutor, i) => {
+      const changerAuthExec = await changer.authorizedExecutors(i);
+      if (changerAuthExec === authorizedExecutor) {
+        console.log('OK. Authorized Executor address: ', authorizedExecutor);
+      } else {
+        console.error('ERROR! Authorized Executor address is not correct ', changerAuthExec);
+      }
+    });
   } catch (error) {
     callback(error);
   }

@@ -583,7 +583,8 @@ const makeUtils = async (artifacts, networkName, config, owner, deployer) => {
       MoCInrate: contractAddresses.mocInrate,
       MoCState: contractAddresses.mocState,
       MoCVendors: contractAddresses.mocVendors,
-      CommissionSplitter: contractAddresses.commissionSplitter
+      CommissionSplitter: contractAddresses.commissionSplitter,
+      MoCRiskProxManager: contractAddresses.moCRiskProxManager
     };
 
     const implementationAddresses = {
@@ -593,6 +594,7 @@ const makeUtils = async (artifacts, networkName, config, owner, deployer) => {
       MoCSettlement: implementationAddr.mocSettlement,
       MoCInrate: implementationAddr.mocInrate,
       MoCState: implementationAddr.mocState,
+      MoCRiskProxManager: implementationAddr.mocRiskProxManager,
       ProxyAdmin: implementationAddr.proxyAdmin,
       UpgradeDelegator: implementationAddr.upgradeDelegator,
       Governor: implementationAddr.governor,
