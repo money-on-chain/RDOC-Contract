@@ -76,7 +76,7 @@ export const fixtureDeployed = memoizee(
   }>) => {
     return deployments.createFixture(async ({ ethers }) => {
       await deployments.fixture();
-      const { deployer, alice, vendor } = await getNamedAccounts();
+      const { deployer, alice, bob, vendor } = await getNamedAccounts();
 
       const proxyAdmin: ProxyAdmin = await deployContract("ProxyAdmin", ProxyAdmin__factory, []);
 
@@ -238,6 +238,8 @@ export const fixtureDeployed = memoizee(
 
       await reserveToken.claim(pEth(100000000000));
       await reserveToken.connect(await ethers.getSigner(alice)).claim(pEth(100000000000));
+      await reserveToken.connect(await ethers.getSigner(bob)).claim(pEth(100000000000));
+
       await transferOwnershipAndMinting(riskProToken, mocExchange.address);
       await transferPausingRole(riskProToken, moc.address);
       await proxyAdmin.transferOwnership(upgradeDelegator.address);

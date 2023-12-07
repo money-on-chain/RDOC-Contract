@@ -2,7 +2,7 @@
 
 Moc V2 specif contracts are defined on [rif-sc-protocol](https://github.com/money-on-chain/rif-sc-protocol) repository compiled under `/artifacts/contracts/` folder and from node_modules `moc-core` dependency (main MOC Protocol).
 
-The version currently used, corresponds to Release <TODO>. Any update on the given target contracts, will required them to be re-compiled and imported.
+The version currently used, is compatible with Releases v1.0.X. Any relevant update on the given target contracts, will required them to be re-compiled and imported again.
 
 Files required from `/artifacts/contracts/`:
 
