@@ -146,12 +146,7 @@ contract V2MigrationChanger is ChangeContract {
     mocV2.migrateFromV1(qAC, qTC, qTP, nextEmaCalculation, nextTCInterestPayment);
     MoC_Migrator(address(mocProxy)).migrateToV2(address(mocV2));
     MoCExchange_Migrator(address(mocExchangeProxy)).migrateToV2(address(mocV2));
-    // unpause MocV2 and set the real pauser address
-    address pauser = MoC(address(mocProxy)).stopper();
-    mocV2.setPauser(address(this));
-    mocV2.unpause();
-    mocV2.setPauser(pauser);
-
+    
     IMocQueueV2 rocQueue = IMocQueueV2(mocV2.mocQueue());
     rocQueue.registerBucket(address(mocV2));
     for (uint256 i = 0; i < authorizedExecutors.length; i++) {
@@ -204,6 +199,8 @@ contract V2MigrationChanger is ChangeContract {
     MoCConnector mocConnector = MoCConnector(address(mocConnectorProxy));
     // assert governor address
     require(address(mocState.governor()) == mocV2.governor(), "wrong param: governor address");
+    // assert pauser address
+    require(MoC(address(mocProxy)).stopper() == mocV2.pauser(), "wrong param: pauser address");    
     // assert reserveToken address
     require(address(mocConnector.reserveToken()) == mocV2.acToken(), "wrong param: reserve token address");
     // assert riskProToken address

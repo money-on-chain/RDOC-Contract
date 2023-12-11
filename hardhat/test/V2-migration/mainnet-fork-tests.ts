@@ -33,6 +33,7 @@ import {
   StopperV2,
   StopperV2__factory,
   MocVendors,
+  MoCVendors__factory,
 } from "../../typechain";
 import { Balance, deployMocRifV2, pEth, CONSTANTS } from "../helpers/utils";
 import { assertPrec } from "../helpers/assertHelper";
@@ -59,6 +60,7 @@ describe("Feature: MoC V2 migration - mainnet fork", () => {
   let governorOwnerSigner: SignerWithAddress;
   let holderSigner: SignerWithAddress;
   let multisig: SignerWithAddress;
+  let vendorGuardian: Address;
   let signer: any;
   let holderStableTokenBalanceBefore: Balance;
   let holderRifProTokenBalanceBefore: Balance;
@@ -88,6 +90,10 @@ describe("Feature: MoC V2 migration - mainnet fork", () => {
       stopper = StopperV2__factory.connect("0x51072aC8Fe05Fcfdc14e02Bb3a0C7499Ad9eF140", signer);
       stableToken = StableToken__factory.connect("0x3A15461d8aE0F0Fb5Fa2629e9DA7D66A794a6e37", signer);
       riskProToken = RiskProToken__factory.connect("0xf4d27c56595Ed59B66cC7F03CFF5193e4bd74a61", signer);
+      vendorGuardian = await MoCVendors__factory.connect(
+        await mocStateProxy.getMoCVendors(),
+        signer,
+      ).getVendorGuardianAddress();
       // deploy MocV2
       let mocCoreExpansion: MocCoreExpansion;
       let maxAbsoluteOpProvider: FCMaxAbsoluteOpProvider;
@@ -126,7 +132,7 @@ describe("Feature: MoC V2 migration - mainnet fork", () => {
             decayBlockSpan: 720,
           },
           governorAddress: governor.address,
-          pauserAddress: deployer,
+          pauserAddress: stopper.address,
           mocCoreExpansion: mocCoreExpansion.address,
           emaCalculationBlockSpan: await mocStateProxy.getEmaCalculationBlockSpan(),
           mocVendors: mocVendorsV2.address,
@@ -135,12 +141,9 @@ describe("Feature: MoC V2 migration - mainnet fork", () => {
         mocQueue: mocQueue.address,
       });
 
-      await mocVendorsV2.initialize(deployer, governor.address, deployer);
+      await mocVendorsV2.initialize(vendorGuardian, governor.address, stopper.address);
       // set 10% markup to vendor
       await mocVendorsV2.setVendorMarkup(vendor, pEth(0.1));
-
-      // pause MocRifV2
-      await mocRifV2.pause();
 
       // initialize mocQueue
       const minOperWaitingBlck = 1;
@@ -156,7 +159,7 @@ describe("Feature: MoC V2 migration - mainnet fork", () => {
         swapTPforTCExecFee: CONSTANTS.EXEC_FEE,
         swapTCforTPExecFee: CONSTANTS.EXEC_FEE,
       };
-      await mocQueue.initialize(governor.address, deployer, minOperWaitingBlck, maxOperPerBlock, execFeeParams);
+      await mocQueue.initialize(governor.address, stopper.address, minOperWaitingBlck, maxOperPerBlock, execFeeParams);
 
       await helpers.impersonateAccount(governorOwnerAddress);
       governorOwnerSigner = await ethers.getSigner(governorOwnerAddress);

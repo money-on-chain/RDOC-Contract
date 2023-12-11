@@ -230,10 +230,11 @@ export const fixtureDeployed = memoizee(
         deployer,
       );
       await upgradeDelegator["initialize(address,address)"](governorMock.address, proxyAdmin.address);
+      const vendorGuardian = deployer;
       await mocVendors["initialize(address,address,address)"](
         mocConnector.address,
         governorMock.address,
-        deployer /*vendorGuardian*/,
+        vendorGuardian,
       );
 
       await reserveToken.claim(pEth(100000000000));
@@ -283,7 +284,7 @@ export const fixtureDeployed = memoizee(
             decayBlockSpan: 720,
           },
           governorAddress: governorMock.address,
-          pauserAddress: deployer,
+          pauserAddress: stopper.address,
           mocCoreExpansion: mocCoreExpansion.address,
           emaCalculationBlockSpan: baseParams.emaBlockSpan,
           mocVendors: mocVendorsV2.address,
@@ -306,14 +307,17 @@ export const fixtureDeployed = memoizee(
         swapTPforTCExecFee: CONSTANTS.EXEC_FEE,
         swapTCforTPExecFee: CONSTANTS.EXEC_FEE,
       };
-      await mocQueue.initialize(governorMock.address, deployer, minOperWaitingBlck, maxOperPerBlock, execFeeParams);
+      await mocQueue.initialize(
+        governorMock.address,
+        stopper.address,
+        minOperWaitingBlck,
+        maxOperPerBlock,
+        execFeeParams,
+      );
 
-      await mocVendorsV2.initialize(deployer, governorMock.address, deployer);
+      await mocVendorsV2.initialize(vendorGuardian, governorMock.address, stopper.address);
       // set 5% markup to vendor
       await mocVendorsV2.setVendorMarkup(vendor, pEth(0.05));
-
-      // pause MocRifV2
-      await mocRifV2.pause();
 
       await stopper.setMaxAbsoluteOperation(maxAbsoluteOpProvider.address, CONSTANTS.MAX_UINT256);
 

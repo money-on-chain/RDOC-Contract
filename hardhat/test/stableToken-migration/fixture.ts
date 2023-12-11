@@ -147,7 +147,7 @@ export const fixtureDeployed = memoizee(
         mocSettlement.address,
         mocExchange.address,
         mocInrate.address,
-        deployer,
+        deployer, //burnoutBookAddress
         reserveToken.address,
       );
       await moc["initialize(address,address,address,bool,uint256)"](
@@ -189,7 +189,7 @@ export const fixtureDeployed = memoizee(
         baseParams.riskProxTmax,
         baseParams.riskProRate,
         baseParams.dayBlockSpan * 7,
-        deployer,
+        deployer, // riskProInterestTargetAddress
         mocCommissionSplitter.address,
         // commissionRate,
         baseParams.stableTmin,
@@ -209,12 +209,12 @@ export const fixtureDeployed = memoizee(
       );
       await mocCommissionSplitter["initialize(address,address,uint256,address,address,address,address)"](
         moc.address,
-        deployer,
+        deployer, // _commissionsAddress
         baseParams.mocProportion,
         governorMock.address,
         reserveToken.address,
         mocToken.address,
-        deployer,
+        deployer, // _mocTokenCommissionsAddress
       );
       await upgradeDelegator["initialize(address,address)"](governorMock.address, proxyAdmin.address);
       await mocVendors["initialize(address,address,address)"](
