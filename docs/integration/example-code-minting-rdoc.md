@@ -1,9 +1,9 @@
-# Example code minting RDOC
+# Example code minting USDRIF
 
 In the following example we will learn how to:
 
-- Get the maximum amount of RDOC available to mint.
-- Mint RDOC.
+- Get the maximum amount of USDRIF available to mint.
+- Mint USDRIF.
 
 You can find code examples into _/examples_ dir.
 
@@ -102,7 +102,7 @@ const execute = async () => {
     throw Error('Can not find MoC Exchange contract.');
   }
 
-  // Loading mocState contract. It is necessary to compute max RDOC available to mint
+  // Loading mocState contract. It is necessary to compute max USDRIF available to mint
   const mocState = await getContract(MoCStateAbi.abi, mocStateAddress);
   if (!mocState) {
     throw Error('Can not find MoCState contract.');
@@ -167,7 +167,7 @@ const execute = async () => {
       .on('error', console.error);
   };
 
-  // Gets max RDOC available to mint
+  // Gets max USDRIF available to mint
   const getAbsoluteMaxRDoc = await mocState.methods.absoluteMaxStableToken().call();
   const rifAmount = '0.00001';
   const vendorAccount = '<vendor-address>';

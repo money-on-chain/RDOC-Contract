@@ -27,20 +27,21 @@ import {
   RiskProToken,
   RiskProToken__factory,
   StableToken,
+  StableTokenV2,
+  StableTokenV2__factory,
   StableToken__factory,
-  StopperV2,
-  StopperV2__factory,
+  Stopper,
+  Stopper__factory,
+  TokenMigrator,
+  TokenMigrator__factory,
   UpgradeDelegator,
   UpgradeDelegator__factory,
   MoCExchange,
   MoCExchange__factory,
   ProxyAdmin__factory,
   ProxyAdmin,
-  GovernorMock,
-  GovernorMock__factory,
-  PriceProviderMock,
-} from "../typechain";
-import { deployContract, deployTransparentProxy, baseParams, pEth, CONSTANTS } from "./helpers/utils";
+} from "../../typechain";
+import { deployContract, deployTransparentProxy, baseParams, pEth } from "../helpers/utils";
 
 export const fixtureDeployed = memoizee(
   (): (() => Promise<{
@@ -53,22 +54,27 @@ export const fixtureDeployed = memoizee(
     mocInrate: MoCInrate;
     mocVendors: MoCVendors;
     riskProxManager: MoCRiskProxManager;
-    stopper: StopperV2;
+    stopper: Stopper;
     mocCommissionSplitter: CommissionSplitter;
     upgradeDelegator: UpgradeDelegator;
     stableToken: StableToken;
+    stableTokenV2: StableTokenV2;
     mocToken: MoCToken;
     riskProToken: RiskProToken;
     reserveToken: ReserveToken;
-    governorMock: GovernorMock;
-    priceProvider: PriceProviderMock;
+    tokenMigrator: TokenMigrator;
   }>) => {
     return deployments.createFixture(async ({ ethers }) => {
       await deployments.fixture();
       const { deployer, alice } = await getNamedAccounts();
+      const signer = await ethers.provider.getSigner();
 
-      const proxyAdmin: ProxyAdmin = await deployContract("ProxyAdmin", ProxyAdmin__factory, []);
-      const mocHelperAddress = await deployContract("MoCHelperLib", undefined, []);
+      const deployedProxyAdmin = await deployments.getOrNull("ProxyAdmin");
+      if (!deployedProxyAdmin) throw new Error("No ProxyAdmin deployed.");
+      const proxyAdmin: ProxyAdmin = ProxyAdmin__factory.connect(deployedProxyAdmin.address, signer);
+
+      const mocHelperLib = await deployments.getOrNull("MoCHelperLib");
+      if (!mocHelperLib) throw new Error("No MoCHelperLib deployed.");
 
       const mocConnector: MoCConnector = await deployTransparentProxy(
         "MoCConnector",
@@ -77,7 +83,7 @@ export const fixtureDeployed = memoizee(
       );
       const moc: MoC = await deployTransparentProxy("MoC", proxyAdmin.address, MoC__factory);
       const mocState: MoCState = await deployTransparentProxy("MoCState", proxyAdmin.address, MoCState__factory, {
-        libraries: { MoCHelperLib: mocHelperAddress },
+        libraries: { MoCHelperLib: mocHelperLib.address },
       });
       const mocSettlement: MoCSettlement = await deployTransparentProxy(
         "MoCSettlement",
@@ -85,7 +91,7 @@ export const fixtureDeployed = memoizee(
         MoCSettlement__factory,
       );
       const mocInrate: MoCInrate = await deployTransparentProxy("MoCInrate", proxyAdmin.address, MoCInrate__factory, {
-        libraries: { MoCHelperLib: mocHelperAddress },
+        libraries: { MoCHelperLib: mocHelperLib.address },
       });
       const mocVendors: MoCVendors = await deployTransparentProxy(
         "MoCVendors",
@@ -93,28 +99,26 @@ export const fixtureDeployed = memoizee(
         MoCVendors__factory,
       );
 
-      const mocExchange: MoCExchange = await deployTransparentProxy(
-        "MoCExchange",
-        proxyAdmin.address,
-        MoCExchange__factory,
-        {
-          libraries: { MoCHelperLib: mocHelperAddress },
-        },
-      );
+      const deployedMocExchange = await deployments.getOrNull("MoCExchangeProxy");
+      if (!deployedMocExchange) throw new Error("No MoCExchangeProxy deployed.");
+      const mocExchange: MoCExchange = MoCExchange__factory.connect(deployedMocExchange.address, signer);
 
       const riskProxManager: MoCRiskProxManager = await deployTransparentProxy(
         "MoCRiskProxManager",
         proxyAdmin.address,
         MoCRiskProxManager__factory,
       );
-      const stopper: StopperV2 = await deployTransparentProxy("StopperV2", proxyAdmin.address, StopperV2__factory);
+      const stopper: Stopper = await deployTransparentProxy("Stopper", proxyAdmin.address, Stopper__factory);
       const mocCommissionSplitter: CommissionSplitter = await deployTransparentProxy(
         "CommissionSplitter",
         proxyAdmin.address,
         CommissionSplitter__factory,
       );
 
-      const stableToken: StableToken = await deployContract("StableToken", StableToken__factory, []);
+      const deployedStableToken = await deployments.getOrNull("StableToken");
+      if (!deployedStableToken) throw new Error("No StableToken deployed.");
+      const stableToken: StableToken = StableToken__factory.connect(deployedStableToken.address, signer);
+
       const mocToken: MoCToken = await deployContract("MoCToken", MoCToken__factory, []);
       const riskProToken: RiskProToken = await deployContract("RiskProToken", RiskProToken__factory, []);
       const reserveToken: ReserveToken = await deployContract("ReserveToken", ReserveToken__factory, []);
@@ -125,7 +129,8 @@ export const fixtureDeployed = memoizee(
         baseParams.mocPrice,
       ]);
 
-      const governorMock: GovernorMock = await deployContract("GovernorMock", GovernorMock__factory, []);
+      const governorMock = await deployments.getOrNull("GovernorMock");
+      if (!governorMock) throw new Error("No GovernorMock deployed.");
 
       const upgradeDelegator: UpgradeDelegator = await deployContract(
         "UpgradeDelegator",
@@ -142,7 +147,7 @@ export const fixtureDeployed = memoizee(
         mocSettlement.address,
         mocExchange.address,
         mocInrate.address,
-        CONSTANTS.DUMMY_ADDRESS, //burnout address deprecated
+        deployer,
         reserveToken.address,
       );
       await moc["initialize(address,address,address,bool,uint256)"](
@@ -218,6 +223,11 @@ export const fixtureDeployed = memoizee(
         deployer /*vendorGuardian*/,
       );
 
+      // After Moc and MocExchange had been initialized
+      await moc.setMaxAbsoluteOperation(pEth(1000000));
+      await moc.setMaxOperationalDifference(pEth(500000));
+      await moc.setDecayBlockSpan(720);
+
       await reserveToken.claim(pEth(100000000000));
       await reserveToken.connect(await ethers.getSigner(alice)).claim(pEth(100000000000));
       await transferOwnershipAndMinting(riskProToken, mocExchange.address);
@@ -225,8 +235,16 @@ export const fixtureDeployed = memoizee(
       await transferPausingRole(riskProToken, moc.address);
       await proxyAdmin.transferOwnership(upgradeDelegator.address);
 
+      const deployedStableTokenV2 = await deployments.getOrNull("StableTokenV2Proxy");
+      if (!deployedStableTokenV2) throw new Error("No StableTokenV2Proxy deployed.");
+      const stableTokenV2: StableTokenV2 = StableTokenV2__factory.connect(deployedStableTokenV2.address, signer);
+
+      const deployedTokenMigrator = await deployments.getOrNull("TokenMigrator");
+      if (!deployedTokenMigrator) throw new Error("No TokenMigrator deployed.");
+      const tokenMigrator: TokenMigrator = TokenMigrator__factory.connect(deployedTokenMigrator.address, signer);
+
       return {
-        mocHelperAddress,
+        mocHelperAddress: mocHelperLib.address,
         moc,
         mocConnector,
         mocExchange,
@@ -242,8 +260,8 @@ export const fixtureDeployed = memoizee(
         mocToken,
         riskProToken,
         reserveToken,
-        governorMock,
-        priceProvider,
+        stableTokenV2,
+        tokenMigrator,
       };
     });
   },

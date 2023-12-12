@@ -14,7 +14,7 @@ Assuming you already have your project up and running (if you don't, please foll
 npm install --save -E git+https://git@github.com/money-on-chain/RDOC-Contract.git
 ```
 
-Having done that lets you use our contract as a dependency to your contract. For this let's suppose you are doing some kind of contract that when executing a certain task charges a fixed commission. Now let's suppose that the commission is sent in RIFs because it is easier for the user but actually you want some RDOCs. The good news is that you can do this instantly just by redeeming them. The code necessary to do this is actually pretty simple.
+Having done that lets you use our contract as a dependency to your contract. For this let's suppose you are doing some kind of contract that when executing a certain task charges a fixed commission. Now let's suppose that the commission is sent in RIFs because it is easier for the user but actually you want some USDRIF. The good news is that you can do this instantly just by redeeming them. The code necessary to do this is actually pretty simple.
 ​
 You just have to import the contract
 ​
@@ -38,19 +38,19 @@ moc.redeemStableTokenRequest(stableTokenAmount);
 ```
 
 ```js
-//Add 10 RDOCs to a redeem request.
+//Add 10 USDRIF to a redeem request.
 moc.alterRedeemRequestAmount(true, 10);
-//Sustract 5 RDOCs to a redeem request.
+//Sustract 5 USDRIF to a redeem request.
 moc.alterRedeemRequestAmount(true, 5);
 ```
 
 ```js
-//Trying to redeem All RDOCs.
+//Trying to redeem All USDRIF.
 uint256 docBalance = stableToken.balanceOf(userAddress);
 moc.redeemFreeStableTokenVendors(docBalance, vendorAccount);
 ```
 
-You can send it immediately to you so you can start using it right away. In order to do this you should add a few more lines similar to the ones before, only that you will have to use the RDOC token.
+You can send it immediately to you so you can start using it right away. In order to do this you should add a few more lines similar to the ones before, only that you will have to use the USDRIF token.
 ​
 This will leave you with a contract similar to the following
 ​​
@@ -64,9 +64,9 @@ import "money-on-chain/contracts/token/StableToken.sol";
 contract YourRedeemingRDocContract {
     // Address of the MoC contract
     MoC public moc;
-    // Address of the RDOC token
+    // Address of the USDRIF token
     StableToken public stableToken;
-    // RDOC Amount
+    // USDRIF Amount
     uint256 stableTokenAmount;
     // Address that will receive the markup
     address public vendorAccount;

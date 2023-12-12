@@ -68,7 +68,7 @@ const execute = async () => {
   const redeemFreeStableToken = async (stableTokenAmount, vendorAccount) => {
     const weiAmount = web3.utils.toWei(stableTokenAmount, 'ether');
 
-    console.log(`Calling redeem RDOC request, account: ${from}, amount: ${weiAmount}.`);
+    console.log(`Calling redeem USDRIF request, account: ${from}, amount: ${weiAmount}.`);
     moc.methods
       .redeemFreeStableTokenVendors(weiAmount, vendorAccount)
       .send({ from, gasPrice }, function(error, transactionHash) {
@@ -90,8 +90,8 @@ const execute = async () => {
   const finalStableTokenAmount = Math.min(freeStableToken, userStableTokenBalance);
   const vendorAccount = '<vendor-address>';
 
-  console.log('User RDOC balance: ', userStableTokenBalance.toString());
-  console.log('=== Max Available RDOC to redeem: ', finalStableTokenAmount);
+  console.log('User USDRIF balance: ', userStableTokenBalance.toString());
+  console.log('=== Max Available USDRIF to redeem: ', finalStableTokenAmount);
 
   // Call redeem
   await redeemFreeStableToken(stableTokenAmount, vendorAccount);

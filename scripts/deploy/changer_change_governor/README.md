@@ -20,7 +20,7 @@ return
 ```
 Using network 'rdocMainnet'.
 
-Configuration path:  /home/martin/Proyectos/RDOC_Contract/scripts/deploy/changer_change_governor/deployConfig-rdocMainnet.json
+Configuration path:  RDOC_Contract/scripts/deploy/changer_change_governor/deployConfig-rdocMainnet.json
 BatchChanger Deploy at: 0xFb511b75e8A633Bc08fbDB477eD825309f06Ba76
 Length Data:  7
 Length Target:  7

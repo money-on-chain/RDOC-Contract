@@ -238,7 +238,7 @@ returns(isActive bool)
 
 **Returns**
 
-true if vendor was registered successfully; otherwise false
+true if vendor was registered successfully; otherwise true
 
 **Arguments**
 

@@ -82,7 +82,6 @@ contract MoCBucketContainer is MoCBase, Governed {
    * @param  _cobj - new value of cobj
    */
   function setBucketCobj(bytes32 _bucket, uint256 _cobj) public onlyAuthorizedChanger() {
-    //TODO: It is necessary to analyze the impact in the model it has when changing X2. This
     mocBuckets[_bucket].cobj = _cobj;
   }
 
@@ -111,7 +110,7 @@ contract MoCBucketContainer is MoCBase, Governed {
   }
 
   /**
-    @dev Returns all the address that currently have riskProx position for this bucket
+    @dev Returns the number of addresses that currently have riskProx position for this bucket
     @param bucket bucket of the active address
   */
   function getActiveAddressesCount(bytes32 bucket) public view returns (uint256 count) {
