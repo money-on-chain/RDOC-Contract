@@ -1,5 +1,26 @@
 import { ethers } from "hardhat";
 import { BigNumber } from "@ethersproject/bignumber";
+import MocRifCompiled from "../../dependencies/mocV2Imports/MocRif.json";
+import MocCoreExpansionCompiled from "../../dependencies/mocV2Imports/MocCoreExpansion.json";
+import MocQueueCompiled from "../../dependencies/mocV2Imports/MocQueue.json";
+import MocVendorsCompiled from "../../dependencies/mocV2Imports/MocVendors.json";
+import FCMaxAbsoluteOpProviderCompiled from "../../dependencies/mocV2Imports/FCMaxAbsoluteOpProvider.json";
+import FCMaxOpDifferenceProviderCompiled from "../../dependencies/mocV2Imports/FCMaxOpDifferenceProvider.json";
+
+import {
+  MocRif,
+  MocCoreExpansion,
+  MocCoreExpansion__factory,
+  MocRif__factory,
+  MocQueue,
+  MocQueue__factory,
+  MocVendors,
+  MocVendors__factory,
+  FCMaxAbsoluteOpProvider,
+  FCMaxAbsoluteOpProvider__factory,
+  FCMaxOpDifferenceProvider,
+  FCMaxOpDifferenceProvider__factory,
+} from "../../typechain";
 
 export const gasLimit = 6800000;
 export type Balance = BigNumber;
@@ -7,6 +28,7 @@ export type Balance = BigNumber;
 export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
 export const MINTER_ROLE = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("MINTER_ROLE"));
 export const BURNER_ROLE = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("BURNER_ROLE"));
+export const EXECUTOR_ROLE = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("EXECUTOR_ROLE"));
 
 export const deployUUPSProxy = async (contract: string, typechain: any) => {
   const MocImplementationFactory = await ethers.getContractFactory(contract);
@@ -14,6 +36,61 @@ export const deployUUPSProxy = async (contract: string, typechain: any) => {
   const ProxyFactory = await ethers.getContractFactory("ERC1967Proxy");
   const proxy = await ProxyFactory.deploy(mocImplementation.address, "0x");
   return typechain.connect(proxy.address, ethers.provider.getSigner());
+};
+
+export const deployMocRifV2 = async (
+  stopperAddress: string,
+): Promise<{
+  mocRifV2: MocRif;
+  mocCoreExpansion: MocCoreExpansion;
+  mocQueue: MocQueue;
+  mocVendorsV2: MocVendors;
+  maxAbsoluteOpProvider: FCMaxAbsoluteOpProvider;
+  maxOpDiffProvider: FCMaxOpDifferenceProvider;
+}> => {
+  const MocImplementationFactory = await ethers.getContractFactory(MocRifCompiled.abi, MocRifCompiled.bytecode);
+  const mocImplementation = await MocImplementationFactory.deploy();
+  const ProxyFactory = await ethers.getContractFactory("ERC1967Proxy");
+  const mocProxy = await ProxyFactory.deploy(mocImplementation.address, "0x");
+
+  const MocCoreExpansionFactory = await ethers.getContractFactory(
+    MocCoreExpansionCompiled.abi,
+    MocCoreExpansionCompiled.bytecode,
+  );
+  const mocCoreExpansion = await MocCoreExpansionFactory.deploy();
+
+  const MocQueueFactory = await ethers.getContractFactory(MocQueueCompiled.abi, MocQueueCompiled.bytecode);
+  const mocQueueImplementation = await MocQueueFactory.deploy();
+  const mocQueueProxy = await ProxyFactory.deploy(mocQueueImplementation.address, "0x");
+
+  const MocVendorsFactory = await ethers.getContractFactory(MocVendorsCompiled.abi, MocVendorsCompiled.bytecode);
+  const mocVendors = await MocVendorsFactory.deploy();
+  const vendorsProxy = await ProxyFactory.deploy(mocVendors.address, "0x");
+
+  const FCMaxAbsoluteOpProvider = await ethers.getContractFactory(
+    FCMaxAbsoluteOpProviderCompiled.abi,
+    FCMaxAbsoluteOpProviderCompiled.bytecode,
+  );
+  const maxAbsoluteOpProvider = await FCMaxAbsoluteOpProvider.deploy(stopperAddress);
+  const FCMaxOpDifferenceProvider = await ethers.getContractFactory(
+    FCMaxOpDifferenceProviderCompiled.abi,
+    FCMaxOpDifferenceProviderCompiled.bytecode,
+  );
+  const maxOpDiffProvider = await FCMaxOpDifferenceProvider.deploy(stopperAddress);
+  return {
+    mocRifV2: MocRif__factory.connect(mocProxy.address, ethers.provider.getSigner()),
+    mocCoreExpansion: MocCoreExpansion__factory.connect(mocCoreExpansion.address, ethers.provider.getSigner()),
+    mocQueue: MocQueue__factory.connect(mocQueueProxy.address, ethers.provider.getSigner()),
+    mocVendorsV2: MocVendors__factory.connect(vendorsProxy.address, ethers.provider.getSigner()),
+    maxAbsoluteOpProvider: FCMaxAbsoluteOpProvider__factory.connect(
+      maxAbsoluteOpProvider.address,
+      ethers.provider.getSigner(),
+    ),
+    maxOpDiffProvider: FCMaxOpDifferenceProvider__factory.connect(
+      maxOpDiffProvider.address,
+      ethers.provider.getSigner(),
+    ),
+  };
 };
 
 export const deployTransparentProxy = async (contract: string, proxyAdmin: string, typechain: any, libraries?: any) => {
@@ -45,6 +122,7 @@ export const CONSTANTS = {
   MAX_BALANCE: ethers.constants.MaxUint256.div((1e17).toString()),
   PRECISION: BigNumber.from((1e18).toString()),
   ONE: BigNumber.from((1e18).toString()),
+  EXEC_FEE: 100,
 };
 
 export const baseParams = {
@@ -71,7 +149,7 @@ export const baseParams = {
   stableTmin: pEth(0),
   stableTmax: pEth("0.0002611578760678"),
   stablePower: pEth(1),
-  mocProportion: 0, // pEth(0.01 * 10 ** 18), // mocPrecision
+  mocProportion: pEth(0.01), // mocPrecision
 
   liquidationEnabled: false,
   _protected: pEth(1.5), // mocPrecision

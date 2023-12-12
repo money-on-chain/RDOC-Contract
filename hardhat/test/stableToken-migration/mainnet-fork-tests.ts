@@ -33,13 +33,12 @@ describe("Feature: Stable Token migration - mainnet fork", () => {
   let signer: any;
   let holderReserveTokenBalanceBefore: Balance;
   let holderStableTokenBalanceBefore: Balance;
-  let snapshot: any;
   const governorOwnerAddress = "0x65a5681bE95d212F0c90eAd40170D8277de81169";
   const rDocHolderAddress = "0x98F453D7d04cbc5A9759308E0a47f0DA471A8Df0";
   const gasPrice = 65820000;
   describe("GIVEN the MocRif protocol deployed in mainnet", () => {
     before(async () => {
-      snapshot = await helpers.takeSnapshot();
+      await helpers.reset("https://public-node.rsk.co", 5650800);
       signer = ethers.provider.getSigner();
       mocProxy = MoC__factory.connect(mocMainnetAddresses.proxyAddresses.MoC, signer);
       reserveToken = ReserveToken__factory.connect(mocMainnetAddresses.implementationAddresses.MocReserve, signer);
@@ -67,9 +66,6 @@ describe("Feature: Stable Token migration - mainnet fork", () => {
 
       // set baseFee to could send txs below the max gas price limit
       await helpers.setNextBlockBaseFeePerGas(gasPrice);
-    });
-    after(async () => {
-      await snapshot.restore();
     });
     describe("WHEN holder tries migrate his StableToken before the upgrade", () => {
       it("THEN tx fails because TokenMigrator StableTokenV1 balance is 0", async () => {

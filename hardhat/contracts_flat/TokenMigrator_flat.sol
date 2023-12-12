@@ -538,7 +538,7 @@ library SafeERC20 {
 
 // File contracts/token/TokenMigrator.sol
 
-pragma solidity 0.8.16;
+pragma solidity 0.8.20;
 
 
 /**
