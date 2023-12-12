@@ -1,6 +1,6 @@
 {
-  "name": "@rdoc-contract/hardhat",
-  "version": "0.0.0",
+  "name": "roc-contracts-v1-migrations",
+  "version": "0.2.0",
   "private": true,
   "homepage": "https://github.com/money-on-chain/RDOC-Contract",
   "description": "RIF on chain using hardhat framework",
