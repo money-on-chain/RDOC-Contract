@@ -78,6 +78,7 @@ describe("Feature: MoC V2 migration - upgrades", () => {
           mocCommissionSplitter.address,
           mocRifV2.address,
           mocProxy.address,
+          [deployer],
         ));
         tx = await changer.execute();
       });
@@ -194,7 +195,7 @@ describe("Feature: MoC V2 migration - upgrades", () => {
         });
       });
       describe("WHEN check MocV2 pauser", () => {
-        it("THEN pauser address is MocV1 stopper instead of the temp pauser", async () => {
+        it("THEN pauser address is MocV1 stopper", async () => {
           expect(await mocRifV2.pauser()).to.be.equal(mocV1Pauser);
         });
       });

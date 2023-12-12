@@ -49,7 +49,6 @@ import {
   pEth,
   deployMocRifV2,
   deployUUPSProxy,
-  EXECUTOR_ROLE,
   CONSTANTS,
 } from "../helpers/utils";
 
@@ -77,7 +76,7 @@ export const fixtureDeployed = memoizee(
   }>) => {
     return deployments.createFixture(async ({ ethers }) => {
       await deployments.fixture();
-      const { deployer, alice, vendor } = await getNamedAccounts();
+      const { deployer, alice, bob, vendor } = await getNamedAccounts();
 
       const proxyAdmin: ProxyAdmin = await deployContract("ProxyAdmin", ProxyAdmin__factory, []);
 
@@ -231,14 +230,17 @@ export const fixtureDeployed = memoizee(
         deployer,
       );
       await upgradeDelegator["initialize(address,address)"](governorMock.address, proxyAdmin.address);
+      const vendorGuardian = deployer;
       await mocVendors["initialize(address,address,address)"](
         mocConnector.address,
         governorMock.address,
-        deployer /*vendorGuardian*/,
+        vendorGuardian,
       );
 
       await reserveToken.claim(pEth(100000000000));
       await reserveToken.connect(await ethers.getSigner(alice)).claim(pEth(100000000000));
+      await reserveToken.connect(await ethers.getSigner(bob)).claim(pEth(100000000000));
+
       await transferOwnershipAndMinting(riskProToken, mocExchange.address);
       await transferPausingRole(riskProToken, moc.address);
       await proxyAdmin.transferOwnership(upgradeDelegator.address);
@@ -282,7 +284,7 @@ export const fixtureDeployed = memoizee(
             decayBlockSpan: 720,
           },
           governorAddress: governorMock.address,
-          pauserAddress: deployer,
+          pauserAddress: stopper.address,
           mocCoreExpansion: mocCoreExpansion.address,
           emaCalculationBlockSpan: baseParams.emaBlockSpan,
           mocVendors: mocVendorsV2.address,
@@ -293,6 +295,7 @@ export const fixtureDeployed = memoizee(
 
       // initialize mocQueue
       const minOperWaitingBlck = 1;
+      const maxOperPerBlock = 10;
       const execFeeParams = {
         tcMintExecFee: CONSTANTS.EXEC_FEE,
         tcRedeemExecFee: CONSTANTS.EXEC_FEE,
@@ -304,27 +307,17 @@ export const fixtureDeployed = memoizee(
         swapTPforTCExecFee: CONSTANTS.EXEC_FEE,
         swapTCforTPExecFee: CONSTANTS.EXEC_FEE,
       };
-      await mocQueue.initialize(governorMock.address, deployer, minOperWaitingBlck, execFeeParams);
-      await mocQueue.registerBucket(mocRifV2.address);
-      await mocQueue.grantRole(EXECUTOR_ROLE, deployer);
+      await mocQueue.initialize(
+        governorMock.address,
+        stopper.address,
+        minOperWaitingBlck,
+        maxOperPerBlock,
+        execFeeParams,
+      );
 
-      await mocVendorsV2.initialize(deployer, governorMock.address, deployer);
+      await mocVendorsV2.initialize(vendorGuardian, governorMock.address, stopper.address);
       // set 5% markup to vendor
       await mocVendorsV2.setVendorMarkup(vendor, pEth(0.05));
-
-      // pause MocRifV2
-      await mocRifV2.pause();
-
-      // add Legacy stableToken in MocV2
-      await mocRifV2.addPeggedToken({
-        tpTokenAddress: stableToken.address,
-        priceProviderAddress: stableTokenPriceProvider.address,
-        tpCtarg: baseParams.c0Cobj,
-        tpMintFee: pEth(0.1), // 10%,
-        tpRedeemFee: pEth(0.1), // 10%,
-        tpEma: baseParams.reservePrice,
-        tpEmaSf: baseParams.smoothingFactor,
-      });
 
       await stopper.setMaxAbsoluteOperation(maxAbsoluteOpProvider.address, CONSTANTS.MAX_UINT256);
 

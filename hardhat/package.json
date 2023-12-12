@@ -8,7 +8,7 @@
     "hardhat": "2.12.2",
     "hardhat-deploy": "0.11.25",
     "hardhat-storage-layout": "0.1.7",
-    "solc": "0.8.16"
+    "solc": "0.8.20"
   },
   "devDependencies": {
     "@commitlint/cli": "17.2.0",
@@ -81,7 +81,7 @@
     "prettier:check": "prettier --config .prettierrc --check \"**/*.{js,json,md,sol,ts}\"",
     "release": "standard-version",
     "security": "docker run -it -v $(pwd):/home/ethsec/project trailofbits/eth-security-toolbox",
-    "security-default": "echo \"solc-select install 0.8.16 && solc-select use 0.8.16 && cd project && slither --exclude-dependencies --exclude pragma,low-level-calls .\" | sudo docker run -i -v $(pwd):/home/ethsec/project trailofbits/eth-security-toolbox",
+    "security-default": "echo \"solc-select install 0.8.20 && solc-select use 0.8.20 && cd project && slither --exclude-dependencies --exclude pragma,low-level-calls .\" | sudo docker run -i -v $(pwd):/home/ethsec/project trailofbits/eth-security-toolbox",
     "slither": "slither .",
     "size-contracts": "hardhat size-contracts",
     "docgen": "hardhat docgen",

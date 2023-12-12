@@ -18,7 +18,8 @@ module.exports = async callback => {
       config.v1ProxyAddresses.MoC,
       config.implementationAddresses.MoC_Migrator,
       config.implementationAddresses.MoCExchange_Migrator,
-      config.implementationAddresses.Deprecated
+      config.implementationAddresses.Deprecated,
+      config.authorizedExecutors
     );
     console.log('V2MigrationChanger address: ', v2MigrationChanger.address);
 

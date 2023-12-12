@@ -11,10 +11,13 @@ import "../../contracts/V2_migration/MoCExchange_Migrator.sol";
 import "../../contracts/MoCState.sol";
 import "../../contracts/MoCInrate.sol";
 
+
 /**
   @title V2MigrationChanger
  */
 contract V2MigrationChanger is ChangeContract {
+  bytes32 constant EXECUTOR_ROLE = keccak256("EXECUTOR_ROLE");
+
   struct UpgradesAddresses {
     AdminUpgradeabilityProxy proxy;
     address newImplementation;
@@ -23,6 +26,7 @@ contract V2MigrationChanger is ChangeContract {
   CommissionSplitter public commissionSplitter;
   IMoCV2 public mocV2;
   address public deprecatedImp;
+  address[] public authorizedExecutors;
 
   // MoC
   AdminUpgradeabilityProxy public mocProxy;
@@ -41,11 +45,10 @@ contract V2MigrationChanger is ChangeContract {
   // MocRiskProxManager
   AdminUpgradeabilityProxy public mocRiskProxManagerProxy;
 
-  uint256 tpEma;
   uint256 nextEmaCalculation;
   uint256 nextTCInterestPayment;
 
-   /**
+  /**
     @notice Constructor
     @param _upgradeDelegator Address of the upgradeDelegator in charge of that proxy
     @param _commissionSplitter Address of the CommissionSplitter contract used to split commissions before
@@ -55,6 +58,7 @@ contract V2MigrationChanger is ChangeContract {
     @param _mocMigrator MoC atomic implementation address to execute the migration
     @param _mocExchangeMigrator MoCExchange atomic implementation address to execute the migration
     @param _deprecatedImp deprectaed contract implementation address
+    @param _authorizedExecutors array of authorized queue executors
   */
   constructor(
     UpgradeDelegator _upgradeDelegator,
@@ -63,12 +67,14 @@ contract V2MigrationChanger is ChangeContract {
     AdminUpgradeabilityProxy _mocProxy,
     address _mocMigrator,
     address _mocExchangeMigrator,
-    address _deprecatedImp
+    address _deprecatedImp,
+    address[] memory _authorizedExecutors
   ) public {
     upgradeDelegator = _upgradeDelegator;
     commissionSplitter = _commissionSplitter;
     mocV2 = IMoCV2(_mocV2);
     deprecatedImp = _deprecatedImp;
+    authorizedExecutors = _authorizedExecutors;
     // MoC
     mocProxy = _mocProxy;
     mocMigrator = _mocMigrator;
@@ -95,7 +101,6 @@ contract V2MigrationChanger is ChangeContract {
   function castToAdminUpgradeabilityProxy(address _address) internal returns (AdminUpgradeabilityProxy proxy) {
     return AdminUpgradeabilityProxy(address(uint160(_address)));
   }
-
 
   /**
     @notice Execute the changes.
@@ -124,15 +129,29 @@ contract V2MigrationChanger is ChangeContract {
     uint256 qTC = IERC20(mocConnector.riskProToken()).totalSupply();
     uint256 qTP = IERC20(mocConnector.stableToken()).totalSupply();
 
-    mocV2.migrateFromV1(qAC, qTC, qTP, tpEma, nextEmaCalculation, nextTCInterestPayment);
+    // Adds USDRIF Pegged Token to V2 protocol with same configuration
+    MoCState mocState = MoCState(address(mocStateProxy));
+    MoCInrate mocInrate = MoCInrate(address(mocInrateProxy));
+    IMoCV2.PeggedTokenParams memory peggedTokenParams = IMoCV2.PeggedTokenParams({
+      tpTokenAddress: address(mocConnector.stableToken()),
+      priceProviderAddress: address(mocState.getPriceProvider()),
+      tpCtarg: mocState.cobj(),
+      tpMintFee: mocInrate.commissionRatesByTxType(mocInrate.MINT_STABLETOKEN_FEES_RESERVE()),
+      tpRedeemFee: mocInrate.commissionRatesByTxType(mocInrate.REDEEM_STABLETOKEN_FEES_RESERVE()),
+      tpEma: mocState.getExponentalMovingAverage(),
+      tpEmaSf: mocState.getSmoothingFactor()
+    });
+    mocV2.addPeggedToken(peggedTokenParams);
+
+    mocV2.migrateFromV1(qAC, qTC, qTP, nextEmaCalculation, nextTCInterestPayment);
     MoC_Migrator(address(mocProxy)).migrateToV2(address(mocV2));
     MoCExchange_Migrator(address(mocExchangeProxy)).migrateToV2(address(mocV2));
-    // unpause MocV2 and set the real pauser address
-    address pauser = MoC(address(mocProxy)).stopper();
-    mocV2.setPauser(address(this));
-    mocV2.unpause();
-    mocV2.setPauser(pauser);
-
+    
+    IMocQueueV2 rocQueue = IMocQueueV2(mocV2.mocQueue());
+    rocQueue.registerBucket(address(mocV2));
+    for (uint256 i = 0; i < authorizedExecutors.length; i++) {
+      rocQueue.grantRole(EXECUTOR_ROLE, authorizedExecutors[i]);
+    }
     // MoC
     upgradeDelegator.upgrade(mocProxy, deprecatedImp);
     // MocExchange
@@ -157,13 +176,11 @@ contract V2MigrationChanger is ChangeContract {
     MoCState mocState = MoCState(address(mocStateProxy));
     MoCInrate mocInrate = MoCInrate(address(mocInrateProxy));
     // we need to get these values before the upgrade because mocState will be deprecated
-    tpEma = mocState.getExponentalMovingAverage();
     nextEmaCalculation = mocState.lastEmaCalculation() + mocState.emaCalculationBlockSpan();
     nextTCInterestPayment = mocInrate.lastRiskProInterestBlock() + mocInrate.riskProInterestBlockSpan();
     // CommissionSplitter holds all the platform fees and then splits them one part for a custom address and another
     // is re-inyected to MoC protocol, so we need to split them to transfer all the balance after the upgrade
     commissionSplitter.split();
-    // TODO: commissionSpliterV2 and V3 ??
     verifyMigrationCompatibility();
   }
 
@@ -171,8 +188,7 @@ contract V2MigrationChanger is ChangeContract {
     @notice Intended to do the final tweaks after the upgrade, for example initialize the contract
     @dev This function can be overriden by child changers to upgrade contracts that require some changes after the upgrade
    */
-  function _afterUpgrade() internal {    
-  }
+  function _afterUpgrade() internal {}
 
   /**
     @notice Verify that most important configuration params are the same for both protocol versions
@@ -183,26 +199,18 @@ contract V2MigrationChanger is ChangeContract {
     MoCConnector mocConnector = MoCConnector(address(mocConnectorProxy));
     // assert governor address
     require(address(mocState.governor()) == mocV2.governor(), "wrong param: governor address");
+    // assert pauser address
+    require(MoC(address(mocProxy)).stopper() == mocV2.pauser(), "wrong param: pauser address");    
     // assert reserveToken address
     require(address(mocConnector.reserveToken()) == mocV2.acToken(), "wrong param: reserve token address");
     // assert riskProToken address
     require(address(mocConnector.riskProToken()) == mocV2.tcToken(), "wrong param: riskPro token address");
-    // assert stableToken address
-    require(address(mocConnector.stableToken()) == mocV2.tpTokens(0), "wrong param: stable token address");
-    // assert stableToken price provider address
-    (, address priceProvider) = mocV2.pegContainer(0);
-    require(address(mocState.getPriceProvider()) == priceProvider, "wrong param: price provider address");
     // assert MoC Token price provider address
     require(address(mocState.getMoCPriceProvider()) == mocV2.feeTokenPriceProvider(), "wrong param: price provider address");
     // assert protected threshlod
     require(mocState.getProtected() == mocV2.protThrld(), "wrong param: protected threshold");
     // assert liquidation threshold
     require(mocState.liq() == mocV2.liqThrld(), "wrong param: liquidation threshold");
-    // assert stableToken target coverage
-    require(mocState.cobj() == mocV2.tpCtarg(0), "wrong param: target coverage");
-    // assert stableToken ema smoothing factor
-    (, uint256 smoothingFactor) = mocV2.tpEma(0);
-    require(mocState.getSmoothingFactor() == smoothingFactor, "wrong param: smoothing factor");
     require(mocInrate.riskProInterestAddress() == mocV2.tcInterestCollectorAddress(), "wrong param: TC interest collector address");
     require(mocInrate.riskProRate() == mocV2.tcInterestRate(), "wrong param: TC interest rate");
     require(mocInrate.riskProInterestBlockSpan() == mocV2.tcInterestPaymentBlockSpan(), "wrong param: TC interest block span");
@@ -213,7 +221,24 @@ contract V2MigrationChanger is ChangeContract {
 
 
 interface IMoCV2 {
-  function migrateFromV1(uint256 qAC_, uint256 qTC_, uint256 qTP_, uint256 tpEma_, uint256 nextEmaCalculation_, uint256 nextTCInterestPayment_)
+  struct PeggedTokenParams {
+    // Pegged Token contract address to add
+    address tpTokenAddress;
+    // priceProviderAddress Pegged Token price provider contract address
+    address priceProviderAddress;
+    // Pegged Token target coverage [PREC]
+    uint256 tpCtarg;
+    // additional fee pct applied on mint [PREC]
+    uint256 tpMintFee;
+    // additional fee pct applied on redeem [PREC]
+    uint256 tpRedeemFee;
+    // initial Pegged Token exponential moving average [PREC]
+    uint256 tpEma;
+    // Pegged Token smoothing factor [PREC]
+    uint256 tpEmaSf;
+  }
+
+  function migrateFromV1(uint256 qAC_, uint256 qTC_, uint256 qTP_, uint256 nextEmaCalculation_, uint256 nextTCInterestPayment_)
     external;
 
   function governor() external view returns (address governor);
@@ -224,6 +249,8 @@ interface IMoCV2 {
 
   function tpTokens(uint256 index_) external view returns (address tpToken);
 
+  function mocQueue() external view returns (address mocQueue);
+
   function pegContainer(uint256 index_) external view returns (uint256 nTP, address priceProvider);
 
   function feeTokenPriceProvider() external view returns (address feeTokenpriceProvider);
@@ -233,8 +260,6 @@ interface IMoCV2 {
   function liqThrld() external view returns (uint256 liqThrld);
 
   function tpCtarg(uint256 index_) external view returns (uint256 tpCtarg);
-
-  function tpEma(uint256 index_) external view returns (uint256 ema, uint256 sf);
 
   function getCglb() external view returns (uint256 cglob);
 
@@ -251,4 +276,13 @@ interface IMoCV2 {
   function tcInterestRate() external view returns (uint256 tcInterestRate);
 
   function tcInterestPaymentBlockSpan() external view returns (uint256 tcInterestPaymentBlockSpan);
+
+  function addPeggedToken(PeggedTokenParams calldata peggedTokenParams_) external;
+}
+
+
+interface IMocQueueV2 {
+  function registerBucket(address bucket_) external;
+
+  function grantRole(bytes32 role, address account) external;
 }

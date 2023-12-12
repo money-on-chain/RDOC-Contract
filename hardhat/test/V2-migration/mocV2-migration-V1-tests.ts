@@ -24,6 +24,7 @@ describe("Feature: MoC V2 migration - V1 functionalities", () => {
   let stableToken: StableTokenV2;
   let riskProToken: RiskProToken;
   let upgradeDelegator: UpgradeDelegator;
+  let deployer: Address;
   let alice: Address;
   let aliceSigner: SignerWithAddress;
   let vendor: Address;
@@ -35,7 +36,7 @@ describe("Feature: MoC V2 migration - V1 functionalities", () => {
 
   describe("GIVEN a MoC Legacy protocol deployed", () => {
     before(async () => {
-      ({ alice, vendor } = await getNamedAccounts());
+      ({ deployer, alice, vendor } = await getNamedAccounts());
       ({
         mocHelperAddress,
         moc: mocProxy,
@@ -75,6 +76,7 @@ describe("Feature: MoC V2 migration - V1 functionalities", () => {
             mocCommissionSplitter.address,
             mocRifV2.address,
             mocProxy.address,
+            [deployer],
           );
           await changer.execute();
         });

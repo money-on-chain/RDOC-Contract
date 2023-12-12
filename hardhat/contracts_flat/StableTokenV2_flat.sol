@@ -111,7 +111,7 @@ interface IERC20Upgradeable {
 
 // File contracts/interfaces/IMocRC20.sol
 
-pragma solidity 0.8.16;
+pragma solidity 0.8.20;
 
 /**
  * @title IMocRC20
@@ -134,7 +134,7 @@ interface IMocRC20 is IERC20Upgradeable {
 
 // File contracts/interfaces/IChangeContract.sol
 
-pragma solidity 0.8.16;
+pragma solidity 0.8.20;
 
 /**
   @title IChangeContract
@@ -155,7 +155,7 @@ interface IChangeContract {
 
 // File contracts/interfaces/IGovernor.sol
 
-pragma solidity 0.8.16;
+pragma solidity 0.8.20;
 
 /**
   @title IGovernor
@@ -572,7 +572,7 @@ abstract contract Initializable {
 
 // File contracts/governance/Governed.sol
 
-pragma solidity 0.8.16;
+pragma solidity 0.8.20;
 
 
 /**
@@ -2898,7 +2898,7 @@ contract ERC20Upgradeable is Initializable, ContextUpgradeable, IERC20Upgradeabl
 
 // File contracts/token/MocRC20.sol
 
-pragma solidity 0.8.16;
+pragma solidity 0.8.20;
 
 
 /* solhint-disable-next-line max-line-length */
@@ -3704,7 +3704,7 @@ contract ERC1967Proxy is Proxy, ERC1967Upgrade {
 
 // File contracts/token/StableTokenV2.sol
 
-pragma solidity 0.8.16;
+pragma solidity 0.8.20;
 
 // Import to allow compilation and deploy of ERC1967Proxy
 
