@@ -4,30 +4,30 @@ pragma experimental ABIEncoderV2;
 import "zos-lib/contracts/upgradeability/AdminUpgradeabilityProxy.sol";
 import "moc-governance/contracts/Governance/ChangeContract.sol";
 import "moc-governance/contracts/Upgradeability/UpgradeDelegator.sol";
-import "../auxiliar/CommissionSplitter.sol";
+import "../auxiliar/CommissionSplitterV2.sol";
+import "../auxiliar/CommissionSplitterV3.sol";
 import "../base/MoCConnector.sol";
 import "../../contracts/V2_migration/MoC_Migrator.sol";
 import "../../contracts/V2_migration/MoCExchange_Migrator.sol";
 import "../../contracts/MoCState.sol";
 import "../../contracts/MoCInrate.sol";
 
-
 /**
   @title V2MigrationChanger
  */
 contract V2MigrationChanger is ChangeContract {
-  bytes32 constant EXECUTOR_ROLE = keccak256("EXECUTOR_ROLE");
-
+  uint256 public constant PRECISION = 10 ** 18;
   struct UpgradesAddresses {
     AdminUpgradeabilityProxy proxy;
     address newImplementation;
   }
   UpgradeDelegator public upgradeDelegator;
-  CommissionSplitter public commissionSplitter;
+  CommissionSplitterV2 public commissionSplitterV2Proxy;
+  CommissionSplitterV3 public commissionSplitterV3Proxy;
   IMoCV2 public mocV2;
+  INewCommissionSplitter public feesSplitterProxy;
+  INewCommissionSplitter public tcInterestsSplitterProxy;
   address public deprecatedImp;
-  address[] public authorizedExecutors;
-
   // MoC
   AdminUpgradeabilityProxy public mocProxy;
   address public mocMigrator;
@@ -45,36 +45,31 @@ contract V2MigrationChanger is ChangeContract {
   // MocRiskProxManager
   AdminUpgradeabilityProxy public mocRiskProxManagerProxy;
 
-  uint256 nextEmaCalculation;
-  uint256 nextTCInterestPayment;
+  uint256 public nextEmaCalculation;
+  uint256 public nextTCInterestPayment;
 
   /**
     @notice Constructor
     @param _upgradeDelegator Address of the upgradeDelegator in charge of that proxy
-    @param _commissionSplitter Address of the CommissionSplitter contract used to split commissions before
-      the migration to transfer all MoC balance
     @param _mocV2 Address of the new MoC Core protocol
     @param _mocProxy MoC proxy address
     @param _mocMigrator MoC atomic implementation address to execute the migration
     @param _mocExchangeMigrator MoCExchange atomic implementation address to execute the migration
     @param _deprecatedImp deprectaed contract implementation address
-    @param _authorizedExecutors array of authorized queue executors
   */
   constructor(
     UpgradeDelegator _upgradeDelegator,
-    CommissionSplitter _commissionSplitter,
     IMoCV2 _mocV2,
     AdminUpgradeabilityProxy _mocProxy,
     address _mocMigrator,
     address _mocExchangeMigrator,
-    address _deprecatedImp,
-    address[] memory _authorizedExecutors
+    address _deprecatedImp
   ) public {
     upgradeDelegator = _upgradeDelegator;
-    commissionSplitter = _commissionSplitter;
     mocV2 = IMoCV2(_mocV2);
+    feesSplitterProxy = INewCommissionSplitter(mocV2.mocFeeFlowAddress());
+    tcInterestsSplitterProxy = INewCommissionSplitter(mocV2.tcInterestCollectorAddress());
     deprecatedImp = _deprecatedImp;
-    authorizedExecutors = _authorizedExecutors;
     // MoC
     mocProxy = _mocProxy;
     mocMigrator = _mocMigrator;
@@ -92,6 +87,10 @@ contract V2MigrationChanger is ChangeContract {
     mocInrateProxy = castToAdminUpgradeabilityProxy(mocConnector.mocInrate());
     // MocRiskProxManager
     mocRiskProxManagerProxy = castToAdminUpgradeabilityProxy(mocConnector.riskProxManager());
+    // CommissionSplitterV2
+    commissionSplitterV2Proxy = CommissionSplitterV2(MoCInrate(address(mocInrateProxy)).commissionsAddress());
+    // CommissionSplitterV3
+    commissionSplitterV3Proxy = CommissionSplitterV3(MoCInrate(address(mocInrateProxy)).riskProInterestAddress());
   }
 
   /**
@@ -146,12 +145,10 @@ contract V2MigrationChanger is ChangeContract {
     mocV2.migrateFromV1(qAC, qTC, qTP, nextEmaCalculation, nextTCInterestPayment);
     MoC_Migrator(address(mocProxy)).migrateToV2(address(mocV2));
     MoCExchange_Migrator(address(mocExchangeProxy)).migrateToV2(address(mocV2));
-    
+
     IMocQueueV2 rocQueue = IMocQueueV2(mocV2.mocQueue());
     rocQueue.registerBucket(address(mocV2));
-    for (uint256 i = 0; i < authorizedExecutors.length; i++) {
-      rocQueue.grantRole(EXECUTOR_ROLE, authorizedExecutors[i]);
-    }
+
     // MoC
     upgradeDelegator.upgrade(mocProxy, deprecatedImp);
     // MocExchange
@@ -180,8 +177,12 @@ contract V2MigrationChanger is ChangeContract {
     nextTCInterestPayment = mocInrate.lastRiskProInterestBlock() + mocInrate.riskProInterestBlockSpan();
     // CommissionSplitter holds all the platform fees and then splits them one part for a custom address and another
     // is re-inyected to MoC protocol, so we need to split them to transfer all the balance after the upgrade
-    commissionSplitter.split();
+    commissionSplitterV2Proxy.split();
+    commissionSplitterV3Proxy.split();
+
     verifyMigrationCompatibility();
+    validateCommissionSplittersSetups();
+    validateFeeRetainer();
   }
 
   /**
@@ -200,7 +201,7 @@ contract V2MigrationChanger is ChangeContract {
     // assert governor address
     require(address(mocState.governor()) == mocV2.governor(), "wrong param: governor address");
     // assert pauser address
-    require(MoC(address(mocProxy)).stopper() == mocV2.pauser(), "wrong param: pauser address");    
+    require(MoC(address(mocProxy)).stopper() == mocV2.pauser(), "wrong param: pauser address");
     // assert reserveToken address
     require(address(mocConnector.reserveToken()) == mocV2.acToken(), "wrong param: reserve token address");
     // assert riskProToken address
@@ -211,14 +212,87 @@ contract V2MigrationChanger is ChangeContract {
     require(mocState.getProtected() == mocV2.protThrld(), "wrong param: protected threshold");
     // assert liquidation threshold
     require(mocState.liq() == mocV2.liqThrld(), "wrong param: liquidation threshold");
-    require(mocInrate.riskProInterestAddress() == mocV2.tcInterestCollectorAddress(), "wrong param: TC interest collector address");
+    // assert riskProRate
     require(mocInrate.riskProRate() == mocV2.tcInterestRate(), "wrong param: TC interest rate");
+    // assert riskProInterestBlockSpan
     require(mocInrate.riskProInterestBlockSpan() == mocV2.tcInterestPaymentBlockSpan(), "wrong param: TC interest block span");
+    // don't assert comissionSpliter address because it will be a new contract on V2
+    // require(address(commissionSplitter) == mocV2.mocFeeFlowAddress(), "wrong param: commission splitter address");
+    // don't assert riskProInterestAddress because it will be a new contract on V2
+    // require(mocInrate.riskProInterestAddress() == mocV2.tcInterestCollectorAddress(), "wrong param: TC interest collector address");
 
     return true;
   }
-}
 
+  /**
+    @notice Verify that new CommissionSplitters setups are the same than V1
+   */
+  function validateCommissionSplittersSetups() public view returns (bool success) {
+    /////////////////////////////////////////
+    // feesSplitterProxy verifications /////
+    ///////////////////////////////////////
+    require(feesSplitterProxy.governor() == mocV2.governor(), "wrong param: governor address");
+    require(feesSplitterProxy.acToken() == address(commissionSplitterV2Proxy.reserveToken()), "wrong param: reserve token address");
+    // recipient1 is not used anymore and is replaced with the fee retainer
+    require(feesSplitterProxy.acTokenAddressRecipient1() == commissionSplitterV2Proxy.outputAddress_2(), "wrong param: recipient1 address");
+    require(feesSplitterProxy.acTokenAddressRecipient2() == commissionSplitterV2Proxy.outputAddress_3(), "wrong param: recipient2 address");
+
+    require(feesSplitterProxy.feeToken() == address(commissionSplitterV2Proxy.tokenGovern()), "wrong param: moc token address");
+    require(
+      feesSplitterProxy.feeTokenAddressRecipient1() == commissionSplitterV2Proxy.outputTokenGovernAddress_1(),
+      "wrong param: recipient1 address"
+    );
+    require(
+      feesSplitterProxy.feeTokenAddressRecipient2() == commissionSplitterV2Proxy.outputTokenGovernAddress_2(),
+      "wrong param: recipient2 address"
+    );
+    require(
+      feesSplitterProxy.feeTokenPctToRecipient1() == commissionSplitterV2Proxy.outputProportionTokenGovern_1(),
+      "wrong param: output proportion"
+    );
+
+    ////////////////////////////////////////////////
+    // tcInterestsSplitterProxy verifications /////
+    //////////////////////////////////////////////
+    require(tcInterestsSplitterProxy.governor() == mocV2.governor(), "wrong param: governor address");
+    require(tcInterestsSplitterProxy.acToken() == address(commissionSplitterV3Proxy.reserveToken()), "wrong param: reserve token address");
+    require(
+      tcInterestsSplitterProxy.acTokenAddressRecipient1() == commissionSplitterV3Proxy.outputAddress_1(),
+      "wrong param: recipient1 address"
+    );
+    require(
+      tcInterestsSplitterProxy.acTokenAddressRecipient2() == commissionSplitterV3Proxy.outputAddress_2(),
+      "wrong param: recipient2 address"
+    );
+    require(
+      tcInterestsSplitterProxy.acTokenPctToRecipient1() == commissionSplitterV3Proxy.outputProportion_1(),
+      "wrong param: output proportion"
+    );
+    // for feeToken we only need to check the token because the splitter ask for its balance but is not used
+    require(tcInterestsSplitterProxy.feeToken() == address(commissionSplitterV2Proxy.tokenGovern()), "wrong param: moc token address");
+    return true;
+  }
+
+  /**
+    @notice Verify that fee retainer is correct and the other proportion for fees splitter is mapped ok
+   */
+  function validateFeeRetainer() public view returns (bool success) {
+    uint256 outputProportion1 = commissionSplitterV2Proxy.outputProportion_1();
+    uint256 outputProportion2 = commissionSplitterV2Proxy.outputProportion_2();
+    // we need to map the new percentages
+    // 100% = A + B + C
+    // 100% - A = B + C => B' + C' is the new 100%
+    // 100% = (B / 100% - A) + (C / 100% - A)
+
+    // [PREC]
+    require(mocV2.feeRetainer() == outputProportion1, "wrong param: fee retainer");
+    // [PREC] = ([PREC] * [PREC]) / ([PREC] - [PREC])
+    require(
+      feesSplitterProxy.acTokenPctToRecipient1() == (outputProportion2 * PRECISION) / (PRECISION - outputProportion1),
+      "wrong param: output proportion"
+    );
+  }
+}
 
 interface IMoCV2 {
   struct PeggedTokenParams {
@@ -238,8 +312,7 @@ interface IMoCV2 {
     uint256 tpEmaSf;
   }
 
-  function migrateFromV1(uint256 qAC_, uint256 qTC_, uint256 qTP_, uint256 nextEmaCalculation_, uint256 nextTCInterestPayment_)
-    external;
+  function migrateFromV1(uint256 qAC_, uint256 qTC_, uint256 qTP_, uint256 nextEmaCalculation_, uint256 nextTCInterestPayment_) external;
 
   function governor() external view returns (address governor);
 
@@ -261,6 +334,8 @@ interface IMoCV2 {
 
   function tpCtarg(uint256 index_) external view returns (uint256 tpCtarg);
 
+  function feeRetainer() external view returns (uint256 feeRetainer);
+
   function getCglb() external view returns (uint256 cglob);
 
   function getPTCac() external view returns (uint256 pTCac);
@@ -273,6 +348,8 @@ interface IMoCV2 {
 
   function tcInterestCollectorAddress() external view returns (address tcInterestCollectorAddress);
 
+  function mocFeeFlowAddress() external view returns (address mocFeeFlowAddress);
+
   function tcInterestRate() external view returns (uint256 tcInterestRate);
 
   function tcInterestPaymentBlockSpan() external view returns (uint256 tcInterestPaymentBlockSpan);
@@ -280,9 +357,26 @@ interface IMoCV2 {
   function addPeggedToken(PeggedTokenParams calldata peggedTokenParams_) external;
 }
 
-
 interface IMocQueueV2 {
   function registerBucket(address bucket_) external;
+}
 
-  function grantRole(bytes32 role, address account) external;
+interface INewCommissionSplitter {
+  function acToken() external view returns (address);
+
+  function acTokenAddressRecipient1() external view returns (address);
+
+  function acTokenAddressRecipient2() external view returns (address);
+
+  function acTokenPctToRecipient1() external view returns (uint256);
+
+  function feeToken() external view returns (address);
+
+  function feeTokenAddressRecipient1() external view returns (address);
+
+  function feeTokenAddressRecipient2() external view returns (address);
+
+  function feeTokenPctToRecipient1() external view returns (uint256);
+
+  function governor() external view returns (address);
 }
