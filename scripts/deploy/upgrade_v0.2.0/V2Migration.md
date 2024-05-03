@@ -47,7 +47,7 @@ Some of the tests required V2 ABIs to work, any change on V2 ABI should be impor
 
 ## Step 2: Deploy new MoC V2 protocol and migration changer
 
-Rif on chain V2 protocol implementation lives in [rif-sc-protocol](https://github.com/money-on-chain/rif-sc-protocol) repository.
+Rif on chain V2 protocol implementation lives in [stable-protocol-roc-v2](https://github.com/money-on-chain/stable-protocol-roc-v2) repository.
 For deployment instructions look at `MigrationFromV1.md` and `README.md` files.
 Given `V2MigrationChanger.sol` checks that V2 has the same parameters than V1, to make the process easier and prevent the transaction from failing you can set MoCV1 contract address as a deploy parameter on V2 and it will fetch all the current V1 values and deploy V2 with them.
 
@@ -122,21 +122,20 @@ npm run truffle-compile
 npm run deploy-reset-development
 ```
 
-A json file will be generated with all the deployed addresses, in the corresponding version folder:
-`./scripts/deploy/upgrade_v0.y.z/deployConfig-development.json`
+A json file will be generated with all the deployed addresses, in:
+`./scripts/deploy/deployments/deployConfig-development.json`
 
 copy that file to
 `./scripts/deploy/upgrade_v0.2.0/deployConfig-development.json` and rename proxyAddresses with v1ProxyAddresses. You can also delete `valuesToAssign` field, as it's not needed.
 
 _Note_: To reproduce a live environment, we recommend generating some traffic on V1, minting some RiskPro tokens along some Stable tokens.
 
-Now, move to [rif-sc-protocol](https://github.com/money-on-chain/rif-sc-protocol) repository, to continue with V2 deployment.
+Now, move to [stable-protocol-roc-v2](https://github.com/money-on-chain/stable-protocol-roc-v2) repository, to continue with V2 deployment.
 
-In `hardhat.config.base` configuration file, under `development` network, copy the MoCV1 proxy address that we just deployed:
+In `config/deployParams-development.ts` configuration file, under `developmentMigrateParams` option, copy the MoCV1 proxy address that we just deployed:
 
 ```ts
-  development: {
-      ...
+  {
       // address deployed locally
       mocV1Address: "0x24a......050EE1",
   },
@@ -145,7 +144,7 @@ In `hardhat.config.base` configuration file, under `development` network, copy t
 ```sh
 nvm use
 npm run compile
-npm run deploy-development
+npm run deploy-development-migration
 ```
 
 This deploy would output the MocRiff V2(proxy) address, copy it into V1 here:

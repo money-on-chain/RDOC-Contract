@@ -14,10 +14,8 @@ import { deployContract } from "../helpers/utils";
 export const deployChanger = async (
   mocHelperAddress: Address,
   upgradeDelegator: Address,
-  commissionSplitter: Address,
   mocV2: Address,
   mocProxy: Address,
-  authorizedExecutor: Address[],
 ): Promise<{
   changer: V2MigrationChanger;
   mocMigrator: MoC_Migrator;
@@ -39,13 +37,11 @@ export const deployChanger = async (
   const deprecated: Deprecated = await deployContract("Deprecated", Deprecated__factory, []);
   const changer: V2MigrationChanger = await deployContract("V2MigrationChanger", V2MigrationChanger__factory, [
     upgradeDelegator,
-    commissionSplitter,
     mocV2,
     mocProxy,
     mocMigrator.address,
     mocExchangeMigrator.address,
     deprecated.address,
-    authorizedExecutor,
   ]);
   return {
     changer,

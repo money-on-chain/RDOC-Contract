@@ -217,9 +217,7 @@ contract V2MigrationChanger is ChangeContract {
     // assert riskProInterestBlockSpan
     require(mocInrate.riskProInterestBlockSpan() == mocV2.tcInterestPaymentBlockSpan(), "wrong param: TC interest block span");
     // don't assert comissionSpliter address because it will be a new contract on V2
-    // require(address(commissionSplitter) == mocV2.mocFeeFlowAddress(), "wrong param: commission splitter address");
     // don't assert riskProInterestAddress because it will be a new contract on V2
-    // require(mocInrate.riskProInterestAddress() == mocV2.tcInterestCollectorAddress(), "wrong param: TC interest collector address");
 
     return true;
   }
@@ -270,6 +268,10 @@ contract V2MigrationChanger is ChangeContract {
     );
     // for feeToken we only need to check the token because the splitter ask for its balance but is not used
     require(tcInterestsSplitterProxy.feeToken() == address(commissionSplitterV2Proxy.tokenGovern()), "wrong param: moc token address");
+    // not used but if is address(0) will fail the transfer blocking the split
+    require(tcInterestsSplitterProxy.feeTokenAddressRecipient1() != address(0), "wrong param: recipient1 address");
+    // not used but if is address(0) will fail the transfer blocking the split
+    require(tcInterestsSplitterProxy.feeTokenAddressRecipient2() != address(0), "wrong param: recipient2 address");
     return true;
   }
 
