@@ -9,7 +9,6 @@ import {
   StableTokenV2,
   UpgradeDelegator,
   RiskProToken,
-  CommissionSplitter,
   MoCState,
   MocRif,
   MocQueue,
@@ -34,7 +33,6 @@ describe("Feature: MoC V2 migration - V2 functionalities", () => {
   let aliceSigner: SignerWithAddress;
   let mocRifV2: MocRif;
   let mocQueue: MocQueue;
-  let mocCommissionSplitter: CommissionSplitter;
   describe("GIVEN a MoC Legacy protocol deployed and long V2 migration", () => {
     beforeEach(async () => {
       ({ alice, bob, deployer } = await getNamedAccounts());
@@ -45,7 +43,6 @@ describe("Feature: MoC V2 migration - V2 functionalities", () => {
         reserveToken,
         stableToken,
         riskProToken,
-        mocCommissionSplitter,
         mocState: mocStateProxy,
         mocRifV2,
         mocQueue,
@@ -76,10 +73,8 @@ describe("Feature: MoC V2 migration - V2 functionalities", () => {
           ({ changer } = await deployChanger(
             mocHelperAddress,
             upgradeDelegator.address,
-            mocCommissionSplitter.address,
             mocRifV2.address,
             mocProxy.address,
-            [deployer],
           ));
         });
         describe("AND Bob injects 2 collateral on V2 before changer is executed", () => {
@@ -107,7 +102,9 @@ describe("Feature: MoC V2 migration - V2 functionalities", () => {
           describe("WHEN alice mints 100 TC using MocV2", () => {
             beforeEach(async () => {
               await reserveToken.connect(aliceSigner).approve(mocRifV2.address, pEth(100000));
-              await mocRifV2.connect(aliceSigner).mintTC(pEth(100), pEth(100000), { value: CONSTANTS.EXEC_FEE });
+              await mocRifV2
+                .connect(aliceSigner)
+                .mintTC(pEth(100), pEth(100000), alice, CONSTANTS.ZERO_ADDRESS, { value: CONSTANTS.EXEC_FEE });
               await mocQueue.execute(deployer);
             });
             it("THEN alice riskProToken balance is 1000000(from V1) + 100(from V2)", async () => {
@@ -117,7 +114,9 @@ describe("Feature: MoC V2 migration - V2 functionalities", () => {
           describe("WHEN alice redeems 100 TC using MocV2", () => {
             beforeEach(async () => {
               await riskProToken.connect(aliceSigner).approve(mocRifV2.address, pEth(100));
-              await mocRifV2.connect(aliceSigner).redeemTC(pEth(100), 0, { value: CONSTANTS.EXEC_FEE });
+              await mocRifV2
+                .connect(aliceSigner)
+                .redeemTC(pEth(100), 0, alice, CONSTANTS.ZERO_ADDRESS, { value: CONSTANTS.EXEC_FEE });
               await mocQueue.execute(deployer);
             });
             it("THEN alice riskProToken balance is 1000000(from V1) - 100(from V2)", async () => {
@@ -129,7 +128,9 @@ describe("Feature: MoC V2 migration - V2 functionalities", () => {
               await reserveToken.connect(aliceSigner).approve(mocRifV2.address, pEth(100000));
               await mocRifV2
                 .connect(aliceSigner)
-                .mintTP(stableToken.address, pEth(100), pEth(100000), { value: CONSTANTS.EXEC_FEE });
+                .mintTP(stableToken.address, pEth(100), pEth(100000), alice, CONSTANTS.ZERO_ADDRESS, {
+                  value: CONSTANTS.EXEC_FEE,
+                });
               await mocQueue.execute(deployer);
             });
             it("THEN alice stableToken balance is 1000000(from V1) + 100(from V2)", async () => {
@@ -141,7 +142,9 @@ describe("Feature: MoC V2 migration - V2 functionalities", () => {
               await stableToken.connect(aliceSigner).approve(mocRifV2.address, pEth(100));
               await mocRifV2
                 .connect(aliceSigner)
-                .redeemTP(stableToken.address, pEth(100), 0, { value: CONSTANTS.EXEC_FEE });
+                .redeemTP(stableToken.address, pEth(100), 0, alice, CONSTANTS.ZERO_ADDRESS, {
+                  value: CONSTANTS.EXEC_FEE,
+                });
               await mocQueue.execute(deployer);
             });
             it("THEN alice stableToken balance is 1000000(from V1) - 100(from V2)", async () => {

@@ -8,7 +8,7 @@ import {
   StableTokenV2,
   UpgradeDelegator,
   RiskProToken,
-  CommissionSplitter,
+  CommissionSplitterV2,
   MoCInrate,
   MocRif,
 } from "../../typechain";
@@ -24,19 +24,18 @@ describe("Feature: MoC V2 migration - V1 functionalities", () => {
   let stableToken: StableTokenV2;
   let riskProToken: RiskProToken;
   let upgradeDelegator: UpgradeDelegator;
-  let deployer: Address;
   let alice: Address;
   let aliceSigner: SignerWithAddress;
   let vendor: Address;
   let mocRifV2: MocRif;
-  let mocCommissionSplitter: CommissionSplitter;
+  let mocCommissionSplitterV2: CommissionSplitterV2;
   let mocInrate: MoCInrate;
   const expectRevertContractDeprecated = (it: any) =>
     expect(it).to.be.revertedWith("contract deprecated. Protocol migrated to V2");
 
   describe("GIVEN a MoC Legacy protocol deployed", () => {
     before(async () => {
-      ({ deployer, alice, vendor } = await getNamedAccounts());
+      ({ alice, vendor } = await getNamedAccounts());
       ({
         mocHelperAddress,
         moc: mocProxy,
@@ -44,7 +43,7 @@ describe("Feature: MoC V2 migration - V1 functionalities", () => {
         reserveToken,
         stableToken,
         riskProToken,
-        mocCommissionSplitter,
+        mocCommissionSplitterV2,
         mocInrate,
         mocRifV2,
       } = await fixtureDeployed()());
@@ -67,16 +66,14 @@ describe("Feature: MoC V2 migration - V1 functionalities", () => {
         let mocCommission: Balance;
         before(async () => {
           mocReserveBalanceBefore = await reserveToken.balanceOf(mocProxy.address);
-          const commissionBalanceBefore = await reserveToken.balanceOf(mocCommissionSplitter.address);
-          // 1% of commissions are sent to MoC
-          mocCommission = commissionBalanceBefore.div(100);
+          const commissionBalanceBefore = await reserveToken.balanceOf(mocCommissionSplitterV2.address);
+          // 25% of commissions are sent to MoC
+          mocCommission = commissionBalanceBefore.div(4);
           const { changer } = await deployChanger(
             mocHelperAddress,
             upgradeDelegator.address,
-            mocCommissionSplitter.address,
             mocRifV2.address,
             mocProxy.address,
-            [deployer],
           );
           await changer.execute();
         });
@@ -85,7 +82,7 @@ describe("Feature: MoC V2 migration - V1 functionalities", () => {
             expect(await reserveToken.balanceOf(mocProxy.address)).to.be.equal(0);
           });
           it("THEN Moc Commission Splitter has 0 tokens", async () => {
-            expect(await reserveToken.balanceOf(mocCommissionSplitter.address)).to.be.equal(0);
+            expect(await reserveToken.balanceOf(mocCommissionSplitterV2.address)).to.be.equal(0);
           });
           it("THEN MocV2 has all the Moc Legacy tokens", async () => {
             expect(await reserveToken.balanceOf(mocRifV2.address)).to.be.equal(

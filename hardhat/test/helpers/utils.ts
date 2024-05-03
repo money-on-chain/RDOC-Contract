@@ -6,6 +6,7 @@ import MocQueueCompiled from "../../dependencies/mocV2Imports/MocQueue.json";
 import MocVendorsCompiled from "../../dependencies/mocV2Imports/MocVendors.json";
 import FCMaxAbsoluteOpProviderCompiled from "../../dependencies/mocV2Imports/FCMaxAbsoluteOpProvider.json";
 import FCMaxOpDifferenceProviderCompiled from "../../dependencies/mocV2Imports/FCMaxOpDifferenceProvider.json";
+import CommissionSplitterCompiled from "../../dependencies/mocV2Imports/NewCommissionSplitter.json";
 
 import {
   MocRif,
@@ -20,6 +21,8 @@ import {
   FCMaxAbsoluteOpProvider__factory,
   FCMaxOpDifferenceProvider,
   FCMaxOpDifferenceProvider__factory,
+  NewCommissionSplitter,
+  NewCommissionSplitter__factory,
 } from "../../typechain";
 
 export const gasLimit = 6800000;
@@ -47,6 +50,8 @@ export const deployMocRifV2 = async (
   mocVendorsV2: MocVendors;
   maxAbsoluteOpProvider: FCMaxAbsoluteOpProvider;
   maxOpDiffProvider: FCMaxOpDifferenceProvider;
+  feesSplitter: NewCommissionSplitter;
+  tcInterestsSplitter: NewCommissionSplitter;
 }> => {
   const MocImplementationFactory = await ethers.getContractFactory(MocRifCompiled.abi, MocRifCompiled.bytecode);
   const mocImplementation = await MocImplementationFactory.deploy();
@@ -77,6 +82,17 @@ export const deployMocRifV2 = async (
     FCMaxOpDifferenceProviderCompiled.bytecode,
   );
   const maxOpDiffProvider = await FCMaxOpDifferenceProvider.deploy(stopperAddress);
+
+  const CommissionSplitterFactory = await ethers.getContractFactory(
+    CommissionSplitterCompiled.abi,
+    CommissionSplitterCompiled.bytecode,
+  );
+  const feesSplitter = await CommissionSplitterFactory.deploy();
+  const feesSplitterProxy = await ProxyFactory.deploy(feesSplitter.address, "0x");
+
+  const tcInsterstsSplitter = await CommissionSplitterFactory.deploy();
+  const tcInsterstsSplitterProxy = await ProxyFactory.deploy(tcInsterstsSplitter.address, "0x");
+
   return {
     mocRifV2: MocRif__factory.connect(mocProxy.address, ethers.provider.getSigner()),
     mocCoreExpansion: MocCoreExpansion__factory.connect(mocCoreExpansion.address, ethers.provider.getSigner()),
@@ -88,6 +104,11 @@ export const deployMocRifV2 = async (
     ),
     maxOpDiffProvider: FCMaxOpDifferenceProvider__factory.connect(
       maxOpDiffProvider.address,
+      ethers.provider.getSigner(),
+    ),
+    feesSplitter: NewCommissionSplitter__factory.connect(feesSplitterProxy.address, ethers.provider.getSigner()),
+    tcInterestsSplitter: NewCommissionSplitter__factory.connect(
+      tcInsterstsSplitterProxy.address,
       ethers.provider.getSigner(),
     ),
   };
@@ -124,6 +145,19 @@ export const CONSTANTS = {
   ONE: BigNumber.from((1e18).toString()),
   EXEC_FEE: 100,
 };
+
+export enum OperType {
+  none, // avoid using zero as Type
+  mintTC,
+  redeemTC,
+  mintTP,
+  redeemTP,
+  mintTCandTP,
+  redeemTCandTP,
+  swapTCforTP,
+  swapTPforTC,
+  swapTPforTP,
+}
 
 export const baseParams = {
   reservePrice: pEth(10000), // mocPrecision

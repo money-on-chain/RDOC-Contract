@@ -10,7 +10,6 @@ import {
   UpgradeDelegator,
   AdminUpgradeabilityProxy__factory,
   RiskProToken,
-  CommissionSplitter,
   MoCConnector,
   MocRif,
   MoCState,
@@ -38,7 +37,6 @@ describe("Feature: MoC V2 migration - upgrades", () => {
   let deployer: Address;
   let mocRifV2: MocRif;
   let signer: any;
-  let mocCommissionSplitter: CommissionSplitter;
   let mocConnectorProxy: MoCConnector;
   let mocInrateProxy: MoCInrate;
   let mocRiskProxManagerProxy: MoCRiskProxManager;
@@ -58,7 +56,6 @@ describe("Feature: MoC V2 migration - upgrades", () => {
         upgradeDelegator,
         stableToken,
         riskProToken,
-        mocCommissionSplitter,
         mocRifV2,
       } = await fixtureDeployed()());
       signer = ethers.provider.getSigner();
@@ -75,10 +72,8 @@ describe("Feature: MoC V2 migration - upgrades", () => {
         ({ mocMigrator, mocExchangeMigrator, deprecated, changer } = await deployChanger(
           mocHelperAddress,
           upgradeDelegator.address,
-          mocCommissionSplitter.address,
           mocRifV2.address,
           mocProxy.address,
-          [deployer],
         ));
         tx = await changer.execute();
       });

@@ -2,8 +2,10 @@ import { deployments, getNamedAccounts } from "hardhat";
 import memoizee from "memoizee";
 import { Address } from "hardhat-deploy/types";
 import {
-  CommissionSplitter,
-  CommissionSplitter__factory,
+  CommissionSplitterV2,
+  CommissionSplitterV2__factory,
+  CommissionSplitterV3,
+  CommissionSplitterV3__factory,
   MoC,
   MoC__factory,
   MoCConnector,
@@ -64,7 +66,8 @@ export const fixtureDeployed = memoizee(
     mocVendors: MoCVendors;
     riskProxManager: MoCRiskProxManager;
     stopper: StopperV2;
-    mocCommissionSplitter: CommissionSplitter;
+    mocCommissionSplitterV2: CommissionSplitterV2;
+    mocCommissionSplitterV3: CommissionSplitterV3;
     upgradeDelegator: UpgradeDelegator;
     stableToken: StableTokenV2;
     mocToken: MoCToken;
@@ -120,10 +123,16 @@ export const fixtureDeployed = memoizee(
         MoCRiskProxManager__factory,
       );
       const stopper: StopperV2 = await deployTransparentProxy("StopperV2", proxyAdmin.address, StopperV2__factory);
-      const mocCommissionSplitter: CommissionSplitter = await deployTransparentProxy(
-        "CommissionSplitter",
+      const mocCommissionSplitterV2: CommissionSplitterV2 = await deployTransparentProxy(
+        "CommissionSplitterV2",
         proxyAdmin.address,
-        CommissionSplitter__factory,
+        CommissionSplitterV2__factory,
+      );
+
+      const mocCommissionSplitterV3: CommissionSplitterV3 = await deployTransparentProxy(
+        "CommissionSplitterV3",
+        proxyAdmin.address,
+        CommissionSplitterV3__factory,
       );
 
       const stableToken: StableTokenV2 = await deployUUPSProxy("StableTokenV2", StableTokenV2__factory);
@@ -201,8 +210,8 @@ export const fixtureDeployed = memoizee(
         baseParams.riskProxTmax,
         baseParams.riskProRate,
         baseParams.dayBlockSpan * 7,
-        deployer,
-        mocCommissionSplitter.address,
+        mocCommissionSplitterV3.address,
+        mocCommissionSplitterV2.address,
         // commissionRate,
         baseParams.stableTmin,
         baseParams.stablePower,
@@ -220,14 +229,28 @@ export const fixtureDeployed = memoizee(
         governorMock.address,
         baseParams.settlementBlockSpan,
       );
-      await mocCommissionSplitter["initialize(address,address,uint256,address,address,address,address)"](
-        moc.address,
-        deployer,
-        baseParams.mocProportion,
+      await mocCommissionSplitterV2[
+        "initialize(address,address,address,address,address,uint256,uint256,address,address,uint256,address)"
+      ](
         governorMock.address,
         reserveToken.address,
+        moc.address,
+        deployer, // recipient1 address
+        deployer, // recipient2 address
+        pEth(0.25), // 25%
+        pEth(0.5), // 50%
+        deployer, // recipient1 address
+        deployer, // recipient2 address
+        pEth(0.5), // 50%
         mocToken.address,
-        deployer,
+      );
+
+      await mocCommissionSplitterV3["initialize(address,address,address,address,uint256)"](
+        governorMock.address,
+        reserveToken.address,
+        deployer, // recipient1 address
+        deployer, // recipient2 address
+        pEth(0.5), // 50%
       );
       await upgradeDelegator["initialize(address,address)"](governorMock.address, proxyAdmin.address);
       const vendorGuardian = deployer;
@@ -251,20 +274,29 @@ export const fixtureDeployed = memoizee(
       await moc.setDecayBlockSpan(720);
 
       // deploy MocV2
-      const { mocRifV2, mocCoreExpansion, mocQueue, mocVendorsV2, maxAbsoluteOpProvider, maxOpDiffProvider } =
-        await deployMocRifV2(stopper.address);
+      const {
+        mocRifV2,
+        mocCoreExpansion,
+        mocQueue,
+        mocVendorsV2,
+        maxAbsoluteOpProvider,
+        maxOpDiffProvider,
+        feesSplitter,
+        tcInterestsSplitter,
+      } = await deployMocRifV2(stopper.address);
 
       await mocRifV2.initialize({
         initializeCoreParams: {
           initializeBaseBucketParams: {
+            mocQueueAddress: mocQueue.address,
             feeTokenAddress: mocToken.address,
             feeTokenPriceProviderAddress: mocPriceProvider.address,
             tcTokenAddress: riskProToken.address,
-            mocFeeFlowAddress: deployer,
+            mocFeeFlowAddress: feesSplitter.address,
             mocAppreciationBeneficiaryAddress: deployer,
             protThrld: baseParams._protected,
             liqThrld: baseParams.liq,
-            feeRetainer: 0,
+            feeRetainer: pEth(0.25), // 25%,
             tcMintFee: pEth(0.1), // 10%
             tcRedeemFee: pEth(0.1), // 10%
             swapTPforTPFee: pEth(0.1), // 10%
@@ -276,12 +308,13 @@ export const fixtureDeployed = memoizee(
             successFee: pEth(0.1), // 10%
             appreciationFactor: 0,
             bes: baseParams.settlementBlockSpan,
-            tcInterestCollectorAddress: deployer,
+            tcInterestCollectorAddress: tcInterestsSplitter.address,
             tcInterestRate: baseParams.riskProRate,
             tcInterestPaymentBlockSpan: baseParams.dayBlockSpan * 7,
             maxAbsoluteOpProviderAddress: maxAbsoluteOpProvider.address,
             maxOpDiffProviderAddress: maxOpDiffProvider.address,
             decayBlockSpan: 720,
+            allowDifferentRecipient: false,
           },
           governorAddress: governorMock.address,
           pauserAddress: stopper.address,
@@ -290,7 +323,6 @@ export const fixtureDeployed = memoizee(
           mocVendors: mocVendorsV2.address,
         },
         acTokenAddress: reserveToken.address!,
-        mocQueue: mocQueue.address,
       });
 
       // initialize mocQueue
@@ -323,6 +355,30 @@ export const fixtureDeployed = memoizee(
 
       await stopper.setMaxOperationalDifference(maxOpDiffProvider.address, CONSTANTS.MAX_UINT256);
 
+      await feesSplitter.initialize(
+        governorMock.address,
+        reserveToken.address!,
+        mocToken.address,
+        deployer, // recipient1
+        deployer, // recipient2
+        pEth(2).div(3), // 66.66%
+        deployer, // recipient1
+        deployer, // recipient2
+        pEth(0.5), // 50%
+      );
+
+      await tcInterestsSplitter.initialize(
+        governorMock.address,
+        reserveToken.address!,
+        mocToken.address,
+        deployer, // recipient1
+        deployer, // recipient2
+        pEth(0.5), // 50%
+        deployer, // recipient1
+        deployer, // recipient2
+        pEth(0.5), // 50%
+      );
+
       return {
         mocHelperAddress: mocHelperLib.address,
         moc,
@@ -334,7 +390,8 @@ export const fixtureDeployed = memoizee(
         mocVendors,
         riskProxManager,
         stopper,
-        mocCommissionSplitter,
+        mocCommissionSplitterV2,
+        mocCommissionSplitterV3,
         upgradeDelegator,
         stableToken,
         mocToken,
