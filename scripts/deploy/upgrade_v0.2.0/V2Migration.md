@@ -64,8 +64,7 @@ Once the new V2 smart contracts have been deployed, we need to deploy the contra
   },
   "v2ProxyAddresses": {
     "MoC": "0xEeAd3374........3131Ea5477",
-  },
-  "authorizedExecutors": ["0xFdBc5593........1313a5466"]
+  }
 }
 ```
 
