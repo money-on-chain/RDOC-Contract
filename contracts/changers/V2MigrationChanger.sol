@@ -293,6 +293,7 @@ contract V2MigrationChanger is ChangeContract {
       feesSplitterProxy.acTokenPctToRecipient1() == (outputProportion2 * PRECISION) / (PRECISION - outputProportion1),
       "wrong param: output proportion"
     );
+    return true;
   }
 }
 
