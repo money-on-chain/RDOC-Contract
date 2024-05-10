@@ -13,13 +13,11 @@ module.exports = async callback => {
     console.log('V2MigrationChanger Deploy');
     const v2MigrationChanger = await V2MigrationChanger.new(
       config.implementationAddresses.UpgradeDelegator,
-      config.v1ProxyAddresses.CommissionSplitter,
       config.v2ProxyAddresses.MoC,
       config.v1ProxyAddresses.MoC,
       config.implementationAddresses.MoC_Migrator,
       config.implementationAddresses.MoCExchange_Migrator,
-      config.implementationAddresses.Deprecated,
-      config.authorizedExecutors
+      config.implementationAddresses.Deprecated
     );
     console.log('V2MigrationChanger address: ', v2MigrationChanger.address);
 

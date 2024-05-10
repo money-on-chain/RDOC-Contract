@@ -143,16 +143,6 @@ module.exports = async callback => {
         changerInfo.deprecatedImplementation
       );
     }
-
-    // Authorized
-    await config.authorizedExecutors.forEach(async (authorizedExecutor, i) => {
-      const changerAuthExec = await changer.authorizedExecutors(i);
-      if (changerAuthExec === authorizedExecutor) {
-        console.log('OK. Authorized Executor address: ', authorizedExecutor);
-      } else {
-        console.error('ERROR! Authorized Executor address is not correct ', changerAuthExec);
-      }
-    });
   } catch (error) {
     callback(error);
   }
