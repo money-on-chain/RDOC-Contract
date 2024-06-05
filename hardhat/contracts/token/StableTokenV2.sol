@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.16;
+pragma solidity 0.8.20;
 
 import "./MocRC20.sol";
 // Import to allow compilation and deploy of ERC1967Proxy

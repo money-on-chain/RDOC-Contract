@@ -1,6 +1,6 @@
 {
-  "name": "@rdoc-contract/hardhat",
-  "version": "0.0.0",
+  "name": "roc-contracts-v1-migrations",
+  "version": "0.2.0",
   "private": true,
   "homepage": "https://github.com/money-on-chain/RDOC-Contract",
   "description": "RIF on chain using hardhat framework",
@@ -8,18 +8,18 @@
     "hardhat": "2.12.2",
     "hardhat-deploy": "0.11.25",
     "hardhat-storage-layout": "0.1.7",
-    "solc": "0.8.16"
+    "solc": "0.8.20"
   },
   "devDependencies": {
     "@commitlint/cli": "17.2.0",
     "@commitlint/config-conventional": "17.2.0",
     "@defi-wonderland/smock": "2.3.5",
-    "@nomicfoundation/hardhat-toolbox": "2.0.0",
+    "@nomicfoundation/hardhat-toolbox": "2.0.2",
     "@nomiclabs/hardhat-solhint": "2.0.1",
     "@openzeppelin/contracts": "4.8.0",
     "@openzeppelin/contracts-upgradeable": "4.8.0",
     "@openzeppelin/hardhat-upgrades": "1.21.0",
-    "@typechain/ethers-v5": "10.2.0",
+    "@typechain/ethers-v5": "10.2.1",
     "@types/chai": "4.3.4",
     "@types/fs-extra": "9.0.13",
     "@types/memoizee": "0.4.8",
@@ -47,7 +47,9 @@
     "ts-generator": "0.1.1",
     "ts-node": "10.9.1",
     "typechain": "8.1.1",
-    "typescript": "4.8.4"
+    "typescript": "4.8.4",
+    "es5-ext": "0.10.64",
+    "undici": "5.28.4"
   },
   "comments": {
     "dependencies": "hardhat-solhint and hardhat-prettier includes old versions, that's why specific dependencies are added"
@@ -81,7 +83,7 @@
     "prettier:check": "prettier --config .prettierrc --check \"**/*.{js,json,md,sol,ts}\"",
     "release": "standard-version",
     "security": "docker run -it -v $(pwd):/home/ethsec/project trailofbits/eth-security-toolbox",
-    "security-default": "echo \"solc-select install 0.8.16 && solc-select use 0.8.16 && cd project && slither --exclude-dependencies --exclude pragma,low-level-calls .\" | sudo docker run -i -v $(pwd):/home/ethsec/project trailofbits/eth-security-toolbox",
+    "security-default": "echo \"solc-select install 0.8.20 && solc-select use 0.8.20 && cd project && slither --exclude-dependencies --exclude pragma,low-level-calls .\" | sudo docker run -i -v $(pwd):/home/ethsec/project trailofbits/eth-security-toolbox",
     "slither": "slither .",
     "size-contracts": "hardhat size-contracts",
     "docgen": "hardhat docgen",
