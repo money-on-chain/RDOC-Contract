@@ -1,3 +1,5 @@
+# Warning! this repo is deprecated! The RoC protocol was migrated to [V2](https://github.com/money-on-chain/stable-protocol-core-v2)
+
 # Introduction
 
 RIF On Chain is a suite of smart contracts dedicated to providing a RIF-collateralized stable-coin p pegged 1:1 to US Dollar (USDRIF) and a passive income hodler-targeted token, RIFPro (RIFP).
